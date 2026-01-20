@@ -1,6 +1,6 @@
 {
   "name": "skillkit",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Universal skills loader for AI coding agents - supports Claude Code, Codex, Cursor, Antigravity, OpenCode, Gemini CLI and more",
   "type": "module",
   "main": "./dist/index.js",
