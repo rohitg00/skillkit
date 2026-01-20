@@ -1,5 +1,10 @@
 # SkillKit
 
+[![npm version](https://img.shields.io/npm/v/skillkit.svg)](https://www.npmjs.com/package/skillkit)
+[![npm downloads](https://img.shields.io/npm/dm/skillkit.svg)](https://www.npmjs.com/package/skillkit)
+[![CI](https://github.com/rohitg00/skillkit/actions/workflows/ci.yml/badge.svg)](https://github.com/rohitg00/skillkit/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Universal skills loader for AI coding agents. Install, manage, and sync skills across your favorite AI tools.
 
 Skills follow the [Agent Skills](https://agentskills.io) open format—a simple, portable standard for giving agents new capabilities and expertise.
