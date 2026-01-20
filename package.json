@@ -1,6 +1,6 @@
 {
   "name": "skillkit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Universal skills loader for AI coding agents - supports Claude Code, Codex, Cursor, Antigravity, OpenCode, Gemini CLI and more",
   "type": "module",
   "main": "./dist/index.js",
@@ -47,12 +47,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rohitghumare/skillkit.git"
+    "url": "git+https://github.com/rohitg00/skillkit.git"
   },
   "bugs": {
-    "url": "https://github.com/rohitghumare/skillkit/issues"
+    "url": "https://github.com/rohitg00/skillkit/issues"
   },
-  "homepage": "https://github.com/rohitghumare/skillkit#readme",
+  "homepage": "https://github.com/rohitg00/skillkit#readme",
   "engines": {
     "node": ">=18.0.0"
   },
