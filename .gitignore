@@ -34,3 +34,6 @@ pnpm-lock.yaml
 tmp/
 temp/
 *.tmp
+
+# Installed skills (local testing)
+.agent/
