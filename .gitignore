@@ -27,7 +27,6 @@ npm-debug.log*
 .env.*.local
 
 # Package manager
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
