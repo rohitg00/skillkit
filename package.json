@@ -1,0 +1,74 @@
+{
+  "name": "skillkit",
+  "version": "1.0.0",
+  "description": "Universal skills loader for AI coding agents - supports Claude Code, Codex, Cursor, Antigravity, OpenCode, Gemini CLI and more",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "skillkit": "./dist/cli.js",
+    "sk": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "schemas"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "prepublishOnly": "npm run typecheck && npm run build && npm run test"
+  },
+  "keywords": [
+    "ai",
+    "skills",
+    "claude",
+    "codex",
+    "cursor",
+    "gemini",
+    "opencode",
+    "antigravity",
+    "agent",
+    "coding-assistant",
+    "skill-loader",
+    "cli"
+  ],
+  "author": "Rohit Ghumare",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rohitghumare/skillkit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rohitghumare/skillkit/issues"
+  },
+  "homepage": "https://github.com/rohitghumare/skillkit#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "clipanion": "^4.0.0-rc.4",
+    "got": "^14.4.1",
+    "isomorphic-git": "^1.27.1",
+    "ora": "^8.1.0",
+    "yaml": "^2.6.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

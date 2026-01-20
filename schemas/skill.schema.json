@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://skillkit.dev/schemas/skill.schema.json",
+  "title": "Skill Frontmatter",
+  "description": "Schema for SKILL.md frontmatter validation (follows Agent Skills spec: https://agentskills.io/specification)",
+  "type": "object",
+  "required": ["name", "description"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "Unique skill identifier. Lowercase alphanumeric with hyphens, no leading/trailing/consecutive hyphens."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "description": "What the skill does and when to use it."
+    },
+    "license": {
+      "type": "string",
+      "description": "License name or reference to bundled license file."
+    },
+    "compatibility": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Environment requirements (intended product, system packages, network access, etc.)."
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "description": "Arbitrary key-value mapping for additional metadata."
+    },
+    "allowed-tools": {
+      "type": "string",
+      "description": "Space-delimited list of pre-approved tools the skill may use (experimental)."
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version (e.g., 1.0.0)"
+    },
+    "author": {
+      "type": "string",
+      "description": "Skill author name or organization"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Categorization tags"
+    },
+    "agents": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["claude-code", "codex", "cursor", "antigravity", "opencode", "gemini-cli", "universal"]
+      },
+      "description": "Compatible AI agents (empty = all agents)"
+    }
+  }
+}
