@@ -9,6 +9,8 @@ Universal skills loader for AI coding agents. Install, manage, and sync skills a
 
 Skills follow the [Agent Skills](https://agentskills.io) open format—a simple, portable standard for giving agents new capabilities and expertise.
 
+![SkillKit Demo](https://raw.githubusercontent.com/rohitg00/skillkit/main/skillkit.gif)
+
 ### Compatible With
 
 | Agent | Status |
