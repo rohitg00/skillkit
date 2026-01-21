@@ -20,17 +20,22 @@ Skills follow the [Agent Skills](https://agentskills.io) open format—a simple,
 | Cursor | ✅ Native |
 | Gemini CLI | ✅ Native |
 | OpenCode | ✅ Native |
-| Amp | ✅ Supported |
-| Goose | ✅ Supported |
-| VS Code (Copilot) | ✅ Supported |
-| Letta | ✅ Supported |
-| Factory | ✅ Supported |
 | Antigravity | ✅ Native |
+| Amp | ✅ Native |
+| Clawdbot | ✅ Native |
+| Droid (Factory) | ✅ Native |
+| GitHub Copilot | ✅ Native |
+| Goose | ✅ Native |
+| Kilo Code | ✅ Native |
+| Kiro CLI | ✅ Native |
+| Roo Code | ✅ Native |
+| Trae | ✅ Native |
+| Windsurf | ✅ Native |
 | *Any markdown-config agent* | ✅ Universal |
 
 ## Features
 
-- **Multi-Agent Support**: Works with 10+ AI coding agents out of the box
+- **Multi-Agent Support**: Works with 17+ AI coding agents out of the box
 - **Multi-Platform Git**: GitHub, GitLab, Bitbucket, and local paths
 - **CI/CD Friendly**: Non-interactive flags for automation (`--skills`, `--all`, `--yes`)
 - **Skill Toggle**: Enable/disable skills without removing them
@@ -111,12 +116,14 @@ skillkit install ./my-skills
 skillkit install ~/dev/skills
 
 # Options
+--list               # List available skills without installing
 --skills=pdf,xlsx    # Install specific skills only (CI/CD)
 --all                # Install all discovered skills
 --yes                # Skip confirmation prompts
 --global             # Install to global directory
 --force              # Overwrite existing skills
 --provider=gitlab    # Force specific provider
+--agent=cursor       # Install to specific agent (can specify multiple)
 ```
 
 ### `skillkit sync`
@@ -196,15 +203,25 @@ skillkit validate ./skills --all    # Validate all skills in directory
 
 ## Supported Agents
 
-| Agent | Config File | Skills Directory |
-|-------|-------------|------------------|
-| Claude Code | `AGENTS.md` | `.claude/skills/` |
-| Cursor | `.cursorrules` | `.cursor/skills/` |
-| Codex | `AGENTS.md` | `.codex/skills/` |
-| Gemini CLI | `GEMINI.md` | `.gemini/skills/` |
-| OpenCode | `AGENTS.md` | `.opencode/skills/` |
-| Antigravity | `AGENTS.md` | `.antigravity/skills/` |
-| Universal | `AGENTS.md` | `.agent/skills/` |
+| Agent | Config File | Project Path | Global Path |
+|-------|-------------|--------------|-------------|
+| Claude Code | `AGENTS.md` | `.claude/skills/` | `~/.claude/skills/` |
+| Cursor | `.cursorrules` | `.cursor/skills/` | `~/.cursor/skills/` |
+| Codex | `AGENTS.md` | `.codex/skills/` | `~/.codex/skills/` |
+| Gemini CLI | `GEMINI.md` | `.gemini/skills/` | `~/.gemini/skills/` |
+| OpenCode | `AGENTS.md` | `.opencode/skills/` | `~/.config/opencode/skills/` |
+| Antigravity | `AGENTS.md` | `.antigravity/skills/` | `~/.gemini/antigravity/skills/` |
+| Amp | `AGENTS.md` | `.agents/skills/` | `~/.config/agents/skills/` |
+| Clawdbot | `AGENTS.md` | `skills/` | `~/.clawdbot/skills/` |
+| Droid (Factory) | `AGENTS.md` | `.factory/skills/` | `~/.factory/skills/` |
+| GitHub Copilot | `AGENTS.md` | `.github/skills/` | `~/.copilot/skills/` |
+| Goose | `AGENTS.md` | `.goose/skills/` | `~/.config/goose/skills/` |
+| Kilo Code | `AGENTS.md` | `.kilocode/skills/` | `~/.kilocode/skills/` |
+| Kiro CLI | `AGENTS.md` | `.kiro/skills/` | `~/.kiro/skills/` |
+| Roo Code | `AGENTS.md` | `.roo/skills/` | `~/.roo/skills/` |
+| Trae | `AGENTS.md` | `.trae/skills/` | `~/.trae/skills/` |
+| Windsurf | `AGENTS.md` | `.windsurf/skills/` | `~/.codeium/windsurf/skills/` |
+| Universal | `AGENTS.md` | `.agent/skills/` | `~/.agent/skills/` |
 
 ## Creating Skills
 

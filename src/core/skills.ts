@@ -3,7 +3,32 @@ import { join, basename } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { SkillFrontmatter, SkillMetadata, type Skill, type SkillLocation } from './types.js';
 
-export function discoverSkills(dir: string): Skill[] {
+export const SKILL_DISCOVERY_PATHS = [
+  'skills',
+  'skills/.curated',
+  'skills/.experimental',
+  'skills/.system',
+  '.agents/skills',
+  '.agent/skills',
+  '.claude/skills',
+  '.codex/skills',
+  '.cursor/skills',
+  '.factory/skills',
+  '.gemini/skills',
+  '.github/skills',
+  '.goose/skills',
+  '.kilocode/skills',
+  '.kiro/skills',
+  '.opencode/skills',
+  '.roo/skills',
+  '.trae/skills',
+  '.windsurf/skills',
+  '.clawdbot/skills',
+  '.antigravity/skills',
+  '.copilot/skills',
+];
+
+function discoverSkillsInDir(dir: string): Skill[] {
   const skills: Skill[] = [];
 
   if (!existsSync(dir)) {
@@ -24,6 +49,92 @@ export function discoverSkills(dir: string): Skill[] {
         skills.push(skill);
       }
     }
+  }
+
+  return skills;
+}
+
+/**
+ * Recursively search for skills in all subdirectories
+ */
+function discoverSkillsRecursive(
+  dir: string,
+  seen: Set<string>,
+  maxDepth: number = 5,
+  currentDepth: number = 0
+): Skill[] {
+  const skills: Skill[] = [];
+
+  if (currentDepth >= maxDepth || !existsSync(dir)) {
+    return skills;
+  }
+
+  try {
+    const entries = readdirSync(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      if (entry.name === 'node_modules' || entry.name === '.git') {
+        continue;
+      }
+
+      if (!entry.isDirectory()) continue;
+
+      const entryPath = join(dir, entry.name);
+      const skillMdPath = join(entryPath, 'SKILL.md');
+
+      if (existsSync(skillMdPath)) {
+        const skill = parseSkill(entryPath);
+        if (skill && !seen.has(skill.name)) {
+          seen.add(skill.name);
+          skills.push(skill);
+        }
+      } else {
+        const subSkills = discoverSkillsRecursive(entryPath, seen, maxDepth, currentDepth + 1);
+        skills.push(...subSkills);
+      }
+    }
+  } catch {}
+
+  return skills;
+}
+
+export function discoverSkills(rootDir: string): Skill[] {
+  const skills: Skill[] = [];
+  const seen = new Set<string>();
+
+  const rootSkillMd = join(rootDir, 'SKILL.md');
+  if (existsSync(rootSkillMd)) {
+    const skill = parseSkill(rootDir);
+    if (skill && !seen.has(skill.name)) {
+      seen.add(skill.name);
+      skills.push(skill);
+    }
+  }
+
+  // Search all standard paths
+  for (const searchPath of SKILL_DISCOVERY_PATHS) {
+    const fullPath = join(rootDir, searchPath);
+    if (existsSync(fullPath)) {
+      for (const skill of discoverSkillsInDir(fullPath)) {
+        if (!seen.has(skill.name)) {
+          seen.add(skill.name);
+          skills.push(skill);
+        }
+      }
+    }
+  }
+
+  // Try direct discovery in root (for flat structures)
+  for (const skill of discoverSkillsInDir(rootDir)) {
+    if (!seen.has(skill.name)) {
+      seen.add(skill.name);
+      skills.push(skill);
+    }
+  }
+
+  // Fallback: recursive search if nothing found
+  if (skills.length === 0) {
+    skills.push(...discoverSkillsRecursive(rootDir, seen));
   }
 
   return skills;

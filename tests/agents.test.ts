@@ -71,15 +71,88 @@ describe('agents', () => {
       expect(adapter.type).toBe('universal');
       expect(adapter.name).toBe('Universal (Any Agent)');
     });
+
+    it('should return adapter for amp', () => {
+      const adapter = getAdapter('amp');
+      expect(adapter.type).toBe('amp');
+      expect(adapter.name).toBe('Amp');
+      expect(adapter.skillsDir).toBe('.agents/skills');
+    });
+
+    it('should return adapter for clawdbot', () => {
+      const adapter = getAdapter('clawdbot');
+      expect(adapter.type).toBe('clawdbot');
+      expect(adapter.name).toBe('Clawdbot');
+      expect(adapter.skillsDir).toBe('skills');
+    });
+
+    it('should return adapter for droid', () => {
+      const adapter = getAdapter('droid');
+      expect(adapter.type).toBe('droid');
+      expect(adapter.name).toBe('Droid (Factory)');
+      expect(adapter.skillsDir).toBe('.factory/skills');
+    });
+
+    it('should return adapter for github-copilot', () => {
+      const adapter = getAdapter('github-copilot');
+      expect(adapter.type).toBe('github-copilot');
+      expect(adapter.name).toBe('GitHub Copilot');
+      expect(adapter.skillsDir).toBe('.github/skills');
+    });
+
+    it('should return adapter for goose', () => {
+      const adapter = getAdapter('goose');
+      expect(adapter.type).toBe('goose');
+      expect(adapter.name).toBe('Goose');
+      expect(adapter.skillsDir).toBe('.goose/skills');
+    });
+
+    it('should return adapter for kilo', () => {
+      const adapter = getAdapter('kilo');
+      expect(adapter.type).toBe('kilo');
+      expect(adapter.name).toBe('Kilo Code');
+      expect(adapter.skillsDir).toBe('.kilocode/skills');
+    });
+
+    it('should return adapter for kiro-cli', () => {
+      const adapter = getAdapter('kiro-cli');
+      expect(adapter.type).toBe('kiro-cli');
+      expect(adapter.name).toBe('Kiro CLI');
+      expect(adapter.skillsDir).toBe('.kiro/skills');
+    });
+
+    it('should return adapter for roo', () => {
+      const adapter = getAdapter('roo');
+      expect(adapter.type).toBe('roo');
+      expect(adapter.name).toBe('Roo Code');
+      expect(adapter.skillsDir).toBe('.roo/skills');
+    });
+
+    it('should return adapter for trae', () => {
+      const adapter = getAdapter('trae');
+      expect(adapter.type).toBe('trae');
+      expect(adapter.name).toBe('Trae');
+      expect(adapter.skillsDir).toBe('.trae/skills');
+    });
+
+    it('should return adapter for windsurf', () => {
+      const adapter = getAdapter('windsurf');
+      expect(adapter.type).toBe('windsurf');
+      expect(adapter.name).toBe('Windsurf');
+      expect(adapter.skillsDir).toBe('.windsurf/skills');
+    });
   });
 
   describe('getAllAdapters', () => {
-    it('should return all adapters', () => {
+    it('should return all 17 adapters', () => {
       const adapters = getAllAdapters();
-      expect(adapters.length).toBeGreaterThanOrEqual(7);
+      expect(adapters.length).toBe(17);
       expect(adapters.map(a => a.type)).toContain('claude-code');
       expect(adapters.map(a => a.type)).toContain('cursor');
       expect(adapters.map(a => a.type)).toContain('universal');
+      expect(adapters.map(a => a.type)).toContain('amp');
+      expect(adapters.map(a => a.type)).toContain('goose');
+      expect(adapters.map(a => a.type)).toContain('windsurf');
     });
   });
 
