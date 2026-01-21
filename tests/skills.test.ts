@@ -112,6 +112,146 @@ description: A test skill for testing purposes
       const skills = discoverSkills('/nonexistent/path');
       expect(skills).toHaveLength(0);
     });
+
+    it('should discover skill when root is itself a skill', () => {
+      writeFileSync(
+        join(testDir, 'SKILL.md'),
+        `---
+name: root-skill
+description: A skill at the root level for testing
+---
+# Root Skill`
+      );
+
+      const skills = discoverSkills(testDir);
+      expect(skills).toHaveLength(1);
+      expect(skills[0].name).toBe('root-skill');
+    });
+
+    it('should discover skills in standard paths like skills/', () => {
+      const skillsDir = join(testDir, 'skills');
+      mkdirSync(skillsDir, { recursive: true });
+      
+      const skillDir = join(skillsDir, 'my-skill');
+      mkdirSync(skillDir);
+      writeFileSync(
+        join(skillDir, 'SKILL.md'),
+        `---
+name: my-skill
+description: A skill in the skills directory for testing
+---
+# My Skill`
+      );
+
+      const skills = discoverSkills(testDir);
+      expect(skills).toHaveLength(1);
+      expect(skills[0].name).toBe('my-skill');
+    });
+
+    it('should discover skills in .claude/skills/', () => {
+      const claudeSkillsDir = join(testDir, '.claude', 'skills');
+      mkdirSync(claudeSkillsDir, { recursive: true });
+      
+      const skillDir = join(claudeSkillsDir, 'claude-skill');
+      mkdirSync(skillDir);
+      writeFileSync(
+        join(skillDir, 'SKILL.md'),
+        `---
+name: claude-skill
+description: A skill in the claude skills directory for testing
+---
+# Claude Skill`
+      );
+
+      const skills = discoverSkills(testDir);
+      expect(skills).toHaveLength(1);
+      expect(skills[0].name).toBe('claude-skill');
+    });
+
+    it('should deduplicate skills with same name from different paths', () => {
+      // Create skill in root
+      const rootSkill = join(testDir, 'duplicate-skill');
+      mkdirSync(rootSkill);
+      writeFileSync(
+        join(rootSkill, 'SKILL.md'),
+        `---
+name: duplicate-skill
+description: First occurrence of duplicate skill
+---
+# First`
+      );
+
+      // Create same skill in skills/
+      const skillsDir = join(testDir, 'skills', 'duplicate-skill');
+      mkdirSync(skillsDir, { recursive: true });
+      writeFileSync(
+        join(skillsDir, 'SKILL.md'),
+        `---
+name: duplicate-skill
+description: Second occurrence of duplicate skill
+---
+# Second`
+      );
+
+      const skills = discoverSkills(testDir);
+      expect(skills).toHaveLength(1);
+      expect(skills[0].name).toBe('duplicate-skill');
+    });
+
+    it('should perform recursive search when no skills in standard paths', () => {
+      // Create nested skill structure
+      const nestedDir = join(testDir, 'deeply', 'nested', 'path');
+      mkdirSync(nestedDir, { recursive: true });
+      
+      const skillDir = join(nestedDir, 'hidden-skill');
+      mkdirSync(skillDir);
+      writeFileSync(
+        join(skillDir, 'SKILL.md'),
+        `---
+name: hidden-skill
+description: A skill hidden in a deeply nested directory
+---
+# Hidden Skill`
+      );
+
+      const skills = discoverSkills(testDir);
+      expect(skills).toHaveLength(1);
+      expect(skills[0].name).toBe('hidden-skill');
+    });
+
+    it('should skip node_modules during recursive search', () => {
+      // Create skill in node_modules (should be skipped)
+      const nodeModulesSkill = join(testDir, 'node_modules', 'some-package', 'skill');
+      mkdirSync(nodeModulesSkill, { recursive: true });
+      writeFileSync(
+        join(nodeModulesSkill, 'SKILL.md'),
+        `---
+name: node-modules-skill
+description: Should not be discovered
+---
+# Should Skip`
+      );
+
+      const skills = discoverSkills(testDir);
+      expect(skills).toHaveLength(0);
+    });
+
+    it('should skip .git during recursive search', () => {
+      // Create skill in .git (should be skipped)
+      const gitSkill = join(testDir, '.git', 'hooks', 'skill');
+      mkdirSync(gitSkill, { recursive: true });
+      writeFileSync(
+        join(gitSkill, 'SKILL.md'),
+        `---
+name: git-skill
+description: Should not be discovered
+---
+# Should Skip`
+      );
+
+      const skills = discoverSkills(testDir);
+      expect(skills).toHaveLength(0);
+    });
   });
 
   describe('parseSkill', () => {

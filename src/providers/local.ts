@@ -76,6 +76,11 @@ export class LocalProvider implements GitProviderAdapter {
         success: true,
         path: actualPath,
         skills: skills.map(s => s.name),
+        discoveredSkills: skills.map(s => ({
+          name: s.name,
+          dirName: basename(s.path),
+          path: s.path,
+        })),
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

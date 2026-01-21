@@ -7,6 +7,16 @@ export const AgentType = z.enum([
   'antigravity',
   'opencode',
   'gemini-cli',
+  'amp',
+  'clawdbot',
+  'droid',
+  'github-copilot',
+  'goose',
+  'kilo',
+  'kiro-cli',
+  'roo',
+  'trae',
+  'windsurf',
   'universal',
 ]);
 export type AgentType = z.infer<typeof AgentType>;

@@ -6,7 +6,8 @@ import { Command, Option } from 'clipanion';
 import { detectProvider, isLocalPath } from '../providers/index.js';
 import { getInstallDir, saveSkillMetadata } from '../core/config.js';
 import { isPathInside } from '../core/skills.js';
-import type { SkillMetadata, GitProvider } from '../core/types.js';
+import { getAdapter, detectAgent } from '../agents/index.js';
+import type { SkillMetadata, GitProvider, AgentType } from '../core/types.js';
 
 export class InstallCommand extends Command {
   static override paths = [['install'], ['i']];
@@ -21,6 +22,8 @@ export class InstallCommand extends Command {
       ['Install all skills non-interactively', '$0 install owner/repo --all'],
       ['Install from local path', '$0 install ./my-skills'],
       ['Install globally', '$0 install owner/repo --global'],
+      ['List available skills', '$0 install owner/repo --list'],
+      ['Install to specific agents', '$0 install owner/repo --agent claude-code --agent cursor'],
     ],
   });
 
@@ -48,6 +51,14 @@ export class InstallCommand extends Command {
 
   provider = Option.String('--provider,-p', {
     description: 'Force specific provider (github, gitlab, bitbucket)',
+  });
+
+  list = Option.Boolean('--list,-l', false, {
+    description: 'List available skills without installing',
+  });
+
+  agent = Option.Array('--agent', {
+    description: 'Target specific agents (can specify multiple)',
   });
 
   async execute(): Promise<number> {
@@ -84,6 +95,28 @@ export class InstallCommand extends Command {
 
       const discoveredSkills = result.discoveredSkills || [];
 
+      if (this.list) {
+        if (discoveredSkills.length === 0) {
+          console.log(chalk.yellow('\nNo skills found in this repository'));
+        } else {
+          console.log(chalk.cyan('\nAvailable skills:\n'));
+          for (const skill of discoveredSkills) {
+            console.log(`  ${chalk.green(skill.name)}`);
+          }
+          console.log();
+          console.log(chalk.dim(`Total: ${discoveredSkills.length} skill(s)`));
+          console.log(chalk.dim('\nTo install specific skills: skillkit install <source> --skills=skill1,skill2'));
+          console.log(chalk.dim('To install all skills: skillkit install <source> --all'));
+        }
+
+        const cleanupPath = result.tempRoot || result.path;
+        if (!isLocalPath(this.source) && cleanupPath && existsSync(cleanupPath)) {
+          rmSync(cleanupPath, { recursive: true, force: true });
+        }
+
+        return 0;
+      }
+
       let skillsToInstall = discoveredSkills;
 
       if (this.skills) {
@@ -115,55 +148,76 @@ export class InstallCommand extends Command {
         return 0;
       }
 
-      const installDir = getInstallDir(this.global);
-
-      if (!existsSync(installDir)) {
-        mkdirSync(installDir, { recursive: true });
+      let targetAgents: AgentType[];
+      if (this.agent && this.agent.length > 0) {
+        targetAgents = this.agent as AgentType[];
+      } else {
+        const detectedAgent = await detectAgent();
+        targetAgents = [detectedAgent];
       }
 
-      let installed = 0;
-      for (const skill of skillsToInstall) {
-        const skillName = skill.name;
-        const sourcePath = skill.path;
-        const targetPath = join(installDir, skillName);
+      let totalInstalled = 0;
+      const installResults: { agent: string; dir: string; count: number }[] = [];
 
-        if (existsSync(targetPath) && !this.force) {
-          console.log(chalk.yellow(`  Skipping ${skillName} (already exists, use --force to overwrite)`));
-          continue;
+      for (const agentType of targetAgents) {
+        const adapter = getAdapter(agentType);
+        const installDir = getInstallDir(this.global, agentType);
+
+        if (!existsSync(installDir)) {
+          mkdirSync(installDir, { recursive: true });
         }
 
-        const securityRoot = result.tempRoot || result.path;
-        if (!isPathInside(sourcePath, securityRoot)) {
-          console.log(chalk.red(`  Skipping ${skillName} (path traversal detected)`));
-          continue;
+        if (targetAgents.length > 1) {
+          console.log(chalk.cyan(`\nInstalling to ${adapter.name}...`));
         }
 
-        spinner.start(`Installing ${skillName}...`);
+        let installed = 0;
+        for (const skill of skillsToInstall) {
+          const skillName = skill.name;
+          const sourcePath = skill.path;
+          const targetPath = join(installDir, skillName);
 
-        try {
-          if (existsSync(targetPath)) {
-            rmSync(targetPath, { recursive: true, force: true });
+          if (existsSync(targetPath) && !this.force) {
+            console.log(chalk.yellow(`  Skipping ${skillName} (already exists, use --force to overwrite)`));
+            continue;
           }
 
-          cpSync(sourcePath, targetPath, { recursive: true, dereference: true });
+          const securityRoot = result.tempRoot || result.path;
+          if (!isPathInside(sourcePath, securityRoot)) {
+            console.log(chalk.red(`  Skipping ${skillName} (path traversal detected)`));
+            continue;
+          }
 
-          const metadata: SkillMetadata = {
-            name: skillName,
-            description: '',
-            source: this.source,
-            sourceType: providerAdapter.type,
-            subpath: skillName,
-            installedAt: new Date().toISOString(),
-            enabled: true,
-          };
-          saveSkillMetadata(targetPath, metadata);
+          spinner.start(`Installing ${skillName}...`);
 
-          spinner.succeed(chalk.green(`Installed ${skillName}`));
-          installed++;
-        } catch (error) {
-          spinner.fail(chalk.red(`Failed to install ${skillName}`));
-          console.error(chalk.dim(error instanceof Error ? error.message : String(error)));
+          try {
+            if (existsSync(targetPath)) {
+              rmSync(targetPath, { recursive: true, force: true });
+            }
+
+            cpSync(sourcePath, targetPath, { recursive: true, dereference: true });
+
+            const metadata: SkillMetadata = {
+              name: skillName,
+              description: '',
+              source: this.source,
+              sourceType: providerAdapter.type,
+              subpath: skillName,
+              installedAt: new Date().toISOString(),
+              enabled: true,
+            };
+            saveSkillMetadata(targetPath, metadata);
+
+            spinner.succeed(chalk.green(`Installed ${skillName}`));
+            installed++;
+          } catch (error) {
+            spinner.fail(chalk.red(`Failed to install ${skillName}`));
+            console.error(chalk.dim(error instanceof Error ? error.message : String(error)));
+          }
         }
+
+        totalInstalled += installed;
+        installResults.push({ agent: adapter.name, dir: installDir, count: installed });
       }
 
       const cleanupPath = result.tempRoot || result.path;
@@ -172,7 +226,14 @@ export class InstallCommand extends Command {
       }
 
       console.log();
-      console.log(chalk.green(`Installed ${installed} skill(s) to ${installDir}`));
+      if (targetAgents.length > 1) {
+        console.log(chalk.green(`Installed ${totalInstalled} skill(s) across ${targetAgents.length} agents:`));
+        for (const r of installResults) {
+          console.log(chalk.dim(`  - ${r.agent}: ${r.count} skill(s) to ${r.dir}`));
+        }
+      } else {
+        console.log(chalk.green(`Installed ${totalInstalled} skill(s) to ${installResults[0]?.dir}`));
+      }
 
       if (!this.yes) {
         console.log(chalk.dim('\nRun `skillkit sync` to update your agent config'));
