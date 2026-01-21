@@ -11,6 +11,7 @@ import {
   RemoveCommand,
   InitCommand,
   ValidateCommand,
+  CreateCommand,
 } from './commands/index.js';
 
 const cli = new Cli({
@@ -32,5 +33,6 @@ cli.register(UpdateCommand);
 cli.register(RemoveCommand);
 cli.register(InitCommand);
 cli.register(ValidateCommand);
+cli.register(CreateCommand);
 
 cli.runExit(process.argv.slice(2));

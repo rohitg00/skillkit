@@ -65,6 +65,9 @@ skillkit install gitlab:owner/repo
 # Install specific skills (CI/CD friendly)
 skillkit install owner/repo --skills=pdf,xlsx,docx
 
+# Create a new skill
+skillkit create my-skill
+
 # Sync skills to your agent config
 skillkit sync
 
@@ -201,6 +204,19 @@ skillkit validate ./my-skill        # Validate single skill
 skillkit validate ./skills --all    # Validate all skills in directory
 ```
 
+### `skillkit create <skill-name>`
+
+Create a new skill with proper structure and template.
+
+```bash
+skillkit create my-skill                    # Basic skill
+skillkit create my-skill --full             # Include all directories (references, scripts, assets)
+skillkit create my-skill --scripts          # Include scripts directory
+skillkit create my-skill --references       # Include references directory
+skillkit create my-skill --assets           # Include assets directory
+skillkit create my-skill --dir ./skills     # Create in specific directory
+```
+
 ## Supported Agents
 
 | Agent | Config File | Project Path | Global Path |
@@ -224,6 +240,8 @@ skillkit validate ./skills --all    # Validate all skills in directory
 | Universal | `AGENTS.md` | `.agent/skills/` | `~/.agent/skills/` |
 
 ## Creating Skills
+
+Use `skillkit create <name>` to scaffold a new skill, or create manually:
 
 A skill is a directory with a `SKILL.md` file:
 

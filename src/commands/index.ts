@@ -7,3 +7,4 @@ export { UpdateCommand } from './update.js';
 export { RemoveCommand } from './remove.js';
 export { InitCommand } from './init.js';
 export { ValidateCommand } from './validate.js';
+export { CreateCommand } from './create.js';
