@@ -1,13 +1,14 @@
 import chalk from 'chalk';
 
 export const colors = {
-  primary: chalk.white,
-  secondary: chalk.white,
-  secondaryDim: chalk.dim.white,
-  success: chalk.white,
-  danger: chalk.white,
-  warning: chalk.white,
-  background: chalk.bgBlack,
+  primary: 'white',
+  secondary: 'white',
+  secondaryDim: 'gray',
+  success: 'white',
+  danger: 'white',
+  warning: 'white',
+  background: 'bgBlack',
+  borderDim: 'gray',
 };
 
 export const symbols = {
@@ -15,6 +16,8 @@ export const symbols = {
   bullet: '●',
   checkboxOn: chalk.white('✔'),
   checkboxOff: chalk.dim('✖'),
+  check: chalk.white('✓'),
+  star: '★',
   spinner: ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'],
 };
 

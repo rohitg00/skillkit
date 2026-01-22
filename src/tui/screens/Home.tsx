@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Text } from 'ink';
 import { colors, logo } from '../theme.js';
 import type { Screen } from '../App.js';
@@ -50,7 +50,7 @@ export function Home({ cols = 80, rows = 24 }: HomeProps) {
 
   return (
     <Box flexDirection="column">
-      <Text>{colors.primary(display || useLogo)}</Text>
+      <Text color={colors.primary}>{display || useLogo}</Text>
 
       <Box marginTop={1}>
         <Text>Manage AI agent skills from your terminal.</Text>

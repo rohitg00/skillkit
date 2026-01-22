@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { colors, symbols } from '../theme.js';
 import { getAllAdapters } from '../../agents/index.js';
@@ -48,7 +48,7 @@ export function Sync({ rows = 24 }: Props) {
 
   return (
     <Box flexDirection="column">
-      <Text bold>{colors.primary('SYNC SKILLS')}</Text>
+      <Text bold color={colors.primary}>SYNC SKILLS</Text>
       <Text dimColor>{detected}/{agents.length} agents detected</Text>
 
       {loading && <Text>Detecting agents...</Text>}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Box, Text, useInput, useApp, useStdout } from 'ink';
 import { Sidebar } from './components/Sidebar.js';
 import { Home } from './screens/Home.js';

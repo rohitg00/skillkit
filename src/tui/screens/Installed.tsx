@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { colors, symbols } from '../theme.js';
 import { useSkills } from '../hooks/useSkills.js';
@@ -26,7 +26,7 @@ export function Installed({ rows = 24 }: Props) {
 
   return (
     <Box flexDirection="column">
-      <Text bold>{colors.primary('INSTALLED SKILLS')}</Text>
+      <Text bold color={colors.primary}>INSTALLED SKILLS</Text>
       <Text dimColor>{skills.length} skills</Text>
 
       {loading && <Text>Loading...</Text>}
@@ -43,7 +43,7 @@ export function Installed({ rows = 24 }: Props) {
             const isSel = idx === sel;
             return (
               <Text key={skill.name} inverse={isSel}>
-                {isSel ? symbols.pointer : ' '}{skill.name.padEnd(30)} {skill.agent && colors.secondaryDim(skill.agent)}
+                {isSel ? symbols.pointer : ' '}{skill.name.padEnd(30)} {skill.source && <Text color={colors.secondaryDim}>{skill.source}</Text>}
               </Text>
             );
           })}

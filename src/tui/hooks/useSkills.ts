@@ -8,6 +8,7 @@ interface UseSkillsResult {
   loading: boolean;
   error: string | null;
   refresh: () => void;
+  remove: (name: string) => Promise<void>;
 }
 
 export function useSkills(): UseSkillsResult {
@@ -26,7 +27,7 @@ export function useSkills(): UseSkillsResult {
       const skillItems: SkillItem[] = foundSkills.map((s) => ({
         name: s.name,
         description: s.description,
-        source: s.source,
+        source: s.metadata?.source,
         enabled: s.enabled,
       }));
 
@@ -38,27 +39,23 @@ export function useSkills(): UseSkillsResult {
     }
   };
 
+  const remove = async (name: string) => {
+    const { rmSync } = await import('node:fs');
+    const foundSkill = skills.find(s => s.name === name);
+    if (foundSkill) {
+      const searchDirs = getSearchDirs();
+      const allSkills = findAllSkills(searchDirs);
+      const skill = allSkills.find(s => s.name === name);
+      if (skill) {
+        rmSync(skill.path, { recursive: true, force: true });
+        refresh();
+      }
+    }
+  };
+
   useEffect(() => {
     refresh();
   }, []);
 
-  return { skills, loading, error, refresh };
-}
-
-interface UseSkillStatsResult {
-  projectCount: number;
-  globalCount: number;
-  enabledCount: number;
-  agentCount: number;
-}
-
-export function useSkillStats(): UseSkillStatsResult {
-  const { skills } = useSkills();
-
-  return {
-    projectCount: skills.length,
-    globalCount: 0,
-    enabledCount: skills.filter((s) => s.enabled !== false).length,
-    agentCount: 1,
-  };
+  return { skills, loading, error, refresh, remove };
 }

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Text } from 'ink';
 import { colors, symbols } from '../theme.js';
 import type { Screen } from '../App.js';
@@ -20,7 +19,7 @@ const NAV: { id: Screen; label: string }[] = [
 export function Sidebar({ screen }: SidebarProps) {
   return (
     <Box flexDirection="column" width={14} borderStyle="single" paddingX={1}>
-      <Text bold>{colors.primary('SkillKit')}</Text>
+      <Text bold color={colors.primary}>SkillKit</Text>
       
       {NAV.slice(0, 2).map((item) => (
         <Text key={item.id} inverse={screen === item.id}>

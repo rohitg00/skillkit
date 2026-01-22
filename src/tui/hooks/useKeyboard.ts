@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useInput, useApp } from 'ink';
-import { type Screen, navItems } from '../theme.js';
+import type { Screen } from '../App.js';
 
 interface UseKeyboardOptions {
   onNavigate?: (screen: Screen) => void;
@@ -54,11 +54,16 @@ export function useKeyboard(options: UseKeyboardOptions = {}) {
       return;
     }
 
-    for (const item of navItems) {
-      if (input === item.shortcut && options.onNavigate) {
-        options.onNavigate(item.id);
-        return;
-      }
+    if (input === 'h' && options.onNavigate) {
+      options.onNavigate('home');
+    } else if (input === 'b' && options.onNavigate) {
+      options.onNavigate('browse');
+    } else if (input === 'l' && options.onNavigate) {
+      options.onNavigate('installed');
+    } else if (input === 's' && options.onNavigate) {
+      options.onNavigate('sync');
+    } else if (input === ',' && options.onNavigate) {
+      options.onNavigate('settings');
     }
   });
 }

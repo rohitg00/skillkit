@@ -1,0 +1,3 @@
+version: 1
+agent: claude-code
+autoSync: true

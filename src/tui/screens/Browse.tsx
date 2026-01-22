@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { existsSync, mkdirSync, cpSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { Box, Text, useInput } from 'ink';
@@ -91,7 +91,7 @@ export function Browse({ rows = 24 }: Props) {
 
       const metadata: SkillMetadata = {
         name: skillName,
-        description: skill.description || '',
+        description: '',
         source: source,
         sourceType: provider.type,
         subpath: skillName,
@@ -158,7 +158,7 @@ export function Browse({ rows = 24 }: Props) {
   if (view === 'agents') {
     return (
       <Box flexDirection="column">
-        <Text bold>{colors.primary('SELECT AGENT')}</Text>
+        <Text bold color={colors.primary}>SELECT AGENT</Text>
         <Text dimColor>Install "{selectedSkill?.name}" to which agent?</Text>
         <Text dimColor>(All agents supported - directory created if needed)</Text>
         
@@ -170,7 +170,7 @@ export function Browse({ rows = 24 }: Props) {
             const status = a.detected ? '(ready)' : '(will create)';
             return (
               <Text key={a.type} inverse={isSel}>
-                {isSel ? symbols.pointer : ' '} {a.name.padEnd(20)} {colors.secondaryDim(status)}
+                {isSel ? symbols.pointer : ' '} {a.name.padEnd(20)} <Text color={colors.secondaryDim}>{status}</Text>
               </Text>
             );
           })}
@@ -185,7 +185,7 @@ export function Browse({ rows = 24 }: Props) {
 
   return (
     <Box flexDirection="column">
-      <Text bold>{colors.primary(view === 'repos' ? 'REPOSITORIES' : 'SKILLS')}</Text>
+      <Text bold color={colors.primary}>{view === 'repos' ? 'REPOSITORIES' : 'SKILLS'}</Text>
       {loading && <Text dimColor>Loading {currentRepo}...</Text>}
       {installing && <Text>Installing {installing}...</Text>}
       {message && <Text dimColor>{message}</Text>}
@@ -204,7 +204,7 @@ export function Browse({ rows = 24 }: Props) {
             : (item as typeof skills[0]).source || '';
           return (
             <Text key={src + name} inverse={isSel}>
-              {isSel ? symbols.pointer : ' '}{name.padEnd(25)} {colors.secondaryDim(src)}
+              {isSel ? symbols.pointer : ' '}{name.padEnd(25)} <Text color={colors.secondaryDim}>{src}</Text>
             </Text>
           );
         })}

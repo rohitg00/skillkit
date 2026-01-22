@@ -95,7 +95,7 @@ export function useMarketplace(): UseMarketplaceResult {
         name: skill.name,
         source: source,
         repoName: repoName,
-        description: skill.description,
+        description: undefined,
       }));
 
       setAllSkills(prev => {

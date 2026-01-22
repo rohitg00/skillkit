@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { colors, symbols } from '../theme.js';
 
@@ -23,7 +23,7 @@ export function Settings({}: Props) {
 
   return (
     <Box flexDirection="column">
-      <Text bold>{colors.primary('SETTINGS')}</Text>
+      <Text bold color={colors.primary}>SETTINGS</Text>
       <Text dimColor>Configure SkillKit</Text>
 
       <Box marginTop={1} flexDirection="column">
@@ -31,7 +31,7 @@ export function Settings({}: Props) {
           const isSel = i === sel;
           return (
             <Text key={s.id} inverse={isSel}>
-              {isSel ? symbols.pointer : ' '}{s.label.padEnd(16)} {colors.secondaryDim(s.value)}
+              {isSel ? symbols.pointer : ' '}{s.label.padEnd(16)} <Text color={colors.secondaryDim}>{s.value}</Text>
             </Text>
           );
         })}
