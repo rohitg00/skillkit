@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import { Box, Text } from 'ink';
 import { colors, logo } from '../theme.js';
 import type { Screen } from '../App.js';
@@ -17,6 +20,18 @@ const logoSmall = `
 ╚═╝╩ ╩╩╩═╝╩═╝╩ ╩╩ ╩ 
 `.trim();
 
+function getVersion(): string {
+  try {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    const packageJsonPath = join(__dirname, '../../../package.json');
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+    return packageJson.version || '1.2.0';
+  } catch {
+    return '1.2.0';
+  }
+}
+
 function scramble(target: string, progress: number): string {
   return target.split('\n').map(line => {
     return line.split('').map((char, i) => {
@@ -30,6 +45,7 @@ function scramble(target: string, progress: number): string {
 export function Home({ cols = 80, rows = 24 }: HomeProps) {
   const [progress, setProgress] = useState(0);
   const [display, setDisplay] = useState('');
+  const version = getVersion();
 
   const useLogo = cols < 80 ? logoSmall : logo;
 
@@ -75,7 +91,7 @@ export function Home({ cols = 80, rows = 24 }: HomeProps) {
       )}
 
       <Box marginTop={1}>
-        <Text dimColor>v1.1.0 - Works with 17 AI agents</Text>
+        <Text dimColor>v{version} - Works with 17 AI agents</Text>
       </Box>
     </Box>
   );
