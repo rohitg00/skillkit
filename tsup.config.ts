@@ -14,6 +14,10 @@ export default defineConfig({
   splitting: false,
   skipNodeModulesBundle: true,
   platform: 'node',
-  // Remove banner - npm handles shebang via package.json bin field
-  // For local dev, use: node dist/cli.js
+  esbuildOptions(options) {
+    options.jsx = 'automatic';
+  },
+  loader: {
+    '.tsx': 'tsx',
+  },
 });

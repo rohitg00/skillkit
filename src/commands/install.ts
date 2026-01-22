@@ -163,57 +163,57 @@ export class InstallCommand extends Command {
         const adapter = getAdapter(agentType);
         const installDir = getInstallDir(this.global, agentType);
 
-        if (!existsSync(installDir)) {
-          mkdirSync(installDir, { recursive: true });
-        }
+      if (!existsSync(installDir)) {
+        mkdirSync(installDir, { recursive: true });
+      }
 
         if (targetAgents.length > 1) {
           console.log(chalk.cyan(`\nInstalling to ${adapter.name}...`));
         }
 
-        let installed = 0;
-        for (const skill of skillsToInstall) {
-          const skillName = skill.name;
-          const sourcePath = skill.path;
-          const targetPath = join(installDir, skillName);
+      let installed = 0;
+      for (const skill of skillsToInstall) {
+        const skillName = skill.name;
+        const sourcePath = skill.path;
+        const targetPath = join(installDir, skillName);
 
-          if (existsSync(targetPath) && !this.force) {
-            console.log(chalk.yellow(`  Skipping ${skillName} (already exists, use --force to overwrite)`));
-            continue;
+        if (existsSync(targetPath) && !this.force) {
+          console.log(chalk.yellow(`  Skipping ${skillName} (already exists, use --force to overwrite)`));
+          continue;
+        }
+
+        const securityRoot = result.tempRoot || result.path;
+        if (!isPathInside(sourcePath, securityRoot)) {
+          console.log(chalk.red(`  Skipping ${skillName} (path traversal detected)`));
+          continue;
+        }
+
+        spinner.start(`Installing ${skillName}...`);
+
+        try {
+          if (existsSync(targetPath)) {
+            rmSync(targetPath, { recursive: true, force: true });
           }
 
-          const securityRoot = result.tempRoot || result.path;
-          if (!isPathInside(sourcePath, securityRoot)) {
-            console.log(chalk.red(`  Skipping ${skillName} (path traversal detected)`));
-            continue;
-          }
+          cpSync(sourcePath, targetPath, { recursive: true, dereference: true });
 
-          spinner.start(`Installing ${skillName}...`);
+          const metadata: SkillMetadata = {
+            name: skillName,
+            description: '',
+            source: this.source,
+            sourceType: providerAdapter.type,
+            subpath: skillName,
+            installedAt: new Date().toISOString(),
+            enabled: true,
+          };
+          saveSkillMetadata(targetPath, metadata);
 
-          try {
-            if (existsSync(targetPath)) {
-              rmSync(targetPath, { recursive: true, force: true });
-            }
-
-            cpSync(sourcePath, targetPath, { recursive: true, dereference: true });
-
-            const metadata: SkillMetadata = {
-              name: skillName,
-              description: '',
-              source: this.source,
-              sourceType: providerAdapter.type,
-              subpath: skillName,
-              installedAt: new Date().toISOString(),
-              enabled: true,
-            };
-            saveSkillMetadata(targetPath, metadata);
-
-            spinner.succeed(chalk.green(`Installed ${skillName}`));
-            installed++;
-          } catch (error) {
-            spinner.fail(chalk.red(`Failed to install ${skillName}`));
-            console.error(chalk.dim(error instanceof Error ? error.message : String(error)));
-          }
+          spinner.succeed(chalk.green(`Installed ${skillName}`));
+          installed++;
+        } catch (error) {
+          spinner.fail(chalk.red(`Failed to install ${skillName}`));
+          console.error(chalk.dim(error instanceof Error ? error.message : String(error)));
+        }
         }
 
         totalInstalled += installed;

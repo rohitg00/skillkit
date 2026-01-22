@@ -11,6 +11,31 @@ Skills follow the [Agent Skills](https://agentskills.io) open format—a simple,
 
 ![SkillKit Demo](https://raw.githubusercontent.com/rohitg00/skillkit/main/skillkit.gif)
 
+## Interactive TUI
+
+Manage all your skills with a beautiful terminal interface:
+
+```bash
+skillkit ui
+# or simply
+skillkit
+```
+
+![SkillKit TUI](docs/img/skillkit-ui.png)
+
+**Features:**
+- Browse 33+ skill repositories
+- Install skills with one keystroke
+- Multi-agent installation support
+- View installed skills
+- Sync across agents
+- Responsive design for all terminal sizes
+
+**Navigation:**
+- `h` Home | `b` Browse | `l` List | `s` Sync | `,` Config
+- `↑↓` Navigate | `Enter` Select | `Esc` Back | `q` Quit
+- `m` Multi-agent selection | `r` Refresh/Back
+
 ### Compatible With
 
 | Agent | Status |
@@ -35,6 +60,7 @@ Skills follow the [Agent Skills](https://agentskills.io) open format—a simple,
 
 ## Features
 
+- **Interactive TUI**: Beautiful terminal interface for managing skills
 - **Multi-Agent Support**: Works with 17+ AI coding agents out of the box
 - **Multi-Platform Git**: GitHub, GitLab, Bitbucket, and local paths
 - **CI/CD Friendly**: Non-interactive flags for automation (`--skills`, `--all`, `--yes`)
@@ -53,6 +79,9 @@ npx skillkit <command>
 ## Quick Start
 
 ```bash
+# Launch interactive TUI
+skillkit ui
+
 # Initialize in your project (auto-detects agent)
 skillkit init
 
@@ -94,6 +123,34 @@ skillkit install vercel-labs/agent-skills/skills
 
 
 ## Commands
+
+### `skillkit ui` / `skillkit`
+
+Launch the interactive Terminal User Interface (TUI) for managing skills.
+
+```bash
+skillkit ui          # Explicit TUI launch
+skillkit             # Launch TUI if no arguments provided
+```
+
+**TUI Features:**
+- **Browse**: Discover skills from 33+ repositories
+- **List**: View all installed skills
+- **Sync**: Sync skills across multiple agents
+- **Settings**: Configure SkillKit preferences
+
+**Keyboard Shortcuts:**
+- `h` - Home screen
+- `b` - Browse skills marketplace
+- `l` - List installed skills
+- `s` - Sync skills across agents
+- `,` - Settings
+- `↑↓` - Navigate lists
+- `Enter` - Select / Install
+- `m` - Multi-agent selection (when viewing skills)
+- `r` - Refresh / Go back
+- `Esc` - Return to home
+- `q` - Quit
 
 ### `skillkit install <source>`
 
