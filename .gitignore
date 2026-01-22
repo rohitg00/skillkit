@@ -12,6 +12,7 @@ coverage/
 .vscode/
 *.swp
 *.swo
+*.code-workspace
 
 # OS
 .DS_Store
@@ -37,3 +38,22 @@ temp/
 
 # Installed skills (local testing)
 .agent/
+.claude/
+.cursor/
+.codex/
+.gemini/
+.opencode/
+.antigravity/
+.agents/
+.factory/
+.github/skills/
+.goose/
+.kilocode/
+.kiro/
+.roo/
+.trae/
+.windsurf/
+.agent/
+
+# SkillKit config
+skillkit.yaml
