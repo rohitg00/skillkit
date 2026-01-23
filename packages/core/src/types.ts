@@ -75,6 +75,9 @@ export const SkillkitConfig = z.object({
   enabledSkills: z.array(z.string()).optional(),
   disabledSkills: z.array(z.string()).optional(),
   autoSync: z.boolean().default(true),
+  cacheDir: z.string().optional(),
+  marketplaceSources: z.array(z.string()).optional(),
+  defaultTimeout: z.number().optional(),
 });
 export type SkillkitConfig = z.infer<typeof SkillkitConfig>;
 

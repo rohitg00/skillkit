@@ -39,3 +39,9 @@ export * from './cicd/index.js';
 
 // Memory System (Cross-Agent Session Memory)
 export * from './memory/index.js';
+
+// Team Collaboration (Skill Sharing)
+export * from './team/index.js';
+
+// Plugin System (Extensibility)
+export * from './plugins/index.js';
