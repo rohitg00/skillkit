@@ -25,7 +25,7 @@ const SETTINGS: Setting[] = [
   { id: 'cacheDir', label: 'Cache Dir', type: 'text' },
 ];
 
-export function Settings({}: Props) {
+export function Settings(_props: Props) {
   const [config, setConfig] = useState<SkillkitConfig | null>(null);
   const [sel, setSel] = useState(0);
   const [editing, setEditing] = useState(false);
@@ -128,7 +128,11 @@ export function Settings({}: Props) {
     return (
       <Box flexDirection="column">
         <Text bold color={colors.primary}>SETTINGS</Text>
-        <Text dimColor>Loading...</Text>
+        {error ? (
+          <Text color={colors.danger}>{symbols.error} {error}</Text>
+        ) : (
+          <Text dimColor>Loading...</Text>
+        )}
       </Box>
     );
   }

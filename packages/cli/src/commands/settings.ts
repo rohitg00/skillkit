@@ -93,7 +93,7 @@ export class SettingsCommand extends Command {
       const [key, ...valueParts] = this.set.split('=');
       const value = valueParts.join('=');
 
-      if (!key || value === undefined) {
+      if (!key || !this.set.includes('=')) {
         console.error(chalk.red('Invalid format. Use: --set key=value'));
         return 1;
       }
@@ -139,7 +139,7 @@ export class SettingsCommand extends Command {
 
       console.log();
       console.log(chalk.dim('Use --set key=value to modify settings'));
-      console.log(chalk.dim('Available keys: agent, autoSync, cacheDir, skillsDir'));
+      console.log(chalk.dim('Available keys: agent, autoSync, cacheDir, skillsDir, defaultTimeout'));
     }
 
     return 0;
@@ -199,13 +199,14 @@ export class SettingsCommand extends Command {
         config.skillsDir = value || undefined;
         break;
 
-      case 'defaultTimeout':
+      case 'defaultTimeout': {
         const timeout = parseInt(value, 10);
         if (isNaN(timeout) || timeout < 0) {
           return { success: false, error: 'defaultTimeout must be a positive number (milliseconds)' };
         }
         config.defaultTimeout = timeout;
         break;
+      }
 
       default:
         return { success: false, error: `Unknown setting: ${key}` };

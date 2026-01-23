@@ -37,7 +37,9 @@ export class PluginCommand extends Command {
     const pluginManager = createPluginManager(projectPath);
 
     // Auto-load plugins from directory
-    const pluginsDir = join(projectPath, '.skillkit', 'plugins');
+    const pluginsDir = this.global
+      ? join(projectPath, 'plugins')
+      : join(projectPath, '.skillkit', 'plugins');
     try {
       const plugins = await loadPluginsFromDirectory(pluginsDir);
       for (const plugin of plugins) {
