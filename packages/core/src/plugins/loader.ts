@@ -8,7 +8,7 @@
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, extname, basename } from 'node:path';
+import { join, extname, basename, isAbsolute } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { Plugin, PluginMetadata } from './types.js';
 
@@ -247,13 +247,13 @@ export async function loadPlugin(source: string): Promise<Plugin> {
   const loader = new PluginLoader();
 
   // Determine source type
-  // Check for local file paths: absolute, relative (./, ../), Windows paths, or paths with directory separator
+  // Check for local file paths: absolute, relative (./,  .., paths with /), Windows paths, or tilde
   const isLocalPath =
-    source.startsWith('./') ||
-    source.startsWith('../') ||
-    source.startsWith('/') ||
-    source.includes('\\') ||
-    source.startsWith('~');
+    source.startsWith('.') ||                          // ./, ../, .hidden
+    isAbsolute(source) ||                              // /abs/path or C:\path
+    (source.includes('/') && !source.startsWith('@')) || // plugins/x.js (but not @scope/pkg)
+    source.includes('\\') ||                           // Windows backslash
+    source.startsWith('~');                            // ~/path
 
   if (isLocalPath) {
     // File path
