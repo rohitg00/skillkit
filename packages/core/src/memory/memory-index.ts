@@ -160,8 +160,10 @@ export class MemoryIndexStore {
         }
       }
 
-      // Partial match (keyword is substring of indexed word)
+      // Partial match (keyword is substring of indexed word, but not exact match)
       for (const [indexed, ids] of Object.entries(data.entries)) {
+        // Skip exact matches - they're already counted above with higher weight
+        if (indexed === keyword) continue;
         if (indexed.includes(keyword) || keyword.includes(indexed)) {
           for (const id of ids) {
             matchCounts.set(id, (matchCounts.get(id) || 0) + 1);

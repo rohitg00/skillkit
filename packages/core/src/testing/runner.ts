@@ -740,8 +740,18 @@ async function runTestCase(
     };
   }
 
-  // Check tag filters
-  if (options.tags && testCase.tags) {
+  // Check tag filters - if tags are specified, only run tests with matching tags
+  if (options.tags && options.tags.length > 0) {
+    // Tests without tags should be skipped when tag filter is active
+    if (!testCase.tags || testCase.tags.length === 0) {
+      return {
+        testCase,
+        passed: true,
+        assertions: [],
+        duration: 0,
+        skipped: true,
+      };
+    }
     const hasRequiredTag = options.tags.some((t) => testCase.tags?.includes(t));
     if (!hasRequiredTag) {
       return {

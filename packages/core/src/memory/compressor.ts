@@ -192,13 +192,25 @@ export class RuleBasedCompressor implements CompressionEngine {
       const errorText = error.content.error || error.content.action;
       const matchingSolution = solutions.find((s) => {
         const solutionContext = s.content.context?.toLowerCase() || '';
+        const solutionAction = s.content.action?.toLowerCase() || '';
         const errorLower = errorText.toLowerCase();
-        // Simple matching: solution mentions similar keywords
-        return (
-          solutionContext.includes('fix') ||
-          solutionContext.includes('resolve') ||
-          this.hasSimilarKeywords(errorLower, solutionContext)
-        );
+
+        // Require keyword similarity between error and solution
+        const hasKeywordMatch = this.hasSimilarKeywords(errorLower, solutionContext) ||
+                                this.hasSimilarKeywords(errorLower, solutionAction);
+        if (!hasKeywordMatch) {
+          return false;
+        }
+
+        // Solution should indicate it's a fix/resolution, or have strong keyword overlap
+        const isSolutionIndicator = solutionContext.includes('fix') ||
+                                    solutionContext.includes('resolve') ||
+                                    solutionContext.includes('solution') ||
+                                    solutionAction.includes('fix') ||
+                                    solutionAction.includes('resolve');
+
+        // Require both keyword match AND solution indicator
+        return isSolutionIndicator || this.hasStrongKeywordOverlap(errorLower, solutionContext);
       });
 
       if (matchingSolution) {
@@ -556,9 +568,24 @@ Consider automating or documenting this workflow for future reference.
   }
 
   private hasSimilarKeywords(text1: string, text2: string): boolean {
-    const words1 = text1.split(/\s+/).filter((w) => w.length > 3);
-    const words2 = new Set(text2.split(/\s+/).filter((w) => w.length > 3));
+    // Normalize: lowercase and strip punctuation for better matching
+    const normalize = (word: string) => word.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const words1 = text1.split(/\s+/).map(normalize).filter((w) => w.length > 3);
+    const words2 = new Set(text2.split(/\s+/).map(normalize).filter((w) => w.length > 3));
     return words1.some((w) => words2.has(w));
+  }
+
+  /**
+   * Check for strong keyword overlap (multiple matching words)
+   * More strict than hasSimilarKeywords - requires at least 2 matching words
+   */
+  private hasStrongKeywordOverlap(text1: string, text2: string): boolean {
+    // Normalize: lowercase and strip punctuation for better matching
+    const normalize = (word: string) => word.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const words1 = text1.split(/\s+/).map(normalize).filter((w) => w.length > 3);
+    const words2 = new Set(text2.split(/\s+/).map(normalize).filter((w) => w.length > 3));
+    const matchCount = words1.filter((w) => words2.has(w)).length;
+    return matchCount >= 2;
   }
 }
 
@@ -982,7 +1009,8 @@ export class LearningConsolidator {
     const other = base === learning1 ? learning2 : learning1;
 
     return {
-      source: 'session',
+      // Preserve the source from the base learning instead of hard-coding 'session'
+      source: base.source,
       sourceObservations: [
         ...(base.sourceObservations || []),
         ...(other.sourceObservations || []),

@@ -228,10 +228,27 @@ export class MemoryCommand extends Command {
     const projectPath = process.cwd();
     const injector = createMemoryInjector(projectPath);
 
+    // Validate and parse limit
+    let maxLearnings = 10;
+    if (this.limit) {
+      const parsed = parseInt(this.limit, 10);
+      if (isNaN(parsed) || parsed <= 0) {
+        console.log(chalk.red('Invalid --limit value. Must be a positive number.'));
+        return 1;
+      }
+      maxLearnings = parsed;
+    }
+
+    // Sanitize tags - filter out empty strings
+    const tags = this.tags
+      ?.split(',')
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0);
+
     const results = injector.search(query, {
       includeGlobal: this.global,
-      tags: this.tags?.split(',').map((t) => t.trim()),
-      maxLearnings: this.limit ? parseInt(this.limit, 10) : 10,
+      tags: tags && tags.length > 0 ? tags : undefined,
+      maxLearnings,
       minRelevance: 0,
     });
 
@@ -570,9 +587,10 @@ export class MemoryCommand extends Command {
             source: 'imported',
             title: learning.title,
             content: learning.content,
-            tags: learning.tags,
-            frameworks: learning.frameworks,
-            patterns: learning.patterns,
+            // Default to empty arrays if not present in imported YAML
+            tags: Array.isArray(learning.tags) ? learning.tags : [],
+            frameworks: Array.isArray(learning.frameworks) ? learning.frameworks : [],
+            patterns: Array.isArray(learning.patterns) ? learning.patterns : [],
           });
           imported++;
         }
@@ -789,22 +807,40 @@ export class MemoryCommand extends Command {
   }
 
   /**
+   * Escape a YAML scalar value if it contains special characters
+   */
+  private escapeYamlValue(value: string): string {
+    // Check if value needs quoting (contains special YAML characters)
+    if (/[:#\[\]{}|>&*!?,'"\\@`]/.test(value) || value.includes('\n')) {
+      // Use double quotes and escape internal quotes/backslashes
+      return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+    }
+    return value;
+  }
+
+  /**
    * Generate skill content from learning
    */
   private generateSkillContent(learning: Learning, skillName: string): string {
+    // Escape values that might contain special YAML characters
+    const escapedName = this.escapeYamlValue(skillName);
+    const escapedDesc = this.escapeYamlValue(learning.title);
+    const escapedTags = learning.tags.map((t) => this.escapeYamlValue(t));
+
     const lines: string[] = [
       '---',
-      `name: ${skillName}`,
-      `description: ${learning.title}`,
+      `name: ${escapedName}`,
+      `description: ${escapedDesc}`,
       `version: 1.0.0`,
-      `tags: [${learning.tags.join(', ')}]`,
+      `tags: [${escapedTags.join(', ')}]`,
       `source: skillkit-memory`,
       `sourceType: local`,
     ];
 
     if (learning.frameworks?.length) {
+      const escapedFrameworks = learning.frameworks.map((f) => this.escapeYamlValue(f));
       lines.push(`compatibility:`);
-      lines.push(`  frameworks: [${learning.frameworks.join(', ')}]`);
+      lines.push(`  frameworks: [${escapedFrameworks.join(', ')}]`);
     }
 
     lines.push('---', '', `# ${learning.title}`, '');

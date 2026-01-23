@@ -119,13 +119,31 @@ export class MarketplaceCommand extends Command {
 
   private async searchSkills(marketplace: ReturnType<typeof createMarketplaceAggregator>): Promise<number> {
     const query = this.query || this.action;
+
+    // Validate and parse limit
+    let limit = 20;
+    if (this.limit) {
+      const parsed = parseInt(this.limit, 10);
+      if (isNaN(parsed) || parsed <= 0) {
+        console.error(chalk.red('Invalid --limit value. Must be a positive number.'));
+        return 1;
+      }
+      limit = parsed;
+    }
+
+    // Sanitize tags - filter out empty strings
+    const tags = this.tags
+      ?.split(',')
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0);
+
     const spinner = ora(`Searching for "${query}"...`).start();
 
     try {
       const options: MarketplaceSearchOptions = {
         query: query || undefined,
-        limit: this.limit ? parseInt(this.limit, 10) : 20,
-        tags: this.tags?.split(',').map((t) => t.trim()),
+        limit,
+        tags: tags && tags.length > 0 ? tags : undefined,
         source: this.source,
       };
 
