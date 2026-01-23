@@ -86,7 +86,8 @@ export class SettingsCommand extends Command {
       }
       const value = this.getConfigValue(config, this.get);
       if (this.json) {
-        console.log(JSON.stringify({ [this.get]: value }));
+        // Use null instead of undefined so the key is preserved in JSON output
+        console.log(JSON.stringify({ [this.get]: value ?? null }));
       } else {
         console.log(value ?? '(not set)');
       }

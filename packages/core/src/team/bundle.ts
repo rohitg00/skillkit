@@ -5,7 +5,7 @@
  */
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, statSync } from 'node:fs';
-import { join, basename, resolve, relative, dirname } from 'node:path';
+import { join, basename, resolve, relative, dirname, sep } from 'node:path';
 import { createHash } from 'node:crypto';
 import type { BundleManifest } from './types.js';
 import type { AgentType } from '../types.js';
@@ -252,9 +252,10 @@ export function importBundle(
 
       const skillDir = join(absoluteTargetDir, skill.name);
 
-      // Double-check the resolved path is within target directory
+      // Double-check the resolved path is within target directory (cross-platform)
       const resolvedSkillDir = resolve(skillDir);
-      if (!resolvedSkillDir.startsWith(absoluteTargetDir + '/') && resolvedSkillDir !== absoluteTargetDir) {
+      const relativeToTarget = relative(absoluteTargetDir, resolvedSkillDir);
+      if (relativeToTarget.startsWith('..') || relativeToTarget.startsWith(sep)) {
         errors.push(`Skill "${skill.name}" would escape target directory`);
         continue;
       }
@@ -275,15 +276,15 @@ export function importBundle(
       for (const [filePath, fileContent] of Object.entries(files)) {
         // Validate path to prevent path traversal attacks
         const fullPath = resolve(skillDir, filePath);
-        const relativePath = relative(skillDir, fullPath);
+        const relativeToSkill = relative(skillDir, fullPath);
 
-        // Check for path traversal (path escapes skillDir)
-        if (relativePath.startsWith('..') || resolve(fullPath) !== fullPath || !fullPath.startsWith(skillDir)) {
+        // Check for path traversal (cross-platform)
+        if (relativeToSkill.startsWith('..') || relativeToSkill.startsWith(sep)) {
           errors.push(`Skill "${skill.name}" contains invalid file path: ${filePath}`);
           continue;
         }
 
-        const fileDir = join(fullPath, '..');
+        const fileDir = dirname(fullPath);
         if (!existsSync(fileDir)) {
           mkdirSync(fileDir, { recursive: true });
         }
@@ -305,9 +306,13 @@ export function importBundle(
  */
 function parseSkillContent(content: string): Record<string, string> {
   const files: Record<string, string> = {};
-  const sections = content.split(/\n--- ([^\n]+) ---\n/);
 
-  // First section is empty or content without header
+  // Match file headers at start of string OR after newline
+  // This ensures the first file isn't dropped when content starts with "--- file ---"
+  const sections = content.split(/(?:^|\n)--- ([^\n]+) ---\n/);
+
+  // sections[0] is content before first header (empty if content starts with header)
+  // Then alternating: filePath, fileContent, filePath, fileContent, ...
   let i = 1;
   while (i < sections.length) {
     const filePath = sections[i];

@@ -296,13 +296,19 @@ export async function loadPluginsFromDirectory(dirPath: string): Promise<Plugin[
 
     try {
       if (stat.isDirectory()) {
-        // Try to load from directory
+        // Try to load from directory (check ESM .mjs files first, then .js)
+        const indexMjsPath = join(fullPath, 'index.mjs');
         const indexPath = join(fullPath, 'index.js');
+        const mainMjsPath = join(fullPath, 'plugin.mjs');
         const mainPath = join(fullPath, 'plugin.js');
         const jsonPath = join(fullPath, 'plugin.json');
 
-        if (existsSync(indexPath)) {
+        if (existsSync(indexMjsPath)) {
+          plugins.push(await loader.loadFromFile(indexMjsPath));
+        } else if (existsSync(indexPath)) {
           plugins.push(await loader.loadFromFile(indexPath));
+        } else if (existsSync(mainMjsPath)) {
+          plugins.push(await loader.loadFromFile(mainMjsPath));
         } else if (existsSync(mainPath)) {
           plugins.push(await loader.loadFromFile(mainPath));
         } else if (existsSync(jsonPath)) {
