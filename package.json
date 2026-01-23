@@ -1,33 +1,18 @@
 {
-  "name": "skillkit",
+  "name": "skillkit-monorepo",
   "version": "1.2.0",
-  "description": "Universal skills loader for AI coding agents - supports Claude Code, Codex, Cursor, Antigravity, OpenCode, Gemini CLI and more",
+  "private": true,
+  "description": "Universal skills loader for AI coding agents - Monorepo",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "bin": {
-    "skillkit": "./dist/cli.js",
-    "sk": "./dist/cli.js"
-  },
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
-  },
-  "files": [
-    "dist",
-    "schemas"
-  ],
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "test": "vitest run",
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint src --ext .ts",
-    "prepublishOnly": "npm run typecheck && npm run build && npm run test"
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "clean": "rm -rf node_modules packages/*/node_modules apps/*/node_modules packages/*/dist apps/*/dist"
   },
   "keywords": [
     "ai",
@@ -41,10 +26,11 @@
     "agent",
     "coding-assistant",
     "skill-loader",
-    "cli"
+    "cli",
+    "monorepo"
   ],
   "author": "Rohit Ghumare",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rohitg00/skillkit.git"
@@ -56,24 +42,12 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "dependencies": {
-    "chalk": "^5.3.0",
-    "clipanion": "^4.0.0-rc.4",
-    "got": "^14.4.1",
-    "ink": "^5.0.1",
-    "ink-select-input": "^6.0.0",
-    "ink-spinner": "^5.0.0",
-    "ink-text-input": "^6.0.0",
-    "isomorphic-git": "^1.27.1",
-    "ora": "^8.1.0",
-    "react": "^18.3.1",
-    "yaml": "^2.6.1",
-    "zod": "^3.24.1"
-  },
+  "packageManager": "pnpm@9.0.0",
   "devDependencies": {
     "@types/node": "^22.10.5",
     "@types/react": "^18.3.18",
     "tsup": "^8.3.5",
+    "turbo": "^2.3.4",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   }
