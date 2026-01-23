@@ -40,3 +40,14 @@ export {
   type SyncResult,
   type SyncReport,
 } from './sync.js';
+
+// Loader (Smart Context Loading)
+export {
+  ContextLoader,
+  createContextLoader,
+  estimateTokens,
+  DEFAULT_CONTEXT_CATEGORIES,
+  type ContextCategory,
+  type ContextLoadOptions,
+  type LoadedContext,
+} from './loader.js';
