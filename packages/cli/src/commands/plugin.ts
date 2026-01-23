@@ -123,15 +123,19 @@ export class PluginCommand extends Command {
 
   /**
    * Validate plugin name to prevent path traversal attacks
+   * Allows scoped npm names like @scope/name (mirrors loader.ts validation)
    */
   private isValidPluginName(name: string): boolean {
-    // Reject empty, path separators, or path traversal sequences
-    return Boolean(name) &&
-      !name.includes('/') &&
-      !name.includes('\\') &&
-      !name.includes('..') &&
-      name !== '.' &&
-      !name.startsWith('.');
+    if (!name) return false;
+
+    // Reject backslashes, path traversal sequences, and names starting with '.'
+    if (name.includes('\\') || name.includes('..') || name === '.' || name.startsWith('.')) {
+      return false;
+    }
+
+    // Allow scoped npm names (@scope/name) or simple names (no slashes)
+    // Use the same regex pattern as loader.ts validatePlugin
+    return /^(?:@[a-z0-9-]+\/)?[a-z0-9-]+$/.test(name);
   }
 
   private async installPlugin(pluginManager: ReturnType<typeof createPluginManager>): Promise<number> {
