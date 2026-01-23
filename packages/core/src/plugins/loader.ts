@@ -25,8 +25,8 @@ export class PluginLoader {
     }
 
     const ext = extname(filePath);
-    if (ext !== '.js' && ext !== '.mjs' && ext !== '.ts') {
-      throw new Error(`Unsupported plugin file type: ${ext}`);
+    if (ext !== '.js' && ext !== '.mjs') {
+      throw new Error(`Unsupported plugin file type: ${ext}. Only .js and .mjs files are supported.`);
     }
 
     try {

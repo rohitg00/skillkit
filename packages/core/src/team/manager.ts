@@ -6,6 +6,8 @@
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
+import { execSync } from 'node:child_process';
+import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import type {
   TeamConfig,
   TeamRegistry,
@@ -380,7 +382,6 @@ export class TeamManager {
   private getAuthor(): string {
     // Try to get from git config
     try {
-      const { execSync } = require('node:child_process');
       const name = execSync('git config user.name', { encoding: 'utf-8' }).trim();
       const email = execSync('git config user.email', { encoding: 'utf-8' }).trim();
       return email ? `${name} <${email}>` : name;
@@ -418,97 +419,11 @@ export class TeamManager {
   }
 
   private parseYaml(content: string): unknown {
-    // Simple YAML parser for basic structures
-    const result: Record<string, unknown> = {};
-    const lines = content.split('\n');
-    let currentKey = '';
-    let inArray = false;
-    let arrayItems: unknown[] = [];
-
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith('#')) continue;
-
-      if (trimmed.startsWith('- ')) {
-        if (inArray && currentKey) {
-          arrayItems.push(trimmed.slice(2).trim().replace(/^['"]|['"]$/g, ''));
-        }
-        continue;
-      }
-
-      if (inArray && currentKey) {
-        result[currentKey] = arrayItems;
-        inArray = false;
-        arrayItems = [];
-      }
-
-      const colonIndex = trimmed.indexOf(':');
-      if (colonIndex > 0) {
-        const key = trimmed.slice(0, colonIndex).trim();
-        const value = trimmed.slice(colonIndex + 1).trim();
-
-        if (value === '' || value === '|') {
-          currentKey = key;
-          inArray = true;
-          arrayItems = [];
-        } else {
-          let parsedValue: unknown = value.replace(/^['"]|['"]$/g, '');
-          if (parsedValue === 'true') parsedValue = true;
-          else if (parsedValue === 'false') parsedValue = false;
-          else if (!isNaN(Number(parsedValue)) && parsedValue !== '') {
-            parsedValue = Number(parsedValue);
-          }
-          result[key] = parsedValue;
-        }
-      }
-    }
-
-    if (inArray && currentKey) {
-      result[currentKey] = arrayItems;
-    }
-
-    return result;
+    return yamlParse(content);
   }
 
-  private toYaml(obj: unknown, indent = 0): string {
-    const spaces = '  '.repeat(indent);
-    const lines: string[] = [];
-
-    if (Array.isArray(obj)) {
-      for (const item of obj) {
-        if (typeof item === 'object' && item !== null) {
-          lines.push(`${spaces}-`);
-          const subYaml = this.toYaml(item, indent + 1);
-          lines.push(subYaml);
-        } else {
-          lines.push(`${spaces}- ${this.yamlValue(item)}`);
-        }
-      }
-    } else if (typeof obj === 'object' && obj !== null) {
-      for (const [key, value] of Object.entries(obj)) {
-        if (Array.isArray(value)) {
-          lines.push(`${spaces}${key}:`);
-          lines.push(this.toYaml(value, indent + 1));
-        } else if (typeof value === 'object' && value !== null) {
-          lines.push(`${spaces}${key}:`);
-          lines.push(this.toYaml(value, indent + 1));
-        } else {
-          lines.push(`${spaces}${key}: ${this.yamlValue(value)}`);
-        }
-      }
-    }
-
-    return lines.join('\n');
-  }
-
-  private yamlValue(value: unknown): string {
-    if (typeof value === 'string') {
-      if (value.includes('\n') || value.includes(':') || value.includes('#')) {
-        return `"${value.replace(/"/g, '\\"')}"`;
-      }
-      return value;
-    }
-    return String(value);
+  private toYaml(obj: unknown): string {
+    return yamlStringify(obj, { indent: 2 });
   }
 }
 

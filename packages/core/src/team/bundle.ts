@@ -41,7 +41,7 @@ export class SkillBundle {
     this.skills.set(skillName, content);
     this.manifest.skills.push({
       name: skillName,
-      path: skillPath,
+      path: skillName, // Store only the skill name, not the full path
       agents: agents || this.detectAgents(skillPath),
     });
 

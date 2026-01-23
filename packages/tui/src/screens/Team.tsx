@@ -55,6 +55,7 @@ export function Team({ rows = 24 }: Props) {
         setConfig(teamConfig);
         const sharedSkills = manager.listSharedSkills();
         setSkills(sharedSkills);
+        setSel(s => Math.min(s, Math.max(0, sharedSkills.length - 1)));
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load team');
@@ -71,6 +72,7 @@ export function Team({ rows = 24 }: Props) {
     try {
       const { createTeamManager } = await import('@skillkit/core');
       const manager = createTeamManager(process.cwd());
+      manager.load(); // Load config before sync
       const result = await manager.sync();
 
       const changes = [...result.added, ...result.updated];
@@ -83,6 +85,7 @@ export function Team({ rows = 24 }: Props) {
       // Reload skills
       const sharedSkills = manager.listSharedSkills();
       setSkills(sharedSkills);
+      setSel(s => Math.min(s, Math.max(0, sharedSkills.length - 1)));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Sync failed');
     }
@@ -98,6 +101,7 @@ export function Team({ rows = 24 }: Props) {
     try {
       const { createTeamManager } = await import('@skillkit/core');
       const manager = createTeamManager(process.cwd());
+      manager.load(); // Load config before import
       const result = await manager.importSkill(skillName, { overwrite: false });
 
       if (result.success) {
@@ -114,9 +118,10 @@ export function Team({ rows = 24 }: Props) {
 
   useInput((input, key) => {
     if (loading) return;
+    if (skills.length === 0 && (key.upArrow || key.downArrow)) return;
 
     if (key.upArrow) setSel(i => Math.max(0, i - 1));
-    else if (key.downArrow) setSel(i => Math.min(skills.length - 1, i + 1));
+    else if (key.downArrow) setSel(i => Math.min(Math.max(0, skills.length - 1), i + 1));
     else if (input === 'r') loadTeam();
     else if (input === 's') syncTeam();
     else if (key.return && skills[sel]) {

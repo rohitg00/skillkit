@@ -247,27 +247,35 @@ export class CICDCommand extends Command {
     console.log();
 
     let success = true;
+    let created = false;
 
     for (const provider of providers) {
       const result = this.createWorkflow(projectPath, provider);
+      if (result.skipped) {
+        console.log(chalk.yellow(`  ${result.message}`));
+        continue;
+      }
       if (!result.success) {
         success = false;
-        if (result.skipped) {
-          console.log(chalk.yellow(`  ${result.message}`));
-        } else {
-          console.error(chalk.red(`  ${result.message}`));
-        }
-      } else {
-        console.log(chalk.green(`  ✓ ${result.message}`));
+        console.error(chalk.red(`  ${result.message}`));
+        continue;
       }
+      created = true;
+      console.log(chalk.green(`  ✓ ${result.message}`));
     }
 
     if (success) {
       console.log();
-      console.log(chalk.green('CI/CD workflows initialized successfully!'));
+      console.log(
+        created
+          ? chalk.green('CI/CD workflows initialized successfully!')
+          : chalk.yellow('CI/CD workflows already exist; nothing to do.')
+      );
       console.log();
-      console.log(chalk.dim('The workflows will run on push/PR to validate your skills.'));
-      console.log(chalk.dim('Commit the generated files to enable CI/CD.'));
+      if (created) {
+        console.log(chalk.dim('The workflows will run on push/PR to validate your skills.'));
+        console.log(chalk.dim('Commit the generated files to enable CI/CD.'));
+      }
     }
 
     return success ? 0 : 1;
@@ -315,19 +323,26 @@ export class CICDCommand extends Command {
 
     if (existsSync(ciFile) && !this.force) {
       // Check if skillkit jobs already exist for better messaging
-      const content = readFileSync(ciFile, 'utf-8');
-      if (content.includes('skillkit')) {
+      try {
+        const content = readFileSync(ciFile, 'utf-8');
+        if (content.includes('skillkit')) {
+          return {
+            success: true,
+            message: `.gitlab-ci.yml already contains SkillKit config (use --force to overwrite)`,
+            skipped: true,
+          };
+        }
         return {
           success: true,
-          message: `.gitlab-ci.yml already contains SkillKit config (use --force to overwrite)`,
+          message: `.gitlab-ci.yml already exists (use --force to overwrite)`,
           skipped: true,
         };
+      } catch (error) {
+        return {
+          success: false,
+          message: `Failed to read .gitlab-ci.yml: ${error}`,
+        };
       }
-      return {
-        success: true,
-        message: `.gitlab-ci.yml already exists (use --force to overwrite)`,
-        skipped: true,
-      };
     }
 
     try {

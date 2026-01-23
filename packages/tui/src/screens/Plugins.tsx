@@ -90,9 +90,10 @@ export function Plugins({ rows = 24 }: Props) {
 
   useInput((input, key) => {
     if (loading) return;
+    if (plugins.length === 0 && (key.upArrow || key.downArrow)) return;
 
     if (key.upArrow) setSel(i => Math.max(0, i - 1));
-    else if (key.downArrow) setSel(i => Math.min(plugins.length - 1, i + 1));
+    else if (key.downArrow) setSel(i => Math.min(Math.max(0, plugins.length - 1), i + 1));
     else if (input === 'r') loadPlugins();
     else if (input === 'e' && plugins[sel]) {
       togglePlugin(plugins[sel].name, plugins[sel].enabled);
