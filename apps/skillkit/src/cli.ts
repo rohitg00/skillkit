@@ -29,6 +29,10 @@ import {
   TestCommand,
   MarketplaceCommand,
   MemoryCommand,
+  SettingsCommand,
+  CICDCommand,
+  TeamCommand,
+  PluginCommand,
 } from '@skillkit/cli';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -71,5 +75,9 @@ cli.register(RunCommand);
 cli.register(TestCommand);
 cli.register(MarketplaceCommand);
 cli.register(MemoryCommand);
+cli.register(SettingsCommand);
+cli.register(CICDCommand);
+cli.register(TeamCommand);
+cli.register(PluginCommand);
 
 cli.runExit(process.argv.slice(2));

@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
-import { detectProvider } from '@skillkit/core';
+import { detectProvider, loadConfig, extractFrontmatter } from '@skillkit/core';
+import { readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
 import type { SkillItem } from '../components/SkillList.js';
 
 export interface RepoInfo {
@@ -7,7 +9,8 @@ export interface RepoInfo {
   name: string;
 }
 
-const POPULAR_REPOS: RepoInfo[] = [
+// Default popular repos - can be extended via config.marketplaceSources
+const DEFAULT_REPOS: RepoInfo[] = [
   { source: 'anthropics/skills', name: 'Anthropic Official' },
   { source: 'vercel-labs/agent-skills', name: 'Vercel Labs' },
   { source: 'expo/skills', name: 'Expo / React Native' },
@@ -40,6 +43,53 @@ const POPULAR_REPOS: RepoInfo[] = [
   { source: 'intellectronica/agent-skills', name: 'Context7' },
 ];
 
+/**
+ * Get marketplace repos from config or use defaults
+ */
+function getMarketplaceRepos(): RepoInfo[] {
+  try {
+    const config = loadConfig();
+    if (config.marketplaceSources?.length) {
+      // Merge config sources with defaults, config takes priority
+      const configRepos: RepoInfo[] = config.marketplaceSources.map(source => ({
+        source,
+        name: source.split('/').pop() || source,
+      }));
+      // Add defaults that aren't in config
+      const existingSources = new Set(configRepos.map(r => r.source));
+      for (const repo of DEFAULT_REPOS) {
+        if (!existingSources.has(repo.source)) {
+          configRepos.push(repo);
+        }
+      }
+      return configRepos;
+    }
+  } catch {
+    // Config load failed, use defaults
+  }
+  return DEFAULT_REPOS;
+}
+
+/**
+ * Try to read skill description from frontmatter
+ */
+function readSkillDescription(skillPath: string): string | undefined {
+  const skillMdPath = join(skillPath, 'SKILL.md');
+  if (!existsSync(skillMdPath)) {
+    return undefined;
+  }
+  try {
+    const content = readFileSync(skillMdPath, 'utf-8');
+    const frontmatter = extractFrontmatter(content);
+    if (frontmatter && typeof frontmatter.description === 'string') {
+      return frontmatter.description;
+    }
+  } catch {
+    // Failed to read, return undefined
+  }
+  return undefined;
+}
+
 interface FetchedSkill {
   name: string;
   source: string;
@@ -54,6 +104,7 @@ interface UseMarketplaceResult {
   totalCount: number;
   repos: RepoInfo[];
   currentRepo: string | null;
+  failedRepos: string[];
   refresh: () => void;
   search: (query: string) => void;
   fetchRepo: (source: string) => Promise<void>;
@@ -67,6 +118,8 @@ export function useMarketplace(): UseMarketplaceResult {
   const [error, setError] = useState<string | null>(null);
   const [currentRepo, setCurrentRepo] = useState<string | null>(null);
   const [fetchedRepos, setFetchedRepos] = useState<Set<string>>(new Set());
+  const [failedRepos, setFailedRepos] = useState<string[]>([]);
+  const [repos] = useState<RepoInfo[]>(() => getMarketplaceRepos());
 
   const fetchRepo = useCallback(async (source: string) => {
     if (fetchedRepos.has(source)) return;
@@ -87,12 +140,13 @@ export function useMarketplace(): UseMarketplaceResult {
         throw new Error(result.error || 'Failed to fetch skills');
       }
 
-      const repoName = POPULAR_REPOS.find(r => r.source === source)?.name || source;
+      const repoName = repos.find(r => r.source === source)?.name || source;
       const newSkills: FetchedSkill[] = result.discoveredSkills.map(skill => ({
         name: skill.name,
         source: source,
         repoName: repoName,
-        description: undefined,
+        // Try to read description from skill frontmatter
+        description: readSkillDescription(skill.path),
       }));
 
       setAllSkills(prev => {
@@ -107,30 +161,44 @@ export function useMarketplace(): UseMarketplaceResult {
         rmSync(result.tempRoot, { recursive: true, force: true });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch repository');
+      const errorMsg = err instanceof Error ? err.message : 'Failed to fetch repository';
+      setError(errorMsg);
+      // Track failed repos for display
+      setFailedRepos(prev => prev.includes(source) ? prev : [...prev, source]);
     } finally {
       setLoading(false);
       setCurrentRepo(null);
     }
-  }, [fetchedRepos]);
+  }, [fetchedRepos, repos]);
 
   const fetchAllRepos = useCallback(async () => {
     setLoading(true);
     setError(null);
+    const failures: string[] = [];
 
-    for (const repo of POPULAR_REPOS) {
+    for (const repo of repos) {
       if (!fetchedRepos.has(repo.source)) {
         setCurrentRepo(repo.source);
         try {
           await fetchRepo(repo.source);
-        } catch {
+        } catch (err) {
+          // Track which repos failed
+          failures.push(repo.source);
         }
       }
     }
 
+    // Update failed repos list
+    if (failures.length > 0) {
+      setFailedRepos(prev => {
+        const combined = [...prev, ...failures];
+        return [...new Set(combined)]; // deduplicate
+      });
+    }
+
     setLoading(false);
     setCurrentRepo(null);
-  }, [fetchRepo, fetchedRepos]);
+  }, [fetchRepo, fetchedRepos, repos]);
 
   const search = useCallback((query: string) => {
     if (!query.trim()) {
@@ -153,6 +221,8 @@ export function useMarketplace(): UseMarketplaceResult {
     setFetchedRepos(new Set());
     setAllSkills([]);
     setFilteredSkills([]);
+    setFailedRepos([]);
+    setError(null);
   }, []);
 
   useEffect(() => {
@@ -170,8 +240,9 @@ export function useMarketplace(): UseMarketplaceResult {
     loading,
     error,
     totalCount: allSkills.length,
-    repos: POPULAR_REPOS,
+    repos,
     currentRepo,
+    failedRepos,
     refresh,
     search,
     fetchRepo,

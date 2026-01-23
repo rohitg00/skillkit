@@ -21,3 +21,7 @@ export { RunCommand } from './run.js';
 export { TestCommand } from './test.js';
 export { MarketplaceCommand } from './marketplace.js';
 export { MemoryCommand } from './memory.js';
+export { SettingsCommand } from './settings.js';
+export { CICDCommand } from './cicd.js';
+export { TeamCommand } from './team.js';
+export { PluginCommand } from './plugin.js';
