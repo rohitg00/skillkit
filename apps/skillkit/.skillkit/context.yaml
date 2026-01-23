@@ -1,0 +1,43 @@
+version: 1
+project:
+  name: skillkit
+  description: Universal skills loader for AI coding agents - supports Claude Code, Codex, Cursor, Antigravity, OpenCode, Gemini CLI and more
+  type: cli
+  path: /Users/rohitghumare/skillkit/apps/skillkit
+stack:
+  languages:
+    - name: typescript
+      version: 5.7.2
+      confidence: 100
+      source: tsconfig.json
+  frameworks: []
+  libraries: []
+  styling: []
+  testing:
+    - name: vitest
+      version: 2.1.8
+      confidence: 100
+      source: package.json
+  databases: []
+  tools: []
+  runtime:
+    - name: nodejs
+      version: 18.0.0
+      confidence: 100
+      source: package.json
+patterns:
+  apiStyle: rest
+  testing: vitest
+skills:
+  installed: []
+  recommended: []
+  excluded: []
+  autoSync: true
+  securityLevel: medium
+  testingRequired: false
+agents:
+  detected: []
+  synced: []
+  disabled: []
+createdAt: 2026-01-23T00:02:29.727Z
+updatedAt: 2026-01-23T00:02:29.728Z

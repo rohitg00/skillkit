@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { detectProvider } from '../../providers/index.js';
+import { detectProvider } from '@skillkit/core';
 import type { SkillItem } from '../components/SkillList.js';
 
 export interface RepoInfo {
