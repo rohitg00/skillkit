@@ -3,17 +3,79 @@
 [![npm version](https://img.shields.io/npm/v/skillkit.svg)](https://www.npmjs.com/package/skillkit)
 [![npm downloads](https://img.shields.io/npm/dm/skillkit.svg)](https://www.npmjs.com/package/skillkit)
 [![CI](https://github.com/rohitg00/skillkit/actions/workflows/ci.yml/badge.svg)](https://github.com/rohitg00/skillkit/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Universal skills loader for AI coding agents. Install, manage, and sync skills across your favorite AI tools.
+**The universal skills platform for AI coding agents.** Install, manage, translate, and sync skills across 17+ AI tools with smart recommendations.
 
-Skills follow the [Agent Skills](https://agentskills.io) open format—a simple, portable standard for giving agents new capabilities and expertise.
+```bash
+npm install -g skillkit && skillkit
+```
 
-![SkillKit Demo](https://raw.githubusercontent.com/rohitg00/skillkit/main/skillkit.gif)
+## Why SkillKit?
+
+| Problem | SkillKit Solution |
+|---------|------------------|
+| Skills only work with one agent | **Cross-agent translation** - use any skill with any agent |
+| Don't know which skills to install | **Smart recommendations** - project-aware suggestions |
+| Config fragmented across agents | **One config, all agents** - sync everywhere |
+| Manual skill discovery | **Task-based search** - find skills by what you need |
+
+## 30-Second Quick Start
+
+```bash
+# Install globally
+npm install -g skillkit
+
+# Get personalized skill recommendations for your project
+skillkit recommend
+
+# Install top-rated skills
+skillkit install anthropics/skills
+
+# Launch interactive TUI
+skillkit
+```
+
+## Key Features
+
+### Smart Recommendations
+Analyzes your project and suggests the best skills:
+
+```bash
+skillkit recommend
+# Project: my-app (Next.js + TypeScript + Tailwind)
+#
+# Recommended Skills:
+#   92% ██████████ vercel-react-best-practices
+#   87% █████████░ tailwind-v4-patterns
+#   85% █████████░ nextjs-app-router
+```
+
+### Cross-Agent Translation
+Use any skill with any agent - automatic format conversion:
+
+```bash
+# Translate a Claude skill to Cursor format
+skillkit translate react-patterns --to cursor
+
+# Translate all skills for a new agent
+skillkit translate --all --to antigravity
+```
+
+### Project Context Sync
+Configure once, sync to all your agents:
+
+```bash
+# Analyze project and create context
+skillkit context init
+
+# Sync your config to all detected agents
+skillkit context sync --all
+```
 
 ## Interactive TUI
 
-Manage all your skills with a beautiful terminal interface:
+Launch the beautiful terminal interface:
 
 ```bash
 skillkit ui
@@ -25,16 +87,16 @@ skillkit
 
 **Features:**
 - Browse 33+ skill repositories
+- Smart skill recommendations based on your project
 - Install skills with one keystroke
 - Multi-agent installation support
-- View installed skills
-- Sync across agents
+- Cross-agent skill translation
 - Responsive design for all terminal sizes
 
 **Navigation:**
-- `h` Home | `b` Browse | `l` List | `s` Sync | `,` Config
+- `h` Home | `b` Browse | `r` Recommend | `l` List | `s` Sync | `,` Config
 - `↑↓` Navigate | `Enter` Select | `Esc` Back | `q` Quit
-- `m` Multi-agent selection | `r` Refresh/Back
+- `m` Multi-agent selection | `/` Search
 
 ### Compatible With
 
@@ -60,48 +122,44 @@ skillkit
 
 ## Features
 
+- **Smart Recommendations**: AI-powered skill suggestions based on your project stack
+- **Cross-Agent Translation**: Convert skills between any of 17+ agent formats
+- **Project Context Sync**: One config that syncs to all your agents
 - **Interactive TUI**: Beautiful terminal interface for managing skills
-- **Multi-Agent Support**: Works with 17+ AI coding agents out of the box
+- **Multi-Agent Support**: Works with Claude Code, Cursor, Codex, Windsurf, and 13+ more
 - **Multi-Platform Git**: GitHub, GitLab, Bitbucket, and local paths
 - **CI/CD Friendly**: Non-interactive flags for automation (`--skills`, `--all`, `--yes`)
-- **Skill Toggle**: Enable/disable skills without removing them
-- **Type-Safe**: Built with TypeScript and Zod validation
 - **Zero Config**: Auto-detects your agent and configures appropriately
 
 ## Installation
 
 ```bash
+# Global install (recommended)
 npm install -g skillkit
-# or
+
+# Or use without installing
 npx skillkit <command>
+
+# Or with other package managers
+pnpm add -g skillkit
+yarn global add skillkit
+bun add -g skillkit
 ```
 
 ## Quick Start
 
 ```bash
-# Launch interactive TUI
-skillkit ui
+# 1. Get recommendations for your project
+skillkit recommend
 
-# Initialize in your project (auto-detects agent)
-skillkit init
+# 2. Install recommended skills
+skillkit install anthropics/skills
 
-# Install skills from GitHub
-skillkit install owner/repo
-
-# Install from GitLab
-skillkit install gitlab:owner/repo
-
-# Install specific skills (CI/CD friendly)
-skillkit install owner/repo --skills=pdf,xlsx,docx
-
-# Create a new skill
-skillkit create my-skill
-
-# Sync skills to your agent config
+# 3. Sync to your agent
 skillkit sync
 
-# Read a skill (for AI consumption)
-skillkit read pdf
+# Or just launch the TUI and do it all interactively
+skillkit
 ```
 
 ## Popular Skill Repositories
@@ -115,6 +173,8 @@ skillkit install anthropics/skills
 # Vercel's React & Next.js best practices
 skillkit install vercel-labs/agent-skills/skills
 ```
+
+![SkillKit Demo](https://raw.githubusercontent.com/rohitg00/skillkit/main/skillkit.gif)
 
 | Repository | Skills | Description |
 |------------|--------|-------------|
@@ -135,6 +195,7 @@ skillkit             # Launch TUI if no arguments provided
 
 **TUI Features:**
 - **Browse**: Discover skills from 33+ repositories
+- **Recommend**: Get smart skill suggestions for your project
 - **List**: View all installed skills
 - **Sync**: Sync skills across multiple agents
 - **Settings**: Configure SkillKit preferences
@@ -142,13 +203,14 @@ skillkit             # Launch TUI if no arguments provided
 **Keyboard Shortcuts:**
 - `h` - Home screen
 - `b` - Browse skills marketplace
+- `r` - Smart recommendations
 - `l` - List installed skills
 - `s` - Sync skills across agents
 - `,` - Settings
 - `↑↓` - Navigate lists
 - `Enter` - Select / Install
 - `m` - Multi-agent selection (when viewing skills)
-- `r` - Refresh / Go back
+- `/` - Search skills
 - `Esc` - Return to home
 - `q` - Quit
 
@@ -195,6 +257,48 @@ skillkit sync
 skillkit sync --agent cursor
 skillkit sync --output AGENTS.md
 skillkit sync --enabled-only
+```
+
+### `skillkit recommend`
+
+Get smart skill recommendations based on your project's tech stack.
+
+```bash
+skillkit recommend                    # Analyze current directory
+skillkit recommend --path ./my-app    # Analyze specific project
+skillkit recommend --verbose          # Show detailed match reasons
+skillkit recommend --limit 5          # Limit results
+skillkit recommend --min-score 50     # Only show high matches
+skillkit recommend --category security # Filter by category
+skillkit recommend --search "auth"    # Search skills by task
+skillkit recommend --update           # Update skill index
+skillkit recommend --json             # Output as JSON
+```
+
+### `skillkit translate`
+
+Translate skills between different agent formats.
+
+```bash
+skillkit translate react-skill --to cursor      # Translate to Cursor format
+skillkit translate ./skill --from claude --to windsurf  # Explicit source/target
+skillkit translate --all --to cursor            # Translate all installed skills
+skillkit translate react-skill --to cursor --dry-run    # Preview without writing
+```
+
+**Supported translations:** All 17 agents can translate to/from each other.
+
+### `skillkit context`
+
+Manage project context for cross-agent synchronization.
+
+```bash
+skillkit context init                 # Analyze project and create context
+skillkit context show                 # Display current context
+skillkit context export               # Export context to file
+skillkit context import ./context.yaml # Import context from file
+skillkit context sync --agent cursor  # Sync context to specific agent
+skillkit context sync --all           # Sync to all detected agents
 ```
 
 ### `skillkit read <skills>`
@@ -362,10 +466,21 @@ Instructions for the AI agent on how to use this skill.
 
 ```typescript
 import {
+  // Skill discovery
   findAllSkills,
   discoverSkills,
   detectAgent,
   getAdapter,
+  // Recommendations
+  RecommendationEngine,
+  analyzeProject,
+  // Translation
+  translateSkill,
+  translateSkillFile,
+  // Context
+  ContextManager,
+  initContext,
+  syncToAllAgents,
 } from 'skillkit';
 
 // Find all installed skills
@@ -377,6 +492,20 @@ const agent = await detectAgent();
 // Generate config
 const adapter = getAdapter(agent);
 const config = adapter.generateConfig(skills);
+
+// Get smart recommendations
+const engine = new RecommendationEngine();
+const profile = await analyzeProject('./my-project');
+const recommendations = engine.recommend(profile, skills);
+
+// Translate skills between agents
+const result = translateSkill(skillContent, 'cursor');
+console.log(result.content); // Cursor MDC format
+
+// Manage project context
+const ctx = new ContextManager('./my-project');
+await ctx.init();
+await syncToAllAgents(ctx.getContext());
 ```
 
 ## Configuration
@@ -396,11 +525,11 @@ disabledSkills:
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+Apache License 2.0 - see [LICENSE](LICENSE) for details.
 
 ## Contributing
 
-Contributions welcome! Please read our contributing guidelines.
+Contributions welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting a pull request.
 
 ## Acknowledgments
 

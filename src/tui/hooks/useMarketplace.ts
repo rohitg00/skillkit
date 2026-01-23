@@ -38,9 +38,6 @@ const POPULAR_REPOS: RepoInfo[] = [
   { source: 'giuseppe-trisciuoglio/developer-kit', name: 'Shadcn / Radix' },
   { source: 'openrouterteam/agent-skills', name: 'OpenRouter SDK' },
   { source: 'intellectronica/agent-skills', name: 'Context7' },
-  { source: 'boristane/agent-skills', name: 'Logging Patterns' },
-  { source: 'f/awesome-chatgpt-prompts', name: 'ChatGPT Prompts' },
-  { source: 'rohitg00/openskills', name: 'OpenSkills' },
 ];
 
 interface FetchedSkill {

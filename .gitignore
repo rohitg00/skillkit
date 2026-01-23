@@ -29,7 +29,6 @@ npm-debug.log*
 
 # Package manager
 yarn.lock
-pnpm-lock.yaml
 
 # Temporary files
 tmp/
@@ -57,3 +56,7 @@ temp/
 
 # SkillKit config
 skillkit.yaml
+.skillkit/
+
+# Turbo cache
+.turbo/
