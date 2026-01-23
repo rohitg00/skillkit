@@ -233,7 +233,15 @@ export async function loadPlugin(source: string): Promise<Plugin> {
   const loader = new PluginLoader();
 
   // Determine source type
-  if (source.startsWith('./') || source.startsWith('/') || source.includes('\\')) {
+  // Check for local file paths: absolute, relative (./, ../), Windows paths, or paths with directory separator
+  const isLocalPath =
+    source.startsWith('./') ||
+    source.startsWith('../') ||
+    source.startsWith('/') ||
+    source.includes('\\') ||
+    source.startsWith('~');
+
+  if (isLocalPath) {
     // File path
     if (source.endsWith('.json')) {
       return loader.loadFromJson(source);

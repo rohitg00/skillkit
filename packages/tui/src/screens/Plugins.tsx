@@ -38,8 +38,23 @@ export function Plugins({ rows = 24 }: Props) {
     setError(null);
 
     try {
-      const { createPluginManager } = await import('@skillkit/core');
+      const { createPluginManager, loadPluginsFromDirectory } = await import('@skillkit/core');
+      const { join } = await import('node:path');
       const manager = createPluginManager(process.cwd());
+
+      // Load plugins from directory first to populate the manager
+      const pluginsDir = join(process.cwd(), '.skillkit', 'plugins');
+      try {
+        const loadedPlugins = await loadPluginsFromDirectory(pluginsDir);
+        for (const plugin of loadedPlugins) {
+          if (!manager.getPlugin(plugin.metadata.name)) {
+            await manager.register(plugin);
+          }
+        }
+      } catch {
+        // Plugins directory may not exist
+      }
+
       const allPlugins = manager.listPlugins();
 
       const pluginInfos: PluginInfo[] = allPlugins.map(p => {

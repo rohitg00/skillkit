@@ -5,8 +5,9 @@
  */
 
 import { Command, Option } from 'clipanion';
-import { join } from 'node:path';
+import { join, basename, isAbsolute } from 'node:path';
 import { homedir } from 'node:os';
+import { existsSync, mkdirSync, copyFileSync, cpSync, rmSync } from 'node:fs';
 import chalk from 'chalk';
 import { createPluginManager, loadPlugin, loadPluginsFromDirectory } from '@skillkit/core';
 
@@ -129,6 +130,45 @@ export class PluginCommand extends Command {
     this.context.stdout.write(`Installing plugin from ${this.source}...\n`);
 
     const plugin = await loadPlugin(this.source);
+
+    // Determine plugins directory
+    const projectPath = this.global
+      ? join(homedir(), '.skillkit')
+      : process.cwd();
+    const pluginsDir = this.global
+      ? join(projectPath, 'plugins')
+      : join(projectPath, '.skillkit', 'plugins');
+
+    // Persist plugin files to disk if source is a local file/directory
+    const isLocalPath = this.source.startsWith('./') || this.source.startsWith('/') || this.source.includes('\\') || isAbsolute(this.source);
+    if (isLocalPath && existsSync(this.source)) {
+      const pluginName = plugin.metadata.name;
+      const targetDir = join(pluginsDir, pluginName);
+
+      // Create plugins directory if needed
+      if (!existsSync(pluginsDir)) {
+        mkdirSync(pluginsDir, { recursive: true });
+      }
+
+      // Copy plugin to plugins directory
+      const { statSync } = await import('node:fs');
+      const sourceStat = statSync(this.source);
+
+      if (sourceStat.isDirectory()) {
+        // Copy entire directory
+        cpSync(this.source, targetDir, { recursive: true });
+      } else {
+        // Copy single file
+        if (!existsSync(targetDir)) {
+          mkdirSync(targetDir, { recursive: true });
+        }
+        const fileName = basename(this.source);
+        copyFileSync(this.source, join(targetDir, fileName));
+      }
+
+      this.context.stdout.write(chalk.dim(`  Copied to ${targetDir}\n`));
+    }
+
     await pluginManager.register(plugin);
 
     this.context.stdout.write(chalk.green(`✓ Plugin "${plugin.metadata.name}" installed!\n`));
@@ -158,6 +198,21 @@ export class PluginCommand extends Command {
     }
 
     await pluginManager.unregister(this.name);
+
+    // Remove plugin files from disk
+    const projectPath = this.global
+      ? join(homedir(), '.skillkit')
+      : process.cwd();
+    const pluginsDir = this.global
+      ? join(projectPath, 'plugins')
+      : join(projectPath, '.skillkit', 'plugins');
+    const pluginDir = join(pluginsDir, this.name);
+
+    if (existsSync(pluginDir)) {
+      rmSync(pluginDir, { recursive: true, force: true });
+      this.context.stdout.write(chalk.dim(`  Removed ${pluginDir}\n`));
+    }
+
     this.context.stdout.write(chalk.green(`✓ Plugin "${this.name}" uninstalled.\n`));
     return 0;
   }

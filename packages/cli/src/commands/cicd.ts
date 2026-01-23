@@ -122,9 +122,13 @@ sync:
     - skillkit sync --yes
   needs:
     - validate
-  only:
-    - main
-    - master
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master"
+      changes:
+        - .skillkit/**/*
+        - skills/**/*
+        - .claude/skills/**/*
+        - .cursor/skills/**/*
 `;
 
 const CIRCLECI_CONFIG = `version: 2.1
