@@ -35,8 +35,8 @@ jobs:
       - name: Test
         run: pnpm test
 
-      - name: Publish to npm
-        run: npm publish --provenance --access public
+      - name: Publish packages to npm
+        run: pnpm -r publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
