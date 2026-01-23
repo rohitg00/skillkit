@@ -284,7 +284,15 @@ export async function loadPluginsFromDirectory(dirPath: string): Promise<Plugin[
 
   for (const entry of entries) {
     const fullPath = join(dirPath, entry);
-    const stat = statSync(fullPath);
+
+    // Guard against unreadable entries (permission denied, broken symlinks)
+    let stat;
+    try {
+      stat = statSync(fullPath);
+    } catch {
+      // Skip unreadable entries
+      continue;
+    }
 
     try {
       if (stat.isDirectory()) {

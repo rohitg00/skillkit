@@ -127,6 +127,7 @@ export class SettingsCommand extends Command {
         { key: 'autoSync', label: 'Auto Sync', value: config.autoSync ? 'enabled' : 'disabled' },
         { key: 'cacheDir', label: 'Cache Dir', value: config.cacheDir || '~/.skillkit/cache' },
         { key: 'skillsDir', label: 'Skills Dir', value: config.skillsDir || '(default)' },
+        { key: 'defaultTimeout', label: 'Timeout', value: config.defaultTimeout ? `${config.defaultTimeout}ms` : '(default)' },
       ];
 
       for (const setting of settings) {
@@ -140,6 +141,10 @@ export class SettingsCommand extends Command {
 
       if (config.disabledSkills?.length) {
         console.log(`  ${chalk.white('Disabled Skills'.padEnd(14))} ${chalk.dim(config.disabledSkills.join(', '))}`);
+      }
+
+      if (config.marketplaceSources?.length) {
+        console.log(`  ${chalk.white('Marketplaces'.padEnd(14))} ${chalk.dim(config.marketplaceSources.join(', '))}`);
       }
 
       console.log();

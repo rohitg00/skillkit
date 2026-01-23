@@ -5,7 +5,7 @@
  */
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, statSync } from 'node:fs';
-import { join, basename, resolve, relative } from 'node:path';
+import { join, basename, resolve, relative, dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 import type { BundleManifest } from './types.js';
 import type { AgentType } from '../types.js';
@@ -36,6 +36,12 @@ export class SkillBundle {
    */
   addSkill(skillPath: string, agents?: AgentType[]): void {
     const skillName = basename(skillPath);
+
+    // Check for duplicate skill names
+    if (this.skills.has(skillName)) {
+      throw new Error(`Skill "${skillName}" already exists in bundle`);
+    }
+
     const content = this.readSkillContent(skillPath);
 
     this.skills.set(skillName, content);
@@ -130,6 +136,22 @@ export class SkillBundle {
   private detectAgents(skillPath: string): AgentType[] {
     const agents: AgentType[] = [];
 
+    // Handle single-file skills - check if skillPath is a file
+    if (existsSync(skillPath) && statSync(skillPath).isFile()) {
+      const fileName = basename(skillPath).toLowerCase();
+      if (fileName === 'skill.md') {
+        return ['claude-code', 'codex', 'gemini-cli', 'universal'];
+      }
+      if (fileName === 'skill.mdc') {
+        return ['cursor'];
+      }
+      if (fileName === 'rules.md') {
+        return ['windsurf'];
+      }
+      return ['universal'];
+    }
+
+    // Directory-based skill detection
     if (existsSync(join(skillPath, 'SKILL.md'))) {
       agents.push('claude-code', 'codex', 'gemini-cli', 'universal');
     }
@@ -176,8 +198,8 @@ export function exportBundle(
       }
     }
 
-    const dir = join(outputPath, '..');
-    if (!existsSync(dir)) {
+    const dir = dirname(outputPath);
+    if (dir && !existsSync(dir)) {
       mkdirSync(dir, { recursive: true });
     }
 
@@ -215,6 +237,13 @@ export function importBundle(
     const absoluteTargetDir = resolve(targetDir);
 
     for (const skill of data.manifest.skills) {
+      // Validate skill name to prevent path traversal attacks
+      if (!skill.name || skill.name.includes('/') || skill.name.includes('\\') ||
+          skill.name === '..' || skill.name === '.' || skill.name.startsWith('.')) {
+        errors.push(`Skill has invalid name: ${skill.name}`);
+        continue;
+      }
+
       const skillContent = data.skills[skill.name];
       if (!skillContent) {
         errors.push(`Skill "${skill.name}" has no content in bundle`);
@@ -222,6 +251,13 @@ export function importBundle(
       }
 
       const skillDir = join(absoluteTargetDir, skill.name);
+
+      // Double-check the resolved path is within target directory
+      const resolvedSkillDir = resolve(skillDir);
+      if (!resolvedSkillDir.startsWith(absoluteTargetDir + '/') && resolvedSkillDir !== absoluteTargetDir) {
+        errors.push(`Skill "${skill.name}" would escape target directory`);
+        continue;
+      }
 
       // Check if exists
       if (existsSync(skillDir) && !options.overwrite) {

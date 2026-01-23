@@ -148,7 +148,12 @@ export class PluginCommand extends Command {
       this.source.includes('\\') ||
       isAbsolute(this.source);
 
-    if (isLocalPath && existsSync(this.source)) {
+    // Expand tilde to home directory for file operations
+    const resolvedSource = this.source.startsWith('~')
+      ? join(homedir(), this.source.slice(1))
+      : this.source;
+
+    if (isLocalPath && existsSync(resolvedSource)) {
       const pluginName = plugin.metadata.name;
       const targetDir = join(pluginsDir, pluginName);
 
@@ -159,19 +164,19 @@ export class PluginCommand extends Command {
 
       // Copy plugin to plugins directory
       const { statSync } = await import('node:fs');
-      const sourceStat = statSync(this.source);
+      const sourceStat = statSync(resolvedSource);
 
       if (sourceStat.isDirectory()) {
         // Copy entire directory
-        cpSync(this.source, targetDir, { recursive: true });
+        cpSync(resolvedSource, targetDir, { recursive: true });
       } else {
         // Copy single file with a loader-recognized name
         if (!existsSync(targetDir)) {
           mkdirSync(targetDir, { recursive: true });
         }
-        const ext = this.source.endsWith('.json') ? '.json' : '.js';
+        const ext = resolvedSource.endsWith('.json') ? '.json' : '.js';
         const destFileName = ext === '.json' ? 'plugin.json' : 'index.js';
-        copyFileSync(this.source, join(targetDir, destFileName));
+        copyFileSync(resolvedSource, join(targetDir, destFileName));
       }
 
       this.context.stdout.write(chalk.dim(`  Copied to ${targetDir}\n`));
