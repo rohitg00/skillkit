@@ -5,7 +5,7 @@
  */
 
 import { Command, Option } from 'clipanion';
-import { join, isAbsolute } from 'node:path';
+import { join, isAbsolute, resolve, sep } from 'node:path';
 import { homedir } from 'node:os';
 import { existsSync, mkdirSync, copyFileSync, cpSync, rmSync } from 'node:fs';
 import chalk from 'chalk';
@@ -121,15 +121,40 @@ export class PluginCommand extends Command {
     return 0;
   }
 
+  /**
+   * Validate plugin name to prevent path traversal attacks
+   */
+  private isValidPluginName(name: string): boolean {
+    // Reject empty, path separators, or path traversal sequences
+    return Boolean(name) &&
+      !name.includes('/') &&
+      !name.includes('\\') &&
+      !name.includes('..') &&
+      name !== '.' &&
+      !name.startsWith('.');
+  }
+
   private async installPlugin(pluginManager: ReturnType<typeof createPluginManager>): Promise<number> {
     if (!this.source) {
       this.context.stderr.write(chalk.red('--source is required for install\n'));
       return 1;
     }
 
+    // Expand tilde to home directory for all operations
+    const resolvedSource = this.source.startsWith('~')
+      ? join(homedir(), this.source.slice(1))
+      : this.source;
+
     this.context.stdout.write(`Installing plugin from ${this.source}...\n`);
 
-    const plugin = await loadPlugin(this.source);
+    const plugin = await loadPlugin(resolvedSource);
+
+    // Validate plugin name from metadata
+    const pluginName = plugin.metadata.name;
+    if (!this.isValidPluginName(pluginName)) {
+      this.context.stderr.write(chalk.red(`Invalid plugin name: ${pluginName}\n`));
+      return 1;
+    }
 
     // Determine plugins directory
     const projectPath = this.global
@@ -148,14 +173,16 @@ export class PluginCommand extends Command {
       this.source.includes('\\') ||
       isAbsolute(this.source);
 
-    // Expand tilde to home directory for file operations
-    const resolvedSource = this.source.startsWith('~')
-      ? join(homedir(), this.source.slice(1))
-      : this.source;
-
     if (isLocalPath && existsSync(resolvedSource)) {
-      const pluginName = plugin.metadata.name;
       const targetDir = join(pluginsDir, pluginName);
+
+      // Verify targetDir is within pluginsDir (defense in depth)
+      const resolvedTarget = resolve(targetDir);
+      const resolvedPluginsDir = resolve(pluginsDir);
+      if (!resolvedTarget.startsWith(resolvedPluginsDir + sep)) {
+        this.context.stderr.write(chalk.red('Invalid plugin name\n'));
+        return 1;
+      }
 
       // Create plugins directory if needed
       if (!existsSync(pluginsDir)) {
@@ -174,8 +201,15 @@ export class PluginCommand extends Command {
         if (!existsSync(targetDir)) {
           mkdirSync(targetDir, { recursive: true });
         }
-        const ext = resolvedSource.endsWith('.json') ? '.json' : '.js';
-        const destFileName = ext === '.json' ? 'plugin.json' : 'index.js';
+        // Preserve .mjs for ESM plugins, use .js for others
+        let destFileName: string;
+        if (resolvedSource.endsWith('.json')) {
+          destFileName = 'plugin.json';
+        } else if (resolvedSource.endsWith('.mjs')) {
+          destFileName = 'index.mjs';
+        } else {
+          destFileName = 'index.js';
+        }
         copyFileSync(resolvedSource, join(targetDir, destFileName));
       }
 
@@ -210,6 +244,12 @@ export class PluginCommand extends Command {
       return 1;
     }
 
+    // Validate plugin name to prevent path traversal attacks
+    if (!this.isValidPluginName(this.name)) {
+      this.context.stderr.write(chalk.red('Invalid plugin name\n'));
+      return 1;
+    }
+
     await pluginManager.unregister(this.name);
 
     // Remove plugin files from disk
@@ -220,6 +260,14 @@ export class PluginCommand extends Command {
       ? join(projectPath, 'plugins')
       : join(projectPath, '.skillkit', 'plugins');
     const pluginDir = join(pluginsDir, this.name);
+
+    // Verify pluginDir is within pluginsDir (defense in depth)
+    const resolvedPluginDir = resolve(pluginDir);
+    const resolvedPluginsDir = resolve(pluginsDir);
+    if (!resolvedPluginDir.startsWith(resolvedPluginsDir + sep)) {
+      this.context.stderr.write(chalk.red('Invalid plugin name\n'));
+      return 1;
+    }
 
     if (existsSync(pluginDir)) {
       rmSync(pluginDir, { recursive: true, force: true });
