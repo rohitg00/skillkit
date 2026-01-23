@@ -1,6 +1,6 @@
 {
   "name": "@skillkit/agents",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Agent adapters for SkillKit - supports 17+ AI coding agents",
   "type": "module",
   "main": "./dist/index.js",
@@ -11,7 +11,9 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",

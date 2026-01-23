@@ -1,6 +1,6 @@
 {
   "name": "@skillkit/core",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Core functionality for SkillKit - skill discovery, parsing, and translation",
   "type": "module",
   "main": "./dist/index.js",
@@ -35,7 +35,9 @@
       "types": "./dist/recommend/index.d.ts"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
