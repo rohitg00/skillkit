@@ -11,3 +11,5 @@ export { Workflow } from './Workflow.js';
 export { Execute } from './Execute.js';
 export { History } from './History.js';
 export { Marketplace } from './Marketplace.js';
+export { Team } from './Team.js';
+export { Plugins } from './Plugins.js';

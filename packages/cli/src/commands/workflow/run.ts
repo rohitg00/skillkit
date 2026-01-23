@@ -7,6 +7,9 @@ import {
   loadWorkflow,
   validateWorkflow,
   createWorkflowOrchestrator,
+  createSkillExecutor,
+  createSimulatedSkillExecutor,
+  type AgentType,
 } from '@skillkit/core';
 
 /**
@@ -63,6 +66,16 @@ export class WorkflowRunCommand extends Command {
     description: 'Project path (default: current directory)',
   });
 
+  // Agent to use for execution
+  agent = Option.String('--agent,-a', {
+    description: 'Agent to use for skill execution (e.g., claude-code, codex)',
+  });
+
+  // Simulate execution (for testing)
+  simulate = Option.Boolean('--simulate', false, {
+    description: 'Simulate execution without running skills (for testing)',
+  });
+
   async execute(): Promise<number> {
     const targetPath = resolve(this.projectPath || process.cwd());
 
@@ -113,14 +126,45 @@ export class WorkflowRunCommand extends Command {
     const spinner = ora();
     let currentWave = -1;
 
-    // Create orchestrator with mock executor (for now)
+    // Create the skill executor (real or simulated)
+    const skillExecutor = this.simulate
+      ? createSimulatedSkillExecutor({
+          delay: 500,
+          onExecute: (skillName) => {
+            if (this.verbose && !this.json) {
+              console.log(chalk.dim(`  [Simulated] ${skillName}`));
+            }
+          },
+        })
+      : createSkillExecutor({
+          projectPath: targetPath,
+          preferredAgent: this.agent as AgentType | undefined,
+          fallbackToAvailable: true,
+          onExecutionEvent: (event) => {
+            if (this.verbose && !this.json) {
+              switch (event.type) {
+                case 'skill_found':
+                  console.log(chalk.dim(`  Found: ${event.message}`));
+                  break;
+                case 'skill_not_found':
+                  console.log(chalk.red(`  Not found: ${event.skillName}`));
+                  break;
+                case 'agent_selected':
+                  console.log(chalk.dim(`  Agent: ${event.agent}`));
+                  break;
+                case 'execution_complete':
+                  if (!event.success) {
+                    console.log(chalk.red(`  Error: ${event.error}`));
+                  }
+                  break;
+              }
+            }
+          },
+        });
+
+    // Create orchestrator with real skill executor
     const orchestrator = createWorkflowOrchestrator(
-      async (_skillName, _config) => {
-        // TODO: Integrate with actual skill execution
-        // For now, simulate execution
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        return { success: true };
-      },
+      skillExecutor,
       (event) => {
         if (this.json) return;
 

@@ -24,3 +24,11 @@ export {
   type AgentExecutionResult,
   type ExecutionStrategy,
 } from './agents.js';
+
+// Skill Executor for Workflows
+export {
+  createSkillExecutor,
+  createSimulatedSkillExecutor,
+  type SkillExecutorOptions,
+  type SkillExecutionEvent,
+} from './skill-executor.js';

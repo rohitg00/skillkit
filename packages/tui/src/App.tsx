@@ -14,8 +14,10 @@ import { Execute } from './screens/Execute.js';
 import { History } from './screens/History.js';
 import { Marketplace } from './screens/Marketplace.js';
 import { Memory } from './screens/Memory.js';
+import { Team } from './screens/Team.js';
+import { Plugins } from './screens/Plugins.js';
 
-export type Screen = 'home' | 'browse' | 'installed' | 'sync' | 'settings' | 'recommend' | 'translate' | 'context' | 'workflow' | 'execute' | 'history' | 'marketplace' | 'memory';
+export type Screen = 'home' | 'browse' | 'installed' | 'sync' | 'settings' | 'recommend' | 'translate' | 'context' | 'workflow' | 'execute' | 'history' | 'marketplace' | 'memory' | 'team' | 'plugins';
 
 export function App() {
   const [screen, setScreen] = useState<Screen>('home');
@@ -39,6 +41,8 @@ export function App() {
     e: 'memory',
     i: 'installed',
     s: 'sync',
+    a: 'team',
+    p: 'plugins',
     ',': 'settings',
   };
 
@@ -72,6 +76,8 @@ export function App() {
       case 'history': return <History cols={cols} rows={rows} />;
       case 'marketplace': return <Marketplace cols={cols} rows={rows} />;
       case 'memory': return <Memory cols={cols} rows={rows} />;
+      case 'team': return <Team cols={cols} rows={rows} />;
+      case 'plugins': return <Plugins cols={cols} rows={rows} />;
     }
   };
 
@@ -86,7 +92,7 @@ export function App() {
         </Box>
       </Box>
       <Box>
-        <Text dimColor>h Home  m Market  b Browse  i Inst  w Wflow  x Exec  y Hist  r Rec  t Trans  c Ctx  e Mem  s Sync  , Cfg  q Quit</Text>
+        <Text dimColor>h Home  m Market  b Browse  i Inst  w Wflow  x Exec  a Team  p Plug  r Rec  t Trans  c Ctx  e Mem  s Sync  , Cfg  q Quit</Text>
       </Box>
     </Box>
   );

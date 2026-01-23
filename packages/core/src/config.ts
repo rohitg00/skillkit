@@ -15,10 +15,32 @@ export function getGlobalConfigPath(): string {
   return join(homedir(), '.config', 'skillkit', CONFIG_FILE);
 }
 
-export function loadConfig(): SkillkitConfig {
+export function loadConfig(global = false): SkillkitConfig {
   const projectPath = getProjectConfigPath();
   const globalPath = getGlobalConfigPath();
 
+  // If global is explicitly requested, only load from global path
+  if (global) {
+    if (existsSync(globalPath)) {
+      try {
+        const content = readFileSync(globalPath, 'utf-8');
+        const data = parseYaml(content);
+        const parsed = SkillkitConfig.safeParse(data);
+        if (parsed.success) {
+          return parsed.data;
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    }
+    return {
+      version: 1,
+      agent: 'universal',
+      autoSync: true,
+    };
+  }
+
+  // Default behavior: project config takes precedence over global
   if (existsSync(projectPath)) {
     try {
       const content = readFileSync(projectPath, 'utf-8');

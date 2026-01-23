@@ -7,6 +7,8 @@ SkillKit is a CLI tool and ecosystem for managing skills across multiple AI codi
 - Cross-agent skill translation (17+ agents supported)
 - Project context synchronization across agents
 - Interactive TUI for skill management
+- Team collaboration and skill sharing
+- Extensible plugin system
 
 ## Architecture
 
@@ -17,8 +19,16 @@ skillkit/
 │   │   ├── src/
 │   │   │   ├── context/      # Project context detection & sync
 │   │   │   ├── translator/   # Cross-agent translation
-│   │   │   ├── skills.ts     # Skill discovery
-│   │   │   └── types.ts      # Shared types
+│   │   │   ├── recommend/    # Smart recommendations
+│   │   │   ├── memory/       # Session memory system
+│   │   │   ├── marketplace/  # Skill marketplace
+│   │   │   ├── testing/      # Skill testing framework
+│   │   │   ├── workflow/     # Workflow orchestrator
+│   │   │   ├── executor/     # Skill execution engine
+│   │   │   ├── team/         # Team collaboration
+│   │   │   ├── plugins/      # Plugin system
+│   │   │   ├── cicd/         # CI/CD templates
+│   │   │   └── session/      # Session management
 │   ├── cli/            # @skillkit/cli - Command line
 │   ├── tui/            # @skillkit/tui - Terminal UI
 │   └── agents/         # @skillkit/agents - Agent configs
@@ -64,71 +74,114 @@ skillkit/
 - [x] WindsurfTranslator (Markdown rules)
 - [x] CopilotTranslator (GitHub Copilot format)
 - [x] Cross-format translation (any-to-any via canonical form)
-- [x] 97 translator tests passing
 
 ### Phase 3: Project Context Sync ✅ COMPLETE
 - [x] ProjectDetector - Analyzes package.json, configs, file structure
 - [x] ContextManager - Manages .skillkit/context.yaml
 - [x] ContextSync - Syncs skills across detected agents
 - [x] Stack detection (languages, frameworks, styling, testing, databases)
-- [x] 73 context tests passing
 
 ### Phase 4: Smart Recommendations ✅ COMPLETE
-- [x] Recommendation engine based on project profile
-- [x] Task-based skill search
-- [x] Skill freshness checking via marketplace
-- [x] Enhanced TUI with recommendations
+- [x] RecommendationEngine with project profile matching
+- [x] Task-based skill search with relevance scoring
+- [x] Skill freshness checking
+- [x] Quality scoring (popularity, freshness, compatibility)
+- [x] TUI Recommend screen
 
 ### Phase 5: Quality & Testing ✅ COMPLETE
-- [x] Skill testing framework with assertions
-- [x] Test runner in CLI (`skillkit test`)
-- [x] CI integration templates (GitHub Actions, GitLab CI, CircleCI)
-- [x] Pre-commit hook support
+- [x] Skill testing framework with 18 assertion types
+- [x] Test runner (`skillkit test`)
+- [x] CI/CD templates (GitHub Actions, GitLab CI)
+- [x] Setup/cleanup/global hooks
+- [x] Test filtering (tags, skip, only)
 
 ### Phase 6: Workflows & Composition ✅ COMPLETE
-- [x] Workflow parser and orchestrator
-- [x] Multi-wave skill execution
-- [x] Workflow CLI commands (`skillkit workflow`)
-- [x] Conditional execution support
+- [x] Workflow YAML schema
+- [x] Wave-based orchestration (parallel/sequential)
+- [x] WorkflowOrchestrator with pause/resume/cancel
+- [x] Pre/post hooks and environment variables
+- [x] TUI Workflow screen
 
 ### Phase 7: Session Memory System ✅ COMPLETE
-- [x] Observation capture and storage
-- [x] Learning compression with rule-based engine
-- [x] Cross-agent memory injection
-- [x] Memory CLI commands (`skillkit memory`)
-- [x] Global and project-scoped memory
-- [x] Learning export as skills
+- [x] SessionManager for cross-agent learning
+- [x] Memory compressor (rule-based + API fallback)
+- [x] Learning store for skill observations
+- [x] Memory index for fast lookups
+- [x] Memory CLI commands
+- [x] TUI Memory screen
 
 ### Phase 8: Skill Marketplace ✅ COMPLETE
 - [x] Marketplace aggregator from multiple sources
+- [x] Provider system (GitHub, GitLab, Bitbucket, Local)
 - [x] Skill search and filtering
-- [x] Tag-based discovery
 - [x] Cache management with TTL
-- [x] TUI marketplace browser
+- [x] TUI Marketplace screen
+
+### Phase 9: Skill Execution Engine ✅ COMPLETE
+- [x] Task-based execution with checkpoints
+- [x] Auto/manual execution modes
+- [x] Checkpoint types: decision, review, verification
+- [x] Dry-run mode
+- [x] Git commit integration
+- [x] TUI Execute screen
+
+### Phase 10: Team Collaboration ✅ COMPLETE
+- [x] TeamManager for skill sharing
+- [x] Team registry with sync support
+- [x] Skill bundles (create, export, import)
+- [x] Team CLI commands (`skillkit team`)
+- [x] TUI Team screen
+
+### Phase 11: Plugin System ✅ COMPLETE
+- [x] PluginManager with lifecycle hooks
+- [x] Plugin loader (files, npm packages, directories)
+- [x] TranslatorPlugin - Add custom agent formats
+- [x] ProviderPlugin - Add custom skill sources
+- [x] CommandPlugin - Add custom CLI commands
+- [x] Plugin CLI commands (`skillkit plugin`)
+- [x] TUI Plugins screen
 
 ## Key Files
 
 ### Core Package
-- `packages/core/src/translator/` - Universal skill translator (97 tests)
-- `packages/core/src/context/` - Project context detection & sync (73 tests)
+- `packages/core/src/translator/` - Universal skill translator
+- `packages/core/src/context/` - Project context detection & sync
 - `packages/core/src/recommend/` - Smart recommendation engine
-- `packages/core/src/memory/` - Session memory system (compressor, injector, stores)
+- `packages/core/src/memory/` - Session memory system
 - `packages/core/src/marketplace/` - Skill marketplace aggregator
 - `packages/core/src/testing/` - Skill testing framework
 - `packages/core/src/workflow/` - Workflow orchestrator
 - `packages/core/src/executor/` - Skill execution engine
+- `packages/core/src/team/` - Team collaboration (manager, bundle)
+- `packages/core/src/plugins/` - Plugin system (manager, loader)
 - `packages/core/src/cicd/` - CI/CD templates
-- `packages/core/src/session/` - Session management (pause/resume)
+- `packages/core/src/session/` - Session management
 
 ### CLI Commands
-- `packages/cli/src/commands/memory.ts` - Memory management command
-- `packages/cli/src/commands/marketplace.ts` - Marketplace browser
-- `packages/cli/src/commands/test.ts` - Test runner
-- `packages/cli/src/commands/workflow/` - Workflow commands
-- `packages/cli/src/commands/cicd.ts` - CI/CD template generator
+- `skillkit install <repo>` - Install skills from GitHub
+- `skillkit list` - List installed skills
+- `skillkit sync` - Sync skills to all agents
+- `skillkit translate` - Translate skill to another format
+- `skillkit recommend` - Get skill recommendations
+- `skillkit test` - Run skill tests
+- `skillkit workflow run|list|create` - Workflow management
+- `skillkit memory list|search|export` - Memory management
+- `skillkit marketplace search|install` - Marketplace browser
+- `skillkit team init|share|import|list|sync|bundle-*` - Team collaboration
+- `skillkit plugin list|install|uninstall|enable|disable` - Plugin management
+- `skillkit cicd init` - Initialize CI/CD templates
+- `skillkit settings` - Manage settings
+- `skillkit tui` - Launch interactive TUI
+
+### TUI Screens
+- Home, Marketplace, Browse, Installed
+- Workflow, Execute, History
+- Team, Plugins
+- Recommend, Translate, Context, Memory
+- Sync, Settings
 
 ### Test Suites
-- Total: 346+ tests passing across all modules
+- Total: 359 tests passing across all modules
 
 ## Commands
 
@@ -140,11 +193,18 @@ pnpm test             # Run all tests
 pnpm dev              # Development mode
 
 # CLI Usage
-skillkit install <repo>   # Install skills from GitHub
-skillkit list             # List installed skills
-skillkit sync             # Sync skills to all agents
-skillkit translate        # Translate skill to another format
-skillkit tui              # Launch interactive TUI
+skillkit install <repo>              # Install skills from GitHub
+skillkit list                        # List installed skills
+skillkit sync                        # Sync skills to all agents
+skillkit translate                   # Translate skill to another format
+skillkit recommend                   # Get recommendations
+skillkit test                        # Run skill tests
+skillkit workflow run <file>         # Run a workflow
+skillkit memory list                 # List learnings
+skillkit team init --name "Team"     # Initialize team
+skillkit team bundle-create          # Create skill bundle
+skillkit plugin list                 # List plugins
+skillkit tui                         # Launch interactive TUI
 ```
 
 ## Technical Notes
@@ -169,6 +229,19 @@ interface CanonicalSkill {
 }
 ```
 
+### Plugin Interface
+```typescript
+interface Plugin {
+  metadata: PluginMetadata;
+  hooks?: PluginHooks;
+  translators?: TranslatorPlugin[];
+  providers?: ProviderPlugin[];
+  commands?: CommandPlugin[];
+  init?: (context: PluginContext) => Promise<void>;
+  destroy?: () => Promise<void>;
+}
+```
+
 ### Context YAML Schema
 ```yaml
 version: 1
@@ -189,24 +262,24 @@ agents:
   synced: AgentType[]
 ```
 
-## Next Steps (Future Enhancements)
+## Future Enhancements
 
-1. **API-Based Compression**
+1. **API-Based Compression Enhancement**
    - LLM-powered learning extraction (Anthropic/OpenAI)
    - Smarter pattern recognition
    - Automatic skill generation from learnings
 
-2. **Skill Quality Scoring**
-   - Automated quality metrics
-   - Community ratings
-   - Usage analytics
+2. **Plugin Marketplace**
+   - Plugin discovery and registry
+   - Plugin dependency resolution
+   - Automatic updates
 
-3. **Team Collaboration**
-   - Shared memory pools
-   - Team skill bundles
-   - Permission management
+3. **Advanced Testing**
+   - Snapshot testing for skill outputs
+   - Performance regression testing
+   - Multi-agent compatibility testing
 
-4. **Plugin System**
-   - Custom translators
-   - Agent adapters
-   - Memory backends
+4. **Team Analytics**
+   - Usage tracking and metrics
+   - Skill popularity within teams
+   - Collaboration insights
