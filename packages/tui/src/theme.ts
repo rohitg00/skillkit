@@ -19,6 +19,12 @@ export const symbols = {
   check: chalk.white('✓'),
   star: '★',
   spinner: ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'],
+  arrowUp: '↑',
+  arrowDown: '↓',
+  success: '✓',
+  error: '✗',
+  warning: '⚠',
+  info: 'ℹ',
 };
 
 export const logo = `

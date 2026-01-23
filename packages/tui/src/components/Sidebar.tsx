@@ -8,15 +8,24 @@ interface SidebarProps {
   isCompact?: boolean;
 }
 
-const NAV: { id: Screen; label: string }[] = [
-  { id: 'home', label: 'Home' },
-  { id: 'browse', label: 'Browse' },
-  { id: 'recommend', label: 'Recommend' },
-  { id: 'translate', label: 'Translate' },
-  { id: 'context', label: 'Context' },
-  { id: 'installed', label: 'List' },
-  { id: 'sync', label: 'Sync' },
-  { id: 'settings', label: 'Config' },
+const NAV: { id: Screen; label: string; key: string }[] = [
+  // Discovery
+  { id: 'home', label: 'Home', key: 'h' },
+  { id: 'marketplace', label: 'Marketplace', key: 'm' },
+  { id: 'browse', label: 'Browse', key: 'b' },
+  // Execution
+  { id: 'workflow', label: 'Workflows', key: 'w' },
+  { id: 'execute', label: 'Execute', key: 'x' },
+  { id: 'history', label: 'History', key: 'y' },
+  // Tools
+  { id: 'recommend', label: 'Recommend', key: 'r' },
+  { id: 'translate', label: 'Translate', key: 't' },
+  { id: 'context', label: 'Context', key: 'c' },
+  { id: 'memory', label: 'Memory', key: 'e' },
+  // Management
+  { id: 'installed', label: 'Installed', key: 'i' },
+  { id: 'sync', label: 'Sync', key: 's' },
+  { id: 'settings', label: 'Config', key: ',' },
 ];
 
 export function Sidebar({ screen }: SidebarProps) {
@@ -24,6 +33,7 @@ export function Sidebar({ screen }: SidebarProps) {
     <Box flexDirection="column" width={14} borderStyle="single" paddingX={1}>
       <Text bold color={colors.primary}>SkillKit</Text>
 
+      {/* Discovery (0-2) */}
       {NAV.slice(0, 3).map((item) => (
         <Text key={item.id} inverse={screen === item.id}>
           {screen === item.id ? symbols.bullet : ' '}{item.label}
@@ -32,7 +42,8 @@ export function Sidebar({ screen }: SidebarProps) {
 
       <Text> </Text>
 
-      {NAV.slice(3, 5).map((item) => (
+      {/* Execution (3-5) */}
+      {NAV.slice(3, 6).map((item) => (
         <Text key={item.id} inverse={screen === item.id}>
           {screen === item.id ? symbols.bullet : ' '}{item.label}
         </Text>
@@ -40,7 +51,17 @@ export function Sidebar({ screen }: SidebarProps) {
 
       <Text> </Text>
 
-      {NAV.slice(5).map((item) => (
+      {/* Tools (6-9) */}
+      {NAV.slice(6, 10).map((item) => (
+        <Text key={item.id} inverse={screen === item.id}>
+          {screen === item.id ? symbols.bullet : ' '}{item.label}
+        </Text>
+      ))}
+
+      <Text> </Text>
+
+      {/* Management (10-12) */}
+      {NAV.slice(10).map((item) => (
         <Text key={item.id} inverse={screen === item.id}>
           {screen === item.id ? symbols.bullet : ' '}{item.label}
         </Text>

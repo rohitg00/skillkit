@@ -6,3 +6,8 @@ export { Settings } from './Settings.js';
 export { Recommend } from './Recommend.js';
 export { Translate } from './Translate.js';
 export { Context } from './Context.js';
+export { Memory } from './Memory.js';
+export { Workflow } from './Workflow.js';
+export { Execute } from './Execute.js';
+export { History } from './History.js';
+export { Marketplace } from './Marketplace.js';
