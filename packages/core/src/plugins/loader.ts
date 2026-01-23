@@ -118,7 +118,15 @@ export class PluginLoader {
 
     for (const entry of entries) {
       const fullPath = join(dirPath, entry);
-      const stat = statSync(fullPath);
+
+      // Guard against unreadable entries (permission denied, broken symlinks)
+      let stat;
+      try {
+        stat = statSync(fullPath);
+      } catch {
+        // Skip unreadable entries
+        continue;
+      }
 
       if (stat.isDirectory()) {
         // Check for package.json or plugin.json
@@ -128,7 +136,10 @@ export class PluginLoader {
         if (existsSync(pkgPath)) {
           try {
             const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
-            if (pkg.skillkitPlugin || pkg.keywords?.includes('skillkit-plugin')) {
+            // Validate required fields before pushing
+            if ((pkg.skillkitPlugin || pkg.keywords?.includes('skillkit-plugin')) &&
+                pkg.name && typeof pkg.name === 'string' &&
+                pkg.version && typeof pkg.version === 'string') {
               plugins.push({
                 name: pkg.name,
                 version: pkg.version,
@@ -143,7 +154,10 @@ export class PluginLoader {
         } else if (existsSync(pluginPath)) {
           try {
             const data = JSON.parse(readFileSync(pluginPath, 'utf-8'));
-            if (data.metadata) {
+            // Validate metadata has required fields
+            if (data.metadata &&
+                data.metadata.name && typeof data.metadata.name === 'string' &&
+                data.metadata.version && typeof data.metadata.version === 'string') {
               plugins.push(data.metadata);
             }
           } catch {
@@ -183,10 +197,10 @@ export class PluginLoader {
       throw new Error('Plugin metadata must include a version');
     }
 
-    // Validate name format
-    if (!/^[a-z0-9-]+$/.test(metadata.name)) {
+    // Validate name format (allow scoped npm names like @scope/name)
+    if (!/^(?:@[a-z0-9-]+\/)?[a-z0-9-]+$/.test(metadata.name)) {
       throw new Error(
-        'Plugin name must be lowercase alphanumeric with hyphens only'
+        'Plugin name must be lowercase alphanumeric with hyphens only (scoped names like @scope/name are allowed)'
       );
     }
 

@@ -75,15 +75,20 @@ export class SettingsCommand extends Command {
 
     // Get a specific setting
     if (this.get) {
-      const value = this.getConfigValue(config, this.get);
-      if (value === undefined) {
+      // Check if the key is a known setting (not just if value is undefined)
+      const knownKeys = [
+        'agent', 'autoSync', 'cacheDir', 'skillsDir',
+        'enabledSkills', 'disabledSkills', 'marketplaceSources', 'defaultTimeout'
+      ];
+      if (!knownKeys.includes(this.get)) {
         console.error(chalk.red(`Unknown setting: ${this.get}`));
         return 1;
       }
+      const value = this.getConfigValue(config, this.get);
       if (this.json) {
         console.log(JSON.stringify({ [this.get]: value }));
       } else {
-        console.log(value);
+        console.log(value ?? '(not set)');
       }
       return 0;
     }
@@ -201,7 +206,7 @@ export class SettingsCommand extends Command {
 
       case 'defaultTimeout': {
         const timeout = parseInt(value, 10);
-        if (isNaN(timeout) || timeout < 0) {
+        if (isNaN(timeout) || timeout <= 0) {
           return { success: false, error: 'defaultTimeout must be a positive number (milliseconds)' };
         }
         config.defaultTimeout = timeout;

@@ -211,6 +211,9 @@ export function importBundle(
       skills: Record<string, string>;
     };
 
+    // Resolve targetDir to absolute path for consistent path containment checks
+    const absoluteTargetDir = resolve(targetDir);
+
     for (const skill of data.manifest.skills) {
       const skillContent = data.skills[skill.name];
       if (!skillContent) {
@@ -218,7 +221,7 @@ export function importBundle(
         continue;
       }
 
-      const skillDir = join(targetDir, skill.name);
+      const skillDir = join(absoluteTargetDir, skill.name);
 
       // Check if exists
       if (existsSync(skillDir) && !options.overwrite) {

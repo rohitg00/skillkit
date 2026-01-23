@@ -5,7 +5,7 @@
  */
 
 import { Command, Option } from 'clipanion';
-import { join, basename, isAbsolute } from 'node:path';
+import { join, isAbsolute } from 'node:path';
 import { homedir } from 'node:os';
 import { existsSync, mkdirSync, copyFileSync, cpSync, rmSync } from 'node:fs';
 import chalk from 'chalk';
@@ -140,7 +140,14 @@ export class PluginCommand extends Command {
       : join(projectPath, '.skillkit', 'plugins');
 
     // Persist plugin files to disk if source is a local file/directory
-    const isLocalPath = this.source.startsWith('./') || this.source.startsWith('/') || this.source.includes('\\') || isAbsolute(this.source);
+    const isLocalPath =
+      this.source.startsWith('./') ||
+      this.source.startsWith('../') ||
+      this.source.startsWith('/') ||
+      this.source.startsWith('~') ||
+      this.source.includes('\\') ||
+      isAbsolute(this.source);
+
     if (isLocalPath && existsSync(this.source)) {
       const pluginName = plugin.metadata.name;
       const targetDir = join(pluginsDir, pluginName);
@@ -158,12 +165,13 @@ export class PluginCommand extends Command {
         // Copy entire directory
         cpSync(this.source, targetDir, { recursive: true });
       } else {
-        // Copy single file
+        // Copy single file with a loader-recognized name
         if (!existsSync(targetDir)) {
           mkdirSync(targetDir, { recursive: true });
         }
-        const fileName = basename(this.source);
-        copyFileSync(this.source, join(targetDir, fileName));
+        const ext = this.source.endsWith('.json') ? '.json' : '.js';
+        const destFileName = ext === '.json' ? 'plugin.json' : 'index.js';
+        copyFileSync(this.source, join(targetDir, destFileName));
       }
 
       this.context.stdout.write(chalk.dim(`  Copied to ${targetDir}\n`));

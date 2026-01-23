@@ -51,8 +51,11 @@ export function Plugins({ rows = 24 }: Props) {
             await manager.register(plugin);
           }
         }
-      } catch {
-        // Plugins directory may not exist
+      } catch (err: unknown) {
+        // Only ignore ENOENT (directory doesn't exist), rethrow other errors
+        if (err && typeof err === 'object' && 'code' in err && err.code !== 'ENOENT') {
+          throw err;
+        }
       }
 
       const allPlugins = manager.listPlugins();
@@ -84,8 +87,25 @@ export function Plugins({ rows = 24 }: Props) {
     setMessage(null);
 
     try {
-      const { createPluginManager } = await import('@skillkit/core');
+      const { createPluginManager, loadPluginsFromDirectory } = await import('@skillkit/core');
+      const { join } = await import('node:path');
       const manager = createPluginManager(process.cwd());
+
+      // Load plugins from directory first so enable/disable can find them
+      const pluginsDir = join(process.cwd(), '.skillkit', 'plugins');
+      try {
+        const loadedPlugins = await loadPluginsFromDirectory(pluginsDir);
+        for (const plugin of loadedPlugins) {
+          if (!manager.getPlugin(plugin.metadata.name)) {
+            await manager.register(plugin);
+          }
+        }
+      } catch (err: unknown) {
+        // Only ignore ENOENT (directory doesn't exist), rethrow other errors
+        if (err && typeof err === 'object' && 'code' in err && err.code !== 'ENOENT') {
+          throw err;
+        }
+      }
 
       if (currentEnabled) {
         manager.disablePlugin(pluginName);
