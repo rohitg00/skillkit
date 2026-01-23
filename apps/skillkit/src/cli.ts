@@ -19,6 +19,16 @@ import {
   TranslateCommand,
   ContextCommand,
   RecommendCommand,
+  StatusCommand,
+  PauseCommand,
+  ResumeCommand,
+  WorkflowRunCommand,
+  WorkflowListCommand,
+  WorkflowCreateCommand,
+  RunCommand,
+  TestCommand,
+  MarketplaceCommand,
+  MemoryCommand,
 } from '@skillkit/cli';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -51,5 +61,15 @@ cli.register(UICommand);
 cli.register(TranslateCommand);
 cli.register(ContextCommand);
 cli.register(RecommendCommand);
+cli.register(StatusCommand);
+cli.register(PauseCommand);
+cli.register(ResumeCommand);
+cli.register(WorkflowRunCommand);
+cli.register(WorkflowListCommand);
+cli.register(WorkflowCreateCommand);
+cli.register(RunCommand);
+cli.register(TestCommand);
+cli.register(MarketplaceCommand);
+cli.register(MemoryCommand);
 
 cli.runExit(process.argv.slice(2));

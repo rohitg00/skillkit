@@ -9,8 +9,13 @@ import { Settings } from './screens/Settings.js';
 import { Recommend } from './screens/Recommend.js';
 import { Translate } from './screens/Translate.js';
 import { Context } from './screens/Context.js';
+import { Workflow } from './screens/Workflow.js';
+import { Execute } from './screens/Execute.js';
+import { History } from './screens/History.js';
+import { Marketplace } from './screens/Marketplace.js';
+import { Memory } from './screens/Memory.js';
 
-export type Screen = 'home' | 'browse' | 'installed' | 'sync' | 'settings' | 'recommend' | 'translate' | 'context';
+export type Screen = 'home' | 'browse' | 'installed' | 'sync' | 'settings' | 'recommend' | 'translate' | 'context' | 'workflow' | 'execute' | 'history' | 'marketplace' | 'memory';
 
 export function App() {
   const [screen, setScreen] = useState<Screen>('home');
@@ -21,6 +26,22 @@ export function App() {
   const rows = stdout?.rows || 24;
   const showSidebar = cols >= 70;
 
+  const NAV_KEYS: Record<string, Screen> = {
+    h: 'home',
+    m: 'marketplace',
+    b: 'browse',
+    w: 'workflow',
+    x: 'execute',
+    y: 'history',
+    r: 'recommend',
+    t: 'translate',
+    c: 'context',
+    e: 'memory',
+    i: 'installed',
+    s: 'sync',
+    ',': 'settings',
+  };
+
   useInput((input, key) => {
     if (input === 'q') {
       exit();
@@ -30,14 +51,10 @@ export function App() {
       setScreen('home');
       return;
     }
-    if (input === 'h') setScreen('home');
-    if (input === 'b') setScreen('browse');
-    if (input === 'l') setScreen('installed');
-    if (input === 's') setScreen('sync');
-    if (input === ',') setScreen('settings');
-    if (input === 'r') setScreen('recommend');
-    if (input === 't') setScreen('translate');
-    if (input === 'c') setScreen('context');
+    const targetScreen = NAV_KEYS[input];
+    if (targetScreen) {
+      setScreen(targetScreen);
+    }
   });
 
   const renderScreen = () => {
@@ -50,6 +67,11 @@ export function App() {
       case 'recommend': return <Recommend cols={cols} rows={rows} />;
       case 'translate': return <Translate cols={cols} rows={rows} />;
       case 'context': return <Context cols={cols} rows={rows} />;
+      case 'workflow': return <Workflow cols={cols} rows={rows} />;
+      case 'execute': return <Execute cols={cols} rows={rows} />;
+      case 'history': return <History cols={cols} rows={rows} />;
+      case 'marketplace': return <Marketplace cols={cols} rows={rows} />;
+      case 'memory': return <Memory cols={cols} rows={rows} />;
     }
   };
 
@@ -64,7 +86,7 @@ export function App() {
         </Box>
       </Box>
       <Box>
-        <Text dimColor>h Home  b Browse  r Rec  t Trans  c Ctx  l List  s Sync  , Config  q Quit</Text>
+        <Text dimColor>h Home  m Market  b Browse  i Inst  w Wflow  x Exec  y Hist  r Rec  t Trans  c Ctx  e Mem  s Sync  , Cfg  q Quit</Text>
       </Box>
     </Box>
   );
