@@ -38,7 +38,15 @@ export class WorkflowListCommand extends Command {
 
   async execute(): Promise<number> {
     const targetPath = resolve(this.projectPath || process.cwd());
-    const workflows = listWorkflows(targetPath);
+
+    let workflows: ReturnType<typeof listWorkflows>;
+    try {
+      workflows = listWorkflows(targetPath);
+    } catch (err) {
+      console.log(chalk.red('Failed to list workflows.'));
+      console.log(chalk.dim(String(err)));
+      return 1;
+    }
 
     if (this.json) {
       console.log(JSON.stringify(workflows, null, 2));

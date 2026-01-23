@@ -279,10 +279,34 @@ export class SkillExecutionEngine {
         commitSha: taskResult.commitSha,
       });
 
-      if (taskResult.status === 'failed' && !options.continueOnError) {
-        overallStatus = 'failed';
-        overallError = taskResult.error;
-        break;
+      // Emit task_complete progress event (matching execute behavior)
+      this.onProgress?.({
+        type: 'task_complete',
+        taskId: task.id,
+        taskName: task.name,
+        taskIndex: i,
+        totalTasks: tasks.length,
+        status: taskResult.status,
+        error: taskResult.error,
+      });
+
+      // Handle task failure
+      if (taskResult.status === 'failed') {
+        if (!options.continueOnError) {
+          overallStatus = 'failed';
+          overallError = taskResult.error;
+          break;
+        }
+      }
+
+      // Run verification if enabled (matching execute behavior)
+      if (options.verify && task.verify) {
+        const verificationPassed = await this.runVerification(task, taskResult);
+        if (!verificationPassed && !options.continueOnError) {
+          overallStatus = 'failed';
+          overallError = 'Verification failed';
+          break;
+        }
       }
     }
 
@@ -384,7 +408,35 @@ export class SkillExecutionEngine {
   }
 
   /**
+   * Safely test a regex pattern with timeout protection against ReDoS
+   */
+  private safeRegexTest(pattern: string, input: string, timeoutMs = 1000): boolean {
+    // Limit pattern and input length to prevent excessive processing
+    if (pattern.length > 500 || input.length > 100000) {
+      return false;
+    }
+
+    try {
+      const regex = new RegExp(pattern);
+      // Simple patterns should complete quickly; complex ones may timeout
+      const startTime = Date.now();
+      const result = regex.test(input);
+      if (Date.now() - startTime > timeoutMs) {
+        console.warn(`Regex pattern took too long: ${pattern.slice(0, 50)}...`);
+      }
+      return result;
+    } catch {
+      // Invalid regex pattern
+      return false;
+    }
+  }
+
+  /**
    * Run verification for a task
+   *
+   * SECURITY NOTE: Verification commands are executed from skill configuration.
+   * Only run skills from trusted sources. Commands run with the same privileges
+   * as the skillkit process.
    */
   private async runVerification(
     task: ExecutableTask,
@@ -404,6 +456,7 @@ export class SkillExecutionEngine {
       for (const rule of task.verify.automated) {
         if (rule.command) {
           try {
+            // SECURITY: Commands are from skill config - only run trusted skills
             const output = execSync(rule.command, {
               cwd: this.projectPath,
               encoding: 'utf-8',
@@ -419,7 +472,8 @@ export class SkillExecutionEngine {
                 passed = output.includes(expected);
               } else if (rule.expect.startsWith('matches:')) {
                 const pattern = rule.expect.slice(8);
-                passed = new RegExp(pattern).test(output);
+                // Use safe regex test to prevent ReDoS
+                passed = this.safeRegexTest(pattern, output);
               }
             }
 

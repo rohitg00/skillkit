@@ -5,6 +5,7 @@
  * extraction or AI-powered compression.
  */
 
+import { homedir } from 'node:os';
 import type { Observation, Learning, ObservationType } from './types.js';
 import { LearningStore } from './learning-store.js';
 import { MemoryIndexStore } from './memory-index.js';
@@ -856,7 +857,9 @@ export class MemoryCompressor {
       projectPath,
       options?.projectName
     );
-    this.indexStore = new MemoryIndexStore(projectPath, options?.scope === 'global');
+    // For global scope, use home directory; for project scope, use project path
+    const indexBasePath = options?.scope === 'global' ? homedir() : projectPath;
+    this.indexStore = new MemoryIndexStore(indexBasePath, options?.scope === 'global');
     this.projectName = options?.projectName;
   }
 

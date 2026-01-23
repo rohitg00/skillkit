@@ -7,6 +7,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { exec } from 'node:child_process';
+import { createServer } from 'node:net';
 import { promisify } from 'node:util';
 import { parse as parseYaml } from 'yaml';
 import type {
@@ -602,19 +603,43 @@ function assertEnvVarSet(
   };
 }
 
-function assertPortAvailable(
+async function checkPortAvailable(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const server = createServer();
+    server.once('error', () => resolve(false));
+    server.once('listening', () => {
+      server.close();
+      resolve(true);
+    });
+    server.listen(port, '127.0.0.1');
+  });
+}
+
+async function assertPortAvailable(
   assertion: TestAssertion,
   startTime: number
-): AssertionResult {
+): Promise<AssertionResult> {
   const port = parseInt(assertion.target || '0', 10);
 
-  // Simple check - we can't easily check port availability without net module
-  // This is a placeholder that always passes
+  if (port <= 0 || port > 65535) {
+    return {
+      assertion,
+      passed: false,
+      actual: `invalid port ${port}`,
+      expected: 'valid port number (1-65535)',
+      error: 'Invalid port number',
+      duration: Date.now() - startTime,
+    };
+  }
+
+  const isAvailable = await checkPortAvailable(port);
+
   return {
     assertion,
-    passed: true,
-    actual: `port ${port}`,
+    passed: isAvailable,
+    actual: isAvailable ? 'available' : 'in use',
     expected: 'available',
+    error: isAvailable ? undefined : `Port ${port} is already in use`,
     duration: Date.now() - startTime,
   };
 }

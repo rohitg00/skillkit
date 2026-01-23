@@ -230,7 +230,7 @@ async function executeCommand(
     const spawnOptions: SpawnOptions = {
       cwd: options.cwd,
       env: options.env as NodeJS.ProcessEnv,
-      shell: true,
+      // shell: false (default) - prevents shell injection when passing untrusted input
     };
 
     const child = spawn(command, args, spawnOptions);

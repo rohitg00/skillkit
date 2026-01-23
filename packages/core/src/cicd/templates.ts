@@ -152,8 +152,7 @@ skill-validation:
     - skillkit validate
     - skillkit test --json > test-results.json
   artifacts:
-    reports:
-      junit: test-results.json
+    # Note: test-results.json is JSON format, not JUnit XML
     paths:
       - test-results.json
     expire_in: 30 days

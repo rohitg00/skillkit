@@ -157,6 +157,22 @@ export class MarketplaceAggregator {
   }
 
   /**
+   * Check if a path is an absolute URL
+   */
+  private isAbsoluteUrl(path: string): boolean {
+    return /^https?:\/\//i.test(path);
+  }
+
+  /**
+   * Convert a GitHub URL to raw content URL
+   */
+  private toRawUrl(url: string): string {
+    return url
+      .replace('://github.com/', '://raw.githubusercontent.com/')
+      .replace('/blob/', '/');
+  }
+
+  /**
    * Parse a skill entry from JSON
    */
   private parseSkillEntry(
@@ -165,6 +181,11 @@ export class MarketplaceAggregator {
   ): MarketplaceSkill {
     const name = String(item.name || item.title || 'Unknown');
     const path = String(item.path || item.file || item.url || '/');
+
+    // Handle absolute URLs - use them directly instead of building from source
+    const rawUrl = this.isAbsoluteUrl(path)
+      ? this.toRawUrl(path)
+      : this.buildRawUrl(source, path);
 
     return {
       id: `${source.owner}/${source.repo}/${path}`,
@@ -179,7 +200,7 @@ export class MarketplaceAggregator {
       stars: typeof item.stars === 'number' ? item.stars : undefined,
       updatedAt: item.updatedAt as string | undefined,
       downloads: typeof item.downloads === 'number' ? item.downloads : undefined,
-      rawUrl: this.buildRawUrl(source, path),
+      rawUrl,
     };
   }
 
@@ -215,14 +236,21 @@ export class MarketplaceAggregator {
       const descMatch = context.match(/[-*]\s*\[.*?\]\(.*?\)\s*[-:]\s*(.+?)(?:\n|$)/);
       const description = descMatch ? descMatch[1].trim() : '';
 
+      // Handle absolute URLs in README links
+      const isAbsolute = this.isAbsoluteUrl(path);
+      const normalizedPath = isAbsolute ? path : (path.startsWith('/') ? path : `/${path}`);
+      const rawUrl = isAbsolute
+        ? this.toRawUrl(path)
+        : `https://raw.githubusercontent.com/${source.owner}/${source.repo}/${branch}/${path}`;
+
       skills.push({
         id: `${source.owner}/${source.repo}/${path}`,
         name,
         description,
         source,
-        path: path.startsWith('/') ? path : `/${path}`,
+        path: normalizedPath,
         tags: this.inferTags(name, description),
-        rawUrl: `https://raw.githubusercontent.com/${source.owner}/${source.repo}/${branch}/${path}`,
+        rawUrl,
       });
     }
 

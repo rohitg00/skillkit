@@ -7,12 +7,12 @@ export class MemoryIndexStore {
   private readonly filePath: string;
   private data: MemoryIndex | null = null;
 
-  constructor(basePath: string, isGlobal = false) {
-    if (isGlobal) {
-      this.filePath = join(basePath, 'memory', 'index.yaml');
-    } else {
-      this.filePath = join(basePath, '.skillkit', 'memory', 'index.yaml');
-    }
+  constructor(basePath: string, _isGlobal = false) {
+    // Both global and project use .skillkit subdirectory
+    // Global: ~/.skillkit/memory/index.yaml (basePath = homedir())
+    // Project: <projectPath>/.skillkit/memory/index.yaml (basePath = projectPath)
+    // Note: _isGlobal kept for API compatibility but basePath determines the actual path
+    this.filePath = join(basePath, '.skillkit', 'memory', 'index.yaml');
   }
 
   private ensureDir(): void {
