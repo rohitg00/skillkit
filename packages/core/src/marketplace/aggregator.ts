@@ -462,6 +462,7 @@ export class MarketplaceAggregator {
       this.config.sources = [];
     }
     this.config.sources.push(source);
+    this.clearCache();
   }
 
   /**
@@ -473,6 +474,7 @@ export class MarketplaceAggregator {
         (s) => s.owner !== owner || s.repo !== repo
       );
     }
+    this.clearCache();
   }
 
   /**

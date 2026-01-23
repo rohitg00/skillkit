@@ -244,6 +244,30 @@ export class SkillExecutionEngine {
         totalTasks: tasks.length,
       });
 
+      // Handle checkpoints (same as in execute)
+      if (task.type !== 'auto') {
+        const checkpointResult = await this.handleCheckpoint(task, {
+          skillName: skill.name,
+          taskIndex: i,
+          totalTasks: tasks.length,
+        });
+
+        if (!checkpointResult.continue) {
+          overallStatus = 'paused';
+          this.sessionManager.pause();
+          break;
+        }
+
+        // For decision checkpoints, record the decision
+        if (task.type === 'checkpoint:decision' && checkpointResult.selectedOption) {
+          this.sessionManager.recordDecision(
+            `${skill.name}:${task.id}`,
+            checkpointResult.selectedOption,
+            skill.name
+          );
+        }
+      }
+
       const taskResult = await this.executeTask(task, skill, options);
       taskResults.push(taskResult);
 
@@ -262,7 +286,10 @@ export class SkillExecutionEngine {
       }
     }
 
-    this.sessionManager.completeExecution(overallStatus, overallError);
+    // Only complete execution if not paused
+    if (overallStatus !== 'paused') {
+      this.sessionManager.completeExecution(overallStatus, overallError);
+    }
 
     return {
       skillName: skill.name,

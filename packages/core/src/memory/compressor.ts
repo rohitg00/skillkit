@@ -993,7 +993,7 @@ export class LearningConsolidator {
       patterns: [...new Set([...(base.patterns || []), ...(other.patterns || [])])],
       useCount: base.useCount + other.useCount,
       lastUsed: base.lastUsed || other.lastUsed,
-      effectiveness: base.effectiveness || other.effectiveness,
+      effectiveness: base.effectiveness ?? other.effectiveness,
     };
   }
 

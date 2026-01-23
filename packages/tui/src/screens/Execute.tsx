@@ -49,7 +49,7 @@ export function Execute({ rows = 24 }: Props) {
   const renderExecution = (exec: CurrentExecution) => {
     const completedTasks = exec.tasks.filter(t => t.status === 'completed').length;
     const failedTasks = exec.tasks.filter(t => t.status === 'failed').length;
-    const progress = Math.round((completedTasks / exec.totalSteps) * 100);
+    const progress = exec.totalSteps > 0 ? Math.round((completedTasks / exec.totalSteps) * 100) : 0;
 
     const statusColor = exec.status === 'running' ? 'yellow' :
                        exec.status === 'completed' ? 'green' :
