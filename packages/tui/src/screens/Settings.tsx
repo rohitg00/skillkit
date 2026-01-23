@@ -48,7 +48,8 @@ export function Settings(_props: Props) {
 
     switch (setting.id) {
       case 'agent':
-        return config.agent || 'auto-detect';
+        // Map 'universal' back to 'auto-detect' for display consistency
+        return config.agent === 'universal' ? 'auto-detect' : (config.agent || 'auto-detect');
       case 'autoSync':
         return config.autoSync ? 'enabled' : 'disabled';
       case 'cacheDir':

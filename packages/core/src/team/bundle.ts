@@ -5,7 +5,7 @@
  */
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, statSync } from 'node:fs';
-import { join, basename } from 'node:path';
+import { join, basename, resolve, relative } from 'node:path';
 import { createHash } from 'node:crypto';
 import type { BundleManifest } from './types.js';
 import type { AgentType } from '../types.js';
@@ -234,7 +234,16 @@ export function importBundle(
       // Parse and write skill files
       const files = parseSkillContent(skillContent);
       for (const [filePath, fileContent] of Object.entries(files)) {
-        const fullPath = join(skillDir, filePath);
+        // Validate path to prevent path traversal attacks
+        const fullPath = resolve(skillDir, filePath);
+        const relativePath = relative(skillDir, fullPath);
+
+        // Check for path traversal (path escapes skillDir)
+        if (relativePath.startsWith('..') || resolve(fullPath) !== fullPath || !fullPath.startsWith(skillDir)) {
+          errors.push(`Skill "${skill.name}" contains invalid file path: ${filePath}`);
+          continue;
+        }
+
         const fileDir = join(fullPath, '..');
         if (!existsSync(fileDir)) {
           mkdirSync(fileDir, { recursive: true });

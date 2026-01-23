@@ -220,9 +220,13 @@ export class TeamManager {
         return { success: false, error: 'Cannot detect provider for registry URL' };
       }
 
-      const result = await provider.clone(this.config.registryUrl, skillName, {
-        depth: 1,
-      });
+      // Build clone options with auth if available
+      const cloneOptions: { depth?: number; ssh?: boolean } = { depth: 1 };
+      if (this.config.auth?.type === 'ssh') {
+        cloneOptions.ssh = true;
+      }
+
+      const result = await provider.clone(this.config.registryUrl, skillName, cloneOptions);
 
       if (!result.success) {
         return { success: false, error: result.error };
@@ -253,6 +257,10 @@ export class TeamManager {
       throw new Error('Team not initialized');
     }
 
+    if (!this.registry) {
+      throw new Error('Team registry not loaded. Call load() first.');
+    }
+
     const result = { added: [] as string[], updated: [] as string[], removed: [] as string[] };
 
     try {
@@ -261,10 +269,14 @@ export class TeamManager {
         throw new Error('Cannot detect provider for registry URL');
       }
 
+      // Build clone options with auth if available
+      const cloneOptions: { depth?: number; ssh?: boolean } = { depth: 1 };
+      if (this.config.auth?.type === 'ssh') {
+        cloneOptions.ssh = true;
+      }
+
       // Fetch remote registry
-      const fetchResult = await provider.clone(this.config.registryUrl, '', {
-        depth: 1,
-      });
+      const fetchResult = await provider.clone(this.config.registryUrl, '', cloneOptions);
 
       if (!fetchResult.success || !fetchResult.path) {
         throw new Error(fetchResult.error || 'Failed to fetch remote registry');

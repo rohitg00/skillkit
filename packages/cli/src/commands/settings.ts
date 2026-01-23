@@ -58,8 +58,8 @@ export class SettingsCommand extends Command {
   });
 
   async execute(): Promise<number> {
-    // Load current config
-    const config = loadConfig();
+    // Load current config (respect --global flag)
+    const config = loadConfig(this.global);
 
     // Reset to defaults
     if (this.reset) {
