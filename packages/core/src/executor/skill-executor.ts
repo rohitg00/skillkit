@@ -140,13 +140,12 @@ export function createSkillExecutor(options: SkillExecutorOptions = {}): SkillEx
       }
     }
 
-    // If no CLI agent available, provide manual instructions
+    // If no CLI agent available, provide manual instructions or error
     if (!agentToUse) {
       const strategy = getExecutionStrategy(preferredAgent || 'universal');
+      const instructions = getManualExecutionInstructions(preferredAgent || 'universal', skill.path);
 
       if (strategy === 'ide' || strategy === 'manual') {
-        const instructions = getManualExecutionInstructions(preferredAgent || 'universal', skill.path);
-
         onExecutionEvent?.({
           type: 'execution_complete',
           skillName,
@@ -160,6 +159,24 @@ export function createSkillExecutor(options: SkillExecutorOptions = {}): SkillEx
           error: `No CLI agent available for automated execution. ${instructions}`,
         };
       }
+
+      // strategy is 'cli' but the preferred agent's CLI is not installed
+      const errorMsg = preferredAgent
+        ? `The preferred agent "${preferredAgent}" supports CLI execution but its CLI is not installed.`
+        : 'No CLI agent is available for execution.';
+
+      onExecutionEvent?.({
+        type: 'execution_complete',
+        skillName,
+        success: false,
+        message: 'CLI not installed',
+        error: `${errorMsg}\n${instructions}`,
+      });
+
+      return {
+        success: false,
+        error: `${errorMsg} ${instructions}`,
+      };
     }
 
     onExecutionEvent?.({

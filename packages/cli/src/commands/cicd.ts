@@ -313,18 +313,21 @@ export class CICDCommand extends Command {
   private createGitLabCI(projectPath: string): { success: boolean; message: string; skipped?: boolean } {
     const ciFile = join(projectPath, '.gitlab-ci.yml');
 
-    if (existsSync(ciFile)) {
-      if (!this.force) {
-        // Check if skillkit jobs already exist
-        const content = readFileSync(ciFile, 'utf-8');
-        if (content.includes('skillkit')) {
-          return {
-            success: true,
-            message: `.gitlab-ci.yml already contains SkillKit config (use --force to overwrite)`,
-            skipped: true,
-          };
-        }
+    if (existsSync(ciFile) && !this.force) {
+      // Check if skillkit jobs already exist for better messaging
+      const content = readFileSync(ciFile, 'utf-8');
+      if (content.includes('skillkit')) {
+        return {
+          success: true,
+          message: `.gitlab-ci.yml already contains SkillKit config (use --force to overwrite)`,
+          skipped: true,
+        };
       }
+      return {
+        success: true,
+        message: `.gitlab-ci.yml already exists (use --force to overwrite)`,
+        skipped: true,
+      };
     }
 
     try {
