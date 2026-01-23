@@ -411,15 +411,34 @@ export class MemoryCommand extends Command {
 
     console.log(chalk.cyan(`Found ${observations.length} observations to compress...\n`));
 
-    if (this.dryRun) {
-      console.log(chalk.gray('(Dry run - no changes will be made)\n'));
-    }
-
     const compressor = createMemoryCompressor(projectPath);
-    const { learnings, result } = await compressor.compressAndStore(observations, {
+    const compressionOptions = {
       minObservations: 2,
       additionalTags: this.tags?.split(',').map((t) => t.trim()),
-    });
+    };
+
+    if (this.dryRun) {
+      console.log(chalk.gray('(Dry run - no changes will be made)\n'));
+
+      // For dry-run, only compress without storing
+      const result = await compressor.compress(observations, compressionOptions);
+
+      console.log(chalk.green(`✓ Would compress ${result.stats.inputCount} observations into ${result.stats.outputCount} learnings\n`));
+
+      if (result.learnings.length > 0) {
+        console.log(chalk.bold('Learnings that would be created:'));
+        for (const learning of result.learnings) {
+          console.log(`  ${chalk.cyan('●')} ${learning.title}`);
+          console.log(`    Tags: ${learning.tags.join(', ')}`);
+        }
+        console.log();
+      }
+
+      return 0;
+    }
+
+    // Actual compression with storage
+    const { learnings, result } = await compressor.compressAndStore(observations, compressionOptions);
 
     console.log(chalk.green(`✓ Compressed ${result.stats.inputCount} observations into ${result.stats.outputCount} learnings\n`));
 
@@ -432,7 +451,7 @@ export class MemoryCommand extends Command {
       console.log();
     }
 
-    if (!this.dryRun && result.processedObservationIds.length > 0) {
+    if (result.processedObservationIds.length > 0) {
       // Remove processed observations
       const deleted = observationStore.deleteMany(result.processedObservationIds);
       console.log(chalk.gray(`Cleared ${deleted} processed observations.`));

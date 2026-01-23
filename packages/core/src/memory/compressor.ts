@@ -868,6 +868,20 @@ export class MemoryCompressor {
   }
 
   /**
+   * Compress observations without storing (for dry-run/preview)
+   */
+  async compress(
+    observations: Observation[],
+    options?: CompressionOptions
+  ): Promise<CompressionResult> {
+    const compressionOptions = {
+      ...options,
+      projectName: this.projectName || options?.projectName,
+    };
+    return this.engine.compress(observations, compressionOptions);
+  }
+
+  /**
    * Compress observations and store as learnings
    */
   async compressAndStore(

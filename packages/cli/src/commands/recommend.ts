@@ -1,18 +1,19 @@
 import { Command, Option } from 'clipanion';
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import { resolve, join } from 'node:path';
+import { resolve } from 'node:path';
 import chalk from 'chalk';
+import ora from 'ora';
 import {
   type ProjectProfile,
-  type SkillSummary,
-  type SkillIndex,
   type ScoredSkill,
   ContextManager,
   RecommendationEngine,
+  buildSkillIndex,
+  saveIndex,
+  loadIndex as loadIndexFromCache,
+  isIndexStale,
+  INDEX_PATH,
+  KNOWN_SKILL_REPOS,
 } from '@skillkit/core';
-
-const INDEX_PATH = join(process.env.HOME || '~', '.skillkit', 'index.json');
-const INDEX_CACHE_HOURS = 24;
 
 /**
  * Recommend command - get smart skill recommendations based on project analysis
@@ -41,7 +42,8 @@ export class RecommendCommand extends Command {
       ['Filter by category', '$0 recommend --category security'],
       ['Show detailed reasons', '$0 recommend --verbose'],
       ['Update skill index', '$0 recommend --update'],
-      ['Search for skills by task', '$0 recommend --search "authentication"'],
+      ['Search for skills by task', '$0 recommend --task "authentication"'],
+      ['Search for skills (alias)', '$0 recommend --search "testing"'],
     ],
   });
 
@@ -70,9 +72,14 @@ export class RecommendCommand extends Command {
     description: 'Update skill index from sources',
   });
 
-  // Search mode
+  // Search mode (--search or --task)
   search = Option.String('--search,-s', {
     description: 'Search skills by task/query',
+  });
+
+  // Task alias for search (GSD-style)
+  task = Option.String('--task,-t', {
+    description: 'Search skills by task (alias for --search)',
   });
 
   // Include installed skills
@@ -95,7 +102,7 @@ export class RecommendCommand extends Command {
 
     // Handle index update
     if (this.update) {
-      return this.updateIndex();
+      return await this.updateIndex();
     }
 
     // Load or create project profile
@@ -121,9 +128,10 @@ export class RecommendCommand extends Command {
     const engine = new RecommendationEngine();
     engine.loadIndex(index);
 
-    // Handle search mode
-    if (this.search) {
-      return this.handleSearch(engine, this.search);
+    // Handle search mode (--search or --task)
+    const searchQuery = this.search || this.task;
+    if (searchQuery) {
+      return this.handleSearch(engine, searchQuery);
     }
 
     // Get recommendations
@@ -308,72 +316,65 @@ export class RecommendCommand extends Command {
   /**
    * Load skill index from cache
    */
-  private loadIndex(): SkillIndex | null {
-    if (!existsSync(INDEX_PATH)) {
+  private loadIndex() {
+    const index = loadIndexFromCache();
+
+    if (!index) {
       return null;
     }
 
-    try {
-      const content = readFileSync(INDEX_PATH, 'utf-8');
-      const index = JSON.parse(content) as SkillIndex;
-
-      // Check if index is stale
+    // Check if index is stale
+    if (isIndexStale(index) && !this.json) {
       const lastUpdated = new Date(index.lastUpdated);
       const hoursSinceUpdate = (Date.now() - lastUpdated.getTime()) / (1000 * 60 * 60);
-
-      if (hoursSinceUpdate > INDEX_CACHE_HOURS && !this.json) {
-        console.log(
-          chalk.dim(`Index is ${Math.round(hoursSinceUpdate)} hours old. Run --update to refresh.\n`)
-        );
-      }
-
-      return index;
-    } catch {
-      return null;
+      console.log(
+        chalk.dim(`Index is ${Math.round(hoursSinceUpdate)} hours old. Run --update to refresh.\n`)
+      );
     }
+
+    return index;
   }
 
   /**
    * Update skill index from sources
    */
-  private updateIndex(): number {
-    console.log(chalk.cyan('Updating skill index...\n'));
+  private async updateIndex(): Promise<number> {
+    console.log(chalk.cyan('Updating skill index from GitHub repositories...\n'));
+    console.log(chalk.dim(`Sources: ${KNOWN_SKILL_REPOS.map(r => `${r.owner}/${r.repo}`).join(', ')}\n`));
 
-    // For now, create a sample index with well-known skill repositories
-    // In the future, this would fetch from a registry or known skill sources
-    const sampleIndex: SkillIndex = {
-      version: 1,
-      lastUpdated: new Date().toISOString(),
-      skills: getSampleSkills(),
-      sources: [
-        {
-          name: 'vercel-labs',
-          url: 'https://github.com/vercel-labs/agent-skills',
-          lastFetched: new Date().toISOString(),
-          skillCount: 5,
-        },
-        {
-          name: 'anthropics',
-          url: 'https://github.com/anthropics/skills',
-          lastFetched: new Date().toISOString(),
-          skillCount: 3,
-        },
-      ],
-    };
+    const spinner = ora('Fetching skills...').start();
 
-    // Save index
-    const indexDir = join(process.env.HOME || '~', '.skillkit');
-    if (!existsSync(indexDir)) {
-      mkdirSync(indexDir, { recursive: true });
+    try {
+      const { index, errors } = await buildSkillIndex(KNOWN_SKILL_REPOS, (message) => {
+        spinner.text = message;
+      });
+
+      spinner.stop();
+
+      // Report any errors
+      if (errors.length > 0) {
+        console.log(chalk.yellow('\nWarnings:'));
+        for (const error of errors) {
+          console.log(chalk.dim(`  • ${error}`));
+        }
+        console.log();
+      }
+
+      // Save the index
+      saveIndex(index);
+
+      console.log(chalk.green(`✓ Updated index with ${index.skills.length} skills`));
+      if (index.sources.length > 0) {
+        console.log(chalk.dim(`  Sources: ${index.sources.map((s) => s.name).join(', ')}`));
+      }
+      console.log(chalk.dim(`  Saved to: ${INDEX_PATH}\n`));
+
+      return 0;
+    } catch (error) {
+      spinner.fail('Failed to update index');
+      console.error(chalk.red(error instanceof Error ? error.message : String(error)));
+      return 1;
     }
-
-    writeFileSync(INDEX_PATH, JSON.stringify(sampleIndex, null, 2));
-
-    console.log(chalk.green(`✓ Updated index with ${sampleIndex.skills.length} skills`));
-    console.log(chalk.dim(`  Sources: ${sampleIndex.sources.map((s) => s.name).join(', ')}`));
-    console.log(chalk.dim(`  Saved to: ${INDEX_PATH}\n`));
-
-    return 0;
   }
 }
 
@@ -383,162 +384,4 @@ export class RecommendCommand extends Command {
 function truncate(str: string, maxLen: number): string {
   if (str.length <= maxLen) return str;
   return str.slice(0, maxLen - 3) + '...';
-}
-
-/**
- * Sample skills for the index (in a real implementation, this would fetch from sources)
- */
-function getSampleSkills(): SkillSummary[] {
-  return [
-    {
-      name: 'vercel-react-best-practices',
-      description: 'Modern React patterns including Server Components, hooks best practices, and performance optimization',
-      source: 'vercel-labs/agent-skills',
-      tags: ['react', 'frontend', 'typescript', 'nextjs', 'performance'],
-      compatibility: {
-        frameworks: ['react', 'nextjs'],
-        languages: ['typescript', 'javascript'],
-        libraries: [],
-      },
-      popularity: 1500,
-      quality: 95,
-      lastUpdated: new Date().toISOString(),
-      verified: true,
-    },
-    {
-      name: 'tailwind-v4-patterns',
-      description: 'Tailwind CSS v4 utility patterns, responsive design, and component styling best practices',
-      source: 'vercel-labs/agent-skills',
-      tags: ['tailwind', 'css', 'styling', 'frontend', 'responsive'],
-      compatibility: {
-        frameworks: [],
-        languages: ['typescript', 'javascript'],
-        libraries: ['tailwindcss'],
-      },
-      popularity: 1200,
-      quality: 92,
-      lastUpdated: new Date().toISOString(),
-      verified: true,
-    },
-    {
-      name: 'nextjs-app-router',
-      description: 'Next.js App Router patterns including layouts, server actions, and data fetching',
-      source: 'vercel-labs/agent-skills',
-      tags: ['nextjs', 'react', 'routing', 'server-actions', 'frontend'],
-      compatibility: {
-        frameworks: ['nextjs'],
-        languages: ['typescript', 'javascript'],
-        libraries: [],
-      },
-      popularity: 1100,
-      quality: 94,
-      lastUpdated: new Date().toISOString(),
-      verified: true,
-    },
-    {
-      name: 'typescript-strict-patterns',
-      description: 'TypeScript strict mode patterns, type safety, and advanced type utilities',
-      source: 'anthropics/skills',
-      tags: ['typescript', 'types', 'safety', 'patterns'],
-      compatibility: {
-        frameworks: [],
-        languages: ['typescript'],
-        libraries: [],
-      },
-      popularity: 900,
-      quality: 90,
-      lastUpdated: new Date().toISOString(),
-      verified: true,
-    },
-    {
-      name: 'supabase-best-practices',
-      description: 'Supabase integration patterns including auth, database queries, and real-time subscriptions',
-      source: 'anthropics/skills',
-      tags: ['supabase', 'database', 'auth', 'backend', 'postgresql'],
-      compatibility: {
-        frameworks: [],
-        languages: ['typescript', 'javascript'],
-        libraries: ['@supabase/supabase-js'],
-      },
-      popularity: 800,
-      quality: 88,
-      lastUpdated: new Date().toISOString(),
-      verified: true,
-    },
-    {
-      name: 'vitest-testing-patterns',
-      description: 'Testing patterns with Vitest including mocking, assertions, and test organization',
-      source: 'anthropics/skills',
-      tags: ['vitest', 'testing', 'typescript', 'mocking', 'tdd'],
-      compatibility: {
-        frameworks: [],
-        languages: ['typescript', 'javascript'],
-        libraries: ['vitest'],
-      },
-      popularity: 700,
-      quality: 86,
-      lastUpdated: new Date().toISOString(),
-      verified: false,
-    },
-    {
-      name: 'prisma-database-patterns',
-      description: 'Prisma ORM patterns for schema design, migrations, and efficient queries',
-      source: 'vercel-labs/agent-skills',
-      tags: ['prisma', 'database', 'orm', 'postgresql', 'backend'],
-      compatibility: {
-        frameworks: [],
-        languages: ['typescript'],
-        libraries: ['@prisma/client'],
-      },
-      popularity: 850,
-      quality: 89,
-      lastUpdated: new Date().toISOString(),
-      verified: true,
-    },
-    {
-      name: 'security-best-practices',
-      description: 'Security patterns for web applications including XSS prevention, CSRF, and secure headers',
-      source: 'trailofbits/skills',
-      tags: ['security', 'xss', 'csrf', 'headers', 'owasp'],
-      compatibility: {
-        frameworks: [],
-        languages: ['typescript', 'javascript', 'python'],
-        libraries: [],
-      },
-      popularity: 600,
-      quality: 95,
-      lastUpdated: new Date().toISOString(),
-      verified: true,
-    },
-    {
-      name: 'python-fastapi-patterns',
-      description: 'FastAPI best practices for building high-performance Python APIs',
-      source: 'python-skills/fastapi',
-      tags: ['python', 'fastapi', 'backend', 'api', 'async'],
-      compatibility: {
-        frameworks: ['fastapi'],
-        languages: ['python'],
-        libraries: [],
-      },
-      popularity: 550,
-      quality: 85,
-      lastUpdated: new Date().toISOString(),
-      verified: false,
-    },
-    {
-      name: 'zustand-state-management',
-      description: 'Zustand state management patterns for React applications',
-      source: 'react-skills/state',
-      tags: ['zustand', 'react', 'state-management', 'frontend'],
-      compatibility: {
-        frameworks: ['react'],
-        languages: ['typescript', 'javascript'],
-        libraries: ['zustand'],
-      },
-      popularity: 650,
-      quality: 84,
-      lastUpdated: new Date().toISOString(),
-      verified: false,
-    },
-  ];
 }
