@@ -9,7 +9,7 @@ export class MemoryIndexStore {
 
   constructor(basePath: string, isGlobal = false) {
     if (isGlobal) {
-      this.filePath = join(basePath, '.skillkit', 'memory', 'index.yaml');
+      this.filePath = join(basePath, 'memory', 'index.yaml');
     } else {
       this.filePath = join(basePath, '.skillkit', 'memory', 'index.yaml');
     }

@@ -4,7 +4,7 @@
  * Fetches and indexes skills from multiple GitHub repositories.
  */
 
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import type {
@@ -480,7 +480,6 @@ export class MarketplaceAggregator {
    */
   clearCache(): void {
     if (existsSync(this.cachePath)) {
-      const { unlinkSync } = require('node:fs');
       unlinkSync(this.cachePath);
     }
     this.index = null;

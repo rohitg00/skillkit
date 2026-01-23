@@ -1,6 +1,6 @@
 import { Command, Option } from 'clipanion';
 import { resolve, join } from 'node:path';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import chalk from 'chalk';
 import ora from 'ora';
 import {
@@ -195,8 +195,8 @@ export class RunCommand extends Command {
   }
 
   private async loadSkill(projectPath: string): Promise<ExecutableSkill | null> {
-    // Check if it's a file path
-    if (this.skillRef.endsWith('.md') || existsSync(this.skillRef)) {
+    // Check if it's a file path (must be a file, not directory)
+    if (this.skillRef.endsWith('.md') || (existsSync(this.skillRef) && statSync(this.skillRef).isFile())) {
       return this.loadSkillFromFile(resolve(this.skillRef));
     }
 

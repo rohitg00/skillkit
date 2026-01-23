@@ -8,6 +8,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
+import { parse as parseYaml } from 'yaml';
 import type {
   TestAssertion,
   AssertionResult,
@@ -443,9 +444,7 @@ function assertYamlValid(
 
   try {
     const content = readFileSync(filePath, 'utf-8');
-    // Dynamic import of yaml to avoid bundling issues
-    const { parse } = require('yaml');
-    parse(content);
+    parseYaml(content);
 
     return {
       assertion,

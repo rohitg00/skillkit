@@ -28,7 +28,7 @@ export interface ExecutionProgressEvent {
   taskName?: string;
   taskIndex?: number;
   totalTasks?: number;
-  status?: ExecutionTaskStatus;
+  status?: ExecutionTaskStatus | 'paused' | 'cancelled';
   message?: string;
   error?: string;
 }
@@ -195,10 +195,16 @@ export class SkillExecutionEngine {
       error: overallError,
     };
 
+    const statusMessages: Record<typeof overallStatus, string> = {
+      completed: 'Skill execution completed',
+      paused: 'Skill execution paused',
+      failed: overallError || 'Skill execution failed',
+    };
+
     this.onProgress?.({
       type: 'complete',
-      status: overallStatus === 'completed' ? 'completed' : 'failed',
-      message: overallStatus === 'completed' ? 'Skill execution completed' : overallError,
+      status: overallStatus,
+      message: statusMessages[overallStatus],
     });
 
     return result;

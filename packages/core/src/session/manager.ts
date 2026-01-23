@@ -4,7 +4,7 @@
  * Manages session state for skill execution with pause/resume support.
  */
 
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse, stringify } from 'yaml';
 import type {
@@ -335,7 +335,6 @@ export class SessionManager {
    */
   clear(): void {
     if (existsSync(this.sessionPath)) {
-      const { unlinkSync } = require('node:fs');
       unlinkSync(this.sessionPath);
     }
     this.state = null;

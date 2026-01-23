@@ -54,8 +54,11 @@ export class MemoryCommand extends Command {
   // Subcommand (status, search, list, show, compress, export, import, clear, add, rate, config)
   action = Option.String({ required: false });
 
-  // Second argument (query for search, id for show/export/rate, rating for rate)
+  // Second argument (query for search, id for show/export/rate)
   arg = Option.String({ required: false });
+
+  // Third argument (rating value for rate command)
+  ratingArg = Option.String({ required: false });
 
   // Global scope
   global = Option.Boolean('--global,-g', false, {
@@ -667,11 +670,10 @@ export class MemoryCommand extends Command {
       return 1;
     }
 
-    // Find the rating (could be second positional or parse from id)
-    const rating = parseInt(this.content || '0', 10);
+    const rating = parseInt(this.ratingArg || '0', 10);
     if (isNaN(rating) || rating < 0 || rating > 100) {
       console.error(chalk.red('Error: Rating must be 0-100'));
-      console.log(chalk.gray('Usage: skillkit memory rate <id> --content <rating>'));
+      console.log(chalk.gray('Usage: skillkit memory rate <id> <rating>'));
       return 1;
     }
 
