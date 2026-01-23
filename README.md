@@ -125,10 +125,14 @@ skillkit
 - **Smart Recommendations**: AI-powered skill suggestions based on your project stack
 - **Cross-Agent Translation**: Convert skills between any of 17+ agent formats
 - **Project Context Sync**: One config that syncs to all your agents
+- **Session Memory**: Cross-agent learning system that captures and shares knowledge
+- **Skill Marketplace**: Browse and install skills from curated GitHub repositories
+- **Skill Testing**: Test framework for validating skills with assertions
+- **Workflow Orchestration**: Compose skills into multi-step workflows
 - **Interactive TUI**: Beautiful terminal interface for managing skills
 - **Multi-Agent Support**: Works with Claude Code, Cursor, Codex, Windsurf, and 13+ more
 - **Multi-Platform Git**: GitHub, GitLab, Bitbucket, and local paths
-- **CI/CD Friendly**: Non-interactive flags for automation (`--skills`, `--all`, `--yes`)
+- **CI/CD Integration**: GitHub Actions, GitLab CI, CircleCI templates
 - **Zero Config**: Auto-detects your agent and configures appropriately
 
 ## Installation
@@ -365,6 +369,74 @@ skillkit validate ./my-skill        # Validate single skill
 skillkit validate ./skills --all    # Validate all skills in directory
 ```
 
+### `skillkit marketplace`
+
+Browse and install skills from the curated marketplace.
+
+```bash
+skillkit marketplace                    # Browse all skills
+skillkit marketplace search typescript  # Search for skills
+skillkit marketplace refresh            # Refresh skill index
+skillkit marketplace tags               # Show popular tags
+skillkit marketplace sources            # List skill sources
+skillkit marketplace --limit 20         # Limit results
+skillkit marketplace --tags react,next  # Filter by tags
+```
+
+### `skillkit memory`
+
+Manage session memory - learnings captured across AI coding sessions.
+
+```bash
+skillkit memory status              # Show memory status
+skillkit memory search "auth"       # Search memories
+skillkit memory list                # List all learnings
+skillkit memory show <id>           # Show specific learning
+skillkit memory compress            # Compress observations into learnings
+skillkit memory export <id>         # Export learning as a skill
+skillkit memory import ./file.yaml  # Import memories
+skillkit memory add --title "..."   # Add manual learning
+skillkit memory rate <id> 85        # Rate effectiveness (0-100)
+skillkit memory --global            # Use global memory scope
+```
+
+### `skillkit test`
+
+Test skills with the built-in testing framework.
+
+```bash
+skillkit test                       # Run all skill tests
+skillkit test ./my-skill            # Test specific skill
+skillkit test --tags unit           # Run tests with specific tags
+skillkit test --json                # Output results as JSON
+skillkit test --verbose             # Verbose output
+```
+
+### `skillkit workflow`
+
+Manage and run skill workflows (multi-step skill compositions).
+
+```bash
+skillkit workflow list              # List available workflows
+skillkit workflow run <name>        # Run a workflow
+skillkit workflow create <name>     # Create new workflow
+skillkit workflow validate <name>   # Validate workflow definition
+skillkit workflow --verbose         # Verbose output
+```
+
+### `skillkit cicd`
+
+Generate CI/CD integration templates.
+
+```bash
+skillkit cicd github-action         # Generate GitHub Actions workflow
+skillkit cicd pre-commit            # Generate pre-commit hook
+skillkit cicd gitlab-ci             # Generate GitLab CI config
+skillkit cicd circleci              # Generate CircleCI config
+skillkit cicd --list                # List available templates
+skillkit cicd --output ./path       # Output to specific path
+```
+
 ### `skillkit create <skill-name>`
 
 Create a new skill with proper structure and template.
@@ -481,6 +553,21 @@ import {
   ContextManager,
   initContext,
   syncToAllAgents,
+  // Marketplace
+  createMarketplaceAggregator,
+  // Session Memory
+  createMemoryCompressor,
+  createMemoryInjector,
+  LearningStore,
+  ObservationStore,
+  // Testing
+  SkillTestRunner,
+  // Workflows
+  WorkflowOrchestrator,
+  parseWorkflow,
+  // CI/CD
+  getCICDTemplate,
+  listCICDTemplates,
 } from 'skillkit';
 
 // Find all installed skills
@@ -506,6 +593,23 @@ console.log(result.content); // Cursor MDC format
 const ctx = new ContextManager('./my-project');
 await ctx.init();
 await syncToAllAgents(ctx.getContext());
+
+// Browse marketplace
+const marketplace = createMarketplaceAggregator();
+const results = await marketplace.search({ query: 'react' });
+
+// Session memory
+const injector = createMemoryInjector('./my-project');
+const memories = injector.search('authentication patterns');
+
+// Run skill tests
+const runner = new SkillTestRunner('./my-project');
+const testResults = await runner.runAll();
+
+// Run workflows
+const workflow = parseWorkflow('./workflow.yaml');
+const orchestrator = new WorkflowOrchestrator(workflow);
+await orchestrator.execute();
 ```
 
 ## Configuration

@@ -38,6 +38,7 @@ const POPULAR_REPOS: RepoInfo[] = [
   { source: 'giuseppe-trisciuoglio/developer-kit', name: 'Shadcn / Radix' },
   { source: 'openrouterteam/agent-skills', name: 'OpenRouter SDK' },
   { source: 'intellectronica/agent-skills', name: 'Context7' },
+  { source: 'alirezarezvani/claude-skills', name: 'Alireza Rezvani' },
 ];
 
 interface FetchedSkill {
