@@ -195,10 +195,11 @@ export class SkillExecutionEngine {
       error: overallError,
     };
 
-    const statusMessages: Record<typeof overallStatus, string> = {
+    const statusMessages: Record<'completed' | 'failed' | 'cancelled' | 'paused', string> = {
       completed: 'Skill execution completed',
       paused: 'Skill execution paused',
       failed: overallError || 'Skill execution failed',
+      cancelled: 'Skill execution cancelled',
     };
 
     this.onProgress?.({
@@ -408,23 +409,60 @@ export class SkillExecutionEngine {
   }
 
   /**
-   * Safely test a regex pattern with timeout protection against ReDoS
+   * Check if a regex pattern is potentially dangerous (ReDoS-vulnerable)
+   * Rejects patterns with nested quantifiers and other known problematic constructs
    */
-  private safeRegexTest(pattern: string, input: string, timeoutMs = 1000): boolean {
-    // Limit pattern and input length to prevent excessive processing
-    if (pattern.length > 500 || input.length > 100000) {
+  private isUnsafeRegexPattern(pattern: string): boolean {
+    // Detect nested quantifiers like (a+)+, (a*)+, (a+)*, (a*)*
+    // These are the primary cause of catastrophic backtracking
+    const nestedQuantifierPattern = /\([^)]*[+*][^)]*\)[+*?]/;
+    if (nestedQuantifierPattern.test(pattern)) {
+      return true;
+    }
+
+    // Detect overlapping alternations with quantifiers like (a|a)+
+    const overlappingAlternation = /\([^|)]*\|[^|)]*\)[+*]/;
+    if (overlappingAlternation.test(pattern)) {
+      return true;
+    }
+
+    // Detect excessive quantifiers (more than 3 quantifiers in a row-ish)
+    const quantifierCount = (pattern.match(/[+*?]|\{\d+/g) || []).length;
+    if (quantifierCount > 10) {
+      return true;
+    }
+
+    // Detect very long character classes which can be slow
+    const longCharClass = /\[[^\]]{50,}\]/;
+    if (longCharClass.test(pattern)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Safely test a regex pattern with ReDoS prevention
+   *
+   * This method validates patterns before execution to prevent catastrophic backtracking.
+   * Note: This cannot guarantee protection against all ReDoS patterns, but catches common ones.
+   */
+  private safeRegexTest(pattern: string, input: string, _timeoutMs = 1000): boolean {
+    // Strict length limits to prevent excessive processing
+    if (pattern.length > 200 || input.length > 50000) {
+      console.warn(`Regex test skipped: pattern or input too long`);
+      return false;
+    }
+
+    // Reject patterns known to cause ReDoS
+    if (this.isUnsafeRegexPattern(pattern)) {
+      console.warn(`Regex pattern rejected as potentially unsafe: ${pattern.slice(0, 50)}...`);
       return false;
     }
 
     try {
       const regex = new RegExp(pattern);
-      // Simple patterns should complete quickly; complex ones may timeout
-      const startTime = Date.now();
-      const result = regex.test(input);
-      if (Date.now() - startTime > timeoutMs) {
-        console.warn(`Regex pattern took too long: ${pattern.slice(0, 50)}...`);
-      }
-      return result;
+      return regex.test(input);
     } catch {
       // Invalid regex pattern
       return false;

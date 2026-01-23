@@ -95,10 +95,10 @@ export interface TaskExecutionResult {
   status: ExecutionTaskStatus;
   /** Start time */
   startedAt: string;
-  /** End time */
-  completedAt: string;
-  /** Duration in milliseconds */
-  durationMs: number;
+  /** End time (only present for completed/failed/skipped tasks) */
+  completedAt?: string;
+  /** Duration in milliseconds (only present for completed/failed/skipped tasks) */
+  durationMs?: number;
   /** Output/result */
   output?: string;
   /** Error message if failed */
