@@ -5,7 +5,7 @@ import {
   getInstallDir as coreGetInstallDir,
   saveSkillMetadata as coreSaveSkillMetadata,
 } from '@skillkit/core';
-import { getAdapter, detectAgent } from '@skillkit/agents';
+import { getAdapter } from '@skillkit/agents';
 import type { AgentType, AgentAdapterInfo } from '@skillkit/core';
 
 // Re-export for direct use
