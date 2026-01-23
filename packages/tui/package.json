@@ -1,6 +1,6 @@
 {
   "name": "@skillkit/tui",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Terminal UI for SkillKit",
   "type": "module",
   "main": "./dist/index.js",
