@@ -4,6 +4,7 @@
  * Implements permission patterns for agent skill access control.
  */
 
+import { minimatch } from 'minimatch';
 import type {
   PermissionConfig,
   PermissionPattern,
@@ -105,16 +106,13 @@ export class PermissionManager {
 
   /**
    * Match value against pattern (glob-style)
+   *
+   * Uses minimatch for safe glob matching, avoiding ReDoS vulnerabilities.
    */
   private matchPattern(value: string, pattern: string): boolean {
-    // Convert glob pattern to regex
-    const regexPattern = pattern
-      .replace(/[.+^${}()|[\]\\]/g, '\\$&')  // Escape special chars
-      .replace(/\*/g, '.*')                   // * -> .*
-      .replace(/\?/g, '.');                   // ? -> .
-
-    const regex = new RegExp(`^${regexPattern}$`, 'i');
-    return regex.test(value);
+    // Use minimatch for safe, battle-tested glob matching
+    // nocase option ensures case-insensitive matching
+    return minimatch(value, pattern, { nocase: true });
   }
 
   /**

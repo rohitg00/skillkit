@@ -13,7 +13,7 @@ export type StepType = 'test' | 'verify' | 'implement' | 'commit' | 'review' | '
 /**
  * Plan status
  */
-export type PlanStatus = 'draft' | 'ready' | 'executing' | 'paused' | 'completed' | 'failed';
+export type PlanStatus = 'draft' | 'ready' | 'executing' | 'paused' | 'completed' | 'failed' | 'cancelled';
 
 /**
  * Task step within a plan task
@@ -257,6 +257,7 @@ export type PlanEvent =
   | 'plan:task_failed'
   | 'plan:execution_completed'
   | 'plan:execution_failed'
+  | 'plan:execution_cancelled'
   | 'plan:paused'
   | 'plan:resumed';
 

@@ -51,6 +51,7 @@ export class PlanExecutor {
    */
   async execute(plan: StructuredPlan, options?: PlanExecutionOptions): Promise<PlanExecutionResult> {
     const startTime = Date.now();
+    let aborted = false;
     const result: PlanExecutionResult = {
       success: true,
       completedTasks: [],
@@ -79,6 +80,9 @@ export class PlanExecutor {
       for (const taskId of executionOrder) {
         // Check if aborted
         if (this.abortController.signal.aborted) {
+          aborted = true;
+          result.success = false;
+          result.errors = [...(result.errors ?? []), 'Execution cancelled'];
           break;
         }
 
@@ -127,11 +131,19 @@ export class PlanExecutor {
       }
 
       // Update plan status
-      plan.status = result.success ? 'completed' : 'failed';
+      plan.status = aborted ? 'cancelled' : result.success ? 'completed' : 'failed';
       plan.updatedAt = new Date();
 
       result.durationMs = Date.now() - startTime;
-      this.emit(result.success ? 'plan:execution_completed' : 'plan:execution_failed', plan);
+
+      // Emit appropriate event
+      if (aborted) {
+        this.emit('plan:execution_cancelled', plan);
+      } else if (result.success) {
+        this.emit('plan:execution_completed', plan);
+      } else {
+        this.emit('plan:execution_failed', plan);
+      }
 
       return result;
     } catch (error) {
@@ -142,6 +154,12 @@ export class PlanExecutor {
 
       this.emit('plan:execution_failed', plan);
       return result;
+    } finally {
+      // Reset executor state
+      this.abortController = undefined;
+      this.isPaused = false;
+      this.resumePromise = undefined;
+      this.resumeResolve = undefined;
     }
   }
 
@@ -211,6 +229,10 @@ export class PlanExecutor {
             break;
           }
         }
+      } else {
+        // No step executor configured - fail fast
+        errors.push('No step executor configured');
+        break;
       }
     }
 

@@ -115,11 +115,11 @@ export class TaskManager {
     if (task.dependencies && task.dependencies.length > 0) {
       const unfinished = task.dependencies.filter((depId) => {
         const dep = this.tasks.get(depId);
-        return dep && dep.status !== 'completed';
+        return !dep || dep.status !== 'completed';
       });
 
       if (unfinished.length > 0) {
-        throw new Error(`Task has unfinished dependencies: ${unfinished.join(', ')}`);
+        throw new Error(`Task has unfinished or missing dependencies: ${unfinished.join(', ')}`);
       }
     }
 
@@ -372,9 +372,16 @@ export class TaskManager {
   private emit(event: TaskEvent, task: Task): void {
     for (const listener of this.listeners) {
       try {
-        listener(event, task);
+        // Call listener (may return Promise or void)
+        const result = listener(event, task);
+        // If it returns a Promise, catch rejections
+        if (result instanceof Promise) {
+          result.catch(() => {
+            // Ignore async listener errors
+          });
+        }
       } catch {
-        // Ignore listener errors
+        // Ignore sync listener errors
       }
     }
   }
@@ -399,7 +406,26 @@ export class TaskManager {
   fromJSON(tasks: Task[]): void {
     this.clear();
     for (const task of tasks) {
-      this.tasks.set(task.id, task);
+      // Rehydrate Date fields that were serialized to strings
+      const hydrated: Task = {
+        ...task,
+        createdAt: new Date(task.createdAt),
+        updatedAt: new Date(task.updatedAt),
+        plan: task.plan
+          ? {
+              ...task.plan,
+              submittedAt: new Date(task.plan.submittedAt),
+              approvedAt: task.plan.approvedAt ? new Date(task.plan.approvedAt) : undefined,
+            }
+          : undefined,
+        result: task.result
+          ? {
+              ...task.result,
+              completedAt: new Date(task.result.completedAt),
+            }
+          : undefined,
+      };
+      this.tasks.set(hydrated.id, hydrated);
     }
   }
 }

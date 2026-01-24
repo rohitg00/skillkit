@@ -12,6 +12,7 @@ export class AuditLogger {
   private logFile: string;
   private buffer: AuditEvent[] = [];
   private flushInterval: NodeJS.Timeout | null = null;
+  private flushing: Promise<void> | null = null;
 
   constructor(logDir: string) {
     this.logFile = path.join(logDir, 'audit.log');
@@ -116,16 +117,36 @@ export class AuditLogger {
   }
 
   async flush(): Promise<void> {
+    // If already flushing, wait for it to complete
+    if (this.flushing) {
+      return this.flushing;
+    }
+
     if (this.buffer.length === 0) {
       return;
     }
 
+    // Start flush with mutex
+    this.flushing = this.doFlush();
+    try {
+      await this.flushing;
+    } finally {
+      this.flushing = null;
+    }
+  }
+
+  private async doFlush(): Promise<void> {
+    // Snapshot buffer and clear it before async operations
+    const toFlush = this.buffer;
+    this.buffer = [];
+
     try {
       const events = await this.loadEvents();
-      events.push(...this.buffer);
+      events.push(...toFlush);
       await this.saveEvents(events);
-      this.buffer = [];
     } catch (error) {
+      // Restore events on failure
+      this.buffer = [...toFlush, ...this.buffer];
       console.error('Failed to flush audit log:', error);
     }
   }

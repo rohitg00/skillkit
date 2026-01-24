@@ -492,11 +492,20 @@ export class TeamOrchestrator {
       idleAgent.currentTask = undefined;
     }
 
-    // Check for failed tasks
-    for (const task of taskManager.getAllTasks()) {
+    // Check for failed or incomplete tasks
+    const allTasks = taskManager.getAllTasks();
+    for (const task of allTasks) {
       if (task.status === 'failed') {
         failedTasks.push(task.id);
       }
+    }
+
+    // Also check for incomplete tasks (pending, in_progress, etc.)
+    const incomplete = allTasks.filter(
+      (task) => task.status !== 'completed' && task.status !== 'failed'
+    );
+    if (incomplete.length > 0) {
+      failedTasks.push(...incomplete.map((task) => task.id));
     }
 
     return {
@@ -588,9 +597,16 @@ export class TeamOrchestrator {
   private emit(event: TeamEvent, team: Team, agent?: AgentInstance): void {
     for (const listener of this.listeners) {
       try {
-        listener(event, team, agent);
+        // Call listener (may return Promise or void)
+        const result = listener(event, team, agent);
+        // If it returns a Promise, catch rejections
+        if (result instanceof Promise) {
+          result.catch(() => {
+            // Ignore async listener errors
+          });
+        }
       } catch {
-        // Ignore listener errors
+        // Ignore sync listener errors
       }
     }
   }

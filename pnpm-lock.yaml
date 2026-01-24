@@ -63,6 +63,9 @@ importers:
       '@skillkit/core':
         specifier: workspace:*
         version: link:../core
+      minimatch:
+        specifier: ^10.0.1
+        version: 10.1.1
     devDependencies:
       '@types/node':
         specifier: ^22.10.5

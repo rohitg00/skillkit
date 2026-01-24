@@ -64,7 +64,7 @@ describe('TaskManager', () => {
         dependencies: [dep.id],
       });
 
-      expect(() => manager.assignTask(task.id, 'agent-1')).toThrow('unfinished dependencies');
+      expect(() => manager.assignTask(task.id, 'agent-1')).toThrow('unfinished or missing dependencies');
     });
 
     it('should allow assignment when dependencies are complete', () => {
