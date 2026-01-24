@@ -14,23 +14,183 @@ npm install -g skillkit
 # Initialize skillkit in your project
 skillkit init
 
-# Install a skill
-skillkit install github.com/anthropics/courses:prompt-eng/interactive-tutorial
+# Install skills from GitHub
+skillkit install anthropics/skills
 
-# List installed skills
-skillkit list
+# Get recommendations for your stack
+skillkit recommend
 
 # Launch interactive TUI
 skillkit ui
 ```
 
-## Features
+## Core Features
 
-- **17+ Agent Support**: Claude Code, Cursor, Codex, Gemini CLI, Windsurf, GitHub Copilot, and more
-- **Universal Skill Translation**: Convert skills between different agent formats
-- **Smart Recommendations**: Get skill suggestions based on your project stack
-- **Project Context Sync**: One config, all agents
-- **Interactive TUI**: Browse, install, and manage skills visually
+### Cross-Agent Translation
+
+```bash
+# Translate a Claude skill to Cursor format
+skillkit translate react-patterns --to cursor
+
+# Translate all skills to multiple agents
+skillkit translate --all --to windsurf,codex
+
+# Preview translation
+skillkit translate my-skill --to copilot --dry-run
+```
+
+### Smart Recommendations
+
+```bash
+# Get project-aware suggestions
+skillkit recommend
+
+# Filter by task
+skillkit recommend --search "authentication"
+
+# Quality threshold
+skillkit recommend --min-score 85
+```
+
+### Team Collaboration
+
+```bash
+# Initialize team
+skillkit team init --name "Engineering Team"
+
+# Create skill bundle
+skillkit team bundle-create
+
+# Share with team
+skillkit team share onboarding-bundle
+
+# Sync with remote registry
+skillkit team sync
+```
+
+### Plugin System
+
+```bash
+# List installed plugins
+skillkit plugin list
+
+# Install custom plugin
+skillkit plugin install @company/custom-translator
+
+# View plugin info
+skillkit plugin info my-plugin
+```
+
+### Development Methodologies
+
+```bash
+# List available methodologies
+skillkit methodology list
+
+# Load TDD methodology
+skillkit methodology load tdd
+
+# Apply to project
+skillkit methodology apply agile
+```
+
+### Plan System
+
+```bash
+# Parse and validate plan
+skillkit plan parse ./implementation-plan.md
+skillkit plan validate ./plan.md
+
+# Execute plan
+skillkit plan execute ./feature-plan.md
+
+# Check status
+skillkit plan status
+```
+
+### Hooks & Automation
+
+```bash
+# List hooks
+skillkit hook list
+
+# Register pre-commit hook
+skillkit hook register pre-commit
+
+# Trigger manually
+skillkit hook trigger pre-commit
+```
+
+### Workflow Orchestration
+
+```bash
+# List workflows
+skillkit workflow list
+
+# Run workflow
+skillkit workflow run feature-development
+
+# Create new workflow
+skillkit workflow create deployment-flow
+```
+
+### Session Memory
+
+```bash
+# View learnings
+skillkit memory list
+
+# Search past sessions
+skillkit memory search "error handling"
+
+# Compress observations
+skillkit memory compress
+
+# Export learning as skill
+skillkit memory export auth-insight --output auth-skill.md
+```
+
+## Supported Agents (17)
+
+Claude Code, Cursor, Codex, Gemini CLI, Windsurf, GitHub Copilot, OpenCode, Antigravity, Amp, Clawdbot, Droid, Goose, Kilo, Kiro, Roo, Trae, Universal
+
+## Usage Examples
+
+### Install and Sync
+
+```bash
+# Install to multiple agents
+skillkit install anthropics/skills --agent claude-code,cursor
+
+# Sync all skills to detected agents
+skillkit sync --all
+```
+
+### Context Management
+
+```bash
+# Initialize project context
+skillkit context init
+
+# View detected stack
+skillkit context show
+
+# Sync to all agents
+skillkit context sync --all
+```
+
+### Testing
+
+```bash
+# Run all skill tests
+skillkit test
+
+# Test specific skills
+skillkit test ./my-skill --tags unit
+
+# CI/CD integration
+skillkit cicd init
+```
 
 ## Documentation
 

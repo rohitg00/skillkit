@@ -13,6 +13,14 @@
 npm install -g skillkit
 ```
 
+## What's New in v1.5.0
+
+- **Team Collaboration**: Share skill bundles with your team via Git
+- **Plugin System**: Extend SkillKit with custom translators, providers, and commands
+- **Methodologies**: 5 ready-to-use development frameworks (Agile, TDD, DevOps, etc.)
+- **Agent Orchestration**: Coordinate multiple AI agents working together
+- **Hooks & Automation**: Auto-trigger skills on git commits, file changes
+
 ## The Problem
 
 You've built amazing skills for Claude Code. Now you want to try Cursor. Or your team uses different agents. Your options:
@@ -44,6 +52,7 @@ skillkit recommend
 | Feature | Without SkillKit | With SkillKit |
 |---------|-----------------|---------------|
 | **Multi-Agent Support** | Manual rewrite for each agent | One command, all agents |
+| **Team Collaboration** | Email skills back and forth | Git-based bundles, remote sync |
 | **Skill Discovery** | Search GitHub manually | Smart recommendations for your stack |
 | **Format Translation** | Learn each agent's format | Automatic conversion (17 formats) |
 | **Context Sync** | Configure each agent separately | One config, synced everywhere |
