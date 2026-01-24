@@ -89,6 +89,14 @@ export class PlanExecutor {
         // Wait if paused
         await this.waitIfPaused();
 
+        // Re-check if aborted after resuming from pause
+        if (this.abortController.signal.aborted) {
+          aborted = true;
+          result.success = false;
+          result.errors = [...(result.errors ?? []), 'Execution cancelled'];
+          break;
+        }
+
         const task = plan.tasks.find((t) => t.id === taskId);
         if (!task) continue;
 
@@ -194,6 +202,12 @@ export class PlanExecutor {
 
       // Wait if paused
       await this.waitIfPaused();
+
+      // Re-check if aborted after resuming from pause
+      if (this.abortController?.signal.aborted) {
+        errors.push('Execution aborted');
+        break;
+      }
 
       // Report progress
       options?.onProgress?.(task.id, step.number, `executing step ${step.number}`);
