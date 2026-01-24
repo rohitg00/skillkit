@@ -31,3 +31,12 @@ export { PlanCommand } from './plan.js';
 export { CommandCmd } from './command.js';
 export { AICommand } from './ai.js';
 export { AuditCommand } from './audit.js';
+export {
+  AgentCommand,
+  AgentListCommand,
+  AgentShowCommand,
+  AgentCreateCommand,
+  AgentTranslateCommand,
+  AgentSyncCommand,
+  AgentValidateCommand,
+} from './agent.js';

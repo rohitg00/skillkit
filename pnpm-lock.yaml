@@ -31,16 +31,16 @@ importers:
     dependencies:
       '@skillkit/agents':
         specifier: ^1.6.0
-        version: 1.6.0
+        version: 1.6.1
       '@skillkit/cli':
         specifier: ^1.6.0
-        version: 1.6.0(@types/react@18.3.27)(typanion@3.14.0)
+        version: 1.6.1(@types/react@18.3.27)(typanion@3.14.0)
       '@skillkit/core':
         specifier: ^1.6.0
         version: 1.6.0
       '@skillkit/tui':
         specifier: ^1.6.0
-        version: 1.6.0(@types/react@18.3.27)
+        version: 1.6.1(@types/react@18.3.27)
       clipanion:
         specifier: ^4.0.0-rc.4
         version: 4.0.0-rc.4(typanion@3.14.0)
@@ -84,13 +84,13 @@ importers:
     dependencies:
       '@skillkit/agents':
         specifier: ^1.6.0
-        version: 1.6.0
+        version: 1.6.1
       '@skillkit/core':
         specifier: ^1.6.0
         version: 1.6.0
       '@skillkit/tui':
         specifier: ^1.6.0
-        version: 1.6.0(@types/react@18.3.27)
+        version: 1.6.1(@types/react@18.3.27)
       chalk:
         specifier: ^5.3.0
         version: 5.6.2
@@ -155,7 +155,7 @@ importers:
     dependencies:
       '@skillkit/agents':
         specifier: ^1.6.0
-        version: 1.6.0
+        version: 1.6.1
       '@skillkit/core':
         specifier: ^1.6.0
         version: 1.6.0
@@ -650,20 +650,20 @@ packages:
     resolution: {integrity: sha512-P1Cz1dWaFfR4IR+U13mqqiGsLFf1KbayybWwdd2vfctdV6hDpUkgCY0nKOLLTMSoRd/jJNjtbqzf13K8DCCXQw==}
     engines: {node: '>=18'}
 
-  '@skillkit/agents@1.6.0':
-    resolution: {integrity: sha512-rYq9wMqI55ucVOMxR6fyal7Pj87funV884bb8NNop7MUOAEoETtHbMPMRL6MYv9bGvBRzwaNkWRo8cszCj+zjQ==}
+  '@skillkit/agents@1.6.1':
+    resolution: {integrity: sha512-qsAiyCkH11QjNWcsjcDMsy62kPB/ECE6znq3VSHPVUtywWQ8JTp5lq61Xj/w2E+V5YBQNPf4yaSzVzjeiCffkQ==}
     engines: {node: '>=18.0.0'}
 
-  '@skillkit/cli@1.6.0':
-    resolution: {integrity: sha512-ghmeF3kj0TIB5hfct5aoQJO8KnxVBm2+m7wFwXg9aPtewSwws1C7nEYVFMRFWnL0kHPe6+tEo4qddm+GxJ8NFQ==}
+  '@skillkit/cli@1.6.1':
+    resolution: {integrity: sha512-PdpPAiDqB8Rbmffl2wcYlL4jdH/1rWDB98h6Bs8hSzM93ThtQ1p+5RGVp+mIVI2fC02HbQRAR1yRCh2DQ1uM4g==}
     engines: {node: '>=18.0.0'}
 
   '@skillkit/core@1.6.0':
     resolution: {integrity: sha512-987hhnYir4a3qnIkB/iIxeVeJ8mNF6R8IidtnFo9Q4GamcyvJ0W692V5wVOoR2MiS1F/NSstjfrV/h2ujMydyw==}
     engines: {node: '>=18.0.0'}
 
-  '@skillkit/tui@1.6.0':
-    resolution: {integrity: sha512-5ifBzM0G0QhiX3cJDiUNd65SSQEmoFWKJEFtYLNDe/wcP7k3WPZemliyIpSknZh2564wqnwf3w4Ua2TtO9M/WQ==}
+  '@skillkit/tui@1.6.1':
+    resolution: {integrity: sha512-kLgKANVT461cpFApjYNct9Jg7QXhytYLl1iowLAdARvinA7aogRtb1KKh+7Cg6cY0eoY+kgTwSDKYHERqyuFLQ==}
     engines: {node: '>=18.0.0'}
 
   '@types/estree@1.0.8':
@@ -1907,16 +1907,16 @@ snapshots:
 
   '@sindresorhus/is@7.2.0': {}
 
-  '@skillkit/agents@1.6.0':
+  '@skillkit/agents@1.6.1':
     dependencies:
       '@skillkit/core': 1.6.0
       minimatch: 9.0.5
 
-  '@skillkit/cli@1.6.0(@types/react@18.3.27)(typanion@3.14.0)':
+  '@skillkit/cli@1.6.1(@types/react@18.3.27)(typanion@3.14.0)':
     dependencies:
-      '@skillkit/agents': 1.6.0
+      '@skillkit/agents': 1.6.1
       '@skillkit/core': 1.6.0
-      '@skillkit/tui': 1.6.0(@types/react@18.3.27)
+      '@skillkit/tui': 1.6.1(@types/react@18.3.27)
       chalk: 5.6.2
       clipanion: 4.0.0-rc.4(typanion@3.14.0)
       got: 14.6.6
@@ -1937,9 +1937,9 @@ snapshots:
       yaml: 2.8.2
       zod: 3.25.76
 
-  '@skillkit/tui@1.6.0(@types/react@18.3.27)':
+  '@skillkit/tui@1.6.1(@types/react@18.3.27)':
     dependencies:
-      '@skillkit/agents': 1.6.0
+      '@skillkit/agents': 1.6.1
       '@skillkit/core': 1.6.0
       chalk: 5.6.2
       ink: 5.2.1(@types/react@18.3.27)(react@18.3.1)

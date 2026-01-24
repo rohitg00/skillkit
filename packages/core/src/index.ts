@@ -66,3 +66,6 @@ export * from './ai/index.js';
 
 // Audit Logging (Phase 18)
 export * from './audit/index.js';
+
+// Custom Agents Support (Phase 19)
+export * from './agents/index.js';

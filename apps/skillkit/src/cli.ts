@@ -39,6 +39,13 @@ import {
   CommandCmd,
   AICommand,
   AuditCommand,
+  AgentCommand,
+  AgentListCommand,
+  AgentShowCommand,
+  AgentCreateCommand,
+  AgentTranslateCommand,
+  AgentSyncCommand,
+  AgentValidateCommand,
 } from '@skillkit/cli';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -91,5 +98,12 @@ cli.register(PlanCommand);
 cli.register(CommandCmd);
 cli.register(AICommand);
 cli.register(AuditCommand);
+cli.register(AgentCommand);
+cli.register(AgentListCommand);
+cli.register(AgentShowCommand);
+cli.register(AgentCreateCommand);
+cli.register(AgentTranslateCommand);
+cli.register(AgentSyncCommand);
+cli.register(AgentValidateCommand);
 
 cli.runExit(process.argv.slice(2));
