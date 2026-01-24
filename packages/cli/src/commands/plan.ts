@@ -374,7 +374,7 @@ export class PlanCommand extends Command {
     const plan = generator.createPlan(this.name, this.goal || 'Complete the project');
 
     if (this.techStack) {
-      plan.techStack = this.techStack.split(',').map((s) => s.trim());
+      plan.techStack = this.techStack.split(',').map((s) => s.trim()).filter((s) => s !== '');
     }
 
     const markdown = generator.toMarkdown(plan);
