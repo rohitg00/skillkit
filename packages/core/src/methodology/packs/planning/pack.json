@@ -1,0 +1,11 @@
+{
+  "name": "planning",
+  "version": "1.0.0",
+  "description": "Planning methodology pack with skills for design-first approaches, task decomposition, and verification gates",
+  "skills": ["design-first", "task-decomposition", "verification-gates"],
+  "tags": ["planning", "design", "architecture", "decomposition", "verification"],
+  "compatibility": ["all"],
+  "author": "SkillKit Team",
+  "repository": "https://github.com/rohitg00/skillkit",
+  "license": "Apache-2.0"
+}

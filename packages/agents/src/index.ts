@@ -37,6 +37,9 @@ export * from './trae.js';
 export * from './windsurf.js';
 export * from './universal.js';
 
+// Agent features
+export * from './features/index.js';
+
 const adapters: Record<AgentType, AgentAdapter> = {
   'claude-code': new ClaudeCodeAdapter(),
   cursor: new CursorAdapter(),

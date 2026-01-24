@@ -16,8 +16,10 @@ import { Marketplace } from './screens/Marketplace.js';
 import { Memory } from './screens/Memory.js';
 import { Team } from './screens/Team.js';
 import { Plugins } from './screens/Plugins.js';
+import { Methodology } from './screens/Methodology.js';
+import { Plan } from './screens/Plan.js';
 
-export type Screen = 'home' | 'browse' | 'installed' | 'sync' | 'settings' | 'recommend' | 'translate' | 'context' | 'workflow' | 'execute' | 'history' | 'marketplace' | 'memory' | 'team' | 'plugins';
+export type Screen = 'home' | 'browse' | 'installed' | 'sync' | 'settings' | 'recommend' | 'translate' | 'context' | 'workflow' | 'execute' | 'history' | 'marketplace' | 'memory' | 'team' | 'plugins' | 'methodology' | 'plan';
 
 export function App() {
   const [screen, setScreen] = useState<Screen>('home');
@@ -43,6 +45,8 @@ export function App() {
     s: 'sync',
     a: 'team',
     p: 'plugins',
+    o: 'methodology',
+    n: 'plan',
     ',': 'settings',
   };
 
@@ -78,6 +82,8 @@ export function App() {
       case 'memory': return <Memory cols={cols} rows={rows} />;
       case 'team': return <Team cols={cols} rows={rows} />;
       case 'plugins': return <Plugins cols={cols} rows={rows} />;
+      case 'methodology': return <Methodology cols={cols} rows={rows} />;
+      case 'plan': return <Plan cols={cols} rows={rows} />;
     }
   };
 
@@ -92,7 +98,7 @@ export function App() {
         </Box>
       </Box>
       <Box>
-        <Text dimColor>h Home  m Market  b Browse  i Inst  w Wflow  x Exec  a Team  p Plug  r Rec  t Trans  c Ctx  e Mem  s Sync  , Cfg  q Quit</Text>
+        <Text dimColor>h Home  m Market  b Browse  w Wflow  x Exec  a Team  p Plug  o Meth  n Plan  r Rec  t Trans  c Ctx  e Mem  i Inst  s Sync  q Quit</Text>
       </Box>
     </Box>
   );

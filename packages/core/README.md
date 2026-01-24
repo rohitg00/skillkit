@@ -21,6 +21,12 @@ npm install @skillkit/core
 - **Skill Testing**: Test framework with assertions for skill validation
 - **Workflow Orchestration**: Compose skills into multi-step workflows
 - **Marketplace Aggregation**: Browse and search curated skill repositories
+- **Team Collaboration**: Share skill bundles with Git-based remote sync
+- **Plugin System**: Extend with custom translators, providers, and commands
+- **Methodologies**: 5 development frameworks (Agile, TDD, DevOps, Design Thinking, Feature Flags)
+- **Multi-Agent Orchestration**: Coordinate teams of AI agents with task assignment
+- **Plan System**: Parse, validate, and execute structured development plans
+- **Hooks & Automation**: Auto-trigger skills on file changes, git events
 
 ## Usage
 
@@ -153,6 +159,121 @@ const filtered = await marketplace.search({
   tags: ['security', 'auth'],
   limit: 10,
 });
+```
+
+### Team Collaboration
+
+```typescript
+import { TeamManager, SkillBundle } from '@skillkit/core';
+
+// Initialize team
+const teamManager = new TeamManager('./my-project');
+await teamManager.init('Engineering Team');
+
+// Create skill bundle
+const bundle = await teamManager.createBundle('onboarding', {
+  skills: ['git-workflow', 'code-review'],
+  description: 'New developer onboarding',
+});
+
+// Share bundle
+await teamManager.shareBundle(bundle);
+
+// Sync with remote registry
+await teamManager.syncWithRemote('https://github.com/myorg/skills');
+```
+
+### Plugin System
+
+```typescript
+import { PluginManager, TranslatorPlugin } from '@skillkit/core';
+
+// Load plugins
+const pluginManager = new PluginManager('./my-project');
+await pluginManager.loadAll();
+
+// Install plugin
+await pluginManager.install('custom-translator');
+
+// Create custom plugin
+const myPlugin: TranslatorPlugin = {
+  name: 'my-agent',
+  parse: async (content) => ({ /* canonical skill */ }),
+  generate: async (skill) => '/* custom format */',
+};
+```
+
+### Methodologies
+
+```typescript
+import { MethodologyManager } from '@skillkit/core';
+
+// List available methodologies
+const methodologies = await MethodologyManager.list();
+
+// Load methodology
+const tdd = await MethodologyManager.load('tdd');
+// Returns: { name: 'TDD', skills: ['red-green-refactor', 'test-first'], ... }
+```
+
+### Multi-Agent Orchestration
+
+```typescript
+import { TeamOrchestrator, TaskManager } from '@skillkit/core';
+
+// Create agent team
+const orchestrator = new TeamOrchestrator();
+const team = await orchestrator.createTeam({
+  name: 'feature-dev',
+  leader: { id: 'architect', name: 'System Architect' },
+  teammates: [
+    { id: 'frontend', name: 'Frontend Dev', capabilities: ['react'] },
+    { id: 'backend', name: 'Backend Dev', capabilities: ['api'] },
+  ],
+});
+
+// Manage tasks
+const taskManager = new TaskManager();
+const task = taskManager.createTask('Build login', 'Create login endpoint', spec);
+await taskManager.assignTask(task.id, 'backend');
+
+// Get stats
+const stats = taskManager.getStats();
+```
+
+### Plan System
+
+```typescript
+import { PlanParser, PlanValidator, PlanExecutor } from '@skillkit/core';
+
+// Parse plan from markdown
+const parser = new PlanParser();
+const plan = await parser.parseFile('./plan.md');
+
+// Validate plan
+const validator = new PlanValidator();
+const validation = validator.validate(plan);
+
+// Execute plan
+const executor = new PlanExecutor();
+const result = await executor.execute(plan, { dryRun: false });
+```
+
+### Hooks & Automation
+
+```typescript
+import { HookRegistry } from '@skillkit/core';
+
+// Register hooks
+const hooks = new HookRegistry('./my-project');
+await hooks.register('pre-commit', {
+  event: 'pre-commit',
+  skill: 'code-review',
+  enabled: true,
+});
+
+// Trigger hook
+await hooks.trigger('pre-commit', { files: ['src/index.ts'] });
 ```
 
 ## Supported Agents
