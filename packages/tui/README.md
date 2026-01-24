@@ -32,15 +32,64 @@ skillkit
 
 ## Screens
 
-### Home
+### Home (h)
 Overview of your project and quick actions. Shows detected agents, installed skills count, and navigation hints.
 
+### Marketplace (m)
+Browse curated skill marketplace:
+- Search across 33+ repositories
+- Filter by tags and categories
+- View popularity metrics
+- Install with one key
+
 ### Browse (b)
-Explore available skills from curated repositories. Features:
+Explore available skills from curated repositories:
 - Search skills with `/`
 - Filter by tags
 - View skill details
 - One-key installation
+
+### Workflow (w)
+Manage and execute workflows:
+- List available workflows
+- View workflow steps
+- Execute workflows
+- Monitor progress
+
+### Execute (x)
+Execute skills with checkpoints:
+- Task-based execution
+- Decision and review checkpoints
+- Dry-run mode
+- Git integration
+
+### Team (a)
+Team collaboration management:
+- Create and share skill bundles
+- Import team bundles
+- Sync with remote registry
+- Manage team members
+
+### Plugins (p)
+Plugin system management:
+- List installed plugins
+- Install new plugins
+- Enable/disable plugins
+- View plugin details
+
+### Methodology (o)
+Development methodologies:
+- Browse 5 methodologies (Agile, TDD, DevOps, Design Thinking, Feature Flags)
+- View methodology skills
+- Apply to project
+- Track adoption
+
+### Plan (n)
+Structured plan system:
+- Parse plan files
+- Validate plan structure
+- Execute plans step-by-step
+- Track progress
 
 ### Recommend (r)
 AI-powered skill suggestions based on your project:
@@ -63,7 +112,14 @@ View and manage project context:
 - Installed agents
 - Sync context to all agents
 
-### Installed (l)
+### Memory (e)
+Session memory system:
+- View learnings
+- Search past sessions
+- Compress observations
+- Export as skills
+
+### Installed (i)
 Manage your installed skills:
 - View all installed skills
 - Enable/disable skills
@@ -87,17 +143,24 @@ Configure SkillKit:
 | Key | Action |
 |-----|--------|
 | `h` | Home screen |
+| `m` | Marketplace |
 | `b` | Browse skills |
+| `w` | Workflows |
+| `x` | Execute |
+| `a` | Team collaboration |
+| `p` | Plugins |
+| `o` | Methodology |
+| `n` | Plan system |
 | `r` | Recommendations |
 | `t` | Translate skills |
 | `c` | Context management |
-| `l` | List installed |
+| `e` | Memory/Learnings |
+| `i` | Installed skills |
 | `s` | Sync skills |
 | `,` | Settings |
 | `↑/↓` | Navigate lists |
 | `Enter` | Select / Confirm |
 | `/` | Search |
-| `m` | Multi-select mode |
 | `Tab` | Switch focus |
 | `Esc` | Go back |
 | `?` | Help |

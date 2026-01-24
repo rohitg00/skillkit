@@ -101,6 +101,62 @@ skillkit workflow create       # Create new workflow
 skillkit cicd github-action    # Generate GitHub Actions
 skillkit cicd gitlab-ci        # Generate GitLab CI
 skillkit cicd pre-commit       # Generate pre-commit hook
+skillkit cicd init             # Initialize CI/CD templates
+```
+
+### Team Collaboration
+
+```bash
+skillkit team init --name "Team"     # Initialize team
+skillkit team share <bundle>         # Share skill bundle
+skillkit team import <path>          # Import bundle
+skillkit team list                   # List team bundles
+skillkit team sync                   # Sync with remote
+skillkit team remove <bundle>        # Remove bundle
+skillkit team bundle-create          # Create new bundle
+skillkit team bundle-export <id>     # Export bundle
+skillkit team bundle-list            # List all bundles
+```
+
+### Plugin System
+
+```bash
+skillkit plugin list                 # List installed plugins
+skillkit plugin install <name>       # Install plugin
+skillkit plugin uninstall <name>     # Uninstall plugin
+skillkit plugin enable <name>        # Enable plugin
+skillkit plugin disable <name>       # Disable plugin
+skillkit plugin info <name>          # Plugin details
+```
+
+### Methodologies & Plans
+
+```bash
+skillkit methodology list            # List methodologies
+skillkit methodology load <name>     # Load methodology
+skillkit methodology apply <name>    # Apply to project
+
+skillkit plan parse <file>           # Parse plan file
+skillkit plan validate <file>        # Validate plan
+skillkit plan execute <file>         # Execute plan
+skillkit plan status                 # Plan execution status
+```
+
+### Hooks & Automation
+
+```bash
+skillkit hook list                   # List registered hooks
+skillkit hook register <event>       # Register new hook
+skillkit hook trigger <event>        # Trigger hook manually
+skillkit hook enable <id>            # Enable hook
+skillkit hook disable <id>           # Disable hook
+```
+
+### Agent Commands
+
+```bash
+skillkit command generate <agent>    # Generate agent-native commands
+skillkit command list <agent>        # List available commands
 ```
 
 ### Utilities
@@ -110,6 +166,8 @@ skillkit init                  # Initialize in project
 skillkit init --agent cursor   # Initialize for specific agent
 skillkit validate ./skill      # Validate skill format
 skillkit create my-skill       # Create new skill
+skillkit settings              # View all settings
+skillkit settings --set key=value  # Update setting
 ```
 
 ## Install Options
