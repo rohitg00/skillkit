@@ -53,21 +53,39 @@ describe('E2E: Core CLI Commands', () => {
   describe('skillkit init', () => {
     it('should initialize skillkit in a new project', async () => {
       const result = await runCli(['init'], { cwd: testDir });
-      expect(result.exitCode).toBeLessThanOrEqual(1); // May succeed or have warnings
-      // Check for skills directory or config creation
-      const hasSkillsDir = testFileExists(testDir, 'skills') || testFileExists(testDir, '.claude');
-      expect(hasSkillsDir || result.stdout.includes('init')).toBe(true);
+      const output = result.stdout + result.stderr;
+
+      // Check for concrete successful outcome
+      const hasSkillsDir = testFileExists(testDir, 'skills');
+      const hasSkillkitDir = testFileExists(testDir, '.skillkit');
+      const hasClaudeSkills = testFileExists(testDir, '.claude/skills');
+      const hasAnyDir = hasSkillsDir || hasSkillkitDir || hasClaudeSkills;
+
+      // Either a directory was created OR the command completed successfully with output
+      if (!hasAnyDir && result.exitCode !== 0) {
+        // Fail with debugging info
+        expect.fail(`Init failed. Exit code: ${result.exitCode}\nOutput: ${output}`);
+      }
+
+      expect(hasAnyDir || result.exitCode === 0).toBe(true);
     });
 
     it('should create skills directory structure', async () => {
-      await runCli(['init'], { cwd: testDir });
-      // Verify expected structure exists or was attempted
-      const hasAnySkillDir =
-        testFileExists(testDir, 'skills') ||
-        testFileExists(testDir, '.skillkit') ||
-        testFileExists(testDir, '.claude/skills');
-      // Init should at least attempt to create something
-      expect(hasAnySkillDir || true).toBe(true);
+      const result = await runCli(['init'], { cwd: testDir });
+
+      // Verify expected structure actually exists
+      const hasSkillsDir = testFileExists(testDir, 'skills');
+      const hasSkillkitDir = testFileExists(testDir, '.skillkit');
+      const hasClaudeSkills = testFileExists(testDir, '.claude/skills');
+      const hasAnySkillDir = hasSkillsDir || hasSkillkitDir || hasClaudeSkills;
+
+      // Strict assertion - init should create at least one directory
+      if (!hasAnySkillDir) {
+        const output = result.stdout + result.stderr;
+        expect.fail(`Init did not create expected directories.\nExit code: ${result.exitCode}\nOutput: ${output}`);
+      }
+
+      expect(hasAnySkillDir).toBe(true);
     });
   });
 

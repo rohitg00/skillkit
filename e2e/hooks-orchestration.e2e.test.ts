@@ -56,13 +56,19 @@ describe('E2E: Hooks System', () => {
         { cwd: testDir }
       );
       const output = result.stdout + result.stderr;
-      expect(
+
+      // Must have meaningful output about the registration
+      const hasRelevantOutput =
         output.includes('register') ||
-          output.includes('hook') ||
-          output.includes('pre-commit') ||
-          output.includes('success') ||
-          result.exitCode !== undefined
-      ).toBe(true);
+        output.includes('hook') ||
+        output.includes('pre-commit') ||
+        output.includes('success');
+
+      if (!hasRelevantOutput && result.exitCode !== 0) {
+        expect.fail(`Hook registration failed. Exit: ${result.exitCode}\nOutput: ${output}`);
+      }
+
+      expect(hasRelevantOutput || result.exitCode === 0).toBe(true);
     });
 
     it('should register hooks for all event types', async () => {
@@ -71,7 +77,8 @@ describe('E2E: Hooks System', () => {
           ['hook', 'register', '--event', event, '--skill', 'hookable-skill'],
           { cwd: testDir }
         );
-        expect(result.exitCode).toBeDefined();
+        // Command should complete (exit code 0 or 1 for expected behavior)
+        expect(result.exitCode).toBeLessThanOrEqual(1);
       }
     });
 
@@ -89,7 +96,8 @@ describe('E2E: Hooks System', () => {
         ],
         { cwd: testDir }
       );
-      expect(result.exitCode).toBeDefined();
+      // Command should complete successfully or with expected exit
+      expect(result.exitCode).toBeLessThanOrEqual(1);
     });
 
     it('should register hook with condition', async () => {
@@ -106,7 +114,7 @@ describe('E2E: Hooks System', () => {
         ],
         { cwd: testDir }
       );
-      expect(result.exitCode).toBeDefined();
+      expect(result.exitCode).toBeLessThanOrEqual(1);
     });
 
     it('should handle invalid event gracefully', async () => {
@@ -115,13 +123,15 @@ describe('E2E: Hooks System', () => {
         { cwd: testDir }
       );
       const output = result.stdout + result.stderr;
-      expect(
+
+      // Should either fail or show an error message
+      const showsError =
         output.includes('invalid') ||
-          output.includes('unknown') ||
-          output.includes('error') ||
-          !result.success ||
-          result.exitCode !== undefined
-      ).toBe(true);
+        output.includes('unknown') ||
+        output.includes('error') ||
+        !result.success;
+
+      expect(showsError).toBe(true);
     });
   });
 
@@ -134,13 +144,19 @@ describe('E2E: Hooks System', () => {
 
       const result = await runCli(['hook', 'list'], { cwd: testDir });
       const output = result.stdout + result.stderr;
-      expect(
+
+      // Should show hooks or indicate none
+      const hasRelevantOutput =
         output.includes('hook') ||
-          output.includes('build') ||
-          output.includes('hookable-skill') ||
-          output.includes('No') ||
-          result.exitCode !== undefined
-      ).toBe(true);
+        output.includes('build') ||
+        output.includes('hookable-skill') ||
+        output.includes('No');
+
+      if (!hasRelevantOutput && result.exitCode !== 0) {
+        expect.fail(`Hook list failed. Exit: ${result.exitCode}\nOutput: ${output}`);
+      }
+
+      expect(hasRelevantOutput || result.exitCode === 0).toBe(true);
     });
 
     it('should support --json output', async () => {
@@ -156,7 +172,7 @@ describe('E2E: Hooks System', () => {
       });
 
       const result = await runCli(['hook', 'list', '--event', 'test'], { cwd: testDir });
-      expect(result.exitCode).toBeDefined();
+      expect(result.exitCode).toBeLessThanOrEqual(1);
     });
   });
 
@@ -168,13 +184,19 @@ describe('E2E: Hooks System', () => {
 
       const result = await runCli(['hook', 'trigger', 'test'], { cwd: testDir });
       const output = result.stdout + result.stderr;
-      expect(
+
+      // Should show trigger-related output
+      const hasRelevantOutput =
         output.includes('trigger') ||
-          output.includes('test') ||
-          output.includes('hook') ||
-          output.includes('executed') ||
-          result.exitCode !== undefined
-      ).toBe(true);
+        output.includes('test') ||
+        output.includes('hook') ||
+        output.includes('executed');
+
+      if (!hasRelevantOutput && result.exitCode !== 0) {
+        expect.fail(`Hook trigger failed. Exit: ${result.exitCode}\nOutput: ${output}`);
+      }
+
+      expect(hasRelevantOutput || result.exitCode === 0).toBe(true);
     });
 
     it('should trigger with --dry-run', async () => {
@@ -183,12 +205,13 @@ describe('E2E: Hooks System', () => {
       });
 
       const result = await runCli(['hook', 'trigger', 'deploy', '--dry-run'], { cwd: testDir });
-      expect(result.exitCode).toBeDefined();
+      expect(result.exitCode).toBeLessThanOrEqual(1);
     });
 
     it('should handle missing hook gracefully', async () => {
       const result = await runCli(['hook', 'trigger', 'nonexistent-event'], { cwd: testDir });
-      expect(result.exitCode).toBeDefined();
+      // Should complete without crashing
+      expect(result.exitCode).toBeLessThanOrEqual(1);
     });
   });
 
@@ -202,12 +225,18 @@ describe('E2E: Hooks System', () => {
 
       const result = await runCli(['hook', 'remove', 'my-hook'], { cwd: testDir });
       const output = result.stdout + result.stderr;
-      expect(
+
+      // Should show removal confirmation
+      const hasRelevantOutput =
         output.includes('remove') ||
-          output.includes('my-hook') ||
-          output.includes('success') ||
-          result.exitCode !== undefined
-      ).toBe(true);
+        output.includes('my-hook') ||
+        output.includes('success');
+
+      if (!hasRelevantOutput && result.exitCode !== 0) {
+        expect.fail(`Hook remove failed. Exit: ${result.exitCode}\nOutput: ${output}`);
+      }
+
+      expect(hasRelevantOutput || result.exitCode === 0).toBe(true);
     });
 
     it('should remove all hooks for an event', async () => {
@@ -216,7 +245,7 @@ describe('E2E: Hooks System', () => {
       });
 
       const result = await runCli(['hook', 'remove', '--event', 'test', '--all'], { cwd: testDir });
-      expect(result.exitCode).toBeDefined();
+      expect(result.exitCode).toBeLessThanOrEqual(1);
     });
   });
 });
@@ -245,12 +274,12 @@ describe('E2E: Agent Orchestration', () => {
       const result = await runCli(['sync', '--agents', 'claude-code,cursor,windsurf'], {
         cwd: testDir,
       });
-      expect(result.exitCode).toBeDefined();
+      expect(result.exitCode).toBeLessThanOrEqual(1);
     });
 
     it('should sync to all supported agents', async () => {
       const result = await runCli(['sync', '--all-agents'], { cwd: testDir });
-      expect(result.exitCode).toBeDefined();
+      expect(result.exitCode).toBeLessThanOrEqual(1);
     });
   });
 
@@ -262,7 +291,7 @@ describe('E2E: Agent Orchestration', () => {
         ['team', 'init', '--leader', 'claude-code', '--teammates', 'cursor,windsurf'],
         { cwd: testDir }
       );
-      expect(result.exitCode).toBeDefined();
+      expect(result.exitCode).toBeLessThanOrEqual(1);
     });
 
     it('should delegate tasks to team members', async () => {
@@ -270,7 +299,7 @@ describe('E2E: Agent Orchestration', () => {
 
       // This tests the delegation feature if available
       const result = await runCli(['team', 'sync', '--delegate'], { cwd: testDir });
-      expect(result.exitCode).toBeDefined();
+      expect(result.exitCode).toBeLessThanOrEqual(1);
     });
   });
 
@@ -284,7 +313,7 @@ describe('E2E: Agent Orchestration', () => {
 
       // Run workflow that triggers build
       const result = await runCli(['workflow', 'run', 'build'], { cwd: testDir });
-      expect(result.exitCode).toBeDefined();
+      expect(result.exitCode).toBeLessThanOrEqual(1);
     });
 
     it('should chain multiple hooks in sequence', async () => {
@@ -297,7 +326,7 @@ describe('E2E: Agent Orchestration', () => {
       );
 
       const result = await runCli(['hook', 'trigger', 'test', '--chain'], { cwd: testDir });
-      expect(result.exitCode).toBeDefined();
+      expect(result.exitCode).toBeLessThanOrEqual(1);
     });
   });
 });
@@ -340,11 +369,11 @@ This skill automatically activates on:
 
   it('should auto-register hooks from skill metadata', async () => {
     const result = await runCli(['hook', 'auto-register'], { cwd: testDir });
-    expect(result.exitCode).toBeDefined();
+    expect(result.exitCode).toBeLessThanOrEqual(1);
   });
 
   it('should detect and apply skill triggers', async () => {
     const result = await runCli(['sync', '--with-hooks'], { cwd: testDir });
-    expect(result.exitCode).toBeDefined();
+    expect(result.exitCode).toBeLessThanOrEqual(1);
   });
 });

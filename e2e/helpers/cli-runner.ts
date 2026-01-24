@@ -3,11 +3,16 @@
  * Executes skillkit CLI commands and captures output for testing
  */
 
-import { spawn, SpawnOptions, execSync } from 'node:child_process';
-import { join, resolve } from 'node:path';
+import { spawn, execFileSync } from 'node:child_process';
+import { join, resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { mkdirSync, rmSync, existsSync, writeFileSync, readFileSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
+
+// ESM-compatible __dirname equivalent
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export interface CliResult {
   stdout: string;
@@ -93,13 +98,14 @@ export async function runCli(args: string[], options: RunOptions = {}): Promise<
 
 /**
  * Run skillkit CLI synchronously (for simpler tests)
+ * Uses execFileSync to avoid shell injection vulnerabilities
  */
 export function runCliSync(args: string[], options: RunOptions = {}): CliResult {
   const startTime = Date.now();
   const cwd = options.cwd || ROOT_DIR;
 
   try {
-    const result = execSync(`node ${CLI_PATH} ${args.join(' ')}`, {
+    const result = execFileSync('node', [CLI_PATH, ...args], {
       cwd,
       env: { ...process.env, ...options.env, NO_COLOR: '1', FORCE_COLOR: '0' },
       encoding: 'utf-8',
@@ -218,7 +224,8 @@ export function createTestProject(options: {
   if (options.withSkills) {
     const skillsDir = join(dir, 'skills');
     mkdirSync(skillsDir, { recursive: true });
-    const count = options.skillCount || 3;
+    // Use nullish coalescing to respect explicit 0
+    const count = options.skillCount ?? 3;
     for (let i = 1; i <= count; i++) {
       createTestSkill(skillsDir, `test-skill-${i}`);
     }

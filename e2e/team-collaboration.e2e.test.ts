@@ -39,32 +39,50 @@ describe('E2E: Team Collaboration', () => {
     it('should initialize team configuration', async () => {
       const result = await runCli(['team', 'init'], { cwd: testDir });
       const output = result.stdout + result.stderr;
+
+      // Must complete successfully and show relevant output
+      expect(result.exitCode).toBeLessThanOrEqual(1);
+
       // Should initialize team structure or report status
-      expect(
+      const hasRelevantOutput =
         output.includes('team') ||
-          output.includes('init') ||
-          output.includes('created') ||
-          testFileExists(testDir, '.skillkit/team.json') ||
-          testFileExists(testDir, '.skillkit') ||
-          result.exitCode !== undefined
-      ).toBe(true);
+        output.includes('init') ||
+        output.includes('created') ||
+        testFileExists(testDir, '.skillkit/team.json') ||
+        testFileExists(testDir, '.skillkit');
+
+      if (!hasRelevantOutput && result.exitCode !== 0) {
+        expect.fail(`Team init failed. Exit: ${result.exitCode}\nOutput: ${output}`);
+      }
+
+      expect(hasRelevantOutput || result.exitCode === 0).toBe(true);
     });
 
     it('should create team configuration file', async () => {
-      await runCli(['team', 'init'], { cwd: testDir });
+      const result = await runCli(
+        ['team', 'init', '--name', 'test-team', '--registry', 'local'],
+        { cwd: testDir }
+      );
+
       // Check for team config in various possible locations
       const hasTeamConfig =
         testFileExists(testDir, '.skillkit/team.json') ||
         testFileExists(testDir, '.skillkit/team.yaml') ||
         testFileExists(testDir, 'team.json') ||
         testFileExists(testDir, '.skillkit');
-      // Either created or command completed
-      expect(hasTeamConfig || true).toBe(true);
+
+      // Strict assertion - either created config or command succeeded
+      if (!hasTeamConfig && result.exitCode !== 0) {
+        const output = result.stdout + result.stderr;
+        expect.fail(`Team init did not create config. Exit: ${result.exitCode}\nOutput: ${output}`);
+      }
+
+      expect(hasTeamConfig || result.exitCode === 0).toBe(true);
     });
 
     it('should accept team name option', async () => {
       const result = await runCli(['team', 'init', '--name', 'test-team'], { cwd: testDir });
-      expect(result.exitCode).toBeDefined();
+      expect(result.exitCode).toBeLessThanOrEqual(1);
     });
   });
 
@@ -75,14 +93,21 @@ describe('E2E: Team Collaboration', () => {
 
       const result = await runCli(['team', 'list'], { cwd: testDir });
       const output = result.stdout + result.stderr;
+
+      expect(result.exitCode).toBeLessThanOrEqual(1);
+
       // Should list skills or indicate none
-      expect(
+      const hasRelevantOutput =
         output.includes('skill') ||
-          output.includes('team') ||
-          output.includes('No') ||
-          output.includes('empty') ||
-          result.exitCode !== undefined
-      ).toBe(true);
+        output.includes('team') ||
+        output.includes('No') ||
+        output.includes('empty');
+
+      if (!hasRelevantOutput && result.exitCode !== 0) {
+        expect.fail(`Team list failed. Exit: ${result.exitCode}\nOutput: ${output}`);
+      }
+
+      expect(hasRelevantOutput || result.exitCode === 0).toBe(true);
     });
 
     it('should support --json output', async () => {
@@ -101,14 +126,21 @@ describe('E2E: Team Collaboration', () => {
 
       const result = await runCli(['team', 'share', 'team-skill-one'], { cwd: testDir });
       const output = result.stdout + result.stderr;
+
+      expect(result.exitCode).toBeLessThanOrEqual(1);
+
       // Should share skill or report status
-      expect(
+      const hasRelevantOutput =
         output.includes('share') ||
-          output.includes('team-skill-one') ||
-          output.includes('success') ||
-          output.includes('added') ||
-          result.exitCode !== undefined
-      ).toBe(true);
+        output.includes('team-skill-one') ||
+        output.includes('success') ||
+        output.includes('added');
+
+      if (!hasRelevantOutput && result.exitCode !== 0) {
+        expect.fail(`Team share failed. Exit: ${result.exitCode}\nOutput: ${output}`);
+      }
+
+      expect(hasRelevantOutput || result.exitCode === 0).toBe(true);
     });
 
     it('should share multiple skills', async () => {
@@ -117,7 +149,7 @@ describe('E2E: Team Collaboration', () => {
       const result = await runCli(['team', 'share', 'team-skill-one', 'team-skill-two'], {
         cwd: testDir,
       });
-      expect(result.exitCode).toBeDefined();
+      expect(result.exitCode).toBeLessThanOrEqual(1);
     });
 
     it('should handle non-existent skill gracefully', async () => {
@@ -125,14 +157,15 @@ describe('E2E: Team Collaboration', () => {
 
       const result = await runCli(['team', 'share', 'nonexistent-skill'], { cwd: testDir });
       const output = result.stdout + result.stderr;
+
       // Should report error or warning about missing skill
-      expect(
+      const showsError =
         output.includes('not found') ||
-          output.includes('error') ||
-          output.includes('No') ||
-          !result.success ||
-          result.exitCode !== undefined
-      ).toBe(true);
+        output.includes('error') ||
+        output.includes('No') ||
+        !result.success;
+
+      expect(showsError).toBe(true);
     });
   });
 
@@ -143,19 +176,26 @@ describe('E2E: Team Collaboration', () => {
 
       const result = await runCli(['team', 'sync'], { cwd: testDir });
       const output = result.stdout + result.stderr;
-      expect(
+
+      expect(result.exitCode).toBeLessThanOrEqual(1);
+
+      const hasRelevantOutput =
         output.includes('sync') ||
-          output.includes('team') ||
-          output.includes('success') ||
-          result.exitCode !== undefined
-      ).toBe(true);
+        output.includes('team') ||
+        output.includes('success');
+
+      if (!hasRelevantOutput && result.exitCode !== 0) {
+        expect.fail(`Team sync failed. Exit: ${result.exitCode}\nOutput: ${output}`);
+      }
+
+      expect(hasRelevantOutput || result.exitCode === 0).toBe(true);
     });
 
     it('should sync with specific agent', async () => {
       await runCli(['team', 'init'], { cwd: testDir });
 
       const result = await runCli(['team', 'sync', '--agent', 'claude-code'], { cwd: testDir });
-      expect(result.exitCode).toBeDefined();
+      expect(result.exitCode).toBeLessThanOrEqual(1);
     });
   });
 
@@ -166,12 +206,19 @@ describe('E2E: Team Collaboration', () => {
 
       const result = await runCli(['team', 'remove', 'team-skill-one'], { cwd: testDir });
       const output = result.stdout + result.stderr;
-      expect(
+
+      expect(result.exitCode).toBeLessThanOrEqual(1);
+
+      const hasRelevantOutput =
         output.includes('remove') ||
-          output.includes('team-skill-one') ||
-          output.includes('success') ||
-          result.exitCode !== undefined
-      ).toBe(true);
+        output.includes('team-skill-one') ||
+        output.includes('success');
+
+      if (!hasRelevantOutput && result.exitCode !== 0) {
+        expect.fail(`Team remove failed. Exit: ${result.exitCode}\nOutput: ${output}`);
+      }
+
+      expect(hasRelevantOutput || result.exitCode === 0).toBe(true);
     });
   });
 
@@ -186,12 +233,19 @@ describe('E2E: Team Collaboration', () => {
 
       const result = await runCli(['team', 'import', bundleDir], { cwd: testDir });
       const output = result.stdout + result.stderr;
-      expect(
+
+      expect(result.exitCode).toBeLessThanOrEqual(1);
+
+      const hasRelevantOutput =
         output.includes('import') ||
-          output.includes('skill') ||
-          output.includes('success') ||
-          result.exitCode !== undefined
-      ).toBe(true);
+        output.includes('skill') ||
+        output.includes('success');
+
+      if (!hasRelevantOutput && result.exitCode !== 0) {
+        expect.fail(`Team import failed. Exit: ${result.exitCode}\nOutput: ${output}`);
+      }
+
+      expect(hasRelevantOutput || result.exitCode === 0).toBe(true);
     });
   });
 
@@ -204,7 +258,7 @@ describe('E2E: Team Collaboration', () => {
       const result = await runCli(['team', 'bundle-create', '--output', bundlePath], {
         cwd: testDir,
       });
-      expect(result.exitCode).toBeDefined();
+      expect(result.exitCode).toBeLessThanOrEqual(1);
     });
 
     it('should list bundle contents (bundle-list)', async () => {
@@ -216,7 +270,7 @@ describe('E2E: Team Collaboration', () => {
 
       // Now list it
       const result = await runCli(['team', 'bundle-list', bundlePath], { cwd: testDir });
-      expect(result.exitCode).toBeDefined();
+      expect(result.exitCode).toBeLessThanOrEqual(1);
     });
 
     it('should extract bundle (bundle-extract)', async () => {
@@ -231,7 +285,7 @@ describe('E2E: Team Collaboration', () => {
       const result = await runCli(['team', 'bundle-extract', bundlePath, '--output', extractDir], {
         cwd: testDir,
       });
-      expect(result.exitCode).toBeDefined();
+      expect(result.exitCode).toBeLessThanOrEqual(1);
     });
   });
 });
@@ -256,7 +310,7 @@ describe('E2E: Team Orchestration', () => {
 
     // Configure team with roles
     const result = await runCli(['team', 'init', '--role', 'leader:claude-code'], { cwd: testDir });
-    expect(result.exitCode).toBeDefined();
+    expect(result.exitCode).toBeLessThanOrEqual(1);
   });
 
   it('should support multi-agent configuration', async () => {
@@ -266,7 +320,7 @@ describe('E2E: Team Orchestration', () => {
       ['team', 'init', '--agents', 'claude-code,cursor,github-copilot'],
       { cwd: testDir }
     );
-    expect(result.exitCode).toBeDefined();
+    expect(result.exitCode).toBeLessThanOrEqual(1);
   });
 
   it('should handle team task delegation', async () => {
@@ -274,6 +328,6 @@ describe('E2E: Team Orchestration', () => {
 
     // This tests the orchestration task feature if available
     const result = await runCli(['team', 'sync', '--all-agents'], { cwd: testDir });
-    expect(result.exitCode).toBeDefined();
+    expect(result.exitCode).toBeLessThanOrEqual(1);
   });
 });
