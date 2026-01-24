@@ -10,6 +10,9 @@
     "test": "turbo run test",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "vitest run --config e2e/vitest.config.ts",
+    "test:e2e:watch": "vitest --config e2e/vitest.config.ts",
+    "test:all": "pnpm test && pnpm test:e2e",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "clean": "rm -rf node_modules packages/*/node_modules apps/*/node_modules packages/*/dist apps/*/dist"

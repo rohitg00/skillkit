@@ -7,6 +7,7 @@ on:
     branches: [main]
 
 jobs:
+  # Unit tests run on all Node versions
   test:
     runs-on: ubuntu-latest
 
@@ -35,5 +36,55 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Test
+      - name: Unit Tests
         run: pnpm test
+
+  # E2E tests run on latest Node only (to save CI time)
+  e2e:
+    runs-on: ubuntu-latest
+    needs: test  # Run after unit tests pass
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: E2E Tests
+        run: pnpm test:e2e
+
+      - name: Upload E2E Test Results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: |
+            e2e/**/*.log
+            /tmp/skillkit-e2e-*
+          retention-days: 7
+
+  # Final status check for branch protection
+  ci-success:
+    runs-on: ubuntu-latest
+    needs: [test, e2e]
+    if: always()
+    steps:
+      - name: Check all jobs passed
+        run: |
+          if [[ "${{ needs.test.result }}" != "success" ]] || [[ "${{ needs.e2e.result }}" != "success" ]]; then
+            echo "One or more jobs failed"
+            exit 1
+          fi
+          echo "All CI checks passed!"
