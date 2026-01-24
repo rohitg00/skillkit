@@ -6,7 +6,7 @@
 
 import { Command, Option } from 'clipanion';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { resolve, join, dirname } from 'node:path';
+import { resolve, join, dirname, extname } from 'node:path';
 import { existsSync } from 'node:fs';
 import {
   createCommandRegistry,
@@ -199,7 +199,22 @@ export class CommandCmd extends Command {
     // Check if command already exists
     const existing = commands.findIndex((c) => c.name === commandName);
     if (existing >= 0) {
-      commands[existing] = command;
+      // Merge new properties with existing command to preserve metadata
+      const previous = commands[existing];
+      commands[existing] = {
+        ...previous,
+        name: commandName,
+        skill: this.skill,
+        description: this.description ?? previous.description ?? command.description,
+        category: this.category ?? previous.category,
+        examples: command.examples ?? previous.examples,
+        // Preserve existing metadata if not provided
+        aliases: previous.aliases,
+        args: previous.args,
+        tags: previous.tags,
+        hidden: previous.hidden,
+        metadata: previous.metadata,
+      };
       this.context.stdout.write(`Updated command: /${commandName}\n`);
     } else {
       commands.push(command);
@@ -243,23 +258,39 @@ export class CommandCmd extends Command {
     });
 
     const format = getAgentFormat(agent);
-    const outputDir = this.output || resolve(process.cwd(), format.directory);
+    const outputTarget = this.output
+      ? resolve(this.output)
+      : resolve(process.cwd(), format.directory);
+    const outputDir = extname(outputTarget) ? dirname(outputTarget) : outputTarget;
 
     const result = generator.generate(commands, agent);
 
     if (typeof result === 'string') {
       // Single file output (e.g., Cursor rules)
+      const extension = format.extension
+        ? format.extension.startsWith('.') ? format.extension : `.${format.extension}`
+        : '.mdc';
+      const filePath = extname(outputTarget)
+        ? outputTarget
+        : join(outputTarget, `commands${extension}`);
+
       if (this.dryRun) {
-        this.context.stdout.write('Would write to: ' + outputDir + '\n\n');
+        this.context.stdout.write('Would write to: ' + filePath + '\n\n');
         this.context.stdout.write(result);
       } else {
-        await mkdir(dirname(outputDir), { recursive: true });
-        const filePath = join(outputDir, 'commands.mdc');
+        await mkdir(dirname(filePath), { recursive: true });
         await writeFile(filePath, result);
         this.context.stdout.write(`Generated: ${filePath}\n`);
       }
     } else {
       // Multiple file output
+      if (extname(outputTarget)) {
+        this.context.stderr.write(
+          'Error: --output must be a directory for multi-file formats\n'
+        );
+        return 1;
+      }
+
       if (this.dryRun) {
         this.context.stdout.write('Would write to: ' + outputDir + '\n\n');
         for (const [filename, content] of result) {

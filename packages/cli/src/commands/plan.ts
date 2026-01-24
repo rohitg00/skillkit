@@ -225,7 +225,7 @@ export class PlanCommand extends Command {
     const plan = parser.parse(content);
 
     // Validate first
-    const validator = createPlanValidator();
+    const validator = createPlanValidator({ strict: this.strict });
     const validation = validator.validate(plan);
 
     if (!validation.valid) {

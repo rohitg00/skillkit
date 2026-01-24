@@ -177,11 +177,12 @@ skillkit/
 - Home, Marketplace, Browse, Installed
 - Workflow, Execute, History
 - Team, Plugins
+- Methodology (o), Plans (n)
 - Recommend, Translate, Context, Memory
 - Sync, Settings
 
 ### Test Suites
-- Total: 359 tests passing across all modules
+- Total: 602 tests passing across all modules
 
 ## Commands
 

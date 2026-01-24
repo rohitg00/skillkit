@@ -4,6 +4,7 @@
  * Implements file pattern matching for file-scoped skills.
  */
 
+import { minimatch } from 'minimatch';
 import type { GlobConfig } from './types.js';
 
 /**
@@ -90,95 +91,30 @@ export class GlobMatcher {
   }
 
   /**
-   * Convert glob pattern to regex
+   * Convert glob pattern to regex using minimatch
    *
-   * Uses a tokenization approach to avoid conflicts between glob wildcards
-   * and regex special characters in replacement strings.
+   * Uses the battle-tested minimatch library to avoid ReDoS vulnerabilities
+   * and ensure consistent glob matching behavior.
    */
   private patternToRegex(pattern: string): RegExp {
     // Handle negation
     const isNegated = pattern.startsWith('!');
     const cleanPattern = isNegated ? pattern.slice(1) : pattern;
 
-    // Tokenize the pattern: split into segments handling **, *, ?, and literals
-    const tokens: string[] = [];
-    let i = 0;
-
-    while (i < cleanPattern.length) {
-      if (cleanPattern[i] === '*') {
-        if (cleanPattern[i + 1] === '*') {
-          // Handle **
-          if (cleanPattern[i + 2] === '/') {
-            // **/ pattern
-            tokens.push('**/');
-            i += 3;
-          } else if (i > 0 && cleanPattern[i - 1] === '/') {
-            // /** pattern (already consumed /)
-            tokens.push('**');
-            i += 2;
-          } else {
-            tokens.push('**');
-            i += 2;
-          }
-        } else {
-          tokens.push('*');
-          i += 1;
-        }
-      } else if (cleanPattern[i] === '?') {
-        tokens.push('?');
-        i += 1;
-      } else {
-        // Literal character - collect consecutive literals
-        let literal = '';
-        while (i < cleanPattern.length &&
-               cleanPattern[i] !== '*' &&
-               cleanPattern[i] !== '?') {
-          literal += cleanPattern[i];
-          i += 1;
-        }
-        tokens.push(literal);
-      }
+    // Adjust pattern for directory matching
+    let adjustedPattern = cleanPattern;
+    if (this.config.matchDirectories && !cleanPattern.endsWith('/**')) {
+      // Append /** to match directories and their contents
+      adjustedPattern = cleanPattern.endsWith('/')
+        ? `${cleanPattern}**`
+        : `${cleanPattern}/**`;
     }
 
-    // Convert tokens to regex parts
-    const regexParts: string[] = [];
+    // Use minimatch to create a safe regex
+    // minimatch returns null if pattern is invalid, fallback to match-nothing regex
+    const regex = minimatch.makeRe(adjustedPattern, { dot: this.config.matchHidden });
 
-    for (let t = 0; t < tokens.length; t++) {
-      const token = tokens[t];
-
-      if (token === '**/') {
-        // **/ matches zero or more path segments with trailing /
-        // At start: any prefix or nothing
-        // In middle: any directories
-        if (t === 0) {
-          regexParts.push('(?:[^/]+/)*');
-        } else {
-          regexParts.push('(?:[^/]+/)*');
-        }
-      } else if (token === '**') {
-        // ** matches any path (including /)
-        regexParts.push('.*');
-      } else if (token === '*') {
-        // * matches any character except /
-        regexParts.push('[^/]*');
-      } else if (token === '?') {
-        // ? matches single character except /
-        regexParts.push('[^/]');
-      } else {
-        // Literal - escape regex special characters
-        const escaped = token.replace(/[.+^${}()|[\]\\]/g, '\\$&');
-        regexParts.push(escaped);
-      }
-    }
-
-    let regexPattern = regexParts.join('');
-
-    // Handle directory matching
-    if (this.config.matchDirectories) {
-      regexPattern = `${regexPattern}(?:/.*)?`;
-    }
-
-    return new RegExp(`^${regexPattern}$`);
+    return regex || /(?!)/; // /(?!)/ is a regex that never matches anything
   }
 
   /**

@@ -5,6 +5,7 @@
  */
 
 import type { AgentMode, ModeConfig } from './types.js';
+import { GlobMatcher } from './globs.js';
 
 /**
  * Default mode configurations
@@ -156,28 +157,8 @@ export class ModeManager {
       return true;
     }
 
-    return config.allowedFiles.some((pattern) => {
-      // Escape special regex characters except * and ?
-      let regexPattern = pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&');
-
-      // Handle **/ at start (matches any path prefix or nothing)
-      regexPattern = regexPattern.replace(/^\*\*\//, '(?:.*/)?');
-
-      // Handle /**/ in middle (matches any path segment or nothing)
-      regexPattern = regexPattern.replace(/\/\*\*\//g, '(?:/.*)?/');
-
-      // Handle /** at end (matches any path suffix)
-      regexPattern = regexPattern.replace(/\/\*\*$/, '(?:/.*)?');
-
-      // Handle remaining ** (match any path)
-      regexPattern = regexPattern.replace(/\*\*/g, '.*');
-
-      // Handle * (match any except /)
-      regexPattern = regexPattern.replace(/\*/g, '[^/]*');
-
-      const regex = new RegExp(`^${regexPattern}$`);
-      return regex.test(filePath);
-    });
+    const matcher = new GlobMatcher({ include: config.allowedFiles });
+    return matcher.matches(filePath);
   }
 
   /**
