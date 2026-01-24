@@ -1,0 +1,11 @@
+{
+  "name": "meta",
+  "version": "1.0.0",
+  "description": "Meta skills for authoring and managing methodology skills effectively",
+  "skills": ["skill-authoring"],
+  "tags": ["meta", "authoring", "skills", "writing", "documentation"],
+  "compatibility": ["all"],
+  "author": "SkillKit Team",
+  "repository": "https://github.com/rohitg00/skillkit",
+  "license": "Apache-2.0"
+}

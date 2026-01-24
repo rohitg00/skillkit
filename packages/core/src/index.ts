@@ -45,3 +45,24 @@ export * from './team/index.js';
 
 // Plugin System (Extensibility)
 export * from './plugins/index.js';
+
+// Methodology Framework (Phase 12)
+export * from './methodology/index.js';
+
+// Hooks & Automatic Triggering System (Phase 13)
+export * from './hooks/index.js';
+
+// Team Orchestration System (Phase 14)
+export * from './orchestrator/index.js';
+
+// Structured Plan System (Phase 15)
+export * from './plan/index.js';
+
+// Slash Commands & Agent Integration (Phase 16)
+export * from './commands/index.js';
+
+// AI-Powered Features (Phase 18)
+export * from './ai/index.js';
+
+// Audit Logging (Phase 18)
+export * from './audit/index.js';

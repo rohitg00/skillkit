@@ -1,0 +1,11 @@
+{
+  "name": "debugging",
+  "version": "1.0.0",
+  "description": "Systematic debugging methodology pack with skills for root cause analysis, trace isolation, and hypothesis-driven debugging",
+  "skills": ["root-cause-analysis", "trace-and-isolate", "hypothesis-testing"],
+  "tags": ["debugging", "troubleshooting", "investigation", "bug-fixing"],
+  "compatibility": ["all"],
+  "author": "SkillKit Team",
+  "repository": "https://github.com/rohitg00/skillkit",
+  "license": "Apache-2.0"
+}
