@@ -13,13 +13,14 @@
 npm install -g skillkit
 ```
 
-## What's New in v1.5.0
+## What's New in v1.6.0
 
-- **Team Collaboration**: Share skill bundles with your team via Git
-- **Plugin System**: Extend SkillKit with custom translators, providers, and commands
-- **Methodologies**: 5 ready-to-use development frameworks (Agile, TDD, DevOps, etc.)
-- **Agent Orchestration**: Coordinate multiple AI agents working together
-- **Hooks & Automation**: Auto-trigger skills on git commits, file changes
+- **Methodology Framework**: 5 ready-to-use development frameworks (Agile, TDD, DevOps, Security-First, Documentation-First) with 13 specialized skills
+- **Hooks System**: Event-driven skill triggers - auto-activate on git commits, file changes, builds, tests, deployments
+- **Agent Orchestration**: Multi-agent team coordination with leader/teammate roles and task assignment
+- **Plan System**: Structured plan creation with validation and execution - parse, validate, and execute development plans
+- **Slash Commands**: Generate agent-native commands from natural language for all 17 AI agents
+- **Enhanced TUI**: New Methodology (o) and Plan (n) screens with improved navigation
 
 ## The Problem
 
