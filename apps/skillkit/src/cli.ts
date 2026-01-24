@@ -33,6 +33,12 @@ import {
   CICDCommand,
   TeamCommand,
   PluginCommand,
+  MethodologyCommand,
+  HookCommand,
+  PlanCommand,
+  CommandCmd,
+  AICommand,
+  AuditCommand,
 } from '@skillkit/cli';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -79,5 +85,11 @@ cli.register(SettingsCommand);
 cli.register(CICDCommand);
 cli.register(TeamCommand);
 cli.register(PluginCommand);
+cli.register(MethodologyCommand);
+cli.register(HookCommand);
+cli.register(PlanCommand);
+cli.register(CommandCmd);
+cli.register(AICommand);
+cli.register(AuditCommand);
 
 cli.runExit(process.argv.slice(2));

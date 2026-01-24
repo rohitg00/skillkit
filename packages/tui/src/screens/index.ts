@@ -13,3 +13,5 @@ export { History } from './History.js';
 export { Marketplace } from './Marketplace.js';
 export { Team } from './Team.js';
 export { Plugins } from './Plugins.js';
+export { Methodology } from './Methodology.js';
+export { Plan } from './Plan.js';

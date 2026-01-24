@@ -1,0 +1,11 @@
+{
+  "name": "testing",
+  "version": "1.0.0",
+  "description": "Test-driven development methodology pack with skills for RED-GREEN-REFACTOR cycles, testing patterns, and avoiding common anti-patterns",
+  "skills": ["red-green-refactor", "test-patterns", "anti-patterns"],
+  "tags": ["tdd", "testing", "quality", "unit-tests", "integration-tests"],
+  "compatibility": ["all"],
+  "author": "SkillKit Team",
+  "repository": "https://github.com/rohitg00/skillkit",
+  "license": "Apache-2.0"
+}

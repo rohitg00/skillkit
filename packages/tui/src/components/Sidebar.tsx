@@ -20,6 +20,9 @@ const NAV: { id: Screen; label: string; key: string }[] = [
   // Collaboration
   { id: 'team', label: 'Team', key: 'a' },
   { id: 'plugins', label: 'Plugins', key: 'p' },
+  // Methodology
+  { id: 'methodology', label: 'Methodology', key: 'o' },
+  { id: 'plan', label: 'Plans', key: 'n' },
   // Tools
   { id: 'recommend', label: 'Recommend', key: 'r' },
   { id: 'translate', label: 'Translate', key: 't' },
@@ -63,8 +66,8 @@ export function Sidebar({ screen }: SidebarProps) {
 
       <Text> </Text>
 
-      {/* Tools (8-11) */}
-      {NAV.slice(8, 12).map((item) => (
+      {/* Methodology (8-9) */}
+      {NAV.slice(8, 10).map((item) => (
         <Text key={item.id} inverse={screen === item.id}>
           {screen === item.id ? symbols.bullet : ' '}{item.label}
         </Text>
@@ -72,8 +75,17 @@ export function Sidebar({ screen }: SidebarProps) {
 
       <Text> </Text>
 
-      {/* Management (12-14) */}
-      {NAV.slice(12).map((item) => (
+      {/* Tools (10-13) */}
+      {NAV.slice(10, 14).map((item) => (
+        <Text key={item.id} inverse={screen === item.id}>
+          {screen === item.id ? symbols.bullet : ' '}{item.label}
+        </Text>
+      ))}
+
+      <Text> </Text>
+
+      {/* Management (14-16) */}
+      {NAV.slice(14).map((item) => (
         <Text key={item.id} inverse={screen === item.id}>
           {screen === item.id ? symbols.bullet : ' '}{item.label}
         </Text>

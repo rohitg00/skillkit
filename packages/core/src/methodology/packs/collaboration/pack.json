@@ -1,0 +1,11 @@
+{
+  "name": "collaboration",
+  "version": "1.0.0",
+  "description": "Collaboration methodology pack with skills for structured code reviews, parallel investigation, and handoff protocols",
+  "skills": ["structured-review", "parallel-investigation", "handoff-protocols"],
+  "tags": ["collaboration", "code-review", "teamwork", "handoff", "communication"],
+  "compatibility": ["all"],
+  "author": "SkillKit Team",
+  "repository": "https://github.com/rohitg00/skillkit",
+  "license": "Apache-2.0"
+}
