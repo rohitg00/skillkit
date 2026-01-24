@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@skillkit/core": "workspace:*",
-    "minimatch": "^10.0.1"
+    "minimatch": "^9.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",

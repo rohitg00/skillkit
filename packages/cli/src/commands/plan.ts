@@ -310,21 +310,21 @@ export class PlanCommand extends Command {
     const generator = createPlanGenerator({
       includeTests: true,
       includeCommits: true,
-      techStack: this.techStack?.split(',').map((s) => s.trim()),
+      techStack: this.techStack?.split(',').map((s) => s.trim()).filter((s) => s !== ''),
     });
 
     let plan;
 
     if (this.tasks) {
-      const taskNames = this.tasks.split(',').map((s) => s.trim());
+      const taskNames = this.tasks.split(',').map((s) => s.trim()).filter((s) => s !== '');
       plan = generator.fromTaskList(this.name, this.goal || 'Complete the tasks', taskNames, {
         template: this.template as keyof typeof TASK_TEMPLATES,
-        techStack: this.techStack?.split(',').map((s) => s.trim()),
+        techStack: this.techStack?.split(',').map((s) => s.trim()).filter((s) => s !== ''),
       });
     } else {
       plan = generator.createPlan(this.name, this.goal || 'Complete the project');
       if (this.techStack) {
-        plan.techStack = this.techStack.split(',').map((s) => s.trim());
+        plan.techStack = this.techStack.split(',').map((s) => s.trim()).filter((s) => s !== '');
       }
     }
 

@@ -171,15 +171,28 @@ export class AuditLogger {
   private async loadEvents(): Promise<AuditEvent[]> {
     try {
       const content = await fs.readFile(this.logFile, 'utf-8');
-      return content
-        .split('\n')
-        .filter((line) => line.trim())
-        .map((line) => {
+      const events: AuditEvent[] = [];
+
+      for (const line of content.split('\n')) {
+        if (!line.trim()) continue;
+
+        try {
           const event = JSON.parse(line);
           event.timestamp = new Date(event.timestamp);
-          return event;
-        });
-    } catch {
+          events.push(event);
+        } catch (error) {
+          // Skip malformed lines silently to prevent data loss
+          // Malformed lines are ignored, valid events are preserved
+          continue;
+        }
+      }
+
+      return events;
+    } catch (error) {
+      // Only propagate genuine filesystem errors
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+        throw error;
+      }
       return [];
     }
   }
@@ -222,11 +235,11 @@ export class AuditLogger {
 
     filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
-    if (query.offset) {
+    if (query.offset !== undefined && query.offset !== null) {
       filtered = filtered.slice(query.offset);
     }
 
-    if (query.limit) {
+    if (query.limit !== undefined && query.limit !== null) {
       filtered = filtered.slice(0, query.limit);
     }
 
