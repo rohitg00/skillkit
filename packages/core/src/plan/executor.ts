@@ -356,6 +356,14 @@ export class PlanExecutor {
    */
   cancel(): void {
     this.abortController?.abort();
+
+    // Unblock any pending pause to prevent hanging
+    if (this.isPaused && this.resumeResolve) {
+      this.isPaused = false;
+      this.resumeResolve();
+      this.resumeResolve = undefined;
+      this.resumePromise = undefined;
+    }
   }
 
   /**

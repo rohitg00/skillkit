@@ -7,6 +7,8 @@
 import { Command, Option } from 'clipanion';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { resolve, join, dirname, extname } from 'node:path';
+import * as path from 'node:path';
+import * as fs from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import {
   createCommandRegistry,
@@ -207,7 +209,7 @@ export class CommandCmd extends Command {
         skill: this.skill,
         description: this.description ?? previous.description ?? command.description,
         category: this.category ?? previous.category,
-        examples: command.examples ?? previous.examples,
+        examples: command.examples?.length ? command.examples : previous.examples,
         // Preserve existing metadata if not provided
         aliases: previous.aliases,
         args: previous.args,
@@ -390,7 +392,16 @@ export class CommandCmd extends Command {
     const bundle = registry.export(this.all);
 
     if (this.output) {
-      const outputPath = resolve(this.output);
+      let outputPath = resolve(this.output);
+
+      // Check if output is a directory or ends with path separator
+      const stat = await fs.stat(outputPath).catch(() => null);
+      if ((stat && stat.isDirectory()) || this.output.endsWith(path.sep)) {
+        outputPath = path.join(outputPath, 'commands.json');
+      }
+
+      // Ensure parent directory exists
+      await fs.mkdir(path.dirname(outputPath), { recursive: true });
       await writeFile(outputPath, JSON.stringify(bundle, null, 2));
       this.context.stdout.write(`Exported ${bundle.commands.length} commands to: ${outputPath}\n`);
     } else {

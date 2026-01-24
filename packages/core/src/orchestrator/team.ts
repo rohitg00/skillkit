@@ -469,7 +469,15 @@ export class TeamOrchestrator {
       }
 
       // Find an idle agent to assign
-      const idleAgent = team.teammates.find((a) => a.status === 'idle') || team.leader;
+      const idleTeammate = team.teammates.find((a) => a.status === 'idle');
+      const idleLeader = team.leader.status === 'idle' && !team.leader.currentTask ? team.leader : null;
+      const idleAgent = idleTeammate || idleLeader;
+
+      // Skip task if no idle agent available
+      if (!idleAgent) {
+        // No agent available, task will be retried in next iteration
+        break;
+      }
 
       // Assign and execute
       await this.assignTask(teamId, nextTask.id, idleAgent.id);
