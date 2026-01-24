@@ -55,11 +55,12 @@ describe('E2E: Core CLI Commands', () => {
       const result = await runCli(['init'], { cwd: testDir });
       const output = result.stdout + result.stderr;
 
-      // Check for concrete successful outcome
+      // Check for concrete successful outcome - any of these directories
       const hasSkillsDir = testFileExists(testDir, 'skills');
       const hasSkillkitDir = testFileExists(testDir, '.skillkit');
       const hasClaudeSkills = testFileExists(testDir, '.claude/skills');
-      const hasAnyDir = hasSkillsDir || hasSkillkitDir || hasClaudeSkills;
+      const hasAgentSkills = testFileExists(testDir, '.agent/skills');
+      const hasAnyDir = hasSkillsDir || hasSkillkitDir || hasClaudeSkills || hasAgentSkills;
 
       // Either a directory was created OR the command completed successfully with output
       if (!hasAnyDir && result.exitCode !== 0) {
@@ -73,11 +74,12 @@ describe('E2E: Core CLI Commands', () => {
     it('should create skills directory structure', async () => {
       const result = await runCli(['init'], { cwd: testDir });
 
-      // Verify expected structure actually exists
+      // Verify expected structure actually exists - any of these directories
       const hasSkillsDir = testFileExists(testDir, 'skills');
       const hasSkillkitDir = testFileExists(testDir, '.skillkit');
       const hasClaudeSkills = testFileExists(testDir, '.claude/skills');
-      const hasAnySkillDir = hasSkillsDir || hasSkillkitDir || hasClaudeSkills;
+      const hasAgentSkills = testFileExists(testDir, '.agent/skills');
+      const hasAnySkillDir = hasSkillsDir || hasSkillkitDir || hasClaudeSkills || hasAgentSkills;
 
       // Strict assertion - init should create at least one directory
       if (!hasAnySkillDir) {

@@ -77,6 +77,8 @@ describe('E2E: Hooks System', () => {
           ['hook', 'register', '--event', event, '--skill', 'hookable-skill'],
           { cwd: testDir }
         );
+        // Fail explicitly on timeout (-1 exit code)
+        expect(result.exitCode).not.toBe(-1);
         // Command should complete (exit code 0 or 1 for expected behavior)
         expect(result.exitCode).toBeLessThanOrEqual(1);
       }
@@ -96,6 +98,8 @@ describe('E2E: Hooks System', () => {
         ],
         { cwd: testDir }
       );
+      // Fail explicitly on timeout
+      expect(result.exitCode).not.toBe(-1);
       // Command should complete successfully or with expected exit
       expect(result.exitCode).toBeLessThanOrEqual(1);
     });
@@ -114,6 +118,8 @@ describe('E2E: Hooks System', () => {
         ],
         { cwd: testDir }
       );
+      // Fail explicitly on timeout
+      expect(result.exitCode).not.toBe(-1);
       expect(result.exitCode).toBeLessThanOrEqual(1);
     });
 
@@ -172,6 +178,7 @@ describe('E2E: Hooks System', () => {
       });
 
       const result = await runCli(['hook', 'list', '--event', 'test'], { cwd: testDir });
+      expect(result.exitCode).not.toBe(-1);
       expect(result.exitCode).toBeLessThanOrEqual(1);
     });
   });
@@ -184,6 +191,9 @@ describe('E2E: Hooks System', () => {
 
       const result = await runCli(['hook', 'trigger', 'test'], { cwd: testDir });
       const output = result.stdout + result.stderr;
+
+      // Fail explicitly on timeout
+      expect(result.exitCode).not.toBe(-1);
 
       // Should show trigger-related output
       const hasRelevantOutput =
@@ -205,12 +215,14 @@ describe('E2E: Hooks System', () => {
       });
 
       const result = await runCli(['hook', 'trigger', 'deploy', '--dry-run'], { cwd: testDir });
+      expect(result.exitCode).not.toBe(-1);
       expect(result.exitCode).toBeLessThanOrEqual(1);
     });
 
     it('should handle missing hook gracefully', async () => {
       const result = await runCli(['hook', 'trigger', 'nonexistent-event'], { cwd: testDir });
-      // Should complete without crashing
+      // Fail explicitly on timeout, should complete without crashing
+      expect(result.exitCode).not.toBe(-1);
       expect(result.exitCode).toBeLessThanOrEqual(1);
     });
   });
@@ -245,6 +257,7 @@ describe('E2E: Hooks System', () => {
       });
 
       const result = await runCli(['hook', 'remove', '--event', 'test', '--all'], { cwd: testDir });
+      expect(result.exitCode).not.toBe(-1);
       expect(result.exitCode).toBeLessThanOrEqual(1);
     });
   });
@@ -274,11 +287,13 @@ describe('E2E: Agent Orchestration', () => {
       const result = await runCli(['sync', '--agents', 'claude-code,cursor,windsurf'], {
         cwd: testDir,
       });
+      expect(result.exitCode).not.toBe(-1);
       expect(result.exitCode).toBeLessThanOrEqual(1);
     });
 
     it('should sync to all supported agents', async () => {
       const result = await runCli(['sync', '--all-agents'], { cwd: testDir });
+      expect(result.exitCode).not.toBe(-1);
       expect(result.exitCode).toBeLessThanOrEqual(1);
     });
   });
@@ -291,6 +306,7 @@ describe('E2E: Agent Orchestration', () => {
         ['team', 'init', '--leader', 'claude-code', '--teammates', 'cursor,windsurf'],
         { cwd: testDir }
       );
+      expect(result.exitCode).not.toBe(-1);
       expect(result.exitCode).toBeLessThanOrEqual(1);
     });
 
@@ -299,6 +315,7 @@ describe('E2E: Agent Orchestration', () => {
 
       // This tests the delegation feature if available
       const result = await runCli(['team', 'sync', '--delegate'], { cwd: testDir });
+      expect(result.exitCode).not.toBe(-1);
       expect(result.exitCode).toBeLessThanOrEqual(1);
     });
   });
@@ -313,6 +330,7 @@ describe('E2E: Agent Orchestration', () => {
 
       // Run workflow that triggers build
       const result = await runCli(['workflow', 'run', 'build'], { cwd: testDir });
+      expect(result.exitCode).not.toBe(-1);
       expect(result.exitCode).toBeLessThanOrEqual(1);
     });
 
@@ -326,6 +344,7 @@ describe('E2E: Agent Orchestration', () => {
       );
 
       const result = await runCli(['hook', 'trigger', 'test', '--chain'], { cwd: testDir });
+      expect(result.exitCode).not.toBe(-1);
       expect(result.exitCode).toBeLessThanOrEqual(1);
     });
   });
@@ -369,11 +388,13 @@ This skill automatically activates on:
 
   it('should auto-register hooks from skill metadata', async () => {
     const result = await runCli(['hook', 'auto-register'], { cwd: testDir });
+    expect(result.exitCode).not.toBe(-1);
     expect(result.exitCode).toBeLessThanOrEqual(1);
   });
 
   it('should detect and apply skill triggers', async () => {
     const result = await runCli(['sync', '--with-hooks'], { cwd: testDir });
+    expect(result.exitCode).not.toBe(-1);
     expect(result.exitCode).toBeLessThanOrEqual(1);
   });
 });
