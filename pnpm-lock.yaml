@@ -61,8 +61,8 @@ importers:
   packages/agents:
     dependencies:
       '@skillkit/core':
-        specifier: ^1.6.0
-        version: 1.6.0
+        specifier: workspace:*
+        version: link:../core
       minimatch:
         specifier: ^9.0.0
         version: 9.0.5
@@ -649,10 +649,6 @@ packages:
   '@sindresorhus/is@7.2.0':
     resolution: {integrity: sha512-P1Cz1dWaFfR4IR+U13mqqiGsLFf1KbayybWwdd2vfctdV6hDpUkgCY0nKOLLTMSoRd/jJNjtbqzf13K8DCCXQw==}
     engines: {node: '>=18'}
-
-  '@skillkit/core@1.6.0':
-    resolution: {integrity: sha512-987hhnYir4a3qnIkB/iIxeVeJ8mNF6R8IidtnFo9Q4GamcyvJ0W692V5wVOoR2MiS1F/NSstjfrV/h2ujMydyw==}
-    engines: {node: '>=18.0.0'}
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
@@ -1894,13 +1890,6 @@ snapshots:
   '@sec-ant/readable-stream@0.4.1': {}
 
   '@sindresorhus/is@7.2.0': {}
-
-  '@skillkit/core@1.6.0':
-    dependencies:
-      '@types/minimatch': 6.0.0
-      minimatch: 10.1.1
-      yaml: 2.8.2
-      zod: 3.25.76
 
   '@types/estree@1.0.8': {}
 

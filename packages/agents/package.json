@@ -21,7 +21,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@skillkit/core": "^1.6.0",
+    "@skillkit/core": "workspace:*",
     "minimatch": "^9.0.0"
   },
   "devDependencies": {

@@ -33,7 +33,7 @@ describe('ClawdbotAdapter', () => {
     });
 
     it('should have correct skillsDir', () => {
-      expect(adapter.skillsDir).toBe('skills');
+      expect(adapter.skillsDir).toBe('.clawdbot/skills');
     });
 
     it('should have correct configFile', () => {
