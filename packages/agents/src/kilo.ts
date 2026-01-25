@@ -9,6 +9,7 @@ export class KiloAdapter implements AgentAdapter {
   readonly type: AgentType = 'kilo';
   readonly name = 'Kilo Code';
   readonly skillsDir = '.kilocode/skills';
+  // 2026: Kilo uses AGENTS.md at root and .kilocode/rules/ for mode-specific rules
   readonly configFile = 'AGENTS.md';
 
   generateConfig(skills: Skill[]): string {
@@ -68,7 +69,11 @@ ${skillsXml}
   async isDetected(): Promise<boolean> {
     const projectKilo = join(process.cwd(), '.kilocode');
     const globalKilo = join(homedir(), '.kilocode');
+    // 2026: Also check for AGENTS.md and .kilocodemodes
+    const agentsMd = join(process.cwd(), 'AGENTS.md');
+    const kiloModes = join(process.cwd(), '.kilocodemodes');
 
-    return existsSync(projectKilo) || existsSync(globalKilo);
+    return existsSync(projectKilo) || existsSync(globalKilo) ||
+           existsSync(agentsMd) || existsSync(kiloModes);
   }
 }

@@ -8,7 +8,9 @@ import type { Skill, AgentType } from '@skillkit/core';
 export class RooAdapter implements AgentAdapter {
   readonly type: AgentType = 'roo';
   readonly name = 'Roo Code';
+  // 2026: Roo uses .roo/skills/<name>/SKILL.md format
   readonly skillsDir = '.roo/skills';
+  // Roo supports AGENTS.md at root
   readonly configFile = 'AGENTS.md';
 
   generateConfig(skills: Skill[]): string {
@@ -68,7 +70,11 @@ ${skillsXml}
   async isDetected(): Promise<boolean> {
     const projectRoo = join(process.cwd(), '.roo');
     const globalRoo = join(homedir(), '.roo');
+    // 2026: Also check for .roomodes and AGENTS.md
+    const agentsMd = join(process.cwd(), 'AGENTS.md');
+    const roomodes = join(process.cwd(), '.roomodes');
 
-    return existsSync(projectRoo) || existsSync(globalRoo);
+    return existsSync(projectRoo) || existsSync(globalRoo) ||
+           existsSync(agentsMd) || existsSync(roomodes);
   }
 }

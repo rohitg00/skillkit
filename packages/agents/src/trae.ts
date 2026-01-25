@@ -2,14 +2,14 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import type { AgentAdapter } from './base.js';
-import { createSkillXml } from './base.js';
 import type { Skill, AgentType } from '@skillkit/core';
 
 export class TraeAdapter implements AgentAdapter {
   readonly type: AgentType = 'trae';
   readonly name = 'Trae';
   readonly skillsDir = '.trae/skills';
-  readonly configFile = 'AGENTS.md';
+  // 2026: Trae uses .trae/rules/*.md with YAML frontmatter
+  readonly configFile = '.trae/rules/project_rules.md';
 
   generateConfig(skills: Skill[]): string {
     const enabledSkills = skills.filter(s => s.enabled);
@@ -18,43 +18,44 @@ export class TraeAdapter implements AgentAdapter {
       return '';
     }
 
-    const skillsXml = enabledSkills.map(createSkillXml).join('\n\n');
+    const skillsList = enabledSkills
+      .map(s => `### ${s.name}\n\n${s.description}\n\n**Invoke:** \`skillkit read ${s.name}\``)
+      .join('\n\n');
 
-    return `<skills_system priority="1">
+    // Trae uses Markdown with YAML frontmatter (2026 standard)
+    return `---
+alwaysApply: true
+description: SkillKit skills integration for Trae
+globs: ["**/*"]
+---
+# Skills System
+
+You have access to specialized skills that can help complete tasks.
+When a task matches a skill's description, load it using the skillkit CLI.
 
 ## Available Skills
 
-<!-- SKILLS_TABLE_START -->
-<usage>
-When users ask you to perform tasks, check if any of the available skills below can help complete the task more effectively. Skills provide specialized capabilities and domain knowledge.
+${skillsList}
 
-How to use skills:
-- Invoke: \`skillkit read <skill-name>\` or \`npx skillkit read <skill-name>\`
-- The skill content will load with detailed instructions on how to complete the task
-- Base directory provided in output for resolving bundled resources (references/, scripts/, assets/)
+## How to Use Skills
 
-Usage notes:
-- Only use skills listed in <available_skills> below
-- Do not invoke a skill that is already loaded in your context
-- Each skill invocation is stateless
-</usage>
+When a task matches a skill's description, load it:
 
-<available_skills>
+\`\`\`bash
+skillkit read <skill-name>
+\`\`\`
 
-${skillsXml}
-
-</available_skills>
-<!-- SKILLS_TABLE_END -->
-
-</skills_system>`;
+Skills provide detailed instructions for completing complex tasks.
+`;
   }
 
   parseConfig(content: string): string[] {
     const skillNames: string[] = [];
-    const skillRegex = /<name>([^<]+)<\/name>/g;
+    // Parse from ### headers (2026 format)
+    const headerRegex = /^### ([a-z0-9-]+)$/gm;
     let match;
 
-    while ((match = skillRegex.exec(content)) !== null) {
+    while ((match = headerRegex.exec(content)) !== null) {
       skillNames.push(match[1].trim());
     }
 
@@ -67,8 +68,12 @@ ${skillsXml}
 
   async isDetected(): Promise<boolean> {
     const projectTrae = join(process.cwd(), '.trae');
+    const traeRulesDir = join(process.cwd(), '.trae', 'rules');
     const globalTrae = join(homedir(), '.trae');
+    // 2026: Also check for AGENTS.md and CLAUDE.md (Trae supports importing)
+    const agentsMd = join(process.cwd(), 'AGENTS.md');
 
-    return existsSync(projectTrae) || existsSync(globalTrae);
+    return existsSync(projectTrae) || existsSync(traeRulesDir) ||
+           existsSync(globalTrae) || existsSync(agentsMd);
   }
 }

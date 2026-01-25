@@ -2,14 +2,14 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import type { AgentAdapter } from './base.js';
-import { createSkillXml } from './base.js';
 import type { Skill, AgentType } from '@skillkit/core';
 
 export class GitHubCopilotAdapter implements AgentAdapter {
   readonly type: AgentType = 'github-copilot';
   readonly name = 'GitHub Copilot';
   readonly skillsDir = '.github/skills';
-  readonly configFile = 'AGENTS.md';
+  // 2026: GitHub Copilot uses .github/copilot-instructions.md
+  readonly configFile = '.github/copilot-instructions.md';
 
   generateConfig(skills: Skill[]): string {
     const enabledSkills = skills.filter(s => s.enabled);
@@ -18,43 +18,40 @@ export class GitHubCopilotAdapter implements AgentAdapter {
       return '';
     }
 
-    const skillsXml = enabledSkills.map(createSkillXml).join('\n\n');
+    const skillsList = enabledSkills
+      .map(s => `### ${s.name}\n\n${s.description}\n\n**Invoke:** \`skillkit read ${s.name}\``)
+      .join('\n\n');
 
-    return `<skills_system priority="1">
+    // GitHub Copilot uses plain Markdown for copilot-instructions.md (2026 standard)
+    return `# Skills System
+
+You have access to specialized skills that can help complete tasks.
+Skills provide domain-specific knowledge and step-by-step instructions.
 
 ## Available Skills
 
-<!-- SKILLS_TABLE_START -->
-<usage>
-When users ask you to perform tasks, check if any of the available skills below can help complete the task more effectively. Skills provide specialized capabilities and domain knowledge.
+${skillsList}
 
-How to use skills:
-- Invoke: \`skillkit read <skill-name>\` or \`npx skillkit read <skill-name>\`
-- The skill content will load with detailed instructions on how to complete the task
-- Base directory provided in output for resolving bundled resources (references/, scripts/, assets/)
+## How to Use Skills
 
-Usage notes:
-- Only use skills listed in <available_skills> below
-- Do not invoke a skill that is already loaded in your context
-- Each skill invocation is stateless
-</usage>
+When a task matches a skill's description, load it using the terminal:
 
-<available_skills>
+\`\`\`bash
+skillkit read <skill-name>
+\`\`\`
 
-${skillsXml}
-
-</available_skills>
-<!-- SKILLS_TABLE_END -->
-
-</skills_system>`;
+The skill content will load with detailed instructions.
+Each skill is self-contained with its own resources.
+`;
   }
 
   parseConfig(content: string): string[] {
     const skillNames: string[] = [];
-    const skillRegex = /<name>([^<]+)<\/name>/g;
+    // Parse from ### headers
+    const headerRegex = /^### ([a-z0-9-]+)$/gm;
     let match;
 
-    while ((match = skillRegex.exec(content)) !== null) {
+    while ((match = headerRegex.exec(content)) !== null) {
       skillNames.push(match[1].trim());
     }
 
@@ -66,9 +63,13 @@ ${skillsXml}
   }
 
   async isDetected(): Promise<boolean> {
-    const projectGithub = join(process.cwd(), '.github', 'skills');
+    // 2026: Check for GitHub Copilot configuration files
+    const copilotInstructions = join(process.cwd(), '.github', 'copilot-instructions.md');
+    const githubDir = join(process.cwd(), '.github');
+    const githubInstructions = join(process.cwd(), '.github', 'instructions');
     const globalCopilot = join(homedir(), '.copilot');
 
-    return existsSync(projectGithub) || existsSync(globalCopilot);
+    return existsSync(copilotInstructions) || existsSync(githubDir) ||
+           existsSync(githubInstructions) || existsSync(globalCopilot);
   }
 }

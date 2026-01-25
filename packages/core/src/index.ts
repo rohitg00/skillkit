@@ -69,3 +69,6 @@ export * from './audit/index.js';
 
 // Custom Agents Support (Phase 19)
 export * from './agents/index.js';
+
+// Skill Translator (Phase 20 - Cross-Agent Skill Translation)
+export * from './skill-translator.js';

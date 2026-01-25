@@ -2,14 +2,14 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import type { AgentAdapter } from './base.js';
-import { createSkillXml } from './base.js';
 import type { Skill, AgentType } from '@skillkit/core';
 
 export class WindsurfAdapter implements AgentAdapter {
   readonly type: AgentType = 'windsurf';
   readonly name = 'Windsurf';
   readonly skillsDir = '.windsurf/skills';
-  readonly configFile = 'AGENTS.md';
+  // 2026: Windsurf uses .windsurf/rules/*.md format with YAML frontmatter
+  readonly configFile = '.windsurf/rules/skills.md';
 
   generateConfig(skills: Skill[]): string {
     const enabledSkills = skills.filter(s => s.enabled);
@@ -18,43 +18,45 @@ export class WindsurfAdapter implements AgentAdapter {
       return '';
     }
 
-    const skillsXml = enabledSkills.map(createSkillXml).join('\n\n');
+    const skillsList = enabledSkills
+      .map(s => `### ${s.name}\n\n${s.description}\n\n**Invoke:** \`skillkit read ${s.name}\``)
+      .join('\n\n');
 
-    return `<skills_system priority="1">
+    // Windsurf uses Markdown rules with YAML frontmatter (2026 standard)
+    // Mode: "always-on" | "model-decision" | "manual"
+    return `---
+name: "skillkit-skills"
+mode: "model-decision"
+---
+# Skills System
+
+You have access to specialized skills that can help complete tasks.
+When a task matches a skill's description, load it using the skillkit CLI.
 
 ## Available Skills
 
-<!-- SKILLS_TABLE_START -->
-<usage>
-When users ask you to perform tasks, check if any of the available skills below can help complete the task more effectively. Skills provide specialized capabilities and domain knowledge.
+${skillsList}
 
-How to use skills:
-- Invoke: \`skillkit read <skill-name>\` or \`npx skillkit read <skill-name>\`
-- The skill content will load with detailed instructions on how to complete the task
-- Base directory provided in output for resolving bundled resources (references/, scripts/, assets/)
+## How to Use Skills
 
-Usage notes:
-- Only use skills listed in <available_skills> below
-- Do not invoke a skill that is already loaded in your context
-- Each skill invocation is stateless
-</usage>
+When a task matches a skill's description, load it:
 
-<available_skills>
+\`\`\`bash
+skillkit read <skill-name>
+\`\`\`
 
-${skillsXml}
-
-</available_skills>
-<!-- SKILLS_TABLE_END -->
-
-</skills_system>`;
+Skills provide detailed instructions for completing complex tasks.
+Each skill is self-contained with its own resources.
+`;
   }
 
   parseConfig(content: string): string[] {
     const skillNames: string[] = [];
-    const skillRegex = /<name>([^<]+)<\/name>/g;
+    // Parse from ### headers
+    const headerRegex = /^### ([a-z0-9-]+)$/gm;
     let match;
 
-    while ((match = skillRegex.exec(content)) !== null) {
+    while ((match = headerRegex.exec(content)) !== null) {
       skillNames.push(match[1].trim());
     }
 
@@ -66,9 +68,13 @@ ${skillsXml}
   }
 
   async isDetected(): Promise<boolean> {
+    // 2026: Check project and global paths
     const projectWindsurf = join(process.cwd(), '.windsurf');
+    const projectRulesDir = join(process.cwd(), '.windsurf', 'rules');
+    // Global Windsurf config (Codeium)
     const globalWindsurf = join(homedir(), '.codeium', 'windsurf');
 
-    return existsSync(projectWindsurf) || existsSync(globalWindsurf);
+    return existsSync(projectWindsurf) || existsSync(projectRulesDir) ||
+           existsSync(globalWindsurf);
   }
 }

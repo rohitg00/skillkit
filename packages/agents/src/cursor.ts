@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { homedir } from 'node:os';
 import type { AgentAdapter } from './base.js';
 import { createSkillXml } from './base.js';
 import type { Skill, AgentType } from '@skillkit/core';
@@ -8,7 +9,8 @@ export class CursorAdapter implements AgentAdapter {
   readonly type: AgentType = 'cursor';
   readonly name = 'Cursor';
   readonly skillsDir = '.cursor/skills';
-  readonly configFile = '.cursorrules';
+  // 2026: Cursor uses .cursor/rules/*.mdc format (MDC with YAML frontmatter)
+  readonly configFile = '.cursor/rules/skills.mdc';
 
   generateConfig(skills: Skill[]): string {
     const enabledSkills = skills.filter(s => s.enabled);
@@ -23,7 +25,13 @@ export class CursorAdapter implements AgentAdapter {
 
     const skillsXml = enabledSkills.map(createSkillXml).join('\n\n');
 
-    return `# Skills System
+    // MDC format with YAML frontmatter (2026 standard)
+    return `---
+description: SkillKit skills integration - provides specialized capabilities and domain knowledge
+globs: "**/*"
+alwaysApply: true
+---
+# Skills System
 
 You have access to specialized skills that can help complete tasks. Use the skillkit CLI to load skill instructions when needed.
 
@@ -63,9 +71,15 @@ ${skillsXml}
   }
 
   async isDetected(): Promise<boolean> {
-    const cursorRules = join(process.cwd(), '.cursorrules');
+    // 2026: Check for .cursor directory with rules subdirectory
     const cursorDir = join(process.cwd(), '.cursor');
+    const cursorRulesDir = join(process.cwd(), '.cursor', 'rules');
+    // Legacy .cursorrules file (deprecated but still supported)
+    const cursorRulesFile = join(process.cwd(), '.cursorrules');
+    // Global Cursor config
+    const globalCursor = join(homedir(), '.cursor');
 
-    return existsSync(cursorRules) || existsSync(cursorDir);
+    return existsSync(cursorDir) || existsSync(cursorRulesDir) ||
+           existsSync(cursorRulesFile) || existsSync(globalCursor);
   }
 }

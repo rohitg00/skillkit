@@ -211,51 +211,58 @@ export interface AgentTranslationOptions {
 }
 
 /**
- * Agent discovery paths per AI coding agent
+ * Agent discovery paths per AI coding agent (2026 updated)
  */
 export const AGENT_DISCOVERY_PATHS: Record<AgentType, string[]> = {
   'claude-code': ['.claude/agents'],
-  'cursor': ['.cursor/agents'],
+  'cursor': ['.cursor/agents', '.cursor/commands'],
   'codex': ['.codex/agents'],
   'gemini-cli': ['.gemini/agents'],
-  'opencode': ['.opencode/agents'],
+  'opencode': ['.opencode/agents', '.opencode/agent'],
   'antigravity': ['.antigravity/agents'],
   'amp': ['.amp/agents'],
   'clawdbot': ['.clawdbot/agents', 'agents'],
   'droid': ['.factory/agents'],
-  'github-copilot': ['.github/agents', '.github/copilot/agents'],
+  'github-copilot': ['.github/agents', '.github/instructions', '.github/custom-agents'],
   'goose': ['.goose/agents'],
-  'kilo': ['.kilocode/agents'],
+  'kilo': ['.kilocode/agents', '.kilocode/modes'],
   'kiro-cli': ['.kiro/agents'],
-  'roo': ['.roo/agents'],
-  'trae': ['.trae/agents'],
-  'windsurf': ['.windsurf/agents'],
+  'roo': ['.roo/agents', '.roo/modes'],
+  'trae': ['.trae/agents', '.trae/agent'],
+  'windsurf': ['.windsurf/agents', '.windsurf/workflows'],
   'universal': ['agents', '.agents'],
 };
 
 /**
- * All agent discovery paths (union of all agent paths)
+ * All agent discovery paths (union of all agent paths) - 2026 updated
  */
 export const ALL_AGENT_DISCOVERY_PATHS = [
   'agents',
   '.agents',
   '.claude/agents',
   '.cursor/agents',
+  '.cursor/commands',
   '.codex/agents',
   '.gemini/agents',
   '.opencode/agents',
+  '.opencode/agent',
   '.antigravity/agents',
   '.amp/agents',
   '.clawdbot/agents',
   '.factory/agents',
   '.github/agents',
-  '.github/copilot/agents',
+  '.github/instructions',
+  '.github/custom-agents',
   '.goose/agents',
   '.kilocode/agents',
+  '.kilocode/modes',
   '.kiro/agents',
   '.roo/agents',
+  '.roo/modes',
   '.trae/agents',
+  '.trae/agent',
   '.windsurf/agents',
+  '.windsurf/workflows',
 ];
 
 /**
