@@ -21,8 +21,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@skillkit/core": "^1.6.0",
-    "@skillkit/agents": "^1.6.0",
+    "@skillkit/core": "workspace:*",
+    "@skillkit/agents": "workspace:*",
     "chalk": "^5.3.0",
     "ink": "^5.0.1",
     "ink-select-input": "^6.0.0",

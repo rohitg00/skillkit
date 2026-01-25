@@ -53,10 +53,10 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@skillkit/core": "^1.6.0",
-    "@skillkit/agents": "^1.6.0",
-    "@skillkit/cli": "^1.6.0",
-    "@skillkit/tui": "^1.6.0",
+    "@skillkit/core": "workspace:*",
+    "@skillkit/agents": "workspace:*",
+    "@skillkit/cli": "workspace:*",
+    "@skillkit/tui": "workspace:*",
     "clipanion": "^4.0.0-rc.4"
   },
   "devDependencies": {
