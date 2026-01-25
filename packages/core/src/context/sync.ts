@@ -5,6 +5,7 @@ import type { ContextSyncOptions } from './types.js';
 import { ContextManager } from './manager.js';
 import { translateSkillFile } from '../translator/index.js';
 import { findAllSkills } from '../skills.js';
+import { AGENT_CONFIG } from '../agent-config.js';
 
 /**
  * Result of a sync operation
@@ -30,29 +31,6 @@ export interface SyncReport {
 }
 
 /**
- * Agent directory configuration
- */
-const AGENT_DIRS: Record<AgentType, { skillsDir: string; configFile: string }> = {
-  'claude-code': { skillsDir: '.claude/skills', configFile: 'AGENTS.md' },
-  'cursor': { skillsDir: '.cursor/skills', configFile: '.cursorrules' },
-  'codex': { skillsDir: '.codex/skills', configFile: 'AGENTS.md' },
-  'gemini-cli': { skillsDir: '.gemini/skills', configFile: 'GEMINI.md' },
-  'opencode': { skillsDir: '.opencode/skills', configFile: 'AGENTS.md' },
-  'antigravity': { skillsDir: '.antigravity/skills', configFile: 'AGENTS.md' },
-  'amp': { skillsDir: '.agents/skills', configFile: 'AGENTS.md' },
-  'clawdbot': { skillsDir: 'skills', configFile: 'AGENTS.md' },
-  'droid': { skillsDir: '.factory/skills', configFile: 'AGENTS.md' },
-  'github-copilot': { skillsDir: '.github/skills', configFile: 'AGENTS.md' },
-  'goose': { skillsDir: '.goose/skills', configFile: 'AGENTS.md' },
-  'kilo': { skillsDir: '.kilocode/skills', configFile: 'AGENTS.md' },
-  'kiro-cli': { skillsDir: '.kiro/skills', configFile: 'AGENTS.md' },
-  'roo': { skillsDir: '.roo/skills', configFile: 'AGENTS.md' },
-  'trae': { skillsDir: '.trae/skills', configFile: 'AGENTS.md' },
-  'windsurf': { skillsDir: '.windsurf/skills', configFile: 'AGENTS.md' },
-  'universal': { skillsDir: '.agent/skills', configFile: 'AGENTS.md' },
-};
-
-/**
  * Context Sync
  *
  * Handles syncing skills across multiple AI agents.
@@ -73,7 +51,7 @@ export class ContextSync {
   detectAgents(): AgentType[] {
     const detected: AgentType[] = [];
 
-    for (const [agent, config] of Object.entries(AGENT_DIRS)) {
+    for (const [agent, config] of Object.entries(AGENT_CONFIG)) {
       const skillsPath = join(this.projectPath, config.skillsDir);
       const configPath = join(this.projectPath, config.configFile);
 
@@ -171,7 +149,7 @@ export class ContextSync {
     const sourceSkills = skills || this.getSourceSkills();
 
     // Get target directory
-    const agentConfig = AGENT_DIRS[agent];
+    const agentConfig = AGENT_CONFIG[agent];
     if (!agentConfig) {
       result.success = false;
       result.errors.push(`Unknown agent: ${agent}`);
@@ -297,8 +275,8 @@ export class ContextSync {
     // Search directories based on primary agent or common locations
     const searchDirs: string[] = [];
 
-    if (primaryAgent && AGENT_DIRS[primaryAgent]) {
-      searchDirs.push(join(this.projectPath, AGENT_DIRS[primaryAgent].skillsDir));
+    if (primaryAgent && AGENT_CONFIG[primaryAgent]) {
+      searchDirs.push(join(this.projectPath, AGENT_CONFIG[primaryAgent].skillsDir));
     }
 
     // Add common skill locations
@@ -327,7 +305,7 @@ export class ContextSync {
   checkStatus(): Record<AgentType, { hasSkills: boolean; skillCount: number; skills: string[] }> {
     const status: Record<string, { hasSkills: boolean; skillCount: number; skills: string[] }> = {};
 
-    for (const [agent, config] of Object.entries(AGENT_DIRS)) {
+    for (const [agent, config] of Object.entries(AGENT_CONFIG)) {
       const skillsPath = join(this.projectPath, config.skillsDir);
       const skills: string[] = [];
 

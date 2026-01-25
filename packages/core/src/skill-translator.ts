@@ -9,193 +9,33 @@ import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, basename, dirname } from 'node:path';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import type { AgentType, Skill } from './types.js';
+import {
+  AGENT_CONFIG,
+  type AgentDirectoryConfig,
+  getSkillsDir,
+  getConfigFile,
+  getAllSkillsDirs as getAgentAllSkillsDirs,
+  getGlobalSkillsDir as getAgentGlobalSkillsDir,
+  supportsAutoDiscovery as agentSupportsAutoDiscovery,
+} from './agent-config.js';
 
 /**
- * Skill format configuration for each agent
+ * Extended skill format for translation (includes invokeCommand)
  */
-export interface AgentSkillFormat {
-  /** Primary skills directory path */
-  skillsDir: string;
-  /** Config file that references skills (e.g., AGENTS.md, .cursorrules) */
-  configFile: string;
-  /** Whether agent uses YAML frontmatter in SKILL.md */
-  usesFrontmatter: boolean;
-  /** Config format: xml, markdown-table, json, yaml-list, mdc */
-  configFormat: 'xml' | 'markdown-table' | 'json' | 'yaml-list' | 'mdc' | 'markdown';
-  /** How to invoke skills */
+export interface AgentSkillFormat extends AgentDirectoryConfig {
   invokeCommand: string;
-  /** Additional frontmatter fields supported */
-  frontmatterFields?: string[];
-  /** Whether agent supports skill auto-discovery */
-  supportsAutoDiscovery: boolean;
-  /** Alternative skills directories */
-  altSkillsDirs?: string[];
-  /** Global skills path */
-  globalSkillsDir?: string;
 }
 
 /**
  * Agent-specific skill format configurations
+ * Extends AGENT_CONFIG with invokeCommand for all agents
  */
-export const AGENT_SKILL_FORMATS: Record<AgentType, AgentSkillFormat> = {
-  'claude-code': {
-    skillsDir: '.claude/skills',
-    configFile: 'CLAUDE.md',
-    usesFrontmatter: true,
-    configFormat: 'xml',
-    invokeCommand: 'skillkit read',
-    frontmatterFields: ['name', 'description', 'allowed-tools', 'model', 'context', 'agent', 'disable-model-invocation', 'user-invocable', 'argument-hint'],
-    supportsAutoDiscovery: true,
-    globalSkillsDir: '~/.claude/skills',
-  },
-  cursor: {
-    skillsDir: '.cursor/skills',
-    configFile: '.cursor/rules/skills.mdc',
-    usesFrontmatter: true,
-    configFormat: 'mdc',
-    invokeCommand: 'skillkit read',
-    frontmatterFields: ['description', 'globs', 'alwaysApply'],
-    supportsAutoDiscovery: true,
-    altSkillsDirs: ['.cursor/commands'],
-    globalSkillsDir: '~/.cursor/skills',
-  },
-  codex: {
-    skillsDir: '.codex/skills',
-    configFile: 'AGENTS.md',
-    usesFrontmatter: true,
-    configFormat: 'markdown-table',
-    invokeCommand: 'skillkit read',
-    supportsAutoDiscovery: true,
-    globalSkillsDir: '~/.codex/skills',
-  },
-  'gemini-cli': {
-    skillsDir: '.gemini/skills',
-    configFile: 'GEMINI.md',
-    usesFrontmatter: true,
-    configFormat: 'json',
-    invokeCommand: 'skillkit read',
-    supportsAutoDiscovery: true,
-    globalSkillsDir: '~/.gemini/skills',
-  },
-  opencode: {
-    skillsDir: '.opencode/skills',
-    configFile: 'AGENTS.md',
-    usesFrontmatter: true,
-    configFormat: 'xml',
-    invokeCommand: 'skillkit read',
-    supportsAutoDiscovery: true,
-    globalSkillsDir: '~/.config/opencode/skills',
-  },
-  antigravity: {
-    skillsDir: '.antigravity/skills',
-    configFile: 'AGENTS.md',
-    usesFrontmatter: true,
-    configFormat: 'xml',
-    invokeCommand: 'skillkit read',
-    supportsAutoDiscovery: true,
-  },
-  amp: {
-    skillsDir: '.amp/skills',
-    configFile: 'AGENTS.md',
-    usesFrontmatter: true,
-    configFormat: 'xml',
-    invokeCommand: 'skillkit read',
-    supportsAutoDiscovery: true,
-  },
-  clawdbot: {
-    skillsDir: '.clawdbot/skills',
-    configFile: 'AGENTS.md',
-    usesFrontmatter: true,
-    configFormat: 'xml',
-    invokeCommand: 'skillkit read',
-    supportsAutoDiscovery: true,
-    altSkillsDirs: ['agents'],
-  },
-  droid: {
-    skillsDir: '.factory/skills',
-    configFile: 'AGENTS.md',
-    usesFrontmatter: true,
-    configFormat: 'xml',
-    invokeCommand: 'skillkit read',
-    supportsAutoDiscovery: true,
-  },
-  'github-copilot': {
-    skillsDir: '.github/skills',
-    configFile: '.github/copilot-instructions.md',
-    usesFrontmatter: true,
-    configFormat: 'markdown',
-    invokeCommand: 'skillkit read',
-    frontmatterFields: ['applyTo'],
-    supportsAutoDiscovery: true,
-    altSkillsDirs: ['.github/instructions'],
-  },
-  goose: {
-    skillsDir: '.goose/skills',
-    configFile: 'AGENTS.md',
-    usesFrontmatter: true,
-    configFormat: 'xml',
-    invokeCommand: 'skillkit read',
-    supportsAutoDiscovery: true,
-    globalSkillsDir: '~/.config/goose/skills',
-  },
-  kilo: {
-    skillsDir: '.kilocode/skills',
-    configFile: 'AGENTS.md',
-    usesFrontmatter: true,
-    configFormat: 'xml',
-    invokeCommand: 'skillkit read',
-    supportsAutoDiscovery: true,
-    altSkillsDirs: ['.kilocode/rules'],
-  },
-  'kiro-cli': {
-    skillsDir: '.kiro/skills',
-    configFile: 'AGENTS.md',
-    usesFrontmatter: true,
-    configFormat: 'xml',
-    invokeCommand: 'skillkit read',
-    supportsAutoDiscovery: true,
-  },
-  roo: {
-    skillsDir: '.roo/skills',
-    configFile: 'AGENTS.md',
-    usesFrontmatter: true,
-    configFormat: 'xml',
-    invokeCommand: 'skillkit read',
-    frontmatterFields: ['name', 'description', 'disable-model-invocation', 'user-invocable'],
-    supportsAutoDiscovery: true,
-    altSkillsDirs: ['.roo/rules'],
-    globalSkillsDir: '~/.roo/skills',
-  },
-  trae: {
-    skillsDir: '.trae/skills',
-    configFile: '.trae/rules/project_rules.md',
-    usesFrontmatter: true,
-    configFormat: 'markdown',
-    invokeCommand: 'skillkit read',
-    frontmatterFields: ['alwaysApply', 'description', 'globs'],
-    supportsAutoDiscovery: true,
-  },
-  windsurf: {
-    skillsDir: '.windsurf/skills',
-    configFile: '.windsurf/rules/skills.md',
-    usesFrontmatter: true,
-    configFormat: 'markdown',
-    invokeCommand: 'skillkit read',
-    frontmatterFields: ['name', 'description', 'mode'],
-    supportsAutoDiscovery: true,
-    altSkillsDirs: ['.windsurf/workflows'],
-    globalSkillsDir: '~/.codeium/windsurf/skills',
-  },
-  universal: {
-    skillsDir: 'skills',
-    configFile: 'AGENTS.md',
-    usesFrontmatter: true,
-    configFormat: 'markdown',
-    invokeCommand: 'skillkit read',
-    supportsAutoDiscovery: true,
-    altSkillsDirs: ['.agents/skills', '.agent/skills'],
-  },
-};
+export const AGENT_SKILL_FORMATS: Record<AgentType, AgentSkillFormat> = Object.fromEntries(
+  Object.entries(AGENT_CONFIG).map(([agent, config]) => [
+    agent,
+    { ...config, invokeCommand: 'skillkit read' },
+  ])
+) as Record<AgentType, AgentSkillFormat>;
 
 /**
  * Canonical skill representation for cross-agent translation
@@ -819,42 +659,9 @@ function escapeXml(text: string): string {
     .replace(/'/g, '&apos;');
 }
 
-/**
- * Get the skills directory for an agent from the format configuration
- */
-export function getAgentSkillsDir(agent: AgentType): string {
-  return AGENT_SKILL_FORMATS[agent].skillsDir;
-}
-
-/**
- * Get the config file for an agent from the format configuration
- */
-export function getAgentConfigFile(agent: AgentType): string {
-  return AGENT_SKILL_FORMATS[agent].configFile;
-}
-
-/**
- * Check if an agent supports auto-discovery of skills
- */
-export function supportsAutoDiscovery(agent: AgentType): boolean {
-  return AGENT_SKILL_FORMATS[agent].supportsAutoDiscovery;
-}
-
-/**
- * Get all skills directories for an agent (primary + alternatives)
- */
-export function getAllSkillsDirs(agent: AgentType): string[] {
-  const format = AGENT_SKILL_FORMATS[agent];
-  const dirs = [format.skillsDir];
-  if (format.altSkillsDirs) {
-    dirs.push(...format.altSkillsDirs);
-  }
-  return dirs;
-}
-
-/**
- * Get global skills directory for an agent
- */
-export function getGlobalSkillsDir(agent: AgentType): string | undefined {
-  return AGENT_SKILL_FORMATS[agent].globalSkillsDir;
-}
+// Re-export utility functions from centralized config with legacy names for backwards compatibility
+export const getAgentSkillsDir = getSkillsDir;
+export const getAgentConfigFile = getConfigFile;
+export { agentSupportsAutoDiscovery as supportsAutoDiscovery };
+export { getAgentAllSkillsDirs as getAllSkillsDirs };
+export { getAgentGlobalSkillsDir as getGlobalSkillsDir };

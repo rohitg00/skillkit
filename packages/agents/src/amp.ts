@@ -4,12 +4,15 @@ import { homedir } from 'node:os';
 import type { AgentAdapter } from './base.js';
 import { createSkillXml } from './base.js';
 import type { Skill, AgentType } from '@skillkit/core';
+import { AGENT_CONFIG } from '@skillkit/core';
+
+const config = AGENT_CONFIG.amp;
 
 export class AmpAdapter implements AgentAdapter {
   readonly type: AgentType = 'amp';
   readonly name = 'Amp';
-  readonly skillsDir = '.agents/skills';
-  readonly configFile = 'AGENTS.md';
+  readonly skillsDir = config.skillsDir;
+  readonly configFile = config.configFile;
 
   generateConfig(skills: Skill[]): string {
     const enabledSkills = skills.filter(s => s.enabled);

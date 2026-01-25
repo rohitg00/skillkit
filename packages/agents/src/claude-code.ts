@@ -4,12 +4,15 @@ import { homedir } from 'node:os';
 import type { AgentAdapter } from './base.js';
 import { createSkillXml } from './base.js';
 import type { Skill, AgentType } from '@skillkit/core';
+import { AGENT_CONFIG } from '@skillkit/core';
+
+const config = AGENT_CONFIG['claude-code'];
 
 export class ClaudeCodeAdapter implements AgentAdapter {
   readonly type: AgentType = 'claude-code';
   readonly name = 'Claude Code';
-  readonly skillsDir = '.claude/skills';
-  readonly configFile = 'AGENTS.md';
+  readonly skillsDir = config.skillsDir;
+  readonly configFile = config.configFile;
 
   generateConfig(skills: Skill[]): string {
     const enabledSkills = skills.filter(s => s.enabled);

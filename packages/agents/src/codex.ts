@@ -3,12 +3,15 @@ import { join } from 'node:path';
 import { homedir } from 'node:os';
 import type { AgentAdapter } from './base.js';
 import type { Skill, AgentType } from '@skillkit/core';
+import { AGENT_CONFIG } from '@skillkit/core';
+
+const config = AGENT_CONFIG.codex;
 
 export class CodexAdapter implements AgentAdapter {
   readonly type: AgentType = 'codex';
   readonly name = 'OpenAI Codex CLI';
-  readonly skillsDir = '.codex/skills';
-  readonly configFile = 'AGENTS.md';
+  readonly skillsDir = config.skillsDir;
+  readonly configFile = config.configFile;
 
   generateConfig(skills: Skill[]): string {
     const enabledSkills = skills.filter(s => s.enabled);

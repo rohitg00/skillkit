@@ -1,6 +1,9 @@
 // Types
 export * from './types.js';
 
+// Centralized Agent Configuration (single source of truth)
+export * from './agent-config.js';
+
 // Skills discovery and parsing
 export * from './skills.js';
 

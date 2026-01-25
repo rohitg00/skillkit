@@ -4,12 +4,15 @@ import { homedir } from 'node:os';
 import type { AgentAdapter } from './base.js';
 import { createSkillXml } from './base.js';
 import type { Skill, AgentType } from '@skillkit/core';
+import { AGENT_CONFIG } from '@skillkit/core';
+
+const config = AGENT_CONFIG.cursor;
 
 export class CursorAdapter implements AgentAdapter {
   readonly type: AgentType = 'cursor';
   readonly name = 'Cursor';
-  readonly skillsDir = '.cursor/skills';
-  readonly configFile = '.cursor/rules/skills.mdc';
+  readonly skillsDir = config.skillsDir;
+  readonly configFile = config.configFile;
 
   generateConfig(skills: Skill[]): string {
     const enabledSkills = skills.filter(s => s.enabled);

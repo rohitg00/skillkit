@@ -99,10 +99,5 @@ export async function detectAgent(): Promise<AgentType> {
   return 'universal';
 }
 
-export function getSkillsDir(type: AgentType): string {
-  return adapters[type].skillsDir;
-}
-
-export function getConfigFile(type: AgentType): string {
-  return adapters[type].configFile;
-}
+// getSkillsDir and getConfigFile are now re-exported from @skillkit/core above
+// This ensures a single source of truth for agent configurations

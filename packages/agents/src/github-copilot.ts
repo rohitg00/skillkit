@@ -3,12 +3,15 @@ import { join } from 'node:path';
 import { homedir } from 'node:os';
 import type { AgentAdapter } from './base.js';
 import type { Skill, AgentType } from '@skillkit/core';
+import { AGENT_CONFIG } from '@skillkit/core';
+
+const config = AGENT_CONFIG['github-copilot'];
 
 export class GitHubCopilotAdapter implements AgentAdapter {
   readonly type: AgentType = 'github-copilot';
   readonly name = 'GitHub Copilot';
-  readonly skillsDir = '.github/skills';
-  readonly configFile = '.github/copilot-instructions.md';
+  readonly skillsDir = config.skillsDir;
+  readonly configFile = config.configFile;
 
   generateConfig(skills: Skill[]): string {
     const enabledSkills = skills.filter(s => s.enabled);

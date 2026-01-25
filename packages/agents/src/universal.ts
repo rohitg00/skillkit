@@ -3,12 +3,15 @@ import { join } from 'node:path';
 import type { AgentAdapter } from './base.js';
 import { createSkillXml } from './base.js';
 import type { Skill, AgentType } from '@skillkit/core';
+import { AGENT_CONFIG } from '@skillkit/core';
+
+const config = AGENT_CONFIG.universal;
 
 export class UniversalAdapter implements AgentAdapter {
   readonly type: AgentType = 'universal';
   readonly name = 'Universal (Any Agent)';
-  readonly skillsDir = '.agent/skills';
-  readonly configFile = 'AGENTS.md';
+  readonly skillsDir = config.skillsDir;
+  readonly configFile = config.configFile;
 
   generateConfig(skills: Skill[]): string {
     const enabledSkills = skills.filter(s => s.enabled);
