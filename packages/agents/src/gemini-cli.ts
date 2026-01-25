@@ -67,7 +67,7 @@ ${JSON.stringify(skillsJson, null, 2)}
     }
 
     if (skillNames.length === 0) {
-      const headerRegex = /^### ([a-z0-9-]+)$/gm;
+      const headerRegex = /^###\s+(.+?)\s*$/gm;
       let match;
       while ((match = headerRegex.exec(content)) !== null) {
         skillNames.push(match[1].trim());

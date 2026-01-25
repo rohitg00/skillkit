@@ -69,9 +69,9 @@ ${skillsXml}
   }
 
   async isDetected(): Promise<boolean> {
-    const projectAgents = join(process.cwd(), '.agents');
-    const globalAgents = join(homedir(), '.config', 'agents');
+    const projectAmp = join(process.cwd(), '.amp');
+    const globalAmp = join(homedir(), '.amp');
 
-    return existsSync(projectAgents) || existsSync(globalAgents);
+    return existsSync(projectAmp) || existsSync(globalAmp);
   }
 }

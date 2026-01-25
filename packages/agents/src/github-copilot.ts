@@ -48,7 +48,7 @@ Each skill is self-contained with its own resources.
 
   parseConfig(content: string): string[] {
     const skillNames: string[] = [];
-    const headerRegex = /^### ([a-z0-9-]+)$/gm;
+    const headerRegex = /^###\s+(.+?)\s*$/gm;
     let match;
 
     while ((match = headerRegex.exec(content)) !== null) {

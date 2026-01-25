@@ -6,7 +6,7 @@
  */
 
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'node:fs';
-import { join, basename, dirname } from 'node:path';
+import { join, basename, dirname, resolve, relative, isAbsolute } from 'node:path';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import type { AgentType, Skill } from './types.js';
 import {
@@ -206,6 +206,8 @@ function extractAgentSpecificFields(
     'alwaysApply',
     'applyTo',
     'mode',
+    'hooks',
+    'permissionMode',
   ];
 
   for (const field of specialFields) {
@@ -321,50 +323,62 @@ function addAgentSpecificFields(
 ): void {
   // Claude Code specific
   if (targetAgent === 'claude-code') {
-    if (canonical.agentFields?.['model']) {
-      frontmatter.model = canonical.agentFields['model'];
+    if ('model' in (canonical.agentFields ?? {})) {
+      frontmatter.model = canonical.agentFields!['model'];
     }
-    if (canonical.agentFields?.['context']) {
-      frontmatter.context = canonical.agentFields['context'];
+    if ('context' in (canonical.agentFields ?? {})) {
+      frontmatter.context = canonical.agentFields!['context'];
     }
-    if (canonical.agentFields?.['agent']) {
-      frontmatter.agent = canonical.agentFields['agent'];
+    if ('agent' in (canonical.agentFields ?? {})) {
+      frontmatter.agent = canonical.agentFields!['agent'];
     }
-    if (canonical.agentFields?.['disable-model-invocation']) {
-      frontmatter['disable-model-invocation'] = canonical.agentFields['disable-model-invocation'];
+    if ('disable-model-invocation' in (canonical.agentFields ?? {})) {
+      frontmatter['disable-model-invocation'] = canonical.agentFields!['disable-model-invocation'];
     }
-    if (canonical.agentFields?.['user-invocable']) {
-      frontmatter['user-invocable'] = canonical.agentFields['user-invocable'];
+    if ('user-invocable' in (canonical.agentFields ?? {})) {
+      frontmatter['user-invocable'] = canonical.agentFields!['user-invocable'];
     }
-    if (canonical.agentFields?.['argument-hint']) {
-      frontmatter['argument-hint'] = canonical.agentFields['argument-hint'];
+    if ('argument-hint' in (canonical.agentFields ?? {})) {
+      frontmatter['argument-hint'] = canonical.agentFields!['argument-hint'];
+    }
+    if ('hooks' in (canonical.agentFields ?? {})) {
+      frontmatter.hooks = canonical.agentFields!['hooks'];
+    }
+    if ('permissionMode' in (canonical.agentFields ?? {})) {
+      frontmatter.permissionMode = canonical.agentFields!['permissionMode'];
     }
   }
 
   // Cursor/Trae/Windsurf specific (MDC-style)
   if (['cursor', 'trae', 'windsurf'].includes(targetAgent)) {
-    if (canonical.agentFields?.['globs']) {
-      frontmatter.globs = canonical.agentFields['globs'];
+    if ('globs' in (canonical.agentFields ?? {})) {
+      frontmatter.globs = canonical.agentFields!['globs'];
     }
-    if (canonical.agentFields?.['alwaysApply']) {
-      frontmatter.alwaysApply = canonical.agentFields['alwaysApply'];
+    if ('alwaysApply' in (canonical.agentFields ?? {})) {
+      frontmatter.alwaysApply = canonical.agentFields!['alwaysApply'];
+    }
+    if (targetAgent === 'windsurf' && 'mode' in (canonical.agentFields ?? {})) {
+      frontmatter.mode = canonical.agentFields!['mode'];
     }
   }
 
   // GitHub Copilot specific
   if (targetAgent === 'github-copilot') {
-    if (canonical.agentFields?.['applyTo']) {
-      frontmatter.applyTo = canonical.agentFields['applyTo'];
+    if ('applyTo' in (canonical.agentFields ?? {})) {
+      frontmatter.applyTo = canonical.agentFields!['applyTo'];
     }
   }
 
   // Roo specific
   if (targetAgent === 'roo') {
-    if (canonical.agentFields?.['disable-model-invocation']) {
-      frontmatter['disable-model-invocation'] = canonical.agentFields['disable-model-invocation'];
+    if ('disable-model-invocation' in (canonical.agentFields ?? {})) {
+      frontmatter['disable-model-invocation'] = canonical.agentFields!['disable-model-invocation'];
     }
-    if (canonical.agentFields?.['user-invocable']) {
-      frontmatter['user-invocable'] = canonical.agentFields['user-invocable'];
+    if ('user-invocable' in (canonical.agentFields ?? {})) {
+      frontmatter['user-invocable'] = canonical.agentFields!['user-invocable'];
+    }
+    if ('permissionMode' in (canonical.agentFields ?? {})) {
+      frontmatter.permissionMode = canonical.agentFields!['permissionMode'];
     }
   }
 }
@@ -416,8 +430,19 @@ export function writeTranslatedSkill(
   }
 
   try {
-    const targetPath = join(rootDir, result.targetDir);
-    const filePath = join(targetPath, result.filename);
+    const rootPath = resolve(rootDir);
+    const filePath = resolve(rootDir, result.targetDir, result.filename);
+    const targetPath = dirname(filePath);
+
+    // Guard against path traversal
+    const relPath = relative(rootPath, filePath);
+    if (relPath.startsWith('..') || isAbsolute(relPath)) {
+      return {
+        success: false,
+        path: filePath,
+        error: 'Resolved output path escapes rootDir',
+      };
+    }
 
     // Check if file exists and overwrite is disabled
     if (existsSync(filePath) && options?.overwrite === false) {

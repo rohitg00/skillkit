@@ -52,7 +52,7 @@ Skills provide detailed instructions for completing complex tasks.
 
   parseConfig(content: string): string[] {
     const skillNames: string[] = [];
-    const headerRegex = /^### ([a-z0-9-]+)$/gm;
+    const headerRegex = /^###\s+(.+?)\s*$/gm;
     let match;
 
     while ((match = headerRegex.exec(content)) !== null) {
@@ -70,9 +70,7 @@ Skills provide detailed instructions for completing complex tasks.
     const projectTrae = join(process.cwd(), '.trae');
     const traeRulesDir = join(process.cwd(), '.trae', 'rules');
     const globalTrae = join(homedir(), '.trae');
-    const agentsMd = join(process.cwd(), 'AGENTS.md');
 
-    return existsSync(projectTrae) || existsSync(traeRulesDir) ||
-           existsSync(globalTrae) || existsSync(agentsMd);
+    return existsSync(projectTrae) || existsSync(traeRulesDir) || existsSync(globalTrae);
   }
 }

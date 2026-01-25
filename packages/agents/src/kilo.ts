@@ -71,10 +71,8 @@ ${skillsXml}
   async isDetected(): Promise<boolean> {
     const projectKilo = join(process.cwd(), '.kilocode');
     const globalKilo = join(homedir(), '.kilocode');
-    const agentsMd = join(process.cwd(), 'AGENTS.md');
     const kiloModes = join(process.cwd(), '.kilocode', 'modes');
 
-    return existsSync(projectKilo) || existsSync(globalKilo) ||
-           existsSync(agentsMd) || existsSync(kiloModes);
+    return existsSync(projectKilo) || existsSync(globalKilo) || existsSync(kiloModes);
   }
 }

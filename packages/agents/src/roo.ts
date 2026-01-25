@@ -71,10 +71,8 @@ ${skillsXml}
   async isDetected(): Promise<boolean> {
     const projectRoo = join(process.cwd(), '.roo');
     const globalRoo = join(homedir(), '.roo');
-    const agentsMd = join(process.cwd(), 'AGENTS.md');
     const rooModes = join(process.cwd(), '.roo', 'modes');
 
-    return existsSync(projectRoo) || existsSync(globalRoo) ||
-           existsSync(agentsMd) || existsSync(rooModes);
+    return existsSync(projectRoo) || existsSync(globalRoo) || existsSync(rooModes);
   }
 }
