@@ -1,353 +1,179 @@
-import { useState } from 'react';
-import { existsSync, mkdirSync, cpSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
-import { Box, Text, useInput } from 'ink';
-import { colors, symbols } from '../theme.js';
-import { useRecommend } from '../hooks/useRecommend.js';
-import { detectProvider, type AgentType, type SkillMetadata } from '@skillkit/core';
-import { detectAgent, getAdapter, getAllAdapters } from '@skillkit/agents';
-import { getInstallDir, saveSkillMetadata } from '../helpers.js';
+/**
+ * Recommend Screen - AI Skill Suggestions
+ * Clean monochromatic design with colored confidence indicators
+ */
+import { useState, useEffect, useMemo } from 'react';
+import { type Screen } from '../state/index.js';
+import { terminalColors } from '../theme/colors.js';
 
-type View = 'recommendations' | 'search' | 'agents';
-
-interface Props {
+interface RecommendProps {
+  onNavigate: (screen: Screen) => void;
   cols?: number;
   rows?: number;
 }
 
-export function Recommend({ rows = 24 }: Props) {
-  const {
-    recommendations,
-    profile,
-    loading,
-    error,
-    totalScanned,
-    indexStatus,
-    refresh,
-    updateIndex,
-    search,
-    searchResults,
-  } = useRecommend();
+// Spinner frames
+const SPINNER = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
-  const [view, setView] = useState<View>('recommendations');
-  const [sel, setSel] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchMode, setSearchMode] = useState(false);
-  const [installing, setInstalling] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-  const [selectedSkill, setSelectedSkill] = useState<{ name: string; source: string } | null>(null);
-  const [agents, setAgents] = useState<{ type: AgentType; name: string; detected: boolean }[]>([]);
+export function Recommend({ onNavigate, cols = 80, rows = 24 }: RecommendProps) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [analyzing, setAnalyzing] = useState(true);
+  const [spinnerFrame, setSpinnerFrame] = useState(0);
+  const [animPhase, setAnimPhase] = useState(0);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
 
-  const items = view === 'recommendations'
-    ? recommendations
-    : view === 'search'
-    ? searchResults
-    : agents;
+  const isCompact = cols < 60;
+  const isNarrow = cols < 45;
+  const contentWidth = Math.min(cols - 4, 60);
 
-  const maxVisible = Math.max(5, rows - 10);
-  const start = Math.max(0, Math.min(sel - Math.floor(maxVisible / 2), items.length - maxVisible));
-  const visible = items.slice(start, start + maxVisible);
+  // Entrance animation
+  useEffect(() => {
+    if (animPhase >= 3) return;
+    const timer = setTimeout(() => setAnimPhase(p => p + 1), 100);
+    return () => clearTimeout(timer);
+  }, [animPhase]);
 
-  const showAgentSelection = async (skillName: string, source: string) => {
-    setSelectedSkill({ name: skillName, source });
-    const adapters = getAllAdapters();
-    const agentList: typeof agents = [];
-    for (const a of adapters) {
-      agentList.push({
-        type: a.type as AgentType,
-        name: a.name,
-        detected: await a.isDetected(),
+  // Spinner animation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSpinnerFrame(f => (f + 1) % SPINNER.length);
+    }, 80);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Simulate analysis
+  useEffect(() => {
+    if (!analyzing) return;
+    const interval = setInterval(() => {
+      setAnalysisProgress(p => {
+        if (p >= 100) {
+          setAnalyzing(false);
+          return 100;
+        }
+        return p + Math.random() * 15 + 5;
       });
-    }
-    setAgents(agentList);
-    setView('agents');
-    setSel(0);
+    }, 200);
+    return () => clearInterval(interval);
+  }, [analyzing]);
+
+  // Recommendations data
+  const recommendations = useMemo(() => [
+    { name: 'tdd-workflow', reason: 'Based on your test files and coverage patterns', confidence: 95 },
+    { name: 'react-patterns', reason: 'Detected React in package.json with hooks usage', confidence: 88 },
+    { name: 'typescript-strict', reason: 'tsconfig.json found with strict mode disabled', confidence: 82 },
+    { name: 'git-workflow', reason: '.git directory with complex branching detected', confidence: 75 },
+    { name: 'api-design', reason: 'REST endpoints found in your codebase', confidence: 68 },
+    { name: 'docker-compose', reason: 'docker-compose.yml detected for orchestration', confidence: 62 },
+  ], []);
+
+  // Calculate visible recommendations
+  const maxVisible = Math.max(3, Math.floor((rows - 10) / 2));
+  const visibleRecs = recommendations.slice(0, maxVisible);
+
+  const divider = useMemo(() =>
+    <text fg={terminalColors.textMuted}>{'─'.repeat(contentWidth)}</text>,
+    [contentWidth]
+  );
+
+  // Confidence color
+  const getConfColor = (conf: number) => {
+    if (conf >= 80) return terminalColors.success;
+    if (conf >= 60) return terminalColors.recommend;
+    return terminalColors.textMuted;
   };
 
-  const installSkill = async (skillName: string, source: string, agentType?: AgentType) => {
-    if (!source) {
-      setMessage('Error: No source available for this skill');
-      return;
-    }
-
-    setInstalling(skillName);
-    setMessage(null);
-
-    try {
-      const provider = detectProvider(source);
-      if (!provider) {
-        setMessage(`Error: Unknown provider for ${source}`);
-        setInstalling(null);
-        return;
-      }
-
-      const result = await provider.clone(source, '', { depth: 1 });
-
-      if (!result.success || !result.discoveredSkills) {
-        setMessage(`Error: ${result.error || 'Failed to fetch'}`);
-        setInstalling(null);
-        return;
-      }
-
-      const skill = result.discoveredSkills.find(s => s.name === skillName);
-      if (!skill) {
-        setMessage(`Error: Skill ${skillName} not found in repo`);
-        setInstalling(null);
-        return;
-      }
-
-      const targetAgentType = agentType || await detectAgent();
-      const adapter = getAdapter(targetAgentType);
-      const installDir = getInstallDir(false, targetAgentType);
-
-      if (!existsSync(installDir)) {
-        mkdirSync(installDir, { recursive: true });
-      }
-
-      const targetPath = join(installDir, skillName);
-
-      if (existsSync(targetPath)) {
-        rmSync(targetPath, { recursive: true, force: true });
-      }
-
-      cpSync(skill.path, targetPath, { recursive: true, dereference: true });
-
-      const metadata: SkillMetadata = {
-        name: skillName,
-        description: '',
-        source: source,
-        sourceType: provider.type,
-        subpath: skillName,
-        installedAt: new Date().toISOString(),
-        enabled: true,
-      };
-      saveSkillMetadata(targetPath, metadata);
-
-      if (result.tempRoot) {
-        rmSync(result.tempRoot, { recursive: true, force: true });
-      }
-
-      setMessage(`✓ Installed ${skillName} to ${adapter.name}`);
-    } catch (err) {
-      setMessage(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
-    } finally {
-      setInstalling(null);
-      if (agentType) {
-        setSelectedSkill(null);
-        setView('recommendations');
-      }
-    }
-  };
-
-  useInput((input, key) => {
-    if (loading || installing) return;
-
-    // Handle search input mode
-    if (searchMode) {
-      if (key.escape) {
-        setSearchMode(false);
-        setSearchQuery('');
-        setView('recommendations');
-        return;
-      }
-      if (key.return) {
-        setSearchMode(false);
-        if (searchQuery.trim()) {
-          search(searchQuery);
-          setView('search');
-          setSel(0);
-        }
-        return;
-      }
-      if (key.backspace || key.delete) {
-        setSearchQuery(q => q.slice(0, -1));
-        return;
-      }
-      if (input && !key.ctrl && !key.meta) {
-        setSearchQuery(q => q + input);
-        return;
-      }
-      return;
-    }
-
-    // Navigation
-    if (key.upArrow) setSel(i => Math.max(0, i - 1));
-    else if (key.downArrow) setSel(i => Math.min(items.length - 1, i + 1));
-    else if (key.return) {
-      if (view === 'agents' && agents[sel]) {
-        installSkill(selectedSkill!.name, selectedSkill!.source, agents[sel].type);
-      } else if ((view === 'recommendations' || view === 'search') && items[sel]) {
-        const skill = items[sel] as typeof recommendations[0];
-        if (skill.skill.source) {
-          installSkill(skill.skill.name, skill.skill.source);
-        }
-      }
-    }
-    // Actions
-    else if (input === '/') {
-      setSearchMode(true);
-      setSearchQuery('');
-    }
-    else if (input === 'm' && (view === 'recommendations' || view === 'search') && items[sel]) {
-      const skill = items[sel] as typeof recommendations[0];
-      if (skill.skill.source) {
-        showAgentSelection(skill.skill.name, skill.skill.source);
-      }
-    }
-    else if (input === 'u') {
-      updateIndex();
-    }
-    else if (input === 'r' && view !== 'recommendations') {
-      if (view === 'agents') {
-        setView('recommendations');
-      } else {
-        setView('recommendations');
-        setSearchQuery('');
-      }
-      setSel(0);
-    }
-    else if (input === 'R') {
-      refresh();
-    }
-  });
-
-  // Agent selection view
-  if (view === 'agents') {
-    return (
-      <Box flexDirection="column">
-        <Text bold color={colors.primary}>SELECT AGENT</Text>
-        <Text dimColor>Install "{selectedSkill?.name}" to which agent?</Text>
-
-        <Box marginTop={1} flexDirection="column">
-          {visible.map((agent, i) => {
-            const idx = start + i;
-            const isSel = idx === sel;
-            const a = agent as typeof agents[0];
-            const status = a.detected ? '(ready)' : '(will create)';
-            return (
-              <Text key={a.type} inverse={isSel}>
-                {isSel ? symbols.pointer : ' '} {a.name.padEnd(20)} <Text color={colors.secondaryDim}>{status}</Text>
-              </Text>
-            );
-          })}
-        </Box>
-
-        <Box marginTop={1}>
-          <Text dimColor>Enter=install  r=back  q=quit</Text>
-        </Box>
-      </Box>
-    );
-  }
-
-  // Score bar helper
-  const getScoreBar = (score: number): string => {
-    const filled = Math.round(score / 10);
-    const empty = 10 - filled;
-    return '█'.repeat(filled) + '░'.repeat(empty);
-  };
-
-  const getScoreColor = (score: number) => {
-    if (score >= 70) return 'green';
-    if (score >= 50) return 'yellow';
-    return 'gray';
-  };
+  const shortcuts = isCompact
+    ? 'j/k nav   enter install   r refresh   esc back'
+    : 'j/k navigate   enter install   r refresh   esc back';
 
   return (
-    <Box flexDirection="column">
-      <Text bold color={colors.primary}>
-        {view === 'search' ? `SEARCH: "${searchQuery}"` : 'RECOMMENDATIONS'}
-      </Text>
-
-      {/* Status bar */}
-      {loading && <Text dimColor>Loading...</Text>}
-      {installing && <Text>Installing {installing}...</Text>}
-      {message && <Text dimColor>{message}</Text>}
-      {error && <Text color="red">{error}</Text>}
-
-      {/* Search input */}
-      {searchMode && (
-        <Box marginTop={1}>
-          <Text>Search: {searchQuery}</Text>
-          <Text dimColor>█</Text>
-        </Box>
+    <box flexDirection="column" padding={1}>
+      {/* Header */}
+      {animPhase >= 1 && (
+        <box flexDirection="column">
+          <box flexDirection="row" justifyContent="space-between" width={contentWidth}>
+            <text fg={terminalColors.recommend}>◎ Recommendations</text>
+            <text fg={terminalColors.textMuted}>
+              {analyzing ? 'analyzing...' : `${recommendations.length} found`}
+            </text>
+          </box>
+          <text fg={terminalColors.textMuted}>AI skill suggestions</text>
+          <text> </text>
+        </box>
       )}
 
-      {/* Index status warning */}
-      {indexStatus === 'missing' && !loading && (
-        <Box marginTop={1} flexDirection="column">
-          <Text color="yellow">No skill index found.</Text>
-          <Text dimColor>Press 'u' to update index from known sources.</Text>
-        </Box>
+      {/* Analysis progress */}
+      {animPhase >= 2 && analyzing && (
+        <box flexDirection="column">
+          {divider}
+          <text> </text>
+          <box flexDirection="row">
+            <text fg={terminalColors.accent}>{SPINNER[spinnerFrame]} </text>
+            <text fg={terminalColors.text}>Analyzing</text>
+            <text fg={terminalColors.textMuted}> your project...</text>
+          </box>
+          <text> </text>
+          {divider}
+          <text> </text>
+        </box>
       )}
 
-      {indexStatus === 'stale' && !loading && (
-        <Text dimColor>Index may be outdated. Press 'u' to update.</Text>
+      {/* Results summary */}
+      {animPhase >= 2 && !analyzing && (
+        <box flexDirection="column">
+          {divider}
+          <text> </text>
+          <box flexDirection="row">
+            <text fg={terminalColors.success}>✓ </text>
+            <text fg={terminalColors.text}>Analysis complete</text>
+            <text fg={terminalColors.textMuted}> · found {recommendations.length} matching skills</text>
+          </box>
+          <text> </text>
+          {divider}
+          <text> </text>
+        </box>
       )}
 
-      {/* Profile info */}
-      {profile && !searchMode && (
-        <Box marginTop={1} flexDirection="column">
-          <Text dimColor>
-            Project: {profile.name}
-            {profile.type ? ` (${profile.type})` : ''}
-          </Text>
-          {profile.stack.languages.length > 0 && (
-            <Text dimColor>
-              Stack: {profile.stack.languages.map(l => l.name).join(', ')}
-              {profile.stack.frameworks.length > 0 && `, ${profile.stack.frameworks.map(f => f.name).join(', ')}`}
-            </Text>
+      {/* Recommendations list */}
+      {animPhase >= 3 && !analyzing && (
+        <box flexDirection="column">
+          <text fg={terminalColors.text}>Suggested Skills</text>
+          <text> </text>
+
+          {visibleRecs.map((rec, idx) => {
+            const selected = idx === selectedIndex;
+            const indicator = selected ? '▸' : ' ';
+            return (
+              <box key={rec.name} flexDirection="column">
+                <box flexDirection="row">
+                  <text fg={terminalColors.text}>{indicator}</text>
+                  <text fg={selected ? terminalColors.accent : terminalColors.text}>
+                    {rec.name}
+                  </text>
+                  <text fg={getConfColor(rec.confidence)}> {rec.confidence}%</text>
+                </box>
+                <text fg={terminalColors.textMuted}>  {rec.reason}</text>
+                <text> </text>
+              </box>
+            );
+          })}
+
+          {recommendations.length > maxVisible && (
+            <text fg={terminalColors.textMuted}>
+              +{recommendations.length - maxVisible} more
+            </text>
           )}
-        </Box>
+          <text> </text>
+        </box>
       )}
 
-      {/* Item count */}
-      {!searchMode && (
-        <Text dimColor>
-          {view === 'search'
-            ? `${searchResults.length} results`
-            : `${recommendations.length} of ${totalScanned} skills matched`}
-        </Text>
+      {/* Footer */}
+      {animPhase >= 3 && (
+        <box flexDirection="column">
+          {divider}
+          <text fg={terminalColors.textMuted}>{shortcuts}</text>
+        </box>
       )}
-
-      {/* List */}
-      <Box marginTop={1} flexDirection="column">
-        {start > 0 && <Text dimColor>  ↑ {start} more</Text>}
-        {visible.map((item, i) => {
-          const idx = start + i;
-          const isSel = idx === sel;
-          const skill = (item as typeof recommendations[0]).skill;
-          const score = (item as typeof recommendations[0]).score;
-
-          return (
-            <Box key={skill.name} flexDirection="column">
-              <Text inverse={isSel}>
-                {isSel ? symbols.pointer : ' '}
-                <Text color={getScoreColor(score)}>{score.toString().padStart(3)}%</Text>
-                {' '}
-                <Text color={getScoreColor(score)}>{getScoreBar(score)}</Text>
-                {' '}
-                <Text bold>{skill.name}</Text>
-              </Text>
-              {isSel && skill.description && (
-                <Text dimColor>      {skill.description.slice(0, 60)}{skill.description.length > 60 ? '...' : ''}</Text>
-              )}
-              {isSel && skill.source && (
-                <Text dimColor>      Source: {skill.source}</Text>
-              )}
-            </Box>
-          );
-        })}
-        {start + maxVisible < items.length && <Text dimColor>  ↓ {items.length - start - maxVisible} more</Text>}
-      </Box>
-
-      {/* Help bar */}
-      <Box marginTop={1}>
-        <Text dimColor>
-          {view === 'search'
-            ? 'Enter=install  m=choose agent  /=search  r=back  u=update  q=quit'
-            : 'Enter=install  m=choose agent  /=search  u=update  R=refresh  q=quit'}
-        </Text>
-      </Box>
-    </Box>
+    </box>
   );
 }

@@ -1,100 +1,44 @@
-import { Box, Text } from 'ink';
-import { colors, symbols } from '../theme.js';
-import type { Screen } from '../App.js';
+import { type Screen, SIDEBAR_NAV } from '../state/types.js';
+import { terminalColors } from '../theme/colors.js';
+import { symbols } from '../theme/symbols.js';
+import { getVersion } from '../utils/helpers.js';
 
 interface SidebarProps {
   screen: Screen;
   onNavigate: (screen: Screen) => void;
-  isCompact?: boolean;
 }
 
-const NAV: { id: Screen; label: string; key: string }[] = [
-  // Discovery
-  { id: 'home', label: 'Home', key: 'h' },
-  { id: 'marketplace', label: 'Marketplace', key: 'm' },
-  { id: 'browse', label: 'Browse', key: 'b' },
-  // Execution
-  { id: 'workflow', label: 'Workflows', key: 'w' },
-  { id: 'execute', label: 'Execute', key: 'x' },
-  { id: 'history', label: 'History', key: 'y' },
-  // Collaboration
-  { id: 'team', label: 'Team', key: 'a' },
-  { id: 'plugins', label: 'Plugins', key: 'p' },
-  // Methodology
-  { id: 'methodology', label: 'Methodology', key: 'o' },
-  { id: 'plan', label: 'Plans', key: 'n' },
-  // Tools
-  { id: 'recommend', label: 'Recommend', key: 'r' },
-  { id: 'translate', label: 'Translate', key: 't' },
-  { id: 'context', label: 'Context', key: 'c' },
-  { id: 'memory', label: 'Memory', key: 'e' },
-  // Management
-  { id: 'installed', label: 'Installed', key: 'i' },
-  { id: 'sync', label: 'Sync', key: 's' },
-  { id: 'settings', label: 'Config', key: ',' },
-];
-
 export function Sidebar({ screen }: SidebarProps) {
+  const version = getVersion();
+
   return (
-    <Box flexDirection="column" width={14} borderStyle="single" paddingX={1}>
-      <Text bold color={colors.primary}>SkillKit</Text>
+    <box flexDirection="column" width={18} paddingRight={1}>
+      <text fg={terminalColors.accent}>
+        <b>{symbols.brandIcon} skillkit</b>
+      </text>
+      <text fg={terminalColors.textMuted}>v{version}</text>
+      <text> </text>
 
-      {/* Discovery (0-2) */}
-      {NAV.slice(0, 3).map((item) => (
-        <Text key={item.id} inverse={screen === item.id}>
-          {screen === item.id ? symbols.bullet : ' '}{item.label}
-        </Text>
+      {SIDEBAR_NAV.map(({ section, items }, idx) => (
+        <box key={section} flexDirection="column">
+          {idx > 0 && <text> </text>}
+          <text fg={terminalColors.textMuted}>
+            <i>{section}</i>
+          </text>
+          {items.map((item) => {
+            const active = screen === item.screen;
+            return (
+              <text key={item.key} fg={active ? terminalColors.accent : terminalColors.text}>
+                {active ? <b>{symbols.pointer} {item.label}</b> : <>{symbols.pointerInactive} {item.label}</>}
+              </text>
+            );
+          })}
+        </box>
       ))}
 
-      <Text> </Text>
-
-      {/* Execution (3-5) */}
-      {NAV.slice(3, 6).map((item) => (
-        <Text key={item.id} inverse={screen === item.id}>
-          {screen === item.id ? symbols.bullet : ' '}{item.label}
-        </Text>
-      ))}
-
-      <Text> </Text>
-
-      {/* Collaboration (6-7) */}
-      {NAV.slice(6, 8).map((item) => (
-        <Text key={item.id} inverse={screen === item.id}>
-          {screen === item.id ? symbols.bullet : ' '}{item.label}
-        </Text>
-      ))}
-
-      <Text> </Text>
-
-      {/* Methodology (8-9) */}
-      {NAV.slice(8, 10).map((item) => (
-        <Text key={item.id} inverse={screen === item.id}>
-          {screen === item.id ? symbols.bullet : ' '}{item.label}
-        </Text>
-      ))}
-
-      <Text> </Text>
-
-      {/* Tools (10-13) */}
-      {NAV.slice(10, 14).map((item) => (
-        <Text key={item.id} inverse={screen === item.id}>
-          {screen === item.id ? symbols.bullet : ' '}{item.label}
-        </Text>
-      ))}
-
-      <Text> </Text>
-
-      {/* Management (14-16) */}
-      {NAV.slice(14).map((item) => (
-        <Text key={item.id} inverse={screen === item.id}>
-          {screen === item.id ? symbols.bullet : ' '}{item.label}
-        </Text>
-      ))}
-
-      <Box flexGrow={1} />
-
-      <Text dimColor>? Help</Text>
-      <Text dimColor>q Quit</Text>
-    </Box>
+      <box flexGrow={1} />
+      <text fg={terminalColors.textMuted}>{symbols.horizontalLine.repeat(14)}</text>
+      <text fg={terminalColors.textMuted}>/ help  q quit</text>
+    </box>
   );
 }

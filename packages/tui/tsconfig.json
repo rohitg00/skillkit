@@ -4,9 +4,15 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "jsx": "react-jsx",
-    "esModuleInterop": true,
-    "composite": false
+    "jsxImportSource": "@opentui/react",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": false,
+    "skipLibCheck": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*", "src/**/*.d.ts"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx"]
 }

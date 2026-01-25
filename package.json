@@ -7,6 +7,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "ui": "pnpm --filter skillkit exec bun skillkit ui",
     "test": "turbo run test",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -53,5 +54,6 @@
     "turbo": "^2.3.4",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
-  }
+  },
+  "pnpm": {}
 }

@@ -1,7 +1,7 @@
 {
   "name": "@skillkit/tui",
-  "version": "1.6.4",
-  "description": "Terminal UI for SkillKit",
+  "version": "2.0.0",
+  "description": "Unified Terminal UI for SkillKit - Built on OpenTUI",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -23,22 +23,19 @@
   "dependencies": {
     "@skillkit/core": "workspace:*",
     "@skillkit/agents": "workspace:*",
-    "chalk": "^5.3.0",
-    "ink": "^5.0.1",
-    "ink-select-input": "^6.0.0",
-    "ink-spinner": "^5.0.0",
-    "ink-text-input": "^6.0.0",
-    "react": "^18.3.1"
+    "@opentui/core": "^0.1.75",
+    "@opentui/react": "^0.1.75",
+    "react": "^19.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
-    "@types/react": "^18.3.18",
+    "@types/react": "^19.0.0",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "bun": ">=1.2.0"
   },
   "license": "Apache-2.0"
 }

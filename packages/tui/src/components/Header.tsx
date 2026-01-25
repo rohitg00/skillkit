@@ -1,30 +1,35 @@
-import { Box, Text } from 'ink';
-import { colors, symbols } from '../theme.js';
+/**
+ * Header Component
+ * Screen header with title and optional badge/count
+ */
+import { terminalColors } from '../theme/colors.js';
+import { symbols } from '../theme/symbols.js';
 
 interface HeaderProps {
   title: string;
   subtitle?: string;
   count?: number;
+  badge?: string;
+  icon?: string;
 }
 
-export function Header({ title, subtitle, count }: HeaderProps) {
+export function Header({ title, subtitle, count, badge, icon }: HeaderProps) {
   return (
-    <Box flexDirection="column" marginBottom={1}>
-      <Box justifyContent="space-between">
-        <Text color={colors.primary} bold>
-          {title.toUpperCase()}
-        </Text>
+    <box flexDirection="column" marginBottom={1}>
+      <box flexDirection="row" gap={2}>
+        <text fg={terminalColors.text}>
+          <b>{icon && `${icon} `}{title}</b>
+        </text>
         {count !== undefined && (
-          <Text color={colors.secondaryDim}>
-            {symbols.star} {count}
-          </Text>
+          <text fg={terminalColors.textMuted}>({count})</text>
         )}
-      </Box>
+        {badge && (
+          <text fg={terminalColors.accent}>[{badge}]</text>
+        )}
+      </box>
       {subtitle && (
-        <Text color={colors.secondaryDim} dimColor>
-          {subtitle}
-        </Text>
+        <text fg={terminalColors.textSecondary}>{subtitle}</text>
       )}
-    </Box>
+    </box>
   );
 }

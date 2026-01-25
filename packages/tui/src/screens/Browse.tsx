@@ -1,222 +1,145 @@
-import { useState } from 'react';
-import { existsSync, mkdirSync, cpSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
-import { Box, Text, useInput } from 'ink';
-import { colors, symbols } from '../theme.js';
-import { useMarketplace } from '../hooks/useMarketplace.js';
-import { detectProvider, type AgentType, type SkillMetadata } from '@skillkit/core';
-import { detectAgent, getAdapter, getAllAdapters } from '@skillkit/agents';
-import { getInstallDir, saveSkillMetadata } from '../helpers.js';
+/**
+ * Browse Screen - Repository Explorer
+ * Clean monochromatic design
+ */
+import { useState, useEffect, useMemo } from 'react';
+import { type Screen, DEFAULT_REPOS } from '../state/index.js';
+import { terminalColors } from '../theme/colors.js';
 
-type View = 'repos' | 'skills' | 'agents';
-
-interface Props {
+interface BrowseProps {
+  onNavigate: (screen: Screen) => void;
   cols?: number;
   rows?: number;
 }
 
-export function Browse({ rows = 24 }: Props) {
-  const { repos, skills, loading, currentRepo, fetchRepo, fetchAllRepos } = useMarketplace();
-  const [view, setView] = useState<View>('repos');
-  const [sel, setSel] = useState(0);
-  const [installing, setInstalling] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-  const [selectedSkill, setSelectedSkill] = useState<{ name: string; source: string } | null>(null);
-  const [agents, setAgents] = useState<{ type: AgentType; name: string; detected: boolean }[]>([]);
+export function Browse({ onNavigate, cols = 80, rows = 24 }: BrowseProps) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [animPhase, setAnimPhase] = useState(0);
 
-  const items = view === 'repos' ? repos : view === 'skills' ? skills : agents;
-  const maxVisible = Math.max(5, rows - 8);
-  const start = Math.max(0, Math.min(sel - Math.floor(maxVisible / 2), items.length - maxVisible));
-  const visible = items.slice(start, start + maxVisible);
+  const isCompact = cols < 60;
+  const contentWidth = Math.min(cols - 4, 60);
 
-  const showAgentSelection = async (skillName: string, source: string) => {
-    setSelectedSkill({ name: skillName, source });
-    const adapters = getAllAdapters();
-    const agentList: typeof agents = [];
-    for (const a of adapters) {
-      agentList.push({
-        type: a.type as AgentType,
-        name: a.name,
-        detected: await a.isDetected(),
-      });
-    }
-    setAgents(agentList);
-    setView('agents');
-    setSel(0);
-  };
+  // Entrance animation
+  useEffect(() => {
+    if (animPhase >= 2) return;
+    const timer = setTimeout(() => setAnimPhase(p => p + 1), 100);
+    return () => clearTimeout(timer);
+  }, [animPhase]);
 
-  const installSkill = async (skillName: string, source: string, agentType?: AgentType) => {
-    setInstalling(skillName);
-    setMessage(null);
+  const repos = useMemo(() =>
+    DEFAULT_REPOS.map((r) => ({
+      name: r.name,
+      source: r.source,
+    })),
+    []
+  );
 
-    try {
-      const provider = detectProvider(source);
-      if (!provider) {
-        setMessage(`Error: Unknown provider for ${source}`);
-        setInstalling(null);
-        return;
-      }
+  const filteredRepos = useMemo(() =>
+    searchQuery
+      ? repos.filter(
+          (r) =>
+            r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            r.source.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : repos,
+    [repos, searchQuery]
+  );
 
-      const result = await provider.clone(source, '', { depth: 1 });
+  // Calculate visible repos
+  const maxVisible = Math.max(5, rows - 10);
+  const startIdx = Math.max(0, Math.min(selectedIndex - Math.floor(maxVisible / 2), filteredRepos.length - maxVisible));
+  const visibleRepos = filteredRepos.slice(startIdx, startIdx + maxVisible);
 
-      if (!result.success || !result.discoveredSkills) {
-        setMessage(`Error: ${result.error || 'Failed to fetch'}`);
-        setInstalling(null);
-        return;
-      }
+  const divider = useMemo(() =>
+    <text fg={terminalColors.textMuted}>{'─'.repeat(contentWidth)}</text>,
+    [contentWidth]
+  );
 
-      const skill = result.discoveredSkills.find(s => s.name === skillName);
-      if (!skill) {
-        setMessage(`Error: Skill ${skillName} not found`);
-        setInstalling(null);
-        return;
-      }
-
-      const targetAgentType = agentType || await detectAgent();
-      const adapter = getAdapter(targetAgentType);
-      const installDir = getInstallDir(false, targetAgentType);
-
-      if (!existsSync(installDir)) {
-        mkdirSync(installDir, { recursive: true });
-      }
-
-      const targetPath = join(installDir, skillName);
-
-      if (existsSync(targetPath)) {
-        rmSync(targetPath, { recursive: true, force: true });
-      }
-
-      cpSync(skill.path, targetPath, { recursive: true, dereference: true });
-
-      const metadata: SkillMetadata = {
-        name: skillName,
-        description: '',
-        source: source,
-        sourceType: provider.type,
-        subpath: skillName,
-        installedAt: new Date().toISOString(),
-        enabled: true,
-      };
-      saveSkillMetadata(targetPath, metadata);
-
-      if (result.tempRoot) {
-        rmSync(result.tempRoot, { recursive: true, force: true });
-      }
-
-      setMessage(`✓ Installed ${skillName} to ${adapter.name}`);
-      if (!agentType) {
-        setView('skills');
-      }
-    } catch (err) {
-      setMessage(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
-    } finally {
-      setInstalling(null);
-      if (agentType) {
-        setSelectedSkill(null);
-      }
-    }
-  };
-
-  useInput((input, key) => {
-    if (loading || installing) return;
-
-    if (key.upArrow) setSel(i => Math.max(0, i - 1));
-    else if (key.downArrow) setSel(i => Math.min(items.length - 1, i + 1));
-    else if (key.return) {
-      if (view === 'repos' && repos[sel]) {
-        fetchRepo(repos[sel].source);
-        setView('skills');
-        setSel(0);
-        setMessage(null);
-      } else if (view === 'skills' && skills[sel]?.source) {
-        installSkill(skills[sel].name, skills[sel].source);
-      } else if (view === 'agents' && agents[sel]) {
-        installSkill(selectedSkill!.name, selectedSkill!.source, agents[sel].type);
-      }
-    }
-    else if (input === 'm' && view === 'skills' && skills[sel]?.source) {
-      showAgentSelection(skills[sel].name, skills[sel].source!);
-    }
-    else if (input === 'r') {
-      if (view === 'skills') {
-        setView('repos');
-        setSel(0);
-        setMessage(null);
-      } else if (view === 'agents') {
-        setView('skills');
-        setSel(0);
-      }
-    }
-    else if (input === 'a' && view === 'repos') {
-      fetchAllRepos();
-      setView('skills');
-      setSel(0);
-    }
-  });
-
-  if (view === 'agents') {
-    return (
-      <Box flexDirection="column">
-        <Text bold color={colors.primary}>SELECT AGENT</Text>
-        <Text dimColor>Install "{selectedSkill?.name}" to which agent?</Text>
-        <Text dimColor>(All agents supported - directory created if needed)</Text>
-
-        <Box marginTop={1} flexDirection="column">
-          {visible.map((agent, i) => {
-            const idx = start + i;
-            const isSel = idx === sel;
-            const a = agent as typeof agents[0];
-            const status = a.detected ? '(ready)' : '(will create)';
-            return (
-              <Text key={a.type} inverse={isSel}>
-                {isSel ? symbols.pointer : ' '} {a.name.padEnd(20)} <Text color={colors.secondaryDim}>{status}</Text>
-              </Text>
-            );
-          })}
-        </Box>
-
-        <Box marginTop={1}>
-          <Text dimColor>Enter=install to selected agent  r=back  q=quit</Text>
-        </Box>
-      </Box>
-    );
-  }
+  const shortcuts = isCompact
+    ? 'j/k nav   enter open   / search   esc back'
+    : 'j/k navigate   enter open   / search   esc back';
 
   return (
-    <Box flexDirection="column">
-      <Text bold color={colors.primary}>{view === 'repos' ? 'REPOSITORIES' : 'SKILLS'}</Text>
-      {loading && <Text dimColor>Loading {currentRepo}...</Text>}
-      {installing && <Text>Installing {installing}...</Text>}
-      {message && <Text dimColor>{message}</Text>}
-      <Text dimColor>{items.length} items</Text>
+    <box flexDirection="column" padding={1}>
+      {/* Header */}
+      {animPhase >= 1 && (
+        <box flexDirection="column">
+          <box flexDirection="row" justifyContent="space-between" width={contentWidth}>
+            <text fg={terminalColors.browse}>⌕ Browse</text>
+            <text fg={terminalColors.textMuted}>{filteredRepos.length} repos</text>
+          </box>
+          <text fg={terminalColors.textMuted}>explore skill repositories</text>
+          <text> </text>
+        </box>
+      )}
 
-      <Box marginTop={1} flexDirection="column">
-        {start > 0 && <Text dimColor>  ↑ {start} more</Text>}
-        {visible.map((item, i) => {
-          const idx = start + i;
-          const isSel = idx === sel;
-          const name = view === 'repos'
-            ? (item as typeof repos[0]).name
-            : (item as typeof skills[0]).name;
-          const src = view === 'repos'
-            ? (item as typeof repos[0]).source
-            : (item as typeof skills[0]).source || '';
-          return (
-            <Text key={src + name} inverse={isSel}>
-              {isSel ? symbols.pointer : ' '}{name.padEnd(25)} <Text color={colors.secondaryDim}>{src}</Text>
-            </Text>
-          );
-        })}
-        {start + maxVisible < items.length && <Text dimColor>  ↓ {items.length - start - maxVisible} more</Text>}
-      </Box>
+      {/* Search */}
+      {animPhase >= 2 && (
+        <box flexDirection="column">
+          {divider}
+          <text> </text>
+          <box flexDirection="row">
+            <text fg={terminalColors.textMuted}>/ </text>
+            <text fg={searchQuery ? terminalColors.text : terminalColors.textMuted}>
+              {searchQuery || 'type to filter...'}
+            </text>
+          </box>
+          <text> </text>
+          {divider}
+          <text> </text>
+        </box>
+      )}
 
-      <Box marginTop={1}>
-        <Text dimColor>
-          {view === 'repos'
-            ? 'Enter=fetch  a=all  q=quit'
-            : 'Enter=quick install  m=choose agent  r=back  q=quit'}
-        </Text>
-      </Box>
-    </Box>
+      {/* Repository list */}
+      {animPhase >= 2 && (
+        <box flexDirection="column">
+          <text fg={terminalColors.text}>Repositories</text>
+          <text> </text>
+
+          {filteredRepos.length === 0 ? (
+            <text fg={terminalColors.textMuted}>No repositories match your search</text>
+          ) : (
+            <box flexDirection="column">
+              {visibleRepos.map((repo, idx) => {
+                const actualIdx = startIdx + idx;
+                const selected = actualIdx === selectedIndex;
+                const indicator = selected ? '▸' : ' ';
+                // Truncate source if needed
+                const maxLen = contentWidth - repo.name.length - 6;
+                const displaySource = repo.source.length > maxLen
+                  ? repo.source.slice(0, maxLen - 3) + '...'
+                  : repo.source;
+                return (
+                  <box key={repo.source} flexDirection="row">
+                    <text fg={terminalColors.text}>{indicator}</text>
+                    <text fg={selected ? terminalColors.accent : terminalColors.text}>
+                      {repo.name}
+                    </text>
+                    <text fg={terminalColors.textMuted}> · {displaySource}</text>
+                  </box>
+                );
+              })}
+            </box>
+          )}
+
+          {/* Scroll indicator */}
+          {filteredRepos.length > maxVisible && (
+            <text fg={terminalColors.textMuted}>
+              {'\n'}showing {startIdx + 1}-{Math.min(startIdx + maxVisible, filteredRepos.length)} of {filteredRepos.length}
+            </text>
+          )}
+          <text> </text>
+        </box>
+      )}
+
+      {/* Footer */}
+      {animPhase >= 2 && (
+        <box flexDirection="column">
+          {divider}
+          <text fg={terminalColors.textMuted}>{shortcuts}</text>
+        </box>
+      )}
+    </box>
   );
 }

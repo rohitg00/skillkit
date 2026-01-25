@@ -1,105 +1,111 @@
-import { useState } from 'react';
-import { Box, Text, useInput, useApp, useStdout } from 'ink';
+import { useState, useCallback, useEffect } from 'react';
+import { useKeyboard } from '@opentui/react';
+import { type Screen, NAV_KEYS } from './state/types.js';
 import { Sidebar } from './components/Sidebar.js';
-import { Home } from './screens/Home.js';
-import { Browse } from './screens/Browse.js';
-import { Installed } from './screens/Installed.js';
-import { Sync } from './screens/Sync.js';
-import { Settings } from './screens/Settings.js';
-import { Recommend } from './screens/Recommend.js';
-import { Translate } from './screens/Translate.js';
-import { Context } from './screens/Context.js';
-import { Workflow } from './screens/Workflow.js';
-import { Execute } from './screens/Execute.js';
-import { History } from './screens/History.js';
-import { Marketplace } from './screens/Marketplace.js';
-import { Memory } from './screens/Memory.js';
-import { Team } from './screens/Team.js';
-import { Plugins } from './screens/Plugins.js';
-import { Methodology } from './screens/Methodology.js';
-import { Plan } from './screens/Plan.js';
+import { Splash } from './components/Splash.js';
+import {
+  Home, Browse, Installed, Marketplace, Settings, Recommend,
+  Translate, Context, Memory, Team, Plugins, Methodology,
+  Plan, Workflow, Execute, History, Sync, Help,
+} from './screens/index.js';
 
-export type Screen = 'home' | 'browse' | 'installed' | 'sync' | 'settings' | 'recommend' | 'translate' | 'context' | 'workflow' | 'execute' | 'history' | 'marketplace' | 'memory' | 'team' | 'plugins' | 'methodology' | 'plan';
+interface AppProps {
+  onExit?: (code?: number) => void;
+}
 
-export function App() {
+export function App({ onExit }: AppProps = {}) {
+  const [showSplash, setShowSplash] = useState(true);
   const [screen, setScreen] = useState<Screen>('home');
-  const { exit } = useApp();
-  const { stdout } = useStdout();
+  const [dimensions, setDimensions] = useState({
+    cols: process.stdout.columns || 80,
+    rows: process.stdout.rows || 24,
+  });
 
-  const cols = stdout?.columns || 80;
-  const rows = stdout?.rows || 24;
-  const showSidebar = cols >= 70;
+  useEffect(() => {
+    const handleResize = () => {
+      setDimensions({
+        cols: process.stdout.columns || 80,
+        rows: process.stdout.rows || 24,
+      });
+    };
+    process.stdout.on('resize', handleResize);
+    return () => { process.stdout.off('resize', handleResize); };
+  }, []);
 
-  const NAV_KEYS: Record<string, Screen> = {
-    h: 'home',
-    m: 'marketplace',
-    b: 'browse',
-    w: 'workflow',
-    x: 'execute',
-    y: 'history',
-    r: 'recommend',
-    t: 'translate',
-    c: 'context',
-    e: 'memory',
-    i: 'installed',
-    s: 'sync',
-    a: 'team',
-    p: 'plugins',
-    o: 'methodology',
-    n: 'plan',
-    ',': 'settings',
-  };
+  const { cols, rows } = dimensions;
+  const showSidebar = cols >= 60;
 
-  useInput((input, key) => {
-    if (input === 'q') {
-      exit();
+  const handleNavigate = useCallback((newScreen: Screen) => {
+    setScreen(newScreen);
+  }, []);
+
+  const handleSplashComplete = useCallback(() => {
+    setShowSplash(false);
+  }, []);
+
+  useKeyboard((key: { name?: string; ctrl?: boolean }) => {
+    if (showSplash) {
+      setShowSplash(false);
       return;
     }
-    if (key.escape) {
-      setScreen('home');
+
+    if (key.name === 'q' || (key.ctrl && key.name === 'c')) {
+      onExit ? onExit(0) : process.exit(0);
       return;
     }
-    const targetScreen = NAV_KEYS[input];
+
+    const targetScreen = NAV_KEYS[key.name || ''];
     if (targetScreen) {
       setScreen(targetScreen);
     }
+
+    if (key.name === 'escape' && screen !== 'home') {
+      setScreen('home');
+    }
   });
+
+  if (showSplash) {
+    return <Splash onComplete={handleSplashComplete} duration={3000} />;
+  }
+
+  const screenProps = {
+    onNavigate: handleNavigate,
+    cols: cols - (showSidebar ? 20 : 0),
+    rows,
+  };
 
   const renderScreen = () => {
     switch (screen) {
-      case 'home': return <Home onNavigate={setScreen} cols={cols} rows={rows} />;
-      case 'browse': return <Browse cols={cols} rows={rows} />;
-      case 'installed': return <Installed cols={cols} rows={rows} />;
-      case 'sync': return <Sync cols={cols} rows={rows} />;
-      case 'settings': return <Settings cols={cols} rows={rows} />;
-      case 'recommend': return <Recommend cols={cols} rows={rows} />;
-      case 'translate': return <Translate cols={cols} rows={rows} />;
-      case 'context': return <Context cols={cols} rows={rows} />;
-      case 'workflow': return <Workflow cols={cols} rows={rows} />;
-      case 'execute': return <Execute cols={cols} rows={rows} />;
-      case 'history': return <History cols={cols} rows={rows} />;
-      case 'marketplace': return <Marketplace cols={cols} rows={rows} />;
-      case 'memory': return <Memory cols={cols} rows={rows} />;
-      case 'team': return <Team cols={cols} rows={rows} />;
-      case 'plugins': return <Plugins cols={cols} rows={rows} />;
-      case 'methodology': return <Methodology cols={cols} rows={rows} />;
-      case 'plan': return <Plan cols={cols} rows={rows} />;
+      case 'home': return <Home {...screenProps} />;
+      case 'browse': return <Browse {...screenProps} />;
+      case 'installed': return <Installed {...screenProps} />;
+      case 'marketplace': return <Marketplace {...screenProps} />;
+      case 'settings': return <Settings {...screenProps} />;
+      case 'recommend': return <Recommend {...screenProps} />;
+      case 'translate': return <Translate {...screenProps} />;
+      case 'context': return <Context {...screenProps} />;
+      case 'memory': return <Memory {...screenProps} />;
+      case 'team': return <Team {...screenProps} />;
+      case 'plugins': return <Plugins {...screenProps} />;
+      case 'methodology': return <Methodology {...screenProps} />;
+      case 'plan': return <Plan {...screenProps} />;
+      case 'workflow': return <Workflow {...screenProps} />;
+      case 'execute': return <Execute {...screenProps} />;
+      case 'history': return <History {...screenProps} />;
+      case 'sync': return <Sync {...screenProps} />;
+      case 'help': return <Help {...screenProps} />;
+      default: return <Home {...screenProps} />;
     }
   };
 
-  const contentHeight = rows - 2;
-
   return (
-    <Box flexDirection="column" height={rows}>
-      <Box flexDirection="row" height={contentHeight}>
-        {showSidebar && <Sidebar screen={screen} onNavigate={setScreen} />}
-        <Box flexDirection="column" flexGrow={1} marginLeft={1}>
-          {renderScreen()}
-        </Box>
-      </Box>
-      <Box>
-        <Text dimColor>h Home  m Market  b Browse  w Wflow  x Exec  a Team  p Plug  o Meth  n Plan  r Rec  t Trans  c Ctx  e Mem  i Inst  s Sync  q Quit</Text>
-      </Box>
-    </Box>
+    <box flexDirection="row" height={rows}>
+      {showSidebar && <Sidebar screen={screen} onNavigate={handleNavigate} />}
+      <box flexDirection="column" flexGrow={1} marginLeft={showSidebar ? 1 : 0} paddingRight={1}>
+        {renderScreen()}
+      </box>
+    </box>
   );
 }
+
+export { type Screen };

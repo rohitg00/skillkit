@@ -1,59 +1,178 @@
-import { useState } from 'react';
-import { Box, Text, useInput } from 'ink';
-import { colors, symbols } from '../theme.js';
-import { useSkills } from '../hooks/useSkills.js';
+/**
+ * Installed Screen - Skills Manager
+ * Clean monochromatic design
+ */
+import { useState, useEffect, useMemo } from 'react';
+import { type Screen, loadSkills, filterSkills } from '../state/index.js';
+import { terminalColors } from '../theme/colors.js';
 
-interface Props {
+interface InstalledProps {
+  onNavigate: (screen: Screen) => void;
   cols?: number;
   rows?: number;
 }
 
-export function Installed({ rows = 24 }: Props) {
-  const { skills, loading, refresh, remove } = useSkills();
-  const [sel, setSel] = useState(0);
+const SPINNER = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
-  const maxVisible = Math.max(5, rows - 6);
-  const start = Math.max(0, Math.min(sel - Math.floor(maxVisible / 2), skills.length - maxVisible));
-  const visible = skills.slice(start, start + maxVisible);
-
-  useInput((input, key) => {
-    if (loading) return;
-    if (key.upArrow) setSel(i => Math.max(0, i - 1));
-    else if (key.downArrow) setSel(i => Math.min(skills.length - 1, i + 1));
-    else if (input === 'r') refresh();
-    else if (input === 'd' && skills[sel]) remove(skills[sel].name);
+export function Installed({ onNavigate, cols = 80, rows = 24 }: InstalledProps) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [animPhase, setAnimPhase] = useState(0);
+  const [spinnerFrame, setSpinnerFrame] = useState(0);
+  const [skills, setSkills] = useState<ReturnType<typeof loadSkills>>({
+    skills: [],
+    loading: true,
+    error: null,
   });
 
+  const isCompact = cols < 60;
+  const contentWidth = Math.min(cols - 4, 60);
+
+  // Entrance animation
+  useEffect(() => {
+    if (animPhase >= 2) return;
+    const timer = setTimeout(() => setAnimPhase(p => p + 1), 100);
+    return () => clearTimeout(timer);
+  }, [animPhase]);
+
+  // Loading spinner
+  useEffect(() => {
+    if (!skills.loading) return;
+    const interval = setInterval(() => {
+      setSpinnerFrame(f => (f + 1) % SPINNER.length);
+    }, 80);
+    return () => clearInterval(interval);
+  }, [skills.loading]);
+
+  // Load skills
+  useEffect(() => {
+    const data = loadSkills();
+    setSkills(data);
+  }, []);
+
+  const filteredSkills = useMemo(() =>
+    filterSkills(skills.skills, searchQuery),
+    [skills.skills, searchQuery]
+  );
+
+  // Calculate visible items
+  const maxVisible = Math.max(5, rows - 10);
+  const startIdx = Math.max(0, Math.min(selectedIndex - Math.floor(maxVisible / 2), filteredSkills.length - maxVisible));
+  const visibleSkills = filteredSkills.slice(startIdx, startIdx + maxVisible);
+
+  const divider = useMemo(() =>
+    <text fg={terminalColors.textMuted}>{'─'.repeat(contentWidth)}</text>,
+    [contentWidth]
+  );
+
+  // Stats
+  const enabledCount = skills.skills.filter(s => s.enabled !== false).length;
+  const totalCount = skills.skills.length;
+
+  const shortcuts = isCompact
+    ? 'j/k nav   enter toggle   d delete   esc back'
+    : 'j/k navigate   enter toggle   d delete   esc back';
+
   return (
-    <Box flexDirection="column">
-      <Text bold color={colors.primary}>INSTALLED SKILLS</Text>
-      <Text dimColor>{skills.length} skills</Text>
-
-      {loading && <Text>Loading...</Text>}
-
-      {!loading && skills.length === 0 && (
-        <Text dimColor>No skills installed. Press b to browse.</Text>
+    <box flexDirection="column" padding={1}>
+      {/* Header */}
+      {animPhase >= 1 && (
+        <box flexDirection="column">
+          <box flexDirection="row" justifyContent="space-between" width={contentWidth}>
+            <text fg={terminalColors.success}>✓ Installed</text>
+            <text fg={terminalColors.textMuted}>{enabledCount}/{totalCount} active</text>
+          </box>
+          <text fg={terminalColors.textMuted}>manage your skills</text>
+          <text> </text>
+        </box>
       )}
 
-      {!loading && skills.length > 0 && (
-        <Box marginTop={1} flexDirection="column">
-          {start > 0 && <Text dimColor>  ↑ {start} more</Text>}
-          {visible.map((skill, i) => {
-            const idx = start + i;
-            const isSel = idx === sel;
-            return (
-              <Text key={skill.name} inverse={isSel}>
-                {isSel ? symbols.pointer : ' '}{skill.name.padEnd(30)} {skill.source && <Text color={colors.secondaryDim}>{skill.source}</Text>}
-              </Text>
-            );
-          })}
-          {start + maxVisible < skills.length && <Text dimColor>  ↓ {skills.length - start - maxVisible} more</Text>}
-        </Box>
+      {/* Search */}
+      {animPhase >= 2 && (
+        <box flexDirection="column">
+          {divider}
+          <text> </text>
+          <box flexDirection="row">
+            <text fg={terminalColors.textMuted}>/ </text>
+            <text fg={searchQuery ? terminalColors.text : terminalColors.textMuted}>
+              {searchQuery || 'type to filter...'}
+            </text>
+          </box>
+          <text> </text>
+          {divider}
+          <text> </text>
+        </box>
       )}
 
-      <Box marginTop={1}>
-        <Text dimColor>r=refresh  d=delete  q=quit</Text>
-      </Box>
-    </Box>
+      {/* Skills list */}
+      {animPhase >= 2 && (
+        <box flexDirection="column">
+          {skills.loading ? (
+            <box flexDirection="row">
+              <text fg={terminalColors.accent}>{SPINNER[spinnerFrame]} </text>
+              <text fg={terminalColors.text}>Loading skills...</text>
+            </box>
+          ) : skills.error ? (
+            <box flexDirection="column">
+              <text fg={terminalColors.error}>✗ Error loading skills</text>
+              <text fg={terminalColors.textMuted}>{skills.error}</text>
+            </box>
+          ) : filteredSkills.length === 0 ? (
+            <box flexDirection="column">
+              <text fg={terminalColors.textMuted}>
+                {skills.skills.length === 0
+                  ? 'No skills installed yet'
+                  : 'No skills match your search'}
+              </text>
+              {skills.skills.length === 0 && (
+                <>
+                  <text> </text>
+                  <text fg={terminalColors.textMuted}>
+                    Press 'b' to browse or 'm' for marketplace
+                  </text>
+                </>
+              )}
+            </box>
+          ) : (
+            <box flexDirection="column">
+              <text fg={terminalColors.text}>Skills</text>
+              <text> </text>
+              {visibleSkills.map((skill, idx) => {
+                const actualIdx = startIdx + idx;
+                const selected = actualIdx === selectedIndex;
+                const indicator = selected ? '▸' : ' ';
+                const statusIcon = skill.enabled !== false ? '●' : '○';
+                const statusColor = skill.enabled !== false ? terminalColors.success : terminalColors.textMuted;
+                return (
+                  <box key={skill.name} flexDirection="row">
+                    <text fg={terminalColors.text}>{indicator}</text>
+                    <text fg={statusColor}>{statusIcon} </text>
+                    <text fg={selected ? terminalColors.accent : terminalColors.text}>
+                      {skill.name}
+                    </text>
+                  </box>
+                );
+              })}
+
+              {/* Scroll indicator */}
+              {filteredSkills.length > maxVisible && (
+                <text fg={terminalColors.textMuted}>
+                  {'\n'}showing {startIdx + 1}-{Math.min(startIdx + maxVisible, filteredSkills.length)} of {filteredSkills.length}
+                </text>
+              )}
+            </box>
+          )}
+          <text> </text>
+        </box>
+      )}
+
+      {/* Footer */}
+      {animPhase >= 2 && (
+        <box flexDirection="column">
+          {divider}
+          <text fg={terminalColors.textMuted}>{shortcuts}</text>
+        </box>
+      )}
+    </box>
   );
 }

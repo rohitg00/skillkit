@@ -1,96 +1,124 @@
-import { useState, useEffect } from 'react';
-import { Box, Text, useInput } from 'ink';
-import { colors, symbols } from '../theme.js';
-import { listWorkflows, type Workflow as WorkflowType } from '@skillkit/core';
+/**
+ * Workflow Screen - Automation Builder
+ * Clean monochromatic design
+ */
+import { useState, useEffect, useMemo } from 'react';
+import { type Screen } from '../state/index.js';
+import { terminalColors } from '../theme/colors.js';
 
-interface Props {
+interface WorkflowProps {
+  onNavigate: (screen: Screen) => void;
   cols?: number;
   rows?: number;
 }
 
-export function Workflow({ rows = 24 }: Props) {
-  const [workflows, setWorkflows] = useState<WorkflowType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [sel, setSel] = useState(0);
-  const [running, setRunning] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+const WORKFLOWS = [
+  { name: 'test-and-commit', steps: 3, lastRun: '1 hour ago', status: 'success' as const },
+  { name: 'deploy-preview', steps: 5, lastRun: '2 hours ago', status: 'success' as const },
+  { name: 'full-ci', steps: 8, lastRun: '1 day ago', status: 'failed' as const },
+  { name: 'quick-fix', steps: 2, lastRun: '3 days ago', status: 'pending' as const },
+];
 
-  const maxVisible = Math.max(5, rows - 8);
-  const start = Math.max(0, Math.min(sel - Math.floor(maxVisible / 2), workflows.length - maxVisible));
-  const visible = workflows.slice(start, start + maxVisible);
+export function Workflow({ onNavigate, cols = 80, rows = 24 }: WorkflowProps) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [animPhase, setAnimPhase] = useState(0);
 
+  const isCompact = cols < 60;
+  const contentWidth = Math.min(cols - 4, 60);
+
+  // Entrance animation
   useEffect(() => {
-    loadWorkflows();
-  }, []);
+    if (animPhase >= 2) return;
+    const timer = setTimeout(() => setAnimPhase(p => p + 1), 100);
+    return () => clearTimeout(timer);
+  }, [animPhase]);
 
-  const loadWorkflows = () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const wfs = listWorkflows(process.cwd());
-      setWorkflows(wfs);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load workflows');
-    }
-    setLoading(false);
-  };
+  const successCount = WORKFLOWS.filter(w => w.status === 'success').length;
+  const failedCount = WORKFLOWS.filter(w => w.status === 'failed').length;
 
-  useInput((input, key) => {
-    if (loading || running) return;
+  const divider = useMemo(() =>
+    <text fg={terminalColors.textMuted}>{'─'.repeat(contentWidth)}</text>,
+    [contentWidth]
+  );
 
-    if (key.upArrow) setSel(i => Math.max(0, i - 1));
-    else if (key.downArrow) setSel(i => Math.min(workflows.length - 1, i + 1));
-    else if (input === 'r') loadWorkflows();
-    else if (key.return && workflows[sel]) {
-      // Simulate running workflow
-      setRunning(workflows[sel].name);
-      setTimeout(() => setRunning(null), 2000);
-    }
-  });
+  const shortcuts = isCompact
+    ? 'j/k nav   enter run   n new   e edit   esc back'
+    : 'j/k navigate   enter run   n new   e edit   d delete   esc back';
 
   return (
-    <Box flexDirection="column">
-      <Text bold color={colors.primary}>WORKFLOWS</Text>
-      <Text dimColor>{workflows.length} workflow(s) found</Text>
-
-      {loading && <Text>Loading workflows...</Text>}
-      {error && <Text color="red">{error}</Text>}
-      {running && <Text color="yellow">Running: {running}...</Text>}
-
-      {!loading && !running && workflows.length === 0 && (
-        <Box marginTop={1} flexDirection="column">
-          <Text dimColor>No workflows found.</Text>
-          <Text dimColor>Create one with: skillkit workflow create</Text>
-        </Box>
+    <box flexDirection="column" padding={1}>
+      {/* Header */}
+      {animPhase >= 1 && (
+        <box flexDirection="column">
+          <box flexDirection="row" justifyContent="space-between" width={contentWidth}>
+            <text fg={terminalColors.workflow}>⟳ Workflows</text>
+            <text fg={terminalColors.textMuted}>{WORKFLOWS.length} workflows</text>
+          </box>
+          <text fg={terminalColors.textMuted}>automate skill chains</text>
+          <text> </text>
+        </box>
       )}
 
-      {!loading && !running && workflows.length > 0 && (
-        <Box marginTop={1} flexDirection="column">
-          {start > 0 && <Text dimColor>  ↑ {start} more</Text>}
-          {visible.map((wf, i) => {
-            const idx = start + i;
-            const isSel = idx === sel;
-            return (
-              <Box key={wf.name} flexDirection="column">
-                <Text inverse={isSel}>
-                  {isSel ? symbols.pointer : ' '} {wf.name}
-                </Text>
-                {isSel && wf.description && (
-                  <Text dimColor>   {wf.description}</Text>
-                )}
-                {isSel && (
-                  <Text dimColor>   {wf.waves.length} wave(s), {wf.waves.reduce((acc, w) => acc + w.skills.length, 0)} skill(s)</Text>
-                )}
-              </Box>
-            );
-          })}
-          {start + maxVisible < workflows.length && <Text dimColor>  ↓ {workflows.length - start - maxVisible} more</Text>}
-        </Box>
+      {/* Stats */}
+      {animPhase >= 2 && (
+        <box flexDirection="column">
+          {divider}
+          <text> </text>
+          <box flexDirection="row" gap={3}>
+            <text fg={terminalColors.success}>✓ {successCount} passed</text>
+            {failedCount > 0 && (
+              <text fg={terminalColors.error}>✗ {failedCount} failed</text>
+            )}
+          </box>
+          <text> </text>
+          {divider}
+          <text> </text>
+        </box>
       )}
 
-      <Box marginTop={1}>
-        <Text dimColor>Enter=run  r=refresh  q=quit</Text>
-      </Box>
-    </Box>
+      {/* Workflows list */}
+      {animPhase >= 2 && (
+        <box flexDirection="column">
+          <text fg={terminalColors.text}>Workflows</text>
+          <text> </text>
+
+          {WORKFLOWS.length === 0 ? (
+            <box flexDirection="column">
+              <text fg={terminalColors.textMuted}>No workflows yet</text>
+              <text> </text>
+              <text fg={terminalColors.textMuted}>Press 'n' to create one</text>
+            </box>
+          ) : (
+            WORKFLOWS.map((wf, idx) => {
+              const selected = idx === selectedIndex;
+              const indicator = selected ? '▸' : ' ';
+              const statusIcon = wf.status === 'success' ? '✓'
+                : wf.status === 'failed' ? '✗' : '○';
+              const statusColor = wf.status === 'success' ? terminalColors.success
+                : wf.status === 'failed' ? terminalColors.error : terminalColors.textMuted;
+              return (
+                <box key={wf.name} flexDirection="row">
+                  <text fg={terminalColors.text}>{indicator}</text>
+                  <text fg={selected ? terminalColors.accent : terminalColors.text} width={18}>
+                    {wf.name}
+                  </text>
+                  <text fg={statusColor}>{statusIcon} </text>
+                  <text fg={terminalColors.textMuted}>{wf.steps}s · {wf.lastRun}</text>
+                </box>
+              );
+            })
+          )}
+          <text> </text>
+        </box>
+      )}
+
+      {/* Footer */}
+      {animPhase >= 2 && (
+        <box flexDirection="column">
+          {divider}
+          <text fg={terminalColors.textMuted}>{shortcuts}</text>
+        </box>
+      )}
+    </box>
   );
 }

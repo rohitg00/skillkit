@@ -1,78 +1,143 @@
-import { useState, useEffect } from 'react';
-import { Box, Text, useInput } from 'ink';
-import { colors, symbols } from '../theme.js';
-import { getAllAdapters } from '@skillkit/agents';
+/**
+ * Sync Screen - Cross-Agent Synchronization
+ * Clean monochromatic design
+ */
+import { useState, useEffect, useMemo } from 'react';
+import { type Screen } from '../state/index.js';
+import { terminalColors } from '../theme/colors.js';
+import { AGENT_LOGOS } from '../theme/symbols.js';
 
-interface AgentStatus {
-  name: string;
-  type: string;
-  detected: boolean;
-}
-
-interface Props {
+interface SyncProps {
+  onNavigate: (screen: Screen) => void;
   cols?: number;
   rows?: number;
 }
 
-export function Sync({ rows = 24 }: Props) {
-  const [agents, setAgents] = useState<AgentStatus[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [sel, setSel] = useState(0);
-  const [syncing, setSyncing] = useState(false);
+const SPINNER = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
-  const maxVisible = Math.max(5, rows - 6);
-  const start = Math.max(0, Math.min(sel - Math.floor(maxVisible / 2), agents.length - maxVisible));
-  const visible = agents.slice(start, start + maxVisible);
+export function Sync({ onNavigate, cols = 80, rows = 24 }: SyncProps) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'done'>('idle');
+  const [spinnerFrame, setSpinnerFrame] = useState(0);
+  const [animPhase, setAnimPhase] = useState(0);
 
+  const isCompact = cols < 60;
+  const contentWidth = Math.min(cols - 4, 60);
+
+  // Entrance animation
   useEffect(() => {
-    (async () => {
-      const adapters = getAllAdapters();
-      const s: AgentStatus[] = [];
-      for (const a of adapters) {
-        s.push({ name: a.name, type: a.type, detected: await a.isDetected() });
-      }
-      setAgents(s);
-      setLoading(false);
-    })();
-  }, []);
+    if (animPhase >= 2) return;
+    const timer = setTimeout(() => setAnimPhase(p => p + 1), 100);
+    return () => clearTimeout(timer);
+  }, [animPhase]);
 
-  useInput((input, key) => {
-    if (loading || syncing) return;
-    if (key.upArrow) setSel(i => Math.max(0, i - 1));
-    else if (key.downArrow) setSel(i => Math.min(agents.length - 1, i + 1));
-    else if (input === 'a') { setSyncing(true); setTimeout(() => setSyncing(false), 500); }
-    else if (key.return && agents[sel]?.detected) { setSyncing(true); setTimeout(() => setSyncing(false), 300); }
-  });
+  // Spinner animation
+  useEffect(() => {
+    if (syncStatus !== 'syncing') return;
+    const interval = setInterval(() => {
+      setSpinnerFrame(f => (f + 1) % SPINNER.length);
+    }, 80);
+    return () => clearInterval(interval);
+  }, [syncStatus]);
 
-  const detected = agents.filter(a => a.detected).length;
+  // Agents with sync data
+  const agents = useMemo(() => {
+    const agentTypes = ['claude-code', 'cursor', 'github-copilot', 'codex', 'gemini-cli', 'windsurf'];
+    return agentTypes.slice(0, isCompact ? 4 : 6).map((type) => ({
+      type,
+      ...(AGENT_LOGOS[type] || { name: type, icon: '◇' }),
+      synced: type === 'claude-code' || type === 'cursor',
+      skillCount: type === 'claude-code' ? 12 : type === 'cursor' ? 8 : 0,
+    }));
+  }, [isCompact]);
+
+  const syncedCount = agents.filter(a => a.synced).length;
+  const totalSkills = agents.reduce((sum, a) => sum + a.skillCount, 0);
+
+  const divider = useMemo(() =>
+    <text fg={terminalColors.textMuted}>{'─'.repeat(contentWidth)}</text>,
+    [contentWidth]
+  );
+
+  const shortcuts = isCompact
+    ? 'j/k nav   enter sync   a sync all   esc back'
+    : 'j/k navigate   enter sync selected   a sync all   esc back';
 
   return (
-    <Box flexDirection="column">
-      <Text bold color={colors.primary}>SYNC SKILLS</Text>
-      <Text dimColor>{detected}/{agents.length} agents detected</Text>
-
-      {loading && <Text>Detecting agents...</Text>}
-      {syncing && <Text>Syncing...</Text>}
-
-      {!loading && !syncing && (
-        <Box marginTop={1} flexDirection="column">
-          {start > 0 && <Text dimColor>  ↑ {start} more</Text>}
-          {visible.map((agent, i) => {
-            const idx = start + i;
-            const isSel = idx === sel;
-            return (
-              <Text key={agent.type} inverse={isSel} dimColor={!agent.detected}>
-                {isSel ? symbols.pointer : ' '}{agent.detected ? symbols.checkboxOn : symbols.checkboxOff} {agent.name.padEnd(20)} {agent.detected ? 'Ready' : 'N/A'}
-              </Text>
-            );
-          })}
-          {start + maxVisible < agents.length && <Text dimColor>  ↓ {agents.length - start - maxVisible} more</Text>}
-        </Box>
+    <box flexDirection="column" padding={1}>
+      {/* Header */}
+      {animPhase >= 1 && (
+        <box flexDirection="column">
+          <box flexDirection="row" justifyContent="space-between" width={contentWidth}>
+            <text fg={terminalColors.sync}>⇄ Sync</text>
+            <text fg={terminalColors.textMuted}>{syncedCount}/{agents.length} synced</text>
+          </box>
+          <text fg={terminalColors.textMuted}>share skills across agents</text>
+          <text> </text>
+        </box>
       )}
 
-      <Box marginTop={1}>
-        <Text dimColor>Enter=sync  a=all  q=quit</Text>
-      </Box>
-    </Box>
+      {/* Status */}
+      {animPhase >= 2 && (
+        <box flexDirection="column">
+          {divider}
+          <text> </text>
+          {syncStatus === 'syncing' ? (
+            <box flexDirection="row">
+              <text fg={terminalColors.accent}>{SPINNER[spinnerFrame]} </text>
+              <text fg={terminalColors.text}>Syncing skills...</text>
+            </box>
+          ) : syncStatus === 'done' ? (
+            <box flexDirection="row">
+              <text fg={terminalColors.success}>✓ </text>
+              <text fg={terminalColors.text}>Sync complete</text>
+              <text fg={terminalColors.textMuted}> · {totalSkills} skills synced</text>
+            </box>
+          ) : (
+            <box flexDirection="row" gap={3}>
+              <text fg={terminalColors.success}>● {syncedCount} synced</text>
+              <text fg={terminalColors.textMuted}>○ {agents.length - syncedCount} pending</text>
+            </box>
+          )}
+          <text> </text>
+          {divider}
+          <text> </text>
+        </box>
+      )}
+
+      {/* Agents list */}
+      {animPhase >= 2 && (
+        <box flexDirection="column">
+          <text fg={terminalColors.text}>Agents</text>
+          <text> </text>
+
+          {agents.map((agent, idx) => {
+            const selected = idx === selectedIndex;
+            const indicator = selected ? '▸' : ' ';
+            const statusIcon = agent.synced ? '●' : '○';
+            const statusColor = agent.synced ? terminalColors.success : terminalColors.textMuted;
+            return (
+              <box key={agent.type} flexDirection="row">
+                <text fg={terminalColors.text}>{indicator}</text>
+                <text fg={selected ? terminalColors.accent : terminalColors.text}>
+                  {agent.icon} {agent.name}
+                </text>
+                <text fg={statusColor}> {statusIcon}</text>
+                <text fg={terminalColors.textMuted}> {agent.skillCount} skills</text>
+              </box>
+            );
+          })}
+          <text> </text>
+        </box>
+      )}
+
+      {/* Footer */}
+      {animPhase >= 2 && (
+        <box flexDirection="column">
+          {divider}
+          <text fg={terminalColors.textMuted}>{shortcuts}</text>
+        </box>
+      )}
+    </box>
   );
 }

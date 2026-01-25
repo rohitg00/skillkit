@@ -1,40 +1,29 @@
-import { Box, Text } from 'ink';
-import TextInput from 'ink-text-input';
-import { colors } from '../theme.js';
+/**
+ * SearchInput Component
+ * Rounded search input with icon
+ */
+import { terminalColors } from '../theme/colors.js';
 
 interface SearchInputProps {
   value: string;
-  onChange: (value: string) => void;
   placeholder?: string;
-  isFocused?: boolean;
+  focused?: boolean;
+  onChange?: (value: string) => void;
 }
 
 export function SearchInput({
   value,
-  onChange,
-  placeholder = 'Search skills...',
-  isFocused = false,
+  placeholder = 'Search...',
+  focused = false,
 }: SearchInputProps) {
+  const display = value || placeholder;
+  const textColor = value ? terminalColors.text : terminalColors.textMuted;
+
   return (
-    <Box
-      borderStyle="single"
-      borderColor={isFocused ? colors.primary : colors.borderDim}
-      paddingX={1}
-    >
-      <Text color={colors.secondaryDim}>/ </Text>
-      {isFocused ? (
-        <TextInput
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder}
-        />
-      ) : (
-        <Text color={value ? colors.secondary : colors.secondaryDim}>
-          {value || placeholder}
-        </Text>
-      )}
-      <Box flexGrow={1} />
-      <Text color={colors.secondaryDim}>/</Text>
-    </Box>
+    <box flexDirection="row" marginBottom={1}>
+      <text fg={terminalColors.textMuted}>&#x2315; </text>
+      <text fg={textColor}>{display}</text>
+      {focused && <text fg={terminalColors.accent}>&#x258F;</text>}
+    </box>
   );
 }

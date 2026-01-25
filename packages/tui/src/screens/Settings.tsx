@@ -1,193 +1,109 @@
-import { useState, useEffect } from 'react';
-import { Box, Text, useInput } from 'ink';
-import TextInput from 'ink-text-input';
-import { colors, symbols } from '../theme.js';
-import { loadConfig, saveConfig, AgentType as AgentTypeSchema, type SkillkitConfig, type AgentType } from '@skillkit/core';
+/**
+ * Settings Screen - Configuration
+ * Clean monochromatic design
+ */
+import { useState, useEffect, useMemo } from 'react';
+import { type Screen } from '../state/index.js';
+import { terminalColors } from '../theme/colors.js';
 
-interface Props {
+interface SettingsProps {
+  onNavigate: (screen: Screen) => void;
   cols?: number;
   rows?: number;
 }
 
-interface Setting {
-  id: keyof SkillkitConfig | 'agent' | 'autoSync' | 'cacheDir';
-  label: string;
-  type: 'select' | 'toggle' | 'text';
-  options?: string[];
-}
-
-// Get all valid agent types from the Zod schema
-const ALL_AGENTS: AgentType[] = AgentTypeSchema.options;
-
-const SETTINGS: Setting[] = [
-  { id: 'agent', label: 'Default Agent', type: 'select', options: ['auto-detect', ...ALL_AGENTS] },
-  { id: 'autoSync', label: 'Auto Sync', type: 'toggle' },
-  { id: 'cacheDir', label: 'Cache Dir', type: 'text' },
+const SETTINGS = [
+  { key: 'defaultAgent', label: 'Default Agent', value: 'claude-code', type: 'select' },
+  { key: 'skillsDir', label: 'Skills Directory', value: '.claude/skills', type: 'path' },
+  { key: 'autoSync', label: 'Auto Sync', value: 'enabled', type: 'toggle' },
+  { key: 'theme', label: 'Theme', value: 'dark', type: 'select' },
+  { key: 'telemetry', label: 'Telemetry', value: 'disabled', type: 'toggle' },
 ];
 
-export function Settings(_props: Props) {
-  const [config, setConfig] = useState<SkillkitConfig | null>(null);
-  const [sel, setSel] = useState(0);
-  const [editing, setEditing] = useState(false);
-  const [editValue, setEditValue] = useState('');
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export function Settings({ onNavigate, cols = 80, rows = 24 }: SettingsProps) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [animPhase, setAnimPhase] = useState(0);
 
-  // Load config on mount
+  const isCompact = cols < 60;
+  const contentWidth = Math.min(cols - 4, 60);
+
+  // Entrance animation
   useEffect(() => {
-    try {
-      const loaded = loadConfig();
-      setConfig(loaded);
-    } catch (err) {
-      setError(`Failed to load config: ${err}`);
-    }
-  }, []);
+    if (animPhase >= 2) return;
+    const timer = setTimeout(() => setAnimPhase(p => p + 1), 100);
+    return () => clearTimeout(timer);
+  }, [animPhase]);
 
-  const getCurrentValue = (setting: Setting): string => {
-    if (!config) return '';
+  const divider = useMemo(() =>
+    <text fg={terminalColors.textMuted}>{'─'.repeat(contentWidth)}</text>,
+    [contentWidth]
+  );
 
-    switch (setting.id) {
-      case 'agent':
-        // Map 'universal' back to 'auto-detect' for display consistency
-        return config.agent === 'universal' ? 'auto-detect' : (config.agent || 'auto-detect');
-      case 'autoSync':
-        return config.autoSync ? 'enabled' : 'disabled';
-      case 'cacheDir':
-        return config.cacheDir || '~/.skillkit/cache';
-      default:
-        return '';
-    }
-  };
-
-  const handleSave = (setting: Setting, value: string) => {
-    if (!config) return;
-
-    const newConfig = { ...config };
-
-    switch (setting.id) {
-      case 'agent':
-        if (value === 'auto-detect') {
-          newConfig.agent = 'universal';
-        } else {
-          newConfig.agent = value as AgentType;
-        }
-        break;
-      case 'autoSync':
-        newConfig.autoSync = value === 'enabled';
-        break;
-      case 'cacheDir':
-        newConfig.cacheDir = value || undefined;
-        break;
-    }
-
-    try {
-      saveConfig(newConfig, false);
-      setConfig(newConfig);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    } catch (err) {
-      setError(`Failed to save: ${err}`);
-      setTimeout(() => setError(null), 3000);
-    }
-  };
-
-  useInput((input, key) => {
-    if (editing) {
-      if (key.return) {
-        handleSave(SETTINGS[sel], editValue);
-        setEditing(false);
-      } else if (key.escape) {
-        setEditing(false);
-      }
-      return;
-    }
-
-    if (key.upArrow) {
-      setSel(i => Math.max(0, i - 1));
-    } else if (key.downArrow) {
-      setSel(i => Math.min(SETTINGS.length - 1, i + 1));
-    } else if (key.return || input === ' ') {
-      const setting = SETTINGS[sel];
-
-      if (setting.type === 'toggle') {
-        const current = getCurrentValue(setting);
-        const newValue = current === 'enabled' ? 'disabled' : 'enabled';
-        handleSave(setting, newValue);
-      } else if (setting.type === 'select' && setting.options) {
-        const current = getCurrentValue(setting);
-        const idx = setting.options.indexOf(current);
-        const nextIdx = (idx + 1) % setting.options.length;
-        handleSave(setting, setting.options[nextIdx]);
-      } else if (setting.type === 'text') {
-        setEditValue(getCurrentValue(setting));
-        setEditing(true);
-      }
-    }
-  });
-
-  if (!config) {
-    return (
-      <Box flexDirection="column">
-        <Text bold color={colors.primary}>SETTINGS</Text>
-        {error ? (
-          <Text color={colors.danger}>{symbols.error} {error}</Text>
-        ) : (
-          <Text dimColor>Loading...</Text>
-        )}
-      </Box>
-    );
-  }
+  const shortcuts = isCompact
+    ? 'j/k nav   enter edit   r reset   esc back'
+    : 'j/k navigate   enter edit   r reset defaults   esc back';
 
   return (
-    <Box flexDirection="column">
-      <Text bold color={colors.primary}>SETTINGS</Text>
-      <Text dimColor>Configure SkillKit (changes save automatically)</Text>
+    <box flexDirection="column" padding={1}>
+      {/* Header */}
+      {animPhase >= 1 && (
+        <box flexDirection="column">
+          <box flexDirection="row" justifyContent="space-between" width={contentWidth}>
+            <text fg={terminalColors.text}>⚙ Settings</text>
+            <text fg={terminalColors.textMuted}>{SETTINGS.length} options</text>
+          </box>
+          <text fg={terminalColors.textMuted}>configure skillkit</text>
+          <text> </text>
+        </box>
+      )}
 
-      <Box marginTop={1} flexDirection="column">
-        {SETTINGS.map((s, i) => {
-          const isSel = i === sel;
-          const value = getCurrentValue(s);
-          const isEditing = editing && isSel;
+      {/* Settings list */}
+      {animPhase >= 2 && (
+        <box flexDirection="column">
+          {divider}
+          <text> </text>
+          <text fg={terminalColors.text}>Configuration</text>
+          <text> </text>
 
-          return (
-            <Box key={s.id}>
-              <Text inverse={isSel && !isEditing}>
-                {isSel ? symbols.pointer : ' '}{s.label.padEnd(16)}
-              </Text>
-              {isEditing ? (
-                <Box marginLeft={1}>
-                  <TextInput
-                    value={editValue}
-                    onChange={setEditValue}
-                    onSubmit={() => {
-                      handleSave(s, editValue);
-                      setEditing(false);
-                    }}
-                  />
-                </Box>
-              ) : (
-                <Text color={colors.secondaryDim}> {value}</Text>
-              )}
-              {s.type === 'toggle' && isSel && !isEditing && (
-                <Text dimColor> (space to toggle)</Text>
-              )}
-              {s.type === 'select' && isSel && !isEditing && (
-                <Text dimColor> (enter to cycle)</Text>
-              )}
-            </Box>
-          );
-        })}
-      </Box>
+          {SETTINGS.map((setting, idx) => {
+            const selected = idx === selectedIndex;
+            const indicator = selected ? '▸' : ' ';
+            const valueColor = setting.type === 'toggle'
+              ? (setting.value === 'enabled' ? terminalColors.success : terminalColors.textMuted)
+              : terminalColors.textMuted;
+            const toggleIcon = setting.type === 'toggle'
+              ? (setting.value === 'enabled' ? '● ' : '○ ')
+              : '';
+            return (
+              <box key={setting.key} flexDirection="row">
+                <text fg={terminalColors.text}>{indicator}</text>
+                <text fg={selected ? terminalColors.accent : terminalColors.text} width={18}>
+                  {setting.label}
+                </text>
+                <text fg={valueColor}>{toggleIcon}{setting.value}</text>
+              </box>
+            );
+          })}
+          <text> </text>
+        </box>
+      )}
 
-      <Box marginTop={1}>
-        {saved && <Text color={colors.success}>{symbols.check} Settings saved</Text>}
-        {error && <Text color={colors.danger}>{symbols.error} {error}</Text>}
-        {!saved && !error && (
-          <Text dimColor>
-            {editing ? 'Enter=save  Esc=cancel' : 'Enter/Space=edit  q=quit'}
-          </Text>
-        )}
-      </Box>
-    </Box>
+      {/* Config location */}
+      {animPhase >= 2 && !isCompact && (
+        <box flexDirection="column">
+          {divider}
+          <text fg={terminalColors.textMuted}>config: ~/.config/skillkit/config.json</text>
+          <text> </text>
+        </box>
+      )}
+
+      {/* Footer */}
+      {animPhase >= 2 && (
+        <box flexDirection="column">
+          {divider}
+          <text fg={terminalColors.textMuted}>{shortcuts}</text>
+        </box>
+      )}
+    </box>
   );
 }
