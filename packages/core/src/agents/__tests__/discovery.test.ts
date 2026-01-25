@@ -9,6 +9,8 @@ import { tmpdir } from 'node:os';
 import {
   discoverAgents,
   discoverAgentsForAgent,
+  discoverAgentsRecursive,
+  discoverAgentsFromPath,
   findAllAgents,
   findAgent,
   getAgentsDirectory,
@@ -310,6 +312,245 @@ Content.`
       expect(stats.global).toBe(0);
       expect(stats.enabled).toBe(2);
       expect(stats.disabled).toBe(0);
+    });
+  });
+
+  describe('discoverAgentsRecursive', () => {
+    it('should discover agents in nested directories', () => {
+      // Create nested structure like kubernetes-skills/claude-code/k8s-autoscaling
+      const rootDir = join(testDir, 'skills');
+      mkdirSync(join(rootDir, 'k8s-autoscaling'), { recursive: true });
+      mkdirSync(join(rootDir, 'k8s-security'), { recursive: true });
+      mkdirSync(join(rootDir, 'k8s-deploy'), { recursive: true });
+
+      writeFileSync(
+        join(rootDir, 'k8s-autoscaling', 'AGENT.md'),
+        `---
+name: k8s-autoscaling
+description: Kubernetes autoscaling agent
+---
+Autoscaling content.`
+      );
+
+      writeFileSync(
+        join(rootDir, 'k8s-security', 'AGENT.md'),
+        `---
+name: k8s-security
+description: Kubernetes security agent
+---
+Security content.`
+      );
+
+      writeFileSync(
+        join(rootDir, 'k8s-deploy', 'AGENT.md'),
+        `---
+name: k8s-deploy
+description: Kubernetes deployment agent
+---
+Deploy content.`
+      );
+
+      const agents = discoverAgentsRecursive(rootDir);
+
+      expect(agents).toHaveLength(3);
+      const names = agents.map((a) => a.name);
+      expect(names).toContain('k8s-autoscaling');
+      expect(names).toContain('k8s-security');
+      expect(names).toContain('k8s-deploy');
+    });
+
+    it('should discover deeply nested agents', () => {
+      const rootDir = join(testDir, 'deep-skills');
+      mkdirSync(join(rootDir, 'category1', 'subcategory', 'agent-deep'), { recursive: true });
+
+      writeFileSync(
+        join(rootDir, 'category1', 'subcategory', 'agent-deep', 'AGENT.md'),
+        `---
+name: agent-deep
+description: Deeply nested agent
+---
+Deep content.`
+      );
+
+      const agents = discoverAgentsRecursive(rootDir);
+
+      expect(agents).toHaveLength(1);
+      expect(agents[0].name).toBe('agent-deep');
+    });
+
+    it('should discover agents as markdown files', () => {
+      const rootDir = join(testDir, 'md-skills');
+      mkdirSync(join(rootDir, 'subdir'), { recursive: true });
+
+      writeFileSync(
+        join(rootDir, 'top-level-agent.md'),
+        `---
+name: top-level-agent
+description: Top level agent
+---
+Content.`
+      );
+
+      writeFileSync(
+        join(rootDir, 'subdir', 'nested-agent.md'),
+        `---
+name: nested-agent
+description: Nested agent
+---
+Content.`
+      );
+
+      const agents = discoverAgentsRecursive(rootDir);
+
+      expect(agents).toHaveLength(2);
+      const names = agents.map((a) => a.name);
+      expect(names).toContain('top-level-agent');
+      expect(names).toContain('nested-agent');
+    });
+
+    it('should skip hidden directories except standard agent paths', () => {
+      const rootDir = join(testDir, 'hidden-test');
+      mkdirSync(join(rootDir, '.hidden', 'agents'), { recursive: true });
+      mkdirSync(join(rootDir, '.claude', 'agents'), { recursive: true });
+
+      writeFileSync(
+        join(rootDir, '.hidden', 'agents', 'hidden-agent.md'),
+        `---
+name: hidden-agent
+description: Should be skipped
+---
+Content.`
+      );
+
+      writeFileSync(
+        join(rootDir, '.claude', 'agents', 'claude-agent.md'),
+        `---
+name: claude-agent
+description: Should be found
+---
+Content.`
+      );
+
+      const agents = discoverAgentsRecursive(rootDir);
+
+      expect(agents).toHaveLength(1);
+      expect(agents[0].name).toBe('claude-agent');
+    });
+
+    it('should return empty array for non-existent directory', () => {
+      const agents = discoverAgentsRecursive(join(testDir, 'non-existent'));
+      expect(agents).toHaveLength(0);
+    });
+  });
+
+  describe('discoverAgentsFromPath', () => {
+    it('should discover agent from single file', () => {
+      mkdirSync(testDir, { recursive: true });
+
+      writeFileSync(
+        join(testDir, 'single-agent.md'),
+        `---
+name: single-agent
+description: A single agent file
+---
+Content.`
+      );
+
+      const agents = discoverAgentsFromPath(join(testDir, 'single-agent.md'));
+
+      expect(agents).toHaveLength(1);
+      expect(agents[0].name).toBe('single-agent');
+    });
+
+    it('should discover agents from directory without recursive flag', () => {
+      const rootDir = join(testDir, 'flat-dir');
+      mkdirSync(rootDir, { recursive: true });
+
+      writeFileSync(
+        join(rootDir, 'agent-a.md'),
+        `---
+name: agent-a
+description: Agent A
+---
+Content.`
+      );
+
+      writeFileSync(
+        join(rootDir, 'agent-b.md'),
+        `---
+name: agent-b
+description: Agent B
+---
+Content.`
+      );
+
+      const agents = discoverAgentsFromPath(rootDir, false);
+
+      expect(agents).toHaveLength(2);
+    });
+
+    it('should discover agents from directory with recursive flag', () => {
+      const rootDir = join(testDir, 'nested-dir');
+      mkdirSync(join(rootDir, 'subdir'), { recursive: true });
+
+      writeFileSync(
+        join(rootDir, 'agent-top.md'),
+        `---
+name: agent-top
+description: Top agent
+---
+Content.`
+      );
+
+      writeFileSync(
+        join(rootDir, 'subdir', 'agent-nested.md'),
+        `---
+name: agent-nested
+description: Nested agent
+---
+Content.`
+      );
+
+      const agentsNonRecursive = discoverAgentsFromPath(rootDir, false);
+      expect(agentsNonRecursive).toHaveLength(1);
+      expect(agentsNonRecursive[0].name).toBe('agent-top');
+
+      const agentsRecursive = discoverAgentsFromPath(rootDir, true);
+      expect(agentsRecursive).toHaveLength(2);
+      const names = agentsRecursive.map((a) => a.name);
+      expect(names).toContain('agent-top');
+      expect(names).toContain('agent-nested');
+    });
+
+    it('should handle agent directory with AGENT.md', () => {
+      const agentDir = join(testDir, 'agent-dir');
+      mkdirSync(agentDir, { recursive: true });
+
+      writeFileSync(
+        join(agentDir, 'AGENT.md'),
+        `---
+name: agent-dir
+description: Directory-based agent
+---
+Content.`
+      );
+
+      const agents = discoverAgentsFromPath(agentDir);
+
+      expect(agents).toHaveLength(1);
+      expect(agents[0].name).toBe('agent-dir');
+    });
+
+    it('should return empty array for non-existent path', () => {
+      const agents = discoverAgentsFromPath(join(testDir, 'non-existent'));
+      expect(agents).toHaveLength(0);
+    });
+
+    it('should return empty array for non-markdown file', () => {
+      writeFileSync(join(testDir, 'not-agent.txt'), 'Not an agent');
+
+      const agents = discoverAgentsFromPath(join(testDir, 'not-agent.txt'));
+      expect(agents).toHaveLength(0);
     });
   });
 });

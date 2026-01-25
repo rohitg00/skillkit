@@ -13,6 +13,7 @@ import {
   findAllAgents,
   findAgent,
   discoverAgents,
+  discoverAgentsFromPath,
   validateAgent,
   translateAgent,
   getAgentTargetDirectory,
@@ -294,9 +295,18 @@ export class AgentTranslateCommand extends Command {
 
   static override usage = Command.Usage({
     description: 'Translate agents between AI coding agent formats',
+    details: `
+      Translates agent definitions between different AI coding agent formats.
+      Supports recursive translation for directories with multiple agents.
+
+      Use --source to specify a custom source directory with agents.
+      Use --recursive to scan all subdirectories for agents.
+    `,
     examples: [
       ['Translate all to Cursor', '$0 agent translate --to cursor'],
       ['Translate specific agent', '$0 agent translate architect --to cursor'],
+      ['Translate from source directory', '$0 agent translate --source ./my-agents --to cursor'],
+      ['Recursive translation', '$0 agent translate --source ./skills --to cursor --recursive'],
       ['Dry run', '$0 agent translate --to cursor --dry-run'],
     ],
   });
@@ -306,6 +316,10 @@ export class AgentTranslateCommand extends Command {
   to = Option.String('--to,-t', {
     description: 'Target AI agent (claude-code, cursor, codex, etc.)',
     required: true,
+  });
+
+  source = Option.String('--source,-s', {
+    description: 'Source directory or file to translate from',
   });
 
   output = Option.String('--output,-o', {
@@ -320,13 +334,38 @@ export class AgentTranslateCommand extends Command {
     description: 'Translate all agents',
   });
 
+  recursive = Option.Boolean('--recursive,-r', false, {
+    description: 'Recursively scan directories for agents',
+  });
+
   async execute(): Promise<number> {
     const searchDirs = [process.cwd()];
     const targetAgent = this.to as AgentType;
 
     // Get agents to translate
     let agents: CustomAgent[];
-    if (this.name) {
+
+    if (this.source) {
+      // Translate from custom source path
+      const sourcePath = this.source.startsWith('/')
+        ? this.source
+        : join(process.cwd(), this.source);
+
+      if (!existsSync(sourcePath)) {
+        console.log(chalk.red(`Source path not found: ${sourcePath}`));
+        return 1;
+      }
+
+      agents = discoverAgentsFromPath(sourcePath, this.recursive);
+
+      if (agents.length === 0) {
+        console.log(chalk.yellow(`No agents found in: ${sourcePath}`));
+        if (!this.recursive) {
+          console.log(chalk.dim('Tip: Use --recursive to scan subdirectories'));
+        }
+        return 0;
+      }
+    } else if (this.name) {
       const agent = findAgent(this.name, searchDirs);
       if (!agent) {
         console.log(chalk.red(`Agent not found: ${this.name}`));

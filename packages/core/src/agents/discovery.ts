@@ -263,3 +263,121 @@ export function getAgentStats(searchDirs: string[]): {
     disabled: allAgents.filter(a => !a.enabled).length,
   };
 }
+
+/**
+ * Recursively discover all agents in a directory tree
+ * This finds agents at any depth, useful for batch translation
+ */
+export function discoverAgentsRecursive(
+  rootDir: string,
+  location: AgentLocation = 'project'
+): CustomAgent[] {
+  const agents: CustomAgent[] = [];
+  const seen = new Set<string>();
+
+  if (!existsSync(rootDir)) {
+    return agents;
+  }
+
+  function scanDirectory(dir: string): void {
+    try {
+      const entries = readdirSync(dir, { withFileTypes: true });
+
+      for (const entry of entries) {
+        const entryPath = join(dir, entry.name);
+
+        if (entry.isFile() && extname(entry.name) === '.md') {
+          // Parse markdown file directly
+          const agent = parseAgentFile(entryPath, location);
+          if (agent && !seen.has(agent.name)) {
+            seen.add(agent.name);
+            agents.push(agent);
+          }
+        } else if (entry.isDirectory()) {
+          // Skip hidden directories except standard agent paths
+          if (entry.name.startsWith('.') && !entry.name.startsWith('.claude') &&
+              !entry.name.startsWith('.cursor') && !entry.name.startsWith('.codex')) {
+            continue;
+          }
+
+          // Try to parse as agent directory first
+          const agent = parseAgentDir(entryPath, location);
+          if (agent && !seen.has(agent.name)) {
+            seen.add(agent.name);
+            agents.push(agent);
+          } else {
+            // If not an agent directory, recurse into it
+            scanDirectory(entryPath);
+          }
+        }
+      }
+    } catch {
+      // Ignore errors (permission denied, etc.)
+    }
+  }
+
+  scanDirectory(rootDir);
+  return agents;
+}
+
+/**
+ * Discover agents from a custom source path
+ * Handles both file paths and directories
+ */
+export function discoverAgentsFromPath(
+  sourcePath: string,
+  recursive: boolean = false,
+  location: AgentLocation = 'project'
+): CustomAgent[] {
+  if (!existsSync(sourcePath)) {
+    return [];
+  }
+
+  const stats = statSync(sourcePath);
+
+  // Single file
+  if (stats.isFile()) {
+    if (extname(sourcePath) === '.md') {
+      const agent = parseAgentFile(sourcePath, location);
+      return agent ? [agent] : [];
+    }
+    return [];
+  }
+
+  // Directory
+  if (stats.isDirectory()) {
+    if (recursive) {
+      return discoverAgentsRecursive(sourcePath, location);
+    }
+
+    // Non-recursive: only check immediate directory
+    // First try as agent directory
+    const agent = parseAgentDir(sourcePath, location);
+    if (agent) {
+      return [agent];
+    }
+
+    // Otherwise scan directory contents (one level)
+    const agents: CustomAgent[] = [];
+    try {
+      const entries = readdirSync(sourcePath, { withFileTypes: true });
+
+      for (const entry of entries) {
+        const entryPath = join(sourcePath, entry.name);
+
+        if (entry.isFile() && extname(entry.name) === '.md') {
+          const a = parseAgentFile(entryPath, location);
+          if (a) agents.push(a);
+        } else if (entry.isDirectory()) {
+          const a = parseAgentDir(entryPath, location);
+          if (a) agents.push(a);
+        }
+      }
+    } catch {
+      // Ignore errors
+    }
+    return agents;
+  }
+
+  return [];
+}

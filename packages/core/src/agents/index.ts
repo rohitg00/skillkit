@@ -41,6 +41,8 @@ export {
   discoverAgents,
   discoverAgentsForAgent,
   discoverGlobalAgents,
+  discoverAgentsRecursive,
+  discoverAgentsFromPath,
   findAllAgents,
   findAgent,
   getAgentsDirectory,

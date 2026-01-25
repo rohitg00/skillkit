@@ -53,6 +53,8 @@ skillkit recommend
 
 ## What's New in v1.6
 
+- **Recursive Agent Translation**: Batch translate entire directories of agents with `--recursive` flag
+- **Custom AI Sub-Agents**: Create, translate, sync, and validate custom AI sub-agents across 17 coding agents
 - **Methodology Framework**: 5 ready-to-use frameworks (Agile, TDD, DevOps, Security-First, Documentation-First)
 - **Hooks System**: Event-driven skill triggers - auto-activate on commits, file changes, builds
 - **Agent Orchestration**: Multi-agent team coordination with leader/teammate roles
@@ -95,6 +97,12 @@ skillkit translate --all --to windsurf
 
 # Preview translation without writing
 skillkit translate my-skill --to codex --dry-run
+
+# Batch translate from a custom source directory
+skillkit agent translate --source ./my-skills --to cursor
+
+# Recursively translate nested agent directories
+skillkit agent translate --source ./kubernetes-skills --to cursor --recursive
 ```
 
 **Supported Agents:** Claude Code, Cursor, Codex, Gemini CLI, OpenCode, Antigravity, Amp, Clawdbot, Droid, GitHub Copilot, Goose, Kilo, Kiro, Roo, Trae, Windsurf, Universal
@@ -270,6 +278,21 @@ skillkit marketplace search   # Search marketplace
 skillkit translate            # Translate between formats
 skillkit context init         # Initialize project context
 skillkit context sync         # Sync context to agents
+```
+
+### Custom AI Sub-Agents
+
+```bash
+skillkit agent list           # List all installed agents
+skillkit agent show <name>    # Show agent details
+skillkit agent create <name>  # Create a new agent
+skillkit agent translate      # Translate agents between formats
+  --source ./path             #   Source directory or file
+  --to cursor                 #   Target agent format
+  --recursive                 #   Scan subdirectories recursively
+  --dry-run                   #   Preview without writing
+skillkit agent sync           # Sync agents to target AI agent
+skillkit agent validate       # Validate agent definitions
 ```
 
 ### Memory System
