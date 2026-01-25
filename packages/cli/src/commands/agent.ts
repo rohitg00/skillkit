@@ -245,6 +245,14 @@ export class AgentCreateCommand extends Command {
   });
 
   async execute(): Promise<number> {
+    // Validate agent name format
+    const namePattern = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+    if (!namePattern.test(this.name)) {
+      console.log(chalk.red('Invalid agent name: must be lowercase alphanumeric with hyphens'));
+      console.log(chalk.dim('Examples: my-agent, code-reviewer, security-expert'));
+      return 1;
+    }
+
     // Determine target directory
     let targetDir: string;
     if (this.global) {

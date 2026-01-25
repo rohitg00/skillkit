@@ -4,7 +4,7 @@
  * Parses agent definition files (e.g., .claude/agents/*.md)
  */
 
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join, basename, extname } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import {
@@ -352,7 +352,7 @@ export function validateAgent(
   }
 
   // If directory, look for AGENT.md
-  const stats = require('node:fs').statSync(agentPath);
+  const stats = statSync(agentPath);
   if (stats.isDirectory()) {
     const agentMd = join(agentPath, 'AGENT.md');
     const indexMd = join(agentPath, 'index.md');

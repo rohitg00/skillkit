@@ -12,8 +12,14 @@ import {
   type CustomAgent,
   CUSTOM_AGENT_FORMAT_MAP,
   AGENT_DISCOVERY_PATHS,
+  AgentFrontmatter,
 } from './types.js';
-import { toCanonicalAgent, fromCanonicalAgent } from './parser.js';
+import {
+  toCanonicalAgent,
+  fromCanonicalAgent,
+  extractAgentFrontmatter,
+  extractAgentContent,
+} from './parser.js';
 import type { AgentType } from '../types.js';
 import { join } from 'node:path';
 
@@ -121,9 +127,6 @@ export function translateAgentContent(
  * Parse agent from raw content
  */
 function parseAgentFromContent(content: string): CustomAgent | null {
-  const { extractAgentFrontmatter, extractAgentContent } = require('./parser.js');
-  const { AgentFrontmatter } = require('./types.js');
-
   const rawFrontmatter = extractAgentFrontmatter(content);
   const agentContent = extractAgentContent(content);
 
