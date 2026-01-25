@@ -8,7 +8,6 @@ export class GitHubCopilotAdapter implements AgentAdapter {
   readonly type: AgentType = 'github-copilot';
   readonly name = 'GitHub Copilot';
   readonly skillsDir = '.github/skills';
-  // 2026: GitHub Copilot uses .github/copilot-instructions.md
   readonly configFile = '.github/copilot-instructions.md';
 
   generateConfig(skills: Skill[]): string {
@@ -22,7 +21,6 @@ export class GitHubCopilotAdapter implements AgentAdapter {
       .map(s => `### ${s.name}\n\n${s.description}\n\n**Invoke:** \`skillkit read ${s.name}\``)
       .join('\n\n');
 
-    // GitHub Copilot uses plain Markdown for copilot-instructions.md (2026 standard)
     return `# Skills System
 
 You have access to specialized skills that can help complete tasks.
@@ -47,7 +45,6 @@ Each skill is self-contained with its own resources.
 
   parseConfig(content: string): string[] {
     const skillNames: string[] = [];
-    // Parse from ### headers
     const headerRegex = /^### ([a-z0-9-]+)$/gm;
     let match;
 
@@ -63,13 +60,11 @@ Each skill is self-contained with its own resources.
   }
 
   async isDetected(): Promise<boolean> {
-    // 2026: Check for GitHub Copilot configuration files
     const copilotInstructions = join(process.cwd(), '.github', 'copilot-instructions.md');
-    const githubDir = join(process.cwd(), '.github');
     const githubInstructions = join(process.cwd(), '.github', 'instructions');
     const globalCopilot = join(homedir(), '.copilot');
 
-    return existsSync(copilotInstructions) || existsSync(githubDir) ||
+    return existsSync(copilotInstructions) ||
            existsSync(githubInstructions) || existsSync(globalCopilot);
   }
 }

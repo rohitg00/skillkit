@@ -60,7 +60,6 @@ This loads the skill's instructions into context.
 
   async isDetected(): Promise<boolean> {
     const opencodeDir = join(process.cwd(), '.opencode');
-    // 2026: OpenCode uses ~/.config/opencode/ for global config
     const globalOpencode = join(homedir(), '.config', 'opencode');
     const opencodeJson = join(process.cwd(), 'opencode.json');
 

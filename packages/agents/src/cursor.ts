@@ -9,7 +9,6 @@ export class CursorAdapter implements AgentAdapter {
   readonly type: AgentType = 'cursor';
   readonly name = 'Cursor';
   readonly skillsDir = '.cursor/skills';
-  // 2026: Cursor uses .cursor/rules/*.mdc format (MDC with YAML frontmatter)
   readonly configFile = '.cursor/rules/skills.mdc';
 
   generateConfig(skills: Skill[]): string {
@@ -25,7 +24,6 @@ export class CursorAdapter implements AgentAdapter {
 
     const skillsXml = enabledSkills.map(createSkillXml).join('\n\n');
 
-    // MDC format with YAML frontmatter (2026 standard)
     return `---
 description: SkillKit skills integration - provides specialized capabilities and domain knowledge
 globs: "**/*"
@@ -71,7 +69,6 @@ ${skillsXml}
   }
 
   async isDetected(): Promise<boolean> {
-    // 2026: Check for .cursor directory with rules subdirectory
     const cursorDir = join(process.cwd(), '.cursor');
     const cursorRulesDir = join(process.cwd(), '.cursor', 'rules');
     // Legacy .cursorrules file (deprecated but still supported)

@@ -8,7 +8,6 @@ export class WindsurfAdapter implements AgentAdapter {
   readonly type: AgentType = 'windsurf';
   readonly name = 'Windsurf';
   readonly skillsDir = '.windsurf/skills';
-  // 2026: Windsurf uses .windsurf/rules/*.md format with YAML frontmatter
   readonly configFile = '.windsurf/rules/skills.md';
 
   generateConfig(skills: Skill[]): string {
@@ -22,8 +21,6 @@ export class WindsurfAdapter implements AgentAdapter {
       .map(s => `### ${s.name}\n\n${s.description}\n\n**Invoke:** \`skillkit read ${s.name}\``)
       .join('\n\n');
 
-    // Windsurf uses Markdown rules with YAML frontmatter (2026 standard)
-    // Mode: "always-on" | "model-decision" | "manual"
     return `---
 name: "skillkit-skills"
 mode: "model-decision"
@@ -52,7 +49,6 @@ Each skill is self-contained with its own resources.
 
   parseConfig(content: string): string[] {
     const skillNames: string[] = [];
-    // Parse from ### headers
     const headerRegex = /^### ([a-z0-9-]+)$/gm;
     let match;
 
@@ -68,10 +64,8 @@ Each skill is self-contained with its own resources.
   }
 
   async isDetected(): Promise<boolean> {
-    // 2026: Check project and global paths
     const projectWindsurf = join(process.cwd(), '.windsurf');
     const projectRulesDir = join(process.cwd(), '.windsurf', 'rules');
-    // Global Windsurf config (Codeium)
     const globalWindsurf = join(homedir(), '.codeium', 'windsurf');
 
     return existsSync(projectWindsurf) || existsSync(projectRulesDir) ||

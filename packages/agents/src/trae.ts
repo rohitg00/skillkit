@@ -8,7 +8,6 @@ export class TraeAdapter implements AgentAdapter {
   readonly type: AgentType = 'trae';
   readonly name = 'Trae';
   readonly skillsDir = '.trae/skills';
-  // 2026: Trae uses .trae/rules/*.md with YAML frontmatter
   readonly configFile = '.trae/rules/project_rules.md';
 
   generateConfig(skills: Skill[]): string {
@@ -22,7 +21,6 @@ export class TraeAdapter implements AgentAdapter {
       .map(s => `### ${s.name}\n\n${s.description}\n\n**Invoke:** \`skillkit read ${s.name}\``)
       .join('\n\n');
 
-    // Trae uses Markdown with YAML frontmatter (2026 standard)
     return `---
 alwaysApply: true
 description: SkillKit skills integration for Trae
@@ -51,7 +49,6 @@ Skills provide detailed instructions for completing complex tasks.
 
   parseConfig(content: string): string[] {
     const skillNames: string[] = [];
-    // Parse from ### headers (2026 format)
     const headerRegex = /^### ([a-z0-9-]+)$/gm;
     let match;
 
@@ -70,7 +67,6 @@ Skills provide detailed instructions for completing complex tasks.
     const projectTrae = join(process.cwd(), '.trae');
     const traeRulesDir = join(process.cwd(), '.trae', 'rules');
     const globalTrae = join(homedir(), '.trae');
-    // 2026: Also check for AGENTS.md and CLAUDE.md (Trae supports importing)
     const agentsMd = join(process.cwd(), 'AGENTS.md');
 
     return existsSync(projectTrae) || existsSync(traeRulesDir) ||

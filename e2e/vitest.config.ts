@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config';
+import { resolve } from 'node:path';
 
 export default defineConfig({
   test: {
@@ -17,6 +18,12 @@ export default defineConfig({
         singleFork: false,
         isolate: true,
       },
+    },
+  },
+  resolve: {
+    alias: {
+      '@skillkit/core': resolve(__dirname, '../packages/core/src/index.ts'),
+      '@skillkit/agents': resolve(__dirname, '../packages/agents/src/index.ts'),
     },
   },
 });

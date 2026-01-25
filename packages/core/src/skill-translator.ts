@@ -35,7 +35,7 @@ export interface AgentSkillFormat {
 }
 
 /**
- * Agent-specific skill format configurations (2026 latest)
+ * Agent-specific skill format configurations
  */
 export const AGENT_SKILL_FORMATS: Record<AgentType, AgentSkillFormat> = {
   'claude-code': {
@@ -545,7 +545,8 @@ export function translateSkillToAll(
   const results = new Map<AgentType, SkillTranslationResult>();
   const agents: AgentType[] = [
     'claude-code', 'cursor', 'codex', 'gemini-cli', 'opencode',
-    'windsurf', 'kilo', 'roo', 'trae', 'github-copilot', 'goose',
+    'antigravity', 'amp', 'clawdbot', 'droid', 'github-copilot',
+    'goose', 'kilo', 'kiro-cli', 'roo', 'trae', 'windsurf', 'universal',
   ];
 
   for (const agent of agents) {
@@ -562,11 +563,31 @@ export function translateSkillToAll(
  */
 export function writeTranslatedSkill(
   result: SkillTranslationResult,
-  rootDir: string
-): { success: boolean; path: string; error?: string } {
+  rootDir: string,
+  options?: { overwrite?: boolean }
+): { success: boolean; path: string; error?: string; skipped?: boolean } {
+  // Don't write if translation failed
+  if (!result.success) {
+    return {
+      success: false,
+      path: '',
+      error: 'Translation failed',
+    };
+  }
+
   try {
     const targetPath = join(rootDir, result.targetDir);
     const filePath = join(targetPath, result.filename);
+
+    // Check if file exists and overwrite is disabled
+    if (existsSync(filePath) && options?.overwrite === false) {
+      return {
+        success: false,
+        path: filePath,
+        error: 'File exists and overwrite=false',
+        skipped: true,
+      };
+    }
 
     // Create directory if needed
     if (!existsSync(targetPath)) {
