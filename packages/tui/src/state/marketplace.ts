@@ -7,40 +7,15 @@ import { join } from 'node:path';
 import type { SkillItem, RepoInfo, FetchedSkill } from './types.js';
 
 /**
- * Default popular repos - can be extended via config.marketplaceSources
+ * Default repos loaded from marketplace/sources.json (single source of truth)
+ * Import at runtime to allow updates without code changes
  */
-export const DEFAULT_REPOS: RepoInfo[] = [
-  { source: 'anthropics/skills', name: 'Anthropic Official' },
-  { source: 'vercel-labs/agent-skills', name: 'Vercel Labs' },
-  { source: 'expo/skills', name: 'Expo / React Native' },
-  { source: 'remotion-dev/skills', name: 'Remotion Video' },
-  { source: 'ComposioHQ/awesome-claude-skills', name: 'Composio Awesome' },
-  { source: 'travisvn/awesome-claude-skills', name: 'Travis Awesome' },
-  { source: 'mhattingpete/claude-skills-marketplace', name: 'Skills Marketplace' },
-  { source: 'coreyhaines31/marketingskills', name: 'Marketing Skills' },
-  { source: 'obra/superpowers', name: 'Superpowers TDD' },
-  { source: 'softaworks/agent-toolkit', name: 'Softaworks Toolkit' },
-  { source: 'wshobson/agents', name: 'Dev Patterns' },
-  { source: 'langgenius/dify', name: 'Dify Frontend' },
-  { source: 'trailofbits/skills', name: 'Trail of Bits Security' },
-  { source: 'better-auth/skills', name: 'Better Auth' },
-  { source: 'onmax/nuxt-skills', name: 'Nuxt / Vue' },
-  { source: 'hyf0/vue-skills', name: 'Vue Best Practices' },
-  { source: 'jezweb/claude-skills', name: 'Cloudflare / TanStack' },
-  { source: 'elysiajs/skills', name: 'ElysiaJS / Bun' },
-  { source: 'kadajett/agent-nestjs-skills', name: 'NestJS' },
-  { source: 'callstackincubator/agent-skills', name: 'React Native' },
-  { source: 'cloudai-x/threejs-skills', name: 'Three.js' },
-  { source: 'emalorenzo/three-agent-skills', name: 'Three.js Advanced' },
-  { source: 'dimillian/skills', name: 'SwiftUI iOS' },
-  { source: 'stripe/ai', name: 'Stripe Payments' },
-  { source: 'waynesutton/convexskills', name: 'Convex Backend' },
-  { source: 'kepano/obsidian-skills', name: 'Obsidian Notes' },
-  { source: 'jimliu/baoyu-skills', name: 'Baoyu Tools' },
-  { source: 'giuseppe-trisciuoglio/developer-kit', name: 'Shadcn / Radix' },
-  { source: 'openrouterteam/agent-skills', name: 'OpenRouter SDK' },
-  { source: 'intellectronica/agent-skills', name: 'Context7' },
-];
+import sourcesData from '../../../../marketplace/sources.json' with { type: 'json' };
+
+export const DEFAULT_REPOS: RepoInfo[] = sourcesData.sources.map((s: { source: string; name: string }) => ({
+  source: s.source,
+  name: s.name,
+}));
 
 /**
  * Marketplace state

@@ -94,6 +94,69 @@ function downloadContent(content: string, filename: string): void {
   URL.revokeObjectURL(url);
 }
 
+// localStorage cache for AI-generated skills
+const CACHE_KEY = 'skillkit_ai_cache';
+const CACHE_VERSION = 1;
+
+interface CachedSkill {
+  skill: AgentSkill;
+  query: string;
+  timestamp: number;
+}
+
+interface SkillCache {
+  version: number;
+  skills: Record<string, CachedSkill>;
+}
+
+function normalizeQuery(query: string): string {
+  return query.toLowerCase().trim().replace(/\s+/g, ' ');
+}
+
+function getSkillCache(): SkillCache {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const parsed = JSON.parse(cached) as SkillCache;
+      if (parsed.version === CACHE_VERSION) {
+        return parsed;
+      }
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return { version: CACHE_VERSION, skills: {} };
+}
+
+function getCachedSkill(query: string): AgentSkill | null {
+  const cache = getSkillCache();
+  const key = normalizeQuery(query);
+  const cached = cache.skills[key];
+  if (cached) {
+    // Cache valid for 7 days
+    const weekMs = 7 * 24 * 60 * 60 * 1000;
+    if (Date.now() - cached.timestamp < weekMs) {
+      return cached.skill;
+    }
+  }
+  return null;
+}
+
+function setCachedSkill(query: string, skill: AgentSkill): void {
+  try {
+    const cache = getSkillCache();
+    const key = normalizeQuery(query);
+    cache.skills[key] = {
+      skill,
+      query: key,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // Ignore storage errors (quota exceeded, etc.)
+  }
+}
+
 export function SkillGenerator(): React.ReactElement {
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<LoadingState>(LoadingState.IDLE);
@@ -103,6 +166,7 @@ export function SkillGenerator(): React.ReactElement {
   const [selectedSkill, setSelectedSkill] = useState<IndexedSkill | null>(null);
   const [skillContent, setSkillContent] = useState<string | null>(null);
   const [generatedSkill, setGeneratedSkill] = useState<AgentSkill | null>(null);
+  const [isFromCache, setIsFromCache] = useState(false);
   const [activeTab, setActiveTab] = useState<'principles' | 'patterns' | 'antipatterns'>('principles');
 
   const [error, setError] = useState<string | null>(null);
@@ -144,18 +208,71 @@ export function SkillGenerator(): React.ReactElement {
   }
 
   async function handleGenerateWithAI(): Promise<void> {
-    setStatus(LoadingState.LOADING);
     setError(null);
+
+    // Check cache first
+    const cached = getCachedSkill(input);
+    if (cached) {
+      setGeneratedSkill(cached);
+      setIsFromCache(true);
+      setViewMode('generated');
+      setStatus(LoadingState.SUCCESS);
+      return;
+    }
+
+    setStatus(LoadingState.LOADING);
+    setIsFromCache(false);
 
     try {
       const result = await generateAgentSkill(input);
       setGeneratedSkill(result);
+      setCachedSkill(input, result); // Cache the result
       setViewMode('generated');
       setStatus(LoadingState.SUCCESS);
     } catch {
       setError("Failed to generate skill. Please try again.");
       setStatus(LoadingState.ERROR);
     }
+  }
+
+  function submitToMarketplace(): void {
+    if (!generatedSkill) return;
+
+    const slug = generatedSkill.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const skillContent = generateSkillMd(generatedSkill);
+
+    const body = `## 📤 AI-Generated Skill: ${generatedSkill.title}
+
+### Skill Details
+- **Name:** ${generatedSkill.name}
+- **Description:** ${generatedSkill.description}
+- **Tags:** ${generatedSkill.tags.join(', ')}
+- **Version:** ${generatedSkill.version}
+
+### SKILL.md Content
+
+<details>
+<summary>Click to expand</summary>
+
+\`\`\`markdown
+${skillContent.slice(0, 4000)}${skillContent.length > 4000 ? '\n...(truncated)' : ''}
+\`\`\`
+
+</details>
+
+### Checklist for Maintainer
+- [ ] Review skill content for quality
+- [ ] Add to \`marketplace/skills.json\`
+
+---
+**Generated via:** AI Skill Generator
+**Search query:** "${input}"`;
+
+    const title = encodeURIComponent(`[AI Skill] ${generatedSkill.title}`);
+    const encodedBody = encodeURIComponent(body);
+    const url = `https://github.com/rohitg00/skillkit/issues/new?title=${title}&body=${encodedBody}&labels=ai-generated,skill-submission`;
+
+    window.open(url, '_blank', 'noopener,noreferrer');
   }
 
   function handleBack(): void {
@@ -353,9 +470,9 @@ export function SkillGenerator(): React.ReactElement {
 
           <div className="mt-6 pt-6 border-t border-zinc-800">
             <p className="text-zinc-500 font-mono text-sm mb-3">Install with SkillKit:</p>
-            <pre className="bg-zinc-950 border border-zinc-800 p-4 text-sm">
-              <code className="text-zinc-300 font-mono">
-                skillkit install {selectedSkill.id.split('/').slice(0, 2).join('/')} --agent claude-code,cursor
+            <pre className="bg-zinc-950 border border-zinc-800 p-4 text-sm overflow-x-auto">
+              <code className="text-zinc-300 font-mono text-xs sm:text-sm whitespace-nowrap">
+                npx skillkit install {selectedSkill.id.split('/').slice(0, 2).join('/')}
               </code>
             </pre>
           </div>
@@ -366,14 +483,19 @@ export function SkillGenerator(): React.ReactElement {
         <div className="animate-fade-in-up">
           <div className="flex items-start justify-between mb-8 border-b border-zinc-800 pb-6">
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h3 className="text-2xl font-bold text-white">{generatedSkill.title}</h3>
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <h3 className="text-xl sm:text-2xl font-bold text-white">{generatedSkill.title}</h3>
                 <span className="text-xs font-mono text-zinc-500 bg-zinc-900 px-2 py-1 border border-zinc-800">
                   v{generatedSkill.version}
                 </span>
                 <span className="text-xs font-mono text-purple-400 bg-purple-900/30 px-2 py-1 border border-purple-800/50">
                   AI Generated
                 </span>
+                {isFromCache && (
+                  <span className="text-xs font-mono text-green-400 bg-green-900/30 px-2 py-1 border border-green-800/50">
+                    Cached
+                  </span>
+                )}
               </div>
               <p className="text-zinc-400 font-mono text-sm mb-4">{generatedSkill.description}</p>
               <div className="flex flex-wrap gap-2">
@@ -384,15 +506,26 @@ export function SkillGenerator(): React.ReactElement {
                 ))}
               </div>
             </div>
-            <button
-              onClick={downloadGeneratedSkillMd}
-              className="flex items-center gap-2 bg-white text-black px-4 py-2 font-mono text-sm hover:bg-zinc-200 transition-colors shrink-0 ml-4"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              DOWNLOAD
-            </button>
+            <div className="flex flex-col sm:flex-row gap-2 shrink-0 ml-4">
+              <button
+                onClick={downloadGeneratedSkillMd}
+                className="flex items-center justify-center gap-2 bg-white text-black px-4 py-2 font-mono text-sm hover:bg-zinc-200 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                DOWNLOAD
+              </button>
+              <button
+                onClick={submitToMarketplace}
+                className="flex items-center justify-center gap-2 bg-purple-600 text-white px-4 py-2 font-mono text-sm hover:bg-purple-500 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                SUBMIT
+              </button>
+            </div>
           </div>
 
           <Card className="mb-6">

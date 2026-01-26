@@ -39,6 +39,7 @@ import {
   CommandCmd,
   AICommand,
   AuditCommand,
+  PublishCommand,
   AgentCommand,
   AgentListCommand,
   AgentShowCommand,
@@ -98,6 +99,7 @@ cli.register(PlanCommand);
 cli.register(CommandCmd);
 cli.register(AICommand);
 cli.register(AuditCommand);
+cli.register(PublishCommand);
 cli.register(AgentCommand);
 cli.register(AgentListCommand);
 cli.register(AgentShowCommand);

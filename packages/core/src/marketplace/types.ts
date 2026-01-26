@@ -121,26 +121,23 @@ export interface MarketplaceConfig {
 }
 
 /**
- * Default skill sources
+ * Default skill sources - loaded from marketplace/sources.json (single source of truth)
  */
-export const DEFAULT_SKILL_SOURCES: SkillSource[] = [
-  {
-    owner: 'composioHQ',
-    repo: 'awesome-claude-code-skills',
-    name: 'Composio Curated',
-    description: 'Curated collection of Claude Code skills',
-    official: false,
-    branch: 'main',
-  },
-  {
-    owner: 'anthropics',
-    repo: 'courses',
-    name: 'Anthropic Official',
-    description: 'Official Anthropic courses and skills',
-    official: true,
-    branch: 'master',
-  },
-];
+import sourcesData from '../../../../marketplace/sources.json' with { type: 'json' };
+
+export const DEFAULT_SKILL_SOURCES: SkillSource[] = sourcesData.sources.map(
+  (s: { source: string; name: string; official?: boolean }) => {
+    const [owner, repo] = s.source.split('/');
+    return {
+      owner,
+      repo,
+      name: s.name,
+      description: `Skills from ${s.name}`,
+      official: s.official || false,
+      branch: 'main',
+    };
+  }
+);
 
 /**
  * Cache file name

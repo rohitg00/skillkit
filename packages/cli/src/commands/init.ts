@@ -1,3 +1,6 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { createInterface } from 'node:readline';
 import chalk from 'chalk';
 import { Command, Option } from 'clipanion';
 import type { AgentType } from '@skillkit/core';
@@ -69,11 +72,54 @@ export class InitCommand extends Command {
       console.log(chalk.dim('  2. Sync config: skillkit sync'));
       console.log(chalk.dim('  3. Use skills: skillkit read <skill-name>'));
 
+      // Check if SKILL.md exists and offer to publish
+      await this.checkAndPromptPublish();
+
       return 0;
     } catch (error) {
       console.error(chalk.red('Initialization failed'));
       console.error(chalk.dim(error instanceof Error ? error.message : String(error)));
       return 1;
     }
+  }
+
+  private async checkAndPromptPublish(): Promise<void> {
+    const skillMdLocations = [
+      join(process.cwd(), 'SKILL.md'),
+      join(process.cwd(), 'skills', 'SKILL.md'),
+      join(process.cwd(), '.claude', 'skills', 'SKILL.md'),
+      join(process.cwd(), '.cursor', 'skills', 'SKILL.md'),
+    ];
+
+    const foundSkillMd = skillMdLocations.find(loc => existsSync(loc));
+    if (!foundSkillMd) return;
+
+    console.log();
+    console.log(chalk.yellow('Found SKILL.md in your project!'));
+    console.log(chalk.dim('Would you like to publish it to the SkillKit marketplace?'));
+    console.log();
+
+    const answer = await this.prompt('Publish skill? [y/N]: ');
+
+    if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
+      console.log();
+      console.log(chalk.cyan('To publish your skill, run:'));
+      console.log(chalk.white(`  skillkit publish ${foundSkillMd}`));
+      console.log();
+    }
+  }
+
+  private prompt(question: string): Promise<string> {
+    const rl = createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    return new Promise(resolve => {
+      rl.question(question, answer => {
+        rl.close();
+        resolve(answer.trim());
+      });
+    });
   }
 }
