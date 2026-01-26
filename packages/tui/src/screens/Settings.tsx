@@ -55,13 +55,15 @@ export function Settings({ onNavigate, cols = 80 }: SettingsProps) {
     setSettings(DEFAULT_SETTINGS);
   }, []);
 
-  useKeyboard((key: { name?: string }) => {
+  const handleKeyboard = useCallback((key: { name?: string }) => {
     if (key.name === 'j' || key.name === 'down') handleKeyNav(1);
     else if (key.name === 'k' || key.name === 'up') handleKeyNav(-1);
     else if (key.name === 'return') handleToggle();
     else if (key.name === 'r') handleReset();
     else if (key.name === 'escape') onNavigate('home');
-  });
+  }, [handleKeyNav, handleToggle, handleReset, onNavigate]);
+
+  useKeyboard(handleKeyboard);
 
   const divider = useMemo(() =>
     <text fg={terminalColors.textMuted}>{'─'.repeat(contentWidth)}</text>,

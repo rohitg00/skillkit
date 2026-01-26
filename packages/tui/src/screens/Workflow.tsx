@@ -96,8 +96,6 @@ export function Workflow({ onNavigate, cols = 80, rows = 24 }: WorkflowProps) {
           {WORKFLOWS.length === 0 ? (
             <box flexDirection="column">
               <text fg={terminalColors.textMuted}>No workflows yet</text>
-              <text> </text>
-              <text fg={terminalColors.textMuted}>Press 'n' to create one</text>
             </box>
           ) : (
             WORKFLOWS.map((wf, idx) => {

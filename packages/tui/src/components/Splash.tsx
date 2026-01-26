@@ -83,7 +83,8 @@ export function Splash({ onComplete, duration = 3500 }: SplashProps) {
   const [fadeIn, setFadeIn] = useState(0);
   const [particles, setParticles] = useState<string[]>([]);
 
-  const version = getVersion();
+  // Cache version to avoid repeated sync file I/O on every render
+  const version = useMemo(() => getVersion(), []);
   const cols = process.stdout.columns || 80;
   const rows = process.stdout.rows || 24;
   const useSmallLogo = cols < 70;

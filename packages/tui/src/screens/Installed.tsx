@@ -70,7 +70,7 @@ export function Installed({ onNavigate, cols = 80, rows = 24 }: InstalledProps) 
     }
   }, [filteredSkills, selectedIndex]);
 
-  useKeyboard((key: { name?: string; sequence?: string }) => {
+  const handleKeyboard = useCallback((key: { name?: string; sequence?: string }) => {
     if (searchMode) {
       if (key.name === 'escape') {
         setSearchMode(false);
@@ -89,9 +89,11 @@ export function Installed({ onNavigate, cols = 80, rows = 24 }: InstalledProps) 
     else if (key.name === 'k' || key.name === 'up') handleKeyNav(-1);
     else if (key.sequence === '/') setSearchMode(true);
     else if (key.name === 'return') handleToggle();
-    else if (key.name === 'd') handleToggle(); // 'd' disables (same as toggle)
+    else if (key.name === 'd') handleToggle();
     else if (key.name === 'escape') onNavigate('home');
-  });
+  }, [searchMode, handleKeyNav, handleToggle, onNavigate]);
+
+  useKeyboard(handleKeyboard);
 
   useEffect(() => {
     if (selectedIndex >= filteredSkills.length && filteredSkills.length > 0) {
