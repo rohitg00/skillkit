@@ -3,6 +3,7 @@
  */
 import { findAllSkills } from '@skillkit/core';
 import { rmSync } from 'node:fs';
+import { resolve, normalize } from 'node:path';
 import { getSearchDirs } from '../utils/helpers.js';
 import type { SkillItem } from './types.js';
 import type { AgentType } from '@skillkit/core';
@@ -71,6 +72,16 @@ export function removeSkill(skillName: string, agentType?: AgentType): boolean {
     const skill = allSkills.find((s) => s.name === skillName);
 
     if (skill) {
+      const normalizedPath = normalize(resolve(skill.path));
+      const isWithinSearchDirs = searchDirs.some((dir) => {
+        const normalizedDir = normalize(resolve(dir));
+        return normalizedPath.startsWith(normalizedDir + '/') || normalizedPath === normalizedDir;
+      });
+
+      if (!isWithinSearchDirs) {
+        return false;
+      }
+
       rmSync(skill.path, { recursive: true, force: true });
       return true;
     }

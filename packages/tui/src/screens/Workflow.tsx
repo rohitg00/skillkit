@@ -2,7 +2,8 @@
  * Workflow Screen - Automation Builder
  * Clean monochromatic design
  */
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useKeyboard } from '@opentui/react';
 import { type Screen } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
 
@@ -24,7 +25,7 @@ export function Workflow({ onNavigate, cols = 80, rows = 24 }: WorkflowProps) {
   const [animPhase, setAnimPhase] = useState(0);
 
   const isCompact = cols < 60;
-  const contentWidth = Math.min(cols - 4, 60);
+  const contentWidth = Math.max(1, Math.min(cols - 4, 60));
 
   // Entrance animation
   useEffect(() => {
@@ -35,6 +36,16 @@ export function Workflow({ onNavigate, cols = 80, rows = 24 }: WorkflowProps) {
 
   const successCount = WORKFLOWS.filter(w => w.status === 'success').length;
   const failedCount = WORKFLOWS.filter(w => w.status === 'failed').length;
+
+  const handleKeyNav = useCallback((delta: number) => {
+    setSelectedIndex(prev => Math.max(0, Math.min(prev + delta, WORKFLOWS.length - 1)));
+  }, []);
+
+  useKeyboard((key: { name?: string }) => {
+    if (key.name === 'j' || key.name === 'down') handleKeyNav(1);
+    else if (key.name === 'k' || key.name === 'up') handleKeyNav(-1);
+    else if (key.name === 'escape') onNavigate('home');
+  });
 
   const divider = useMemo(() =>
     <text fg={terminalColors.textMuted}>{'─'.repeat(contentWidth)}</text>,

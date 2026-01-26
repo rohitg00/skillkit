@@ -60,7 +60,8 @@ function ShortcutSection({ section, items, isLast }: { section: string; items: {
 export function Help({ cols = 80 }: HelpProps) {
   const [animPhase, setAnimPhase] = useState(0);
   const isCompact = cols < 60;
-  const contentWidth = Math.min(cols - 4, 60);
+  const rawWidth = cols - 4;
+  const contentWidth = Math.max(1, Math.min(rawWidth, 60));
   const version = getVersion();
 
   useEffect(() => {

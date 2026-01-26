@@ -1,8 +1,5 @@
-/**
- * Settings Screen - Configuration
- * Clean monochromatic design
- */
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useKeyboard } from '@opentui/react';
 import { type Screen } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
 
@@ -12,7 +9,14 @@ interface SettingsProps {
   rows?: number;
 }
 
-const SETTINGS = [
+interface SettingItem {
+  key: string;
+  label: string;
+  value: string;
+  type: 'select' | 'path' | 'toggle';
+}
+
+const DEFAULT_SETTINGS: SettingItem[] = [
   { key: 'defaultAgent', label: 'Default Agent', value: 'claude-code', type: 'select' },
   { key: 'skillsDir', label: 'Skills Directory', value: '.claude/skills', type: 'path' },
   { key: 'autoSync', label: 'Auto Sync', value: 'enabled', type: 'toggle' },
@@ -20,19 +24,44 @@ const SETTINGS = [
   { key: 'telemetry', label: 'Telemetry', value: 'disabled', type: 'toggle' },
 ];
 
-export function Settings({ onNavigate, cols = 80, rows = 24 }: SettingsProps) {
+export function Settings({ onNavigate, cols = 80 }: SettingsProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [settings, setSettings] = useState<SettingItem[]>(DEFAULT_SETTINGS);
   const [animPhase, setAnimPhase] = useState(0);
 
   const isCompact = cols < 60;
-  const contentWidth = Math.min(cols - 4, 60);
+  const contentWidth = Math.max(1, Math.min(cols - 4, 60));
 
-  // Entrance animation
   useEffect(() => {
     if (animPhase >= 2) return;
     const timer = setTimeout(() => setAnimPhase(p => p + 1), 100);
     return () => clearTimeout(timer);
   }, [animPhase]);
+
+  const handleKeyNav = useCallback((delta: number) => {
+    setSelectedIndex(prev => Math.max(0, Math.min(prev + delta, settings.length - 1)));
+  }, [settings.length]);
+
+  const handleToggle = useCallback(() => {
+    const setting = settings[selectedIndex];
+    if (setting?.type === 'toggle') {
+      setSettings(prev => prev.map((s, i) =>
+        i === selectedIndex ? { ...s, value: s.value === 'enabled' ? 'disabled' : 'enabled' } : s
+      ));
+    }
+  }, [selectedIndex, settings]);
+
+  const handleReset = useCallback(() => {
+    setSettings(DEFAULT_SETTINGS);
+  }, []);
+
+  useKeyboard((key: { name?: string }) => {
+    if (key.name === 'j' || key.name === 'down') handleKeyNav(1);
+    else if (key.name === 'k' || key.name === 'up') handleKeyNav(-1);
+    else if (key.name === 'return') handleToggle();
+    else if (key.name === 'r') handleReset();
+    else if (key.name === 'escape') onNavigate('home');
+  });
 
   const divider = useMemo(() =>
     <text fg={terminalColors.textMuted}>{'─'.repeat(contentWidth)}</text>,
@@ -50,7 +79,7 @@ export function Settings({ onNavigate, cols = 80, rows = 24 }: SettingsProps) {
         <box flexDirection="column">
           <box flexDirection="row" justifyContent="space-between" width={contentWidth}>
             <text fg={terminalColors.text}>⚙ Settings</text>
-            <text fg={terminalColors.textMuted}>{SETTINGS.length} options</text>
+            <text fg={terminalColors.textMuted}>{settings.length} options</text>
           </box>
           <text fg={terminalColors.textMuted}>configure skillkit</text>
           <text> </text>
@@ -65,7 +94,7 @@ export function Settings({ onNavigate, cols = 80, rows = 24 }: SettingsProps) {
           <text fg={terminalColors.text}>Configuration</text>
           <text> </text>
 
-          {SETTINGS.map((setting, idx) => {
+          {settings.map((setting, idx) => {
             const selected = idx === selectedIndex;
             const indicator = selected ? '▸' : ' ';
             const valueColor = setting.type === 'toggle'

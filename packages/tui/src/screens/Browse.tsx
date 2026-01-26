@@ -1,8 +1,5 @@
-/**
- * Browse Screen - Repository Explorer
- * Clean monochromatic design
- */
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useKeyboard } from '@opentui/react';
 import { type Screen, DEFAULT_REPOS } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
 
@@ -15,10 +12,11 @@ interface BrowseProps {
 export function Browse({ onNavigate, cols = 80, rows = 24 }: BrowseProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchMode, setSearchMode] = useState(false);
   const [animPhase, setAnimPhase] = useState(0);
 
   const isCompact = cols < 60;
-  const contentWidth = Math.min(cols - 4, 60);
+  const contentWidth = Math.max(1, Math.min(cols - 4, 60));
 
   // Entrance animation
   useEffect(() => {
@@ -45,6 +43,37 @@ export function Browse({ onNavigate, cols = 80, rows = 24 }: BrowseProps) {
       : repos,
     [repos, searchQuery]
   );
+
+  const handleKeyNav = useCallback((delta: number) => {
+    setSelectedIndex(prev => Math.max(0, Math.min(prev + delta, filteredRepos.length - 1)));
+  }, [filteredRepos.length]);
+
+  useKeyboard((key: { name?: string; sequence?: string }) => {
+    if (searchMode) {
+      if (key.name === 'escape') {
+        setSearchMode(false);
+      } else if (key.name === 'backspace') {
+        setSearchQuery(prev => prev.slice(0, -1));
+      } else if (key.name === 'return') {
+        setSearchMode(false);
+      } else if (key.sequence && key.sequence.length === 1 && /[a-zA-Z0-9\-_.]/.test(key.sequence)) {
+        setSearchQuery(prev => prev + key.sequence);
+        setSelectedIndex(0);
+      }
+      return;
+    }
+
+    if (key.name === 'j' || key.name === 'down') handleKeyNav(1);
+    else if (key.name === 'k' || key.name === 'up') handleKeyNav(-1);
+    else if (key.sequence === '/') setSearchMode(true);
+    else if (key.name === 'escape') onNavigate('home');
+  });
+
+  useEffect(() => {
+    if (selectedIndex >= filteredRepos.length && filteredRepos.length > 0) {
+      setSelectedIndex(filteredRepos.length - 1);
+    }
+  }, [filteredRepos.length, selectedIndex]);
 
   // Calculate visible repos
   const maxVisible = Math.max(5, rows - 10);

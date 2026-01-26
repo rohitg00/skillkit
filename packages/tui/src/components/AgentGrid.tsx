@@ -22,14 +22,14 @@ export function AgentGrid({
   detectedAgents = [],
   columns = 4,
 }: AgentGridProps) {
+  const safeColumns = Math.max(1, columns);
   const allAgents = Object.entries(AGENT_LOGOS);
   const visibleAgents = allAgents.slice(0, maxVisible);
   const hiddenCount = allAgents.length - maxVisible;
 
-  // Group agents into rows
   const rows: [string, AgentLogo][][] = [];
-  for (let i = 0; i < visibleAgents.length; i += columns) {
-    rows.push(visibleAgents.slice(i, i + columns));
+  for (let i = 0; i < visibleAgents.length; i += safeColumns) {
+    rows.push(visibleAgents.slice(i, i + safeColumns));
   }
 
   return (

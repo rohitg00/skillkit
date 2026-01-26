@@ -1,8 +1,5 @@
-/**
- * Marketplace Screen - Featured Discovery
- * Clean monochromatic design
- */
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useKeyboard } from '@opentui/react';
 import { type Screen, DEFAULT_REPOS } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
 
@@ -12,7 +9,6 @@ interface MarketplaceProps {
   rows?: number;
 }
 
-// Categories
 const CATEGORIES = [
   { name: 'Development', count: 24 },
   { name: 'Testing', count: 18 },
@@ -25,7 +21,7 @@ export function Marketplace({ onNavigate, cols = 80, rows = 24 }: MarketplacePro
   const [animPhase, setAnimPhase] = useState(0);
 
   const isCompact = cols < 60;
-  const contentWidth = Math.min(cols - 4, 60);
+  const contentWidth = Math.max(1, Math.min(cols - 4, 60));
 
   // Entrance animation
   useEffect(() => {
@@ -46,6 +42,16 @@ export function Marketplace({ onNavigate, cols = 80, rows = 24 }: MarketplacePro
 
   const maxVisible = Math.max(3, Math.floor((rows - 14) / 1));
   const visibleFeatured = featured.slice(0, maxVisible);
+
+  const handleKeyNav = useCallback((delta: number) => {
+    setSelectedIndex(prev => Math.max(0, Math.min(prev + delta, visibleFeatured.length - 1)));
+  }, [visibleFeatured.length]);
+
+  useKeyboard((key: { name?: string }) => {
+    if (key.name === 'j' || key.name === 'down') handleKeyNav(1);
+    else if (key.name === 'k' || key.name === 'up') handleKeyNav(-1);
+    else if (key.name === 'escape') onNavigate('home');
+  });
 
   const divider = useMemo(() =>
     <text fg={terminalColors.textMuted}>{'─'.repeat(contentWidth)}</text>,

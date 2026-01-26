@@ -18,10 +18,19 @@ interface StatsCardProps {
 }
 
 export function StatsCard({ items, animated = true }: StatsCardProps) {
-  const [displayValues, setDisplayValues] = useState<number[]>(
+  const [displayValues, setDisplayValues] = useState<number[]>(() =>
     animated ? items.map(() => 0) : items.map((item) => item.value)
   );
   const [animComplete, setAnimComplete] = useState(!animated);
+  const [prevItemsLength, setPrevItemsLength] = useState(items.length);
+
+  useEffect(() => {
+    if (items.length !== prevItemsLength) {
+      setPrevItemsLength(items.length);
+      setDisplayValues(animated ? items.map(() => 0) : items.map((item) => item.value));
+      setAnimComplete(!animated);
+    }
+  }, [items, prevItemsLength, animated]);
 
   useEffect(() => {
     if (!animated || animComplete) return;
@@ -29,13 +38,11 @@ export function StatsCard({ items, animated = true }: StatsCardProps) {
     const duration = animations.countUp.duration;
     const startTime = Date.now();
     const targetValues = items.map((item) => item.value);
-    const frameInterval = 16; // ~60fps
+    const frameInterval = 16;
 
     const intervalId = setInterval(() => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
-
-      // Ease out quart
       const eased = 1 - Math.pow(1 - progress, 4);
 
       const newValues = targetValues.map((target) =>

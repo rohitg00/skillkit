@@ -1,8 +1,5 @@
-/**
- * Recommend Screen - AI Skill Suggestions
- * Clean monochromatic design with colored confidence indicators
- */
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useKeyboard } from '@opentui/react';
 import { type Screen } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
 
@@ -12,7 +9,6 @@ interface RecommendProps {
   rows?: number;
 }
 
-// Spinner frames
 const SPINNER = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
 export function Recommend({ onNavigate, cols = 80, rows = 24 }: RecommendProps) {
@@ -23,23 +19,21 @@ export function Recommend({ onNavigate, cols = 80, rows = 24 }: RecommendProps) 
   const [analysisProgress, setAnalysisProgress] = useState(0);
 
   const isCompact = cols < 60;
-  const isNarrow = cols < 45;
-  const contentWidth = Math.min(cols - 4, 60);
+  const contentWidth = Math.max(1, Math.min(cols - 4, 60));
 
-  // Entrance animation
   useEffect(() => {
     if (animPhase >= 3) return;
     const timer = setTimeout(() => setAnimPhase(p => p + 1), 100);
     return () => clearTimeout(timer);
   }, [animPhase]);
 
-  // Spinner animation
   useEffect(() => {
+    if (!analyzing) return;
     const interval = setInterval(() => {
       setSpinnerFrame(f => (f + 1) % SPINNER.length);
     }, 80);
     return () => clearInterval(interval);
-  }, []);
+  }, [analyzing]);
 
   // Simulate analysis
   useEffect(() => {
@@ -66,9 +60,25 @@ export function Recommend({ onNavigate, cols = 80, rows = 24 }: RecommendProps) 
     { name: 'docker-compose', reason: 'docker-compose.yml detected for orchestration', confidence: 62 },
   ], []);
 
-  // Calculate visible recommendations
   const maxVisible = Math.max(3, Math.floor((rows - 10) / 2));
   const visibleRecs = recommendations.slice(0, maxVisible);
+
+  const handleKeyNav = useCallback((delta: number) => {
+    setSelectedIndex(prev => Math.max(0, Math.min(prev + delta, visibleRecs.length - 1)));
+  }, [visibleRecs.length]);
+
+  const handleRefresh = useCallback(() => {
+    setAnalyzing(true);
+    setAnalysisProgress(0);
+    setSelectedIndex(0);
+  }, []);
+
+  useKeyboard((key: { name?: string }) => {
+    if (key.name === 'j' || key.name === 'down') handleKeyNav(1);
+    else if (key.name === 'k' || key.name === 'up') handleKeyNav(-1);
+    else if (key.name === 'r') handleRefresh();
+    else if (key.name === 'escape') onNavigate('home');
+  });
 
   const divider = useMemo(() =>
     <text fg={terminalColors.textMuted}>{'─'.repeat(contentWidth)}</text>,

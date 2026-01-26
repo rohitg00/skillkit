@@ -160,16 +160,15 @@ export function Splash({ onComplete, duration = 3500 }: SplashProps) {
     return () => clearTimeout(timer);
   }, [onComplete, duration]);
 
-  // Centering
   const pad = ' '.repeat(Math.max(0, Math.floor((cols - maxWidth) / 2)));
-  const progressWidth = Math.min(40, cols - 20);
+  const progressWidth = Math.max(1, Math.min(40, cols - 20));
   const progressPad = ' '.repeat(Math.max(0, Math.floor((cols - progressWidth) / 2)));
 
-  // Progress bar
-  const filledWidth = Math.floor((progress / 100) * progressWidth);
+  const filledWidth = Math.min(Math.floor((progress / 100) * progressWidth), progressWidth);
+  const emptyWidth = Math.max(0, progressWidth - filledWidth - 1);
   const progressBar = PROGRESS.filled.repeat(filledWidth) +
     (filledWidth < progressWidth ? PROGRESS.head : '') +
-    PROGRESS.empty.repeat(Math.max(0, progressWidth - filledWidth - 1));
+    PROGRESS.empty.repeat(emptyWidth);
 
   const currentPhase = PHASES[phase];
 

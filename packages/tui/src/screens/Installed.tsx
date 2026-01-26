@@ -1,8 +1,5 @@
-/**
- * Installed Screen - Skills Manager
- * Clean monochromatic design
- */
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useKeyboard } from '@opentui/react';
 import { type Screen, loadSkills, filterSkills } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
 
@@ -17,6 +14,7 @@ const SPINNER = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', 
 export function Installed({ onNavigate, cols = 80, rows = 24 }: InstalledProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchMode, setSearchMode] = useState(false);
   const [animPhase, setAnimPhase] = useState(0);
   const [spinnerFrame, setSpinnerFrame] = useState(0);
   const [skills, setSkills] = useState<ReturnType<typeof loadSkills>>({
@@ -26,7 +24,7 @@ export function Installed({ onNavigate, cols = 80, rows = 24 }: InstalledProps) 
   });
 
   const isCompact = cols < 60;
-  const contentWidth = Math.min(cols - 4, 60);
+  const contentWidth = Math.max(1, Math.min(cols - 4, 60));
 
   // Entrance animation
   useEffect(() => {
@@ -54,6 +52,51 @@ export function Installed({ onNavigate, cols = 80, rows = 24 }: InstalledProps) 
     filterSkills(skills.skills, searchQuery),
     [skills.skills, searchQuery]
   );
+
+  const handleKeyNav = useCallback((delta: number) => {
+    setSelectedIndex(prev => Math.max(0, Math.min(prev + delta, filteredSkills.length - 1)));
+  }, [filteredSkills.length]);
+
+  const handleToggle = useCallback(() => {
+    if (filteredSkills.length === 0) return;
+    const skill = filteredSkills[selectedIndex];
+    if (skill) {
+      setSkills(prev => ({
+        ...prev,
+        skills: prev.skills.map(s =>
+          s.name === skill.name ? { ...s, enabled: s.enabled === false } : s
+        ),
+      }));
+    }
+  }, [filteredSkills, selectedIndex]);
+
+  useKeyboard((key: { name?: string; sequence?: string }) => {
+    if (searchMode) {
+      if (key.name === 'escape') {
+        setSearchMode(false);
+      } else if (key.name === 'backspace') {
+        setSearchQuery(prev => prev.slice(0, -1));
+      } else if (key.name === 'return') {
+        setSearchMode(false);
+      } else if (key.sequence && key.sequence.length === 1 && /[a-zA-Z0-9\-_.]/.test(key.sequence)) {
+        setSearchQuery(prev => prev + key.sequence);
+        setSelectedIndex(0);
+      }
+      return;
+    }
+
+    if (key.name === 'j' || key.name === 'down') handleKeyNav(1);
+    else if (key.name === 'k' || key.name === 'up') handleKeyNav(-1);
+    else if (key.sequence === '/') setSearchMode(true);
+    else if (key.name === 'return') handleToggle();
+    else if (key.name === 'escape') onNavigate('home');
+  });
+
+  useEffect(() => {
+    if (selectedIndex >= filteredSkills.length && filteredSkills.length > 0) {
+      setSelectedIndex(filteredSkills.length - 1);
+    }
+  }, [filteredSkills.length, selectedIndex]);
 
   // Calculate visible items
   const maxVisible = Math.max(5, rows - 10);

@@ -2,7 +2,8 @@
  * Sync Screen - Cross-Agent Synchronization
  * Clean monochromatic design
  */
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useKeyboard } from '@opentui/react';
 import { type Screen } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
 import { AGENT_LOGOS } from '../theme/symbols.js';
@@ -22,7 +23,7 @@ export function Sync({ onNavigate, cols = 80, rows = 24 }: SyncProps) {
   const [animPhase, setAnimPhase] = useState(0);
 
   const isCompact = cols < 60;
-  const contentWidth = Math.min(cols - 4, 60);
+  const contentWidth = Math.max(1, Math.min(cols - 4, 60));
 
   // Entrance animation
   useEffect(() => {
@@ -53,6 +54,30 @@ export function Sync({ onNavigate, cols = 80, rows = 24 }: SyncProps) {
 
   const syncedCount = agents.filter(a => a.synced).length;
   const totalSkills = agents.reduce((sum, a) => sum + a.skillCount, 0);
+
+  const handleKeyNav = useCallback((delta: number) => {
+    setSelectedIndex(prev => Math.max(0, Math.min(prev + delta, agents.length - 1)));
+  }, [agents.length]);
+
+  const handleSync = useCallback(() => {
+    if (syncStatus === 'syncing') return;
+    setSyncStatus('syncing');
+    setTimeout(() => setSyncStatus('done'), 1500);
+  }, [syncStatus]);
+
+  const handleSyncAll = useCallback(() => {
+    if (syncStatus === 'syncing') return;
+    setSyncStatus('syncing');
+    setTimeout(() => setSyncStatus('done'), 2000);
+  }, [syncStatus]);
+
+  useKeyboard((key: { name?: string }) => {
+    if (key.name === 'j' || key.name === 'down') handleKeyNav(1);
+    else if (key.name === 'k' || key.name === 'up') handleKeyNav(-1);
+    else if (key.name === 'return') handleSync();
+    else if (key.name === 'a') handleSyncAll();
+    else if (key.name === 'escape') onNavigate('home');
+  });
 
   const divider = useMemo(() =>
     <text fg={terminalColors.textMuted}>{'─'.repeat(contentWidth)}</text>,
