@@ -84,6 +84,9 @@ export class InitCommand extends Command {
   }
 
   private async checkAndPromptPublish(): Promise<void> {
+    // Skip in non-interactive environments (CI, piped input, etc.)
+    if (!process.stdin.isTTY) return;
+
     const skillMdLocations = [
       join(process.cwd(), 'SKILL.md'),
       join(process.cwd(), 'skills', 'SKILL.md'),

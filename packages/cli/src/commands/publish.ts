@@ -61,6 +61,11 @@ export class PublishCommand extends Command {
 
     // Build skill entry
     const skillSlug = this.slugify(skillName);
+    if (!skillSlug) {
+      console.error(chalk.red('Skill name produces an empty slug.'));
+      console.error(chalk.dim('Please pass --name with letters or numbers.'));
+      return 1;
+    }
     const skillEntry = {
       id: `${repoInfo.owner}/${repoInfo.repo}/${skillSlug}`,
       name: this.formatName(skillName),
@@ -107,7 +112,7 @@ export class PublishCommand extends Command {
     } catch {
       console.log(chalk.yellow('Could not open browser automatically.'));
       console.log(chalk.dim('Please open this URL manually:\n'));
-      console.log(chalk.cyan(issueUrl.slice(0, 200) + '...'));
+      console.log(chalk.cyan(issueUrl));
     }
 
     console.log();
@@ -219,7 +224,7 @@ export class PublishCommand extends Command {
       }).trim();
 
       // Parse GitHub URL: git@github.com:owner/repo.git or https://github.com/owner/repo.git
-      const match = remote.match(/github\.com[:/]([^/]+)\/([^/.]+)/);
+      const match = remote.match(/github\.com[:/]([^/]+)\/(.+?)(?:\.git)?$/);
       if (match) {
         return { owner: match[1], repo: match[2] };
       }

@@ -97,6 +97,8 @@ function downloadContent(content: string, filename: string): void {
 // localStorage cache for AI-generated skills
 const CACHE_KEY = 'skillkit_ai_cache';
 const CACHE_VERSION = 1;
+const MAX_CACHE_ENTRIES = 50;
+const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 interface CachedSkill {
   skill: AgentSkill;
@@ -119,6 +121,18 @@ function getSkillCache(): SkillCache {
     if (cached) {
       const parsed = JSON.parse(cached) as SkillCache;
       if (parsed.version === CACHE_VERSION) {
+        // Prune expired entries
+        const now = Date.now();
+        let mutated = false;
+        for (const [key, value] of Object.entries(parsed.skills)) {
+          if (!value?.timestamp || now - value.timestamp >= CACHE_TTL_MS) {
+            delete parsed.skills[key];
+            mutated = true;
+          }
+        }
+        if (mutated) {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(parsed));
+        }
         return parsed;
       }
     }
@@ -132,12 +146,8 @@ function getCachedSkill(query: string): AgentSkill | null {
   const cache = getSkillCache();
   const key = normalizeQuery(query);
   const cached = cache.skills[key];
-  if (cached) {
-    // Cache valid for 7 days
-    const weekMs = 7 * 24 * 60 * 60 * 1000;
-    if (Date.now() - cached.timestamp < weekMs) {
-      return cached.skill;
-    }
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.skill;
   }
   return null;
 }
@@ -151,6 +161,14 @@ function setCachedSkill(query: string, skill: AgentSkill): void {
       query: key,
       timestamp: Date.now(),
     };
+    // Enforce max entries limit
+    const entries = Object.entries(cache.skills);
+    if (entries.length > MAX_CACHE_ENTRIES) {
+      entries
+        .sort((a, b) => a[1].timestamp - b[1].timestamp)
+        .slice(0, entries.length - MAX_CACHE_ENTRIES)
+        .forEach(([k]) => delete cache.skills[k]);
+    }
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
   } catch {
     // Ignore storage errors (quota exceeded, etc.)
