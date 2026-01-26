@@ -8,6 +8,10 @@ permissions:
   contents: write
   issues: write
 
+concurrency:
+  group: process-submission-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
 jobs:
   process-submission:
     if: github.event.label.name == 'approved'
@@ -70,7 +74,8 @@ jobs:
               repoName = parseField('Repo');
               skillPath = parseField('Skill Path');
               tags = parseField('Tags');
-              authorGithub = parseField('Author')?.match(/@(\w+)/)?.[1] || '';
+              const authorField = parseField('Author') || '';
+              authorGithub = authorField.replace(/^@/, '').trim();
             }
 
             if (!skillName || !repoOwner || !repoName) {
@@ -103,13 +108,28 @@ jobs:
               return;
             }
 
+            // Parse and validate tags
+            const filteredTags = tags
+              ? tags.split(',').map(t => t.trim().toLowerCase()).filter(t => t.length > 0)
+              : [];
+
+            if (filteredTags.length === 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: '❌ At least one tag is required. Please add tags to your submission.'
+              });
+              return;
+            }
+
             // Add new skill
             const newSkill = {
               id: skillId,
               name: skillName,
               description: description || '',
               source: `${repoOwner}/${repoName}`,
-              tags: tags ? tags.split(',').map(t => t.trim().toLowerCase()) : [],
+              tags: filteredTags,
               author: authorGithub
             };
 

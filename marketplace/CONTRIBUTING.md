@@ -35,7 +35,7 @@
 
 Your skill repository should contain a `SKILL.md` file:
 
-```
+```text
 your-repo/
 ├── skills/
 │   └── skill-name/
