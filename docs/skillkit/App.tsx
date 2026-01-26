@@ -27,16 +27,17 @@ export default function App(): React.ReactElement {
               <div className="w-4 h-4 bg-white"></div>
               <span className="text-base font-bold tracking-tight text-white font-mono">SKILLKIT</span>
             </a>
-            <div className="hidden md:flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <a
                 href="https://github.com/rohitg00/skillkit"
                 target="_blank"
                 rel="noreferrer"
                 className="text-zinc-400 hover:text-white transition-colors p-2"
+                aria-label="GitHub"
               >
                 {GITHUB_ICON}
               </a>
-              <div className="flex items-center bg-zinc-900 border border-zinc-800 px-3 py-1.5">
+              <div className="hidden sm:flex items-center bg-zinc-900 border border-zinc-800 px-3 py-1.5">
                 <span className="text-zinc-500 mr-2 text-xs">$</span>
                 <code className="text-zinc-300 text-xs font-mono">npx skillkit</code>
               </div>
