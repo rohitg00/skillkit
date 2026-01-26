@@ -39,7 +39,7 @@ export default function App(): React.ReactElement {
               </a>
               <div className="hidden sm:flex items-center bg-zinc-900 border border-zinc-800 px-3 py-1.5">
                 <span className="text-zinc-500 mr-2 text-xs">$</span>
-                <code className="text-zinc-300 text-xs font-mono">npx skillkit</code>
+                <code className="text-zinc-300 text-xs font-mono">npx skillkit@latest</code>
               </div>
             </div>
           </div>

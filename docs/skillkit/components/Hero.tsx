@@ -93,7 +93,7 @@ export function Hero(): React.ReactElement {
 
   async function copyInstall(): Promise<void> {
     try {
-      await navigator.clipboard.writeText('npx skillkit');
+      await navigator.clipboard.writeText('npx skillkit@latest');
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -113,13 +113,14 @@ export function Hero(): React.ReactElement {
       <div className="absolute inset-0 bg-gradient-to-b from-zinc-900/50 to-transparent pointer-events-none"></div>
 
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-8 pb-10 relative">
-        <div className="hidden lg:block mb-6">
-          <pre className="text-zinc-800 text-[8px] leading-none font-mono select-none overflow-hidden animate-pulse">
-            {ASCII_LOGO}
-          </pre>
-        </div>
+        <div className="max-w-5xl mx-auto">
+          <div className="hidden lg:block mb-6 overflow-hidden">
+            <pre className="text-zinc-800 text-[8px] leading-none font-mono select-none animate-pulse">
+              {ASCII_LOGO}
+            </pre>
+          </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
           <div className="animate-fade-in">
             <div className="inline-flex items-center space-x-2 border border-zinc-800 bg-zinc-900/50 px-2 py-0.5 mb-3 backdrop-blur-sm">
               <span className="flex h-1.5 w-1.5 bg-white rounded-full"></span>
@@ -142,7 +143,7 @@ export function Hero(): React.ReactElement {
                 className="inline-flex items-center bg-black border border-zinc-700 px-3 py-2 hover:border-zinc-500 transition-colors"
               >
                 <span className="text-zinc-500 mr-2 select-none">$</span>
-                <span className="font-mono text-zinc-100 text-sm">npx skillkit</span>
+                <span className="font-mono text-zinc-100 text-sm">npx skillkit@latest</span>
                 <span className="ml-2 text-zinc-500 hover:text-white transition-colors flex items-center gap-1">
                   {copied ? (
                     <>
@@ -200,6 +201,7 @@ export function Hero(): React.ReactElement {
                 )}
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>

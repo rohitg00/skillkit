@@ -195,7 +195,7 @@ export function Agents(): React.ReactElement {
           <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-black to-transparent z-10"></div>
           <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-black to-transparent z-10"></div>
 
-          <div className="flex animate-scroll hover:[animation-play-state:paused]">
+          <div className="flex animate-scroll hover:[animation-play-state:paused] pl-8">
           {duplicatedAgents.map((agent, index) => (
             <a
               key={`${agent.name}-${index}`}
