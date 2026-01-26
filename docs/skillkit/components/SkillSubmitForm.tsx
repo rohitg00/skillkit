@@ -227,7 +227,6 @@ ${jsonEntry}
 ### Checklist for Maintainer
 - [ ] Verify repository is public
 - [ ] Add JSON entry to \`marketplace/skills.json\`
-- [ ] Add to \`marketplace/skills.json\`
 
 ---
 **Submitted by:** @${form.authorGithub || 'anonymous'}
@@ -254,7 +253,6 @@ ${form.skillContent.slice(0, 4000)}${form.skillContent.length > 4000 ? '\n...(tr
 ### Checklist for Maintainer
 - [ ] Review SKILL.md content
 - [ ] Add JSON entry to \`marketplace/skills.json\`
-- [ ] Add to \`marketplace/skills.json\`
 
 ---
 **Author:** @${form.authorGithub || 'anonymous'}`;

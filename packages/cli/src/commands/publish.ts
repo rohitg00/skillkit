@@ -60,8 +60,9 @@ export class PublishCommand extends Command {
     }
 
     // Build skill entry
+    const skillSlug = this.slugify(skillName);
     const skillEntry = {
-      id: `${repoInfo.owner}/${repoInfo.repo}/${skillName}`,
+      id: `${repoInfo.owner}/${repoInfo.repo}/${skillSlug}`,
       name: this.formatName(skillName),
       description: frontmatter.description || `Best practices and patterns for ${this.formatName(skillName)}`,
       source: `${repoInfo.owner}/${repoInfo.repo}`,
@@ -93,9 +94,13 @@ export class PublishCommand extends Command {
 
     try {
       // Try to open the URL
-      const openCmd = process.platform === 'darwin' ? 'open' :
-                      process.platform === 'win32' ? 'start' : 'xdg-open';
-      execSync(`${openCmd} "${issueUrl}"`, { stdio: 'ignore' });
+      const openCmd =
+        process.platform === 'darwin'
+          ? `open "${issueUrl}"`
+          : process.platform === 'win32'
+            ? `cmd /c start "" "${issueUrl}"`
+            : `xdg-open "${issueUrl}"`;
+      execSync(openCmd, { stdio: 'ignore' });
 
       console.log(chalk.green('GitHub issue page opened!'));
       console.log(chalk.dim('Review and submit the issue to publish your skill.'));
@@ -143,19 +148,33 @@ export class PublishCommand extends Command {
   }
 
   private parseFrontmatter(content: string): SkillFrontmatter {
-    const match = content.match(/^---\n([\s\S]*?)\n---/);
+    const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
     if (!match) return {};
 
     const frontmatter: SkillFrontmatter = {};
-    const lines = match[1].split('\n');
+    const lines = match[1].split(/\r?\n/);
+    let inTagsList = false;
 
     for (const line of lines) {
-      const [key, ...valueParts] = line.split(':');
-      if (!key || valueParts.length === 0) continue;
+      // Handle multiline tags list
+      if (inTagsList) {
+        const tagMatch = line.match(/^\s*-\s*(.+)$/);
+        if (tagMatch) {
+          frontmatter.tags ??= [];
+          frontmatter.tags.push(tagMatch[1].trim().replace(/^["']|["']$/g, ''));
+          continue;
+        }
+        if (line.trim() === '') continue;
+        inTagsList = false;
+      }
 
-      const value = valueParts.join(':').trim();
+      const colonIdx = line.indexOf(':');
+      if (colonIdx === -1) continue;
 
-      switch (key.trim()) {
+      const key = line.slice(0, colonIdx).trim();
+      const value = line.slice(colonIdx + 1).trim();
+
+      switch (key) {
         case 'name':
           frontmatter.name = value.replace(/^["']|["']$/g, '');
           break;
@@ -166,18 +185,29 @@ export class PublishCommand extends Command {
           frontmatter.version = value.replace(/^["']|["']$/g, '');
           break;
         case 'tags':
-          // Parse YAML array: [tag1, tag2] or - tag1\n- tag2
+          // Parse YAML array: [tag1, tag2] or multiline list
           if (value.startsWith('[')) {
             frontmatter.tags = value
               .slice(1, -1)
               .split(',')
               .map(t => t.trim().replace(/^["']|["']$/g, ''));
+          } else if (value === '') {
+            inTagsList = true;
+            frontmatter.tags = [];
           }
           break;
       }
     }
 
     return frontmatter;
+  }
+
+  private slugify(name: string): string {
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 
   private getRepoInfo(dir: string): { owner: string; repo: string } | null {

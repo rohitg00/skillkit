@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SkillKit Sources",
+  "description": "Schema for curated skill repository sources",
+  "type": "object",
+  "required": ["version", "sources"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Schema reference"
+    },
+    "version": {
+      "type": "integer",
+      "description": "Schema version"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date",
+      "description": "Last update date"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of this file"
+    },
+    "sources": {
+      "type": "array",
+      "description": "List of curated skill sources",
+      "items": {
+        "type": "object",
+        "required": ["source", "name"],
+        "properties": {
+          "source": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$",
+            "description": "GitHub owner/repo format"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name for the source"
+          },
+          "official": {
+            "type": "boolean",
+            "description": "Whether this is an official source"
+          }
+        }
+      }
+    }
+  }
+}
