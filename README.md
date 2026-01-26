@@ -1,8 +1,15 @@
-# SkillKit
+<div align="center">
+
+```
+██ SKILLKIT
+```
+
+**Universal Skills for AI Coding Agents**
 
 [![npm version](https://img.shields.io/npm/v/skillkit.svg)](https://www.npmjs.com/package/skillkit)
 [![npm downloads](https://img.shields.io/npm/dm/skillkit.svg)](https://www.npmjs.com/package/skillkit)
 [![CI](https://github.com/rohitg00/skillkit/actions/workflows/ci.yml/badge.svg)](https://github.com/rohitg00/skillkit/actions/workflows/ci.yml)
+[![Website](https://img.shields.io/badge/Website-skillkit-black)](https://rohitg00.github.io/skillkit/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Supercharge Every AI Coding Agent
@@ -50,16 +57,6 @@ skillkit recommend
 | **Context Sync** | Configure each agent separately | One config, synced everywhere |
 | **Session Memory** | Knowledge dies with each session | Persistent learning across agents |
 | **Skill Testing** | Hope it works | Test framework with assertions |
-
-## What's New in v1.6
-
-- **Recursive Agent Translation**: Batch translate entire directories of agents with `--recursive` flag
-- **Custom AI Sub-Agents**: Create, translate, sync, and validate custom AI sub-agents across 17 coding agents
-- **Methodology Framework**: 5 ready-to-use frameworks (Agile, TDD, DevOps, Security-First, Documentation-First)
-- **Hooks System**: Event-driven skill triggers - auto-activate on commits, file changes, builds
-- **Agent Orchestration**: Multi-agent team coordination with leader/teammate roles
-- **Plan System**: Parse, validate, and execute structured development plans
-- **Slash Commands**: Generate agent-native `/commands` from natural language
 
 ## 5-Minute Quick Start
 
