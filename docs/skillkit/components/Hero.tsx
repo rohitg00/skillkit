@@ -139,17 +139,23 @@ export function Hero(): React.ReactElement {
             <div className="flex flex-col sm:flex-row gap-3 mb-4">
               <div className="relative group">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-zinc-700 to-zinc-800 rounded opacity-0 group-hover:opacity-100 transition-opacity blur"></div>
-                <div className="relative flex items-center bg-black border border-zinc-700 px-3 py-2 group-hover:border-zinc-600 transition-colors">
+                <button
+                  onClick={copyInstall}
+                  className="relative flex items-center bg-black border border-zinc-700 px-3 py-2 group-hover:border-zinc-600 transition-colors w-full sm:w-auto"
+                >
                   <span className="text-zinc-500 mr-2 select-none">$</span>
                   <span className="font-mono text-zinc-100 text-sm">npx skillkit</span>
-                  <button
-                    onClick={copyInstall}
-                    className="ml-3 text-zinc-500 hover:text-white transition-colors"
-                    aria-label="Copy to clipboard"
-                  >
-                    {copied ? CHECK_ICON : COPY_ICON}
-                  </button>
-                </div>
+                  <span className="ml-3 text-zinc-500 group-hover:text-white transition-colors flex items-center gap-1">
+                    {copied ? (
+                      <>
+                        {CHECK_ICON}
+                        <span className="text-xs text-green-400">Copied!</span>
+                      </>
+                    ) : (
+                      COPY_ICON
+                    )}
+                  </span>
+                </button>
               </div>
               <Button variant="outline" onClick={openGitHub}>
                 GITHUB
@@ -157,7 +163,7 @@ export function Hero(): React.ReactElement {
             </div>
           </div>
 
-          <div className="relative animate-fade-in-delay w-full lg:max-w-[420px]">
+          <div className="hidden lg:block relative animate-fade-in-delay w-full lg:max-w-[420px]">
             <div className="absolute -inset-1 bg-gradient-to-r from-zinc-800 via-zinc-700 to-zinc-800 rounded-lg opacity-20 blur-lg"></div>
             <div className="relative border border-zinc-800 bg-black rounded-lg overflow-hidden">
               <div className="flex items-center gap-1.5 px-3 py-2 border-b border-zinc-800 bg-zinc-900/50">
