@@ -28,7 +28,8 @@ export function Footer(): React.ReactElement {
         <a
           href="https://github.com/rohitg00/skillkit"
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
+          aria-label="SkillKit on GitHub"
           className="text-zinc-500 hover:text-white transition-colors"
         >
           {GITHUB_ICON}

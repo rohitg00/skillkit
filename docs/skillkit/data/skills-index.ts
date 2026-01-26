@@ -12,17 +12,21 @@ export interface IndexedSkill {
 
 function buildSkillIndex(): IndexedSkill[] {
   return skillsData.skills.map(skill => {
-    const [owner, repo] = skill.source.split('/');
+    const sourceParts = skill.source?.split('/') || [];
+    const owner = sourceParts[0] || 'unknown';
+    const repo = sourceParts[1] || 'unknown';
     const skillSlug = skill.id.split('/').pop() || skill.name.toLowerCase().replace(/\s+/g, '-');
 
     return {
       id: skill.id,
       name: skill.name,
       description: skill.description || '',
-      source: skill.source,
-      sourceUrl: `https://github.com/${skill.source}`,
-      rawUrl: `https://raw.githubusercontent.com/${owner}/${repo}/main/skills/${skillSlug}/SKILL.md`,
-      tags: skill.tags,
+      source: skill.source || '',
+      sourceUrl: owner !== 'unknown' ? `https://github.com/${skill.source}` : '',
+      rawUrl: owner !== 'unknown' && repo !== 'unknown'
+        ? `https://raw.githubusercontent.com/${owner}/${repo}/main/skills/${skillSlug}/SKILL.md`
+        : '',
+      tags: skill.tags || [],
     };
   });
 }

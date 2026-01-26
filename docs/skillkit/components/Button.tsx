@@ -26,9 +26,16 @@ export function Button({
 }: ButtonProps): React.ReactElement {
   const widthClass = fullWidth ? 'w-full' : '';
 
+  const classes = [
+    BASE_STYLES,
+    VARIANT_STYLES[variant],
+    widthClass,
+    className,
+  ].filter(Boolean).join(' ');
+
   return (
     <button
-      className={`${BASE_STYLES} ${VARIANT_STYLES[variant]} ${widthClass} ${className}`}
+      className={classes}
       disabled={disabled || isLoading}
       {...props}
     >

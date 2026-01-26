@@ -153,14 +153,14 @@ export function SkillSubmitForm(): React.ReactElement {
     setIsDragging(false);
   }, []);
 
-  function processMarkdownFile(file: File): void {
+  const processMarkdownFile = useCallback(function(file: File): void {
     setFileName(file.name);
     const reader = new FileReader();
     reader.onload = (event) => {
       parseSkillContent(event.target?.result as string);
     };
     reader.readAsText(file);
-  }
+  }, []);
 
   const handleDrop = useCallback(function(e: React.DragEvent): void {
     e.preventDefault();
@@ -172,7 +172,7 @@ export function SkillSubmitForm(): React.ReactElement {
     if (mdFile) {
       processMarkdownFile(mdFile);
     }
-  }, []);
+  }, [processMarkdownFile]);
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>): void {
     const file = e.target.files?.[0];
@@ -195,7 +195,9 @@ export function SkillSubmitForm(): React.ReactElement {
   const tagsArray = form.tags.split(',').map(t => t.trim()).filter(Boolean);
 
   function generateIssueUrl(): string {
-    const skillId = `${form.repoOwner}/${form.repoName}/${form.slug}`;
+    const skillId = form.repoOwner && form.repoName
+      ? `${form.repoOwner}/${form.repoName}/${form.slug}`
+      : `community/${form.authorGithub || 'anonymous'}/${form.slug}`;
 
     const jsonEntry = JSON.stringify({
       id: skillId,

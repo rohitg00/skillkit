@@ -72,10 +72,15 @@ const agentSkillSchema: Schema = {
 };
 
 export const generateAgentSkill = async (topic: string): Promise<AgentSkill> => {
+  const sanitizedTopic = topic?.trim().slice(0, 500) || '';
+  if (!sanitizedTopic) {
+    throw new Error("Topic is required");
+  }
+
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",
-      contents: `Create a comprehensive AI coding agent skill for: "${topic}"
+      contents: `Create a comprehensive AI coding agent skill for: "${sanitizedTopic}"
 
 This skill will be used by AI coding assistants (like Claude Code, Cursor, GitHub Copilot) to provide better code suggestions and follow best practices.
 
@@ -116,4 +121,4 @@ Guidelines:
   }
 };
 
-export const generateLearningPath = generateAgentSkill as any;
+export const generateLearningPath: (topic: string) => Promise<AgentSkill> = generateAgentSkill;

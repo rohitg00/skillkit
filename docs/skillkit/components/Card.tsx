@@ -23,7 +23,11 @@ export function Card({
   const clickableClass = onClick ? 'cursor-pointer' : '';
 
   function handleKeyDown(e: React.KeyboardEvent): void {
-    if (onClick && e.key === 'Enter') {
+    if (!onClick) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      if (e.key === ' ') {
+        e.preventDefault();
+      }
       onClick();
     }
   }

@@ -91,14 +91,18 @@ export function Hero(): React.ReactElement {
     return () => clearTimeout(timer);
   }, [visibleLines, typingIndex]);
 
-  function copyInstall(): void {
-    navigator.clipboard.writeText('npx skillkit');
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  async function copyInstall(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText('npx skillkit');
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard API failed, silently ignore
+    }
   }
 
   function openGitHub(): void {
-    window.open('https://github.com/rohitg00/skillkit', '_blank');
+    window.open('https://github.com/rohitg00/skillkit', '_blank', 'noopener,noreferrer');
   }
 
   const isTyping = visibleLines < TERMINAL_LINES.length && TERMINAL_LINES[visibleLines].type === 'cmd';
