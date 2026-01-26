@@ -1,0 +1,89 @@
+name: Skill Submission
+description: Submit a new skill to the SkillKit marketplace
+title: "[Skill Submission] "
+labels: ["skill-submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Submit Your Skill to SkillKit Marketplace
+
+        Thanks for contributing! Please fill out the details below.
+
+        **Tip:** You can also use our [web form](https://rohitg00.github.io/skillkit/) to submit skills.
+
+  - type: input
+    id: skill-name
+    attributes:
+      label: Skill Name
+      description: A descriptive name for your skill
+      placeholder: e.g., React Best Practices
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What does this skill teach AI agents?
+      placeholder: A brief description of your skill...
+    validations:
+      required: true
+
+  - type: input
+    id: repo-owner
+    attributes:
+      label: GitHub Owner
+      description: The owner of the repository (username or organization)
+      placeholder: e.g., your-username
+    validations:
+      required: true
+
+  - type: input
+    id: repo-name
+    attributes:
+      label: Repository Name
+      description: The name of the repository containing the skill
+      placeholder: e.g., my-agent-skills
+    validations:
+      required: true
+
+  - type: input
+    id: skill-path
+    attributes:
+      label: Skill Path
+      description: Path to SKILL.md in the repository
+      placeholder: skills/my-skill/SKILL.md
+    validations:
+      required: true
+
+  - type: input
+    id: tags
+    attributes:
+      label: Tags
+      description: Comma-separated tags for categorization
+      placeholder: react, typescript, frontend
+    validations:
+      required: true
+
+  - type: input
+    id: author-github
+    attributes:
+      label: Author GitHub Username
+      description: Your GitHub username
+      placeholder: your-username
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: Repository is public
+          required: true
+        - label: SKILL.md follows the agentskills.io standard format
+          required: true
+        - label: Skill has been tested with at least one AI agent
+          required: false

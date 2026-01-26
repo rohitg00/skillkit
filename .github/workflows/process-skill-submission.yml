@@ -1,0 +1,160 @@
+name: Process Skill Submission
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  process-submission:
+    if: github.event.label.name == 'approved'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Parse Issue and Update skills.json
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            const issue = context.payload.issue;
+            const body = issue.body;
+
+            // Parse issue body for skill details
+            const parseField = (label) => {
+              const regex = new RegExp(`\\*\\*${label}:\\*\\*\\s*(.+?)(?:\\n|$)`, 'i');
+              const match = body.match(regex);
+              return match ? match[1].trim() : '';
+            };
+
+            const parseCheckbox = (text) => {
+              const regex = new RegExp(`- \\[(x|X)\\]\\s*${text}`, 'i');
+              return regex.test(body);
+            };
+
+            // Extract fields from form-based issue
+            let skillName, description, repoOwner, repoName, skillPath, tags, authorGithub;
+
+            if (body.includes('### Skill Name')) {
+              // YAML form format
+              const sections = body.split('###').filter(s => s.trim());
+              for (const section of sections) {
+                const lines = section.trim().split('\n');
+                const header = lines[0].trim().toLowerCase();
+                const value = lines.slice(1).join('\n').trim();
+
+                if (header.includes('skill name')) skillName = value;
+                if (header.includes('description')) description = value;
+                if (header.includes('github owner')) repoOwner = value;
+                if (header.includes('repository name')) repoName = value;
+                if (header.includes('skill path')) skillPath = value;
+                if (header.includes('tags')) tags = value;
+                if (header.includes('author github')) authorGithub = value;
+              }
+            } else {
+              // Markdown format from web form
+              skillName = parseField('Name');
+              description = parseField('Description');
+              repoOwner = parseField('Owner');
+              repoName = parseField('Repo');
+              skillPath = parseField('Skill Path');
+              tags = parseField('Tags');
+              authorGithub = parseField('Author')?.match(/@(\w+)/)?.[1] || '';
+            }
+
+            if (!skillName || !repoOwner || !repoName) {
+              console.log('Missing required fields');
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: '❌ Could not parse skill details. Missing required fields (name, owner, or repo).'
+              });
+              return;
+            }
+
+            // Generate skill ID
+            const skillSlug = skillName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+            const skillId = `${repoOwner}/${repoName}/${skillSlug}`;
+
+            // Read current skills.json
+            const skillsPath = 'marketplace/skills.json';
+            const skillsData = JSON.parse(fs.readFileSync(skillsPath, 'utf-8'));
+
+            // Check for duplicates
+            if (skillsData.skills.some(s => s.id === skillId)) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `⚠️ Skill with ID \`${skillId}\` already exists in the marketplace.`
+              });
+              return;
+            }
+
+            // Add new skill
+            const newSkill = {
+              id: skillId,
+              name: skillName,
+              description: description || '',
+              source: `${repoOwner}/${repoName}`,
+              tags: tags ? tags.split(',').map(t => t.trim().toLowerCase()) : [],
+              author: authorGithub
+            };
+
+            skillsData.skills.push(newSkill);
+            skillsData.updatedAt = new Date().toISOString().split('T')[0];
+
+            // Write updated skills.json
+            fs.writeFileSync(skillsPath, JSON.stringify(skillsData, null, 2) + '\n');
+
+            // Also update docs copy
+            const docsCopyPath = 'docs/skillkit/data/skills.json';
+            fs.writeFileSync(docsCopyPath, JSON.stringify(skillsData, null, 2) + '\n');
+
+            // Also update core copy
+            const coreCopyPath = 'packages/core/src/marketplace/data/skills.json';
+            fs.writeFileSync(coreCopyPath, JSON.stringify(skillsData, null, 2) + '\n');
+
+            console.log(`Added skill: ${skillId}`);
+
+            // Set output for commit
+            core.setOutput('skill_name', skillName);
+            core.setOutput('skill_id', skillId);
+
+      - name: Commit Changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add marketplace/skills.json docs/skillkit/data/skills.json packages/core/src/marketplace/data/skills.json
+          git commit -m "feat(marketplace): add skill from #${{ github.event.issue.number }}"
+          git push
+
+      - name: Close Issue with Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: `✅ **Skill added to marketplace!**\n\nYour skill has been added and will be available in the next release.\n\nThank you for contributing to SkillKit! 🎉`
+            });
+
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              state: 'closed'
+            });
