@@ -112,7 +112,7 @@ export function Hero(): React.ReactElement {
     <div className="relative border-b border-zinc-800 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-zinc-900/50 to-transparent pointer-events-none"></div>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8 pb-10 relative">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-8 pb-10 relative">
         <div className="hidden lg:block mb-6">
           <pre className="text-zinc-800 text-[8px] leading-none font-mono select-none overflow-hidden animate-pulse">
             {ASCII_LOGO}
@@ -157,7 +157,7 @@ export function Hero(): React.ReactElement {
             </div>
           </div>
 
-          <div className="relative animate-fade-in-delay">
+          <div className="relative animate-fade-in-delay lg:max-w-md xl:max-w-lg">
             <div className="absolute -inset-1 bg-gradient-to-r from-zinc-800 via-zinc-700 to-zinc-800 rounded-lg opacity-20 blur-lg"></div>
             <div className="relative border border-zinc-800 bg-black rounded-lg overflow-hidden">
               <div className="flex items-center gap-1.5 px-3 py-2 border-b border-zinc-800 bg-zinc-900/50">
@@ -166,7 +166,7 @@ export function Hero(): React.ReactElement {
                 <div className="w-2.5 h-2.5 rounded-full bg-zinc-700"></div>
                 <span className="ml-2 text-zinc-500 text-xs font-mono">skillkit</span>
               </div>
-              <div className="p-4 font-mono text-xs min-h-[220px]">
+              <div className="p-4 font-mono text-xs min-h-[200px] max-h-[280px]">
                 {TERMINAL_LINES.slice(0, visibleLines).map((line, index) => (
                   <div key={index} className="mb-1">
                     {line.type === 'cmd' ? (

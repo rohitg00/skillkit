@@ -73,7 +73,7 @@ const COMPARISONS = [
 export function Features(): React.ReactElement {
   return (
     <section id="features" className="py-12 border-b border-zinc-800 bg-surface">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-10">
           <div className="lg:col-span-2">
             <h2 className="text-xl font-bold text-white mb-2 font-mono">Why SkillKit?</h2>

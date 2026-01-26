@@ -11,7 +11,7 @@ export function Footer(): React.ReactElement {
 
   return (
     <footer className="border-t border-border py-8 bg-black">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="mx-auto max-w-6xl px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
           <p className="text-zinc-500 text-xs font-mono">
             &copy; {currentYear} SKILLKIT
