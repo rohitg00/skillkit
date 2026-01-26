@@ -195,7 +195,8 @@ export class PublishCommand extends Command {
             frontmatter.tags = value
               .slice(1, -1)
               .split(',')
-              .map(t => t.trim().replace(/^["']|["']$/g, ''));
+              .map(t => t.trim().replace(/^["']|["']$/g, ''))
+              .filter(t => t.length > 0);
           } else if (value === '') {
             inTagsList = true;
             frontmatter.tags = [];
