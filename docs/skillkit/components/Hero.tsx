@@ -119,7 +119,7 @@ export function Hero(): React.ReactElement {
           </pre>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start max-w-5xl mx-auto">
           <div className="animate-fade-in">
             <div className="inline-flex items-center space-x-2 border border-zinc-800 bg-zinc-900/50 px-2 py-0.5 mb-3 backdrop-blur-sm">
               <span className="flex h-1.5 w-1.5 bg-white rounded-full"></span>
@@ -157,7 +157,7 @@ export function Hero(): React.ReactElement {
             </div>
           </div>
 
-          <div className="relative animate-fade-in-delay lg:max-w-md xl:max-w-lg">
+          <div className="relative animate-fade-in-delay w-full lg:max-w-[420px]">
             <div className="absolute -inset-1 bg-gradient-to-r from-zinc-800 via-zinc-700 to-zinc-800 rounded-lg opacity-20 blur-lg"></div>
             <div className="relative border border-zinc-800 bg-black rounded-lg overflow-hidden">
               <div className="flex items-center gap-1.5 px-3 py-2 border-b border-zinc-800 bg-zinc-900/50">
