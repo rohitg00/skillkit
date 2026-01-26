@@ -267,8 +267,10 @@ ${form.skillContent.slice(0, 4000)}${form.skillContent.length > 4000 ? '\n...(tr
   }
 
   function handleSubmitClick(e: React.MouseEvent): void {
-    if (!isValid) {
-      e.preventDefault();
+    e.preventDefault();
+    if (isValid) {
+      const url = generateIssueUrl();
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   }
 
@@ -527,11 +529,10 @@ ${form.skillContent.slice(0, 4000)}${form.skillContent.length > 4000 ? '\n...(tr
             </div>
           )}
 
-          <a
-            href={isValid ? generateIssueUrl() : '#'}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
             onClick={handleSubmitClick}
+            disabled={!isValid}
             className={`flex items-center justify-center gap-3 w-full py-4 font-mono text-sm transition-all ${
               isValid
                 ? 'bg-white text-black hover:bg-zinc-200'
@@ -540,7 +541,7 @@ ${form.skillContent.slice(0, 4000)}${form.skillContent.length > 4000 ? '\n...(tr
           >
             {GITHUB_ICON}
             {isImported ? 'Import to marketplace' : 'Publish skill'}
-          </a>
+          </button>
 
           <p className="text-xs text-zinc-600 text-center font-mono">
             {isImported
