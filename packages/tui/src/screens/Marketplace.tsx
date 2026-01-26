@@ -47,9 +47,19 @@ export function Marketplace({ onNavigate, cols = 80, rows = 24 }: MarketplacePro
     setSelectedIndex(prev => Math.max(0, Math.min(prev + delta, visibleFeatured.length - 1)));
   }, [visibleFeatured.length]);
 
+  const handleInstall = useCallback(() => {
+    const item = visibleFeatured[selectedIndex];
+    if (item) {
+      // Navigate to installed after "installing"
+      onNavigate('installed');
+    }
+  }, [selectedIndex, visibleFeatured, onNavigate]);
+
   useKeyboard((key: { name?: string }) => {
     if (key.name === 'j' || key.name === 'down') handleKeyNav(1);
     else if (key.name === 'k' || key.name === 'up') handleKeyNav(-1);
+    else if (key.name === 'return') handleInstall();
+    else if (key.name === 'b') onNavigate('browse');
     else if (key.name === 'escape') onNavigate('home');
   });
 

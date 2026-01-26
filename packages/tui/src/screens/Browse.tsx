@@ -66,6 +66,13 @@ export function Browse({ onNavigate, cols = 80, rows = 24 }: BrowseProps) {
     if (key.name === 'j' || key.name === 'down') handleKeyNav(1);
     else if (key.name === 'k' || key.name === 'up') handleKeyNav(-1);
     else if (key.sequence === '/') setSearchMode(true);
+    else if (key.name === 'return') {
+      const repo = filteredRepos[selectedIndex];
+      if (repo) {
+        // Open/view the selected repo (navigate to installed to see skills from this repo)
+        onNavigate('installed');
+      }
+    }
     else if (key.name === 'escape') onNavigate('home');
   });
 
@@ -134,10 +141,11 @@ export function Browse({ onNavigate, cols = 80, rows = 24 }: BrowseProps) {
                 const actualIdx = startIdx + idx;
                 const selected = actualIdx === selectedIndex;
                 const indicator = selected ? '▸' : ' ';
-                // Truncate source if needed
-                const maxLen = contentWidth - repo.name.length - 6;
-                const displaySource = repo.source.length > maxLen
-                  ? repo.source.slice(0, maxLen - 3) + '...'
+                // Truncate source if needed - clamp to avoid negative slicing
+                const available = Math.max(0, contentWidth - repo.name.length - 6);
+                const safeSlice = Math.max(0, available - 3);
+                const displaySource = available > 0 && repo.source.length > available
+                  ? repo.source.slice(0, safeSlice) + '...'
                   : repo.source;
                 return (
                   <box key={repo.source} flexDirection="row">

@@ -89,6 +89,7 @@ export function Installed({ onNavigate, cols = 80, rows = 24 }: InstalledProps) 
     else if (key.name === 'k' || key.name === 'up') handleKeyNav(-1);
     else if (key.sequence === '/') setSearchMode(true);
     else if (key.name === 'return') handleToggle();
+    else if (key.name === 'd') handleToggle(); // 'd' disables (same as toggle)
     else if (key.name === 'escape') onNavigate('home');
   });
 
@@ -113,8 +114,8 @@ export function Installed({ onNavigate, cols = 80, rows = 24 }: InstalledProps) 
   const totalCount = skills.skills.length;
 
   const shortcuts = isCompact
-    ? 'j/k nav   enter toggle   d delete   esc back'
-    : 'j/k navigate   enter toggle   d delete   esc back';
+    ? 'j/k nav   enter toggle   d disable   esc back'
+    : 'j/k navigate   enter toggle   d disable   esc back';
 
   return (
     <box flexDirection="column" padding={1}>

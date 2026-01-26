@@ -69,8 +69,8 @@ export function Settings({ onNavigate, cols = 80 }: SettingsProps) {
   );
 
   const shortcuts = isCompact
-    ? 'j/k nav   enter edit   r reset   esc back'
-    : 'j/k navigate   enter edit   r reset defaults   esc back';
+    ? 'j/k nav   enter toggle   r reset   esc back'
+    : 'j/k navigate   enter toggle   r reset defaults   esc back';
 
   return (
     <box flexDirection="column" padding={1}>

@@ -3,7 +3,7 @@
  * Cinematic ASCII art intro with elegant animations
  * Premium terminal experience
  */
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { terminalColors } from '../theme/colors.js';
 import { getVersion } from '../utils/helpers.js';
 
@@ -90,8 +90,8 @@ export function Splash({ onComplete, duration = 3500 }: SplashProps) {
   const currentLogo = useSmallLogo ? LOGO_SMALL : (LOGO_FRAMES[Math.min(frame, 4)] || LOGO_FRAMES[4]);
   const maxWidth = Math.max(...currentLogo.map(l => l.length));
 
-  // Generate ambient particles
-  const generateParticles = useMemo(() => {
+  // Generate ambient particles - returns fresh randomized string each call
+  const generateParticles = useCallback(() => {
     const chars = ['·', '∙', '•', '○', '◦', '◌', '◍', '◎'];
     return Array(cols).fill(0).map(() =>
       Math.random() > 0.97 ? chars[Math.floor(Math.random() * chars.length)] : ' '
@@ -147,7 +147,7 @@ export function Splash({ onComplete, duration = 3500 }: SplashProps) {
       setParticles(prev => {
         const newParticles = [...prev];
         if (newParticles.length > 3) newParticles.shift();
-        newParticles.push(generateParticles);
+        newParticles.push(generateParticles());
         return newParticles;
       });
     }, 150);

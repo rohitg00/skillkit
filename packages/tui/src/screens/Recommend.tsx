@@ -73,9 +73,19 @@ export function Recommend({ onNavigate, cols = 80, rows = 24 }: RecommendProps) 
     setSelectedIndex(0);
   }, []);
 
+  const handleInstall = useCallback(() => {
+    if (analyzing) return;
+    const rec = visibleRecs[selectedIndex];
+    if (rec) {
+      // Navigate to installed after "installing"
+      onNavigate('installed');
+    }
+  }, [analyzing, selectedIndex, visibleRecs, onNavigate]);
+
   useKeyboard((key: { name?: string }) => {
     if (key.name === 'j' || key.name === 'down') handleKeyNav(1);
     else if (key.name === 'k' || key.name === 'up') handleKeyNav(-1);
+    else if (key.name === 'return') handleInstall();
     else if (key.name === 'r') handleRefresh();
     else if (key.name === 'escape') onNavigate('home');
   });

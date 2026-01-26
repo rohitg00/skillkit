@@ -2,7 +2,7 @@
  * Sync Screen - Cross-Agent Synchronization
  * Clean monochromatic design
  */
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useKeyboard } from '@opentui/react';
 import { type Screen } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
@@ -21,9 +21,19 @@ export function Sync({ onNavigate, cols = 80, rows = 24 }: SyncProps) {
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'done'>('idle');
   const [spinnerFrame, setSpinnerFrame] = useState(0);
   const [animPhase, setAnimPhase] = useState(0);
+  const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isCompact = cols < 60;
   const contentWidth = Math.max(1, Math.min(cols - 4, 60));
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (syncTimeoutRef.current) {
+        clearTimeout(syncTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Entrance animation
   useEffect(() => {
@@ -61,15 +71,22 @@ export function Sync({ onNavigate, cols = 80, rows = 24 }: SyncProps) {
 
   const handleSync = useCallback(() => {
     if (syncStatus === 'syncing') return;
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     setSyncStatus('syncing');
-    setTimeout(() => setSyncStatus('done'), 1500);
+    syncTimeoutRef.current = setTimeout(() => setSyncStatus('done'), 1500);
   }, [syncStatus]);
 
   const handleSyncAll = useCallback(() => {
     if (syncStatus === 'syncing') return;
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     setSyncStatus('syncing');
-    setTimeout(() => setSyncStatus('done'), 2000);
+    syncTimeoutRef.current = setTimeout(() => setSyncStatus('done'), 2000);
   }, [syncStatus]);
+
+  // Clamp selectedIndex when agents list shrinks
+  useEffect(() => {
+    setSelectedIndex(prev => Math.max(0, Math.min(prev, agents.length - 1)));
+  }, [agents.length]);
 
   useKeyboard((key: { name?: string }) => {
     if (key.name === 'j' || key.name === 'down') handleKeyNav(1);

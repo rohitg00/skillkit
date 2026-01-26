@@ -53,8 +53,8 @@ export function Workflow({ onNavigate, cols = 80, rows = 24 }: WorkflowProps) {
   );
 
   const shortcuts = isCompact
-    ? 'j/k nav   enter run   n new   e edit   esc back'
-    : 'j/k navigate   enter run   n new   e edit   d delete   esc back';
+    ? 'j/k nav   esc back'
+    : 'j/k navigate   esc back';
 
   return (
     <box flexDirection="column" padding={1}>
