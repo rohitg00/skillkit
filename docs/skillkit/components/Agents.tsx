@@ -190,11 +190,12 @@ export function Agents(): React.ReactElement {
         </p>
       </div>
 
-      <div className="relative">
-        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-black to-transparent z-10"></div>
-        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-black to-transparent z-10"></div>
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div className="relative overflow-hidden">
+          <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-black to-transparent z-10"></div>
+          <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-black to-transparent z-10"></div>
 
-        <div className="flex animate-scroll hover:[animation-play-state:paused]">
+          <div className="flex animate-scroll hover:[animation-play-state:paused]">
           {duplicatedAgents.map((agent, index) => (
             <a
               key={`${agent.name}-${index}`}
@@ -212,6 +213,7 @@ export function Agents(): React.ReactElement {
               </span>
             </a>
           ))}
+          </div>
         </div>
       </div>
 
