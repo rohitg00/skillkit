@@ -12,6 +12,12 @@ const GITHUB_ICON = (
   </svg>
 );
 
+const NPM_ICON = (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M0 7.334v8h6.666v1.332H12v-1.332h12v-8H0zm6.666 6.664H5.334v-4H3.999v4H1.335V8.667h5.331v5.331zm4 0v1.336H8.001V8.667h5.334v5.332h-2.669v-.001zm12.001 0h-1.33v-4h-1.336v4h-1.335v-4h-1.33v4h-2.671V8.667h8.002v5.331zM10.665 10H12v2.667h-1.335V10z" />
+  </svg>
+);
+
 function scrollToTop(e: React.MouseEvent): void {
   e.preventDefault();
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -29,6 +35,15 @@ export default function App(): React.ReactElement {
             </a>
             <div className="flex items-center gap-2 sm:gap-4">
               <a
+                href="https://www.npmjs.com/package/skillkit"
+                target="_blank"
+                rel="noreferrer"
+                className="text-zinc-400 hover:text-red-500 transition-colors p-2"
+                aria-label="npm"
+              >
+                {NPM_ICON}
+              </a>
+              <a
                 href="https://github.com/rohitg00/skillkit"
                 target="_blank"
                 rel="noreferrer"
@@ -37,10 +52,6 @@ export default function App(): React.ReactElement {
               >
                 {GITHUB_ICON}
               </a>
-              <div className="hidden sm:flex items-center bg-zinc-900 border border-zinc-800 px-3 py-1.5">
-                <span className="text-zinc-500 mr-2 text-xs">$</span>
-                <code className="text-zinc-300 text-xs font-mono">npx skillkit@latest</code>
-              </div>
             </div>
           </div>
         </div>
