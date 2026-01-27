@@ -138,15 +138,33 @@ describe('Onboarding Module', () => {
 
   describe('preferences', () => {
     let testDir: string;
+    let originalHome: string | undefined;
+    let originalUserProfile: string | undefined;
 
     beforeEach(() => {
+      vi.resetModules();
       testDir = mkdtempSync(join(tmpdir(), 'skillkit-prefs-test-'));
+      originalHome = process.env.HOME;
+      originalUserProfile = process.env.USERPROFILE;
+      process.env.HOME = testDir;
+      process.env.USERPROFILE = testDir;
     });
 
     afterEach(() => {
       if (existsSync(testDir)) {
         rmSync(testDir, { recursive: true, force: true });
       }
+      if (originalHome === undefined) {
+        delete process.env.HOME;
+      } else {
+        process.env.HOME = originalHome;
+      }
+      if (originalUserProfile === undefined) {
+        delete process.env.USERPROFILE;
+      } else {
+        process.env.USERPROFILE = originalUserProfile;
+      }
+      vi.resetModules();
     });
 
     it('should export preference functions', async () => {

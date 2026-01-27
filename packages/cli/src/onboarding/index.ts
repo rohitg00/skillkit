@@ -108,9 +108,13 @@ export async function runOnboarding(detectedAgents: string[]): Promise<{
 }> {
   welcome();
 
-  if (detectedAgents.length > 0) {
-    prompts.log(`Detected ${detectedAgents.length} agent${detectedAgents.length !== 1 ? 's' : ''}: ${detectedAgents.map(formatAgent).join(', ')}`);
+  if (detectedAgents.length === 0) {
+    prompts.warn('No agents detected');
+    completeOnboarding();
+    return { selectedAgents: [], cancelled: false };
   }
+
+  prompts.log(`Detected ${detectedAgents.length} agent${detectedAgents.length !== 1 ? 's' : ''}: ${detectedAgents.map(formatAgent).join(', ')}`);
 
   const agentResult = await prompts.agentMultiselect({
     message: 'Select agents to configure',

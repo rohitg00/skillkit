@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, cpSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, cpSync, rmSync, symlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { Command, Option } from 'clipanion';
 import { detectProvider, isLocalPath, getProvider } from '@skillkit/core';
@@ -268,6 +268,7 @@ export class InstallCommand extends Command {
         const skillName = skill.name;
         const sourcePath = skill.path;
         const installedAgents: string[] = [];
+        let primaryPath: string | null = null;
 
         for (const agentType of targetAgents) {
           const adapter = getAdapter(agentType);
@@ -292,14 +293,24 @@ export class InstallCommand extends Command {
             continue;
           }
 
-          s.start(`Installing ${skillName} to ${adapter.name}...`);
+          const isSymlinkMode = installMethod === 'symlink' && targetAgents.length > 1;
+          const useSymlink = isSymlinkMode && primaryPath !== null;
+
+          s.start(`Installing ${skillName} to ${adapter.name}${useSymlink ? ' (symlink)' : ''}...`);
 
           try {
             if (existsSync(targetPath)) {
               rmSync(targetPath, { recursive: true, force: true });
             }
 
-            cpSync(sourcePath, targetPath, { recursive: true, dereference: true });
+            if (useSymlink && primaryPath) {
+              symlinkSync(primaryPath, targetPath, 'dir');
+            } else {
+              cpSync(sourcePath, targetPath, { recursive: true, dereference: true });
+              if (isSymlinkMode && primaryPath === null) {
+                primaryPath = targetPath;
+              }
+            }
 
             const metadata: SkillMetadata = {
               name: skillName,
@@ -313,7 +324,7 @@ export class InstallCommand extends Command {
             saveSkillMetadata(targetPath, metadata);
 
             installedAgents.push(agentType);
-            s.stop(`Installed ${skillName} to ${adapter.name}`);
+            s.stop(`Installed ${skillName} to ${adapter.name}${useSymlink ? ' (symlink)' : ''}`);
           } catch (err) {
             s.stop(colors.error(`Failed to install ${skillName} to ${adapter.name}`));
             console.log(colors.muted(err instanceof Error ? err.message : String(err)));

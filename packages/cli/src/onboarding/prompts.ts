@@ -50,7 +50,7 @@ export async function text(options: {
   message: string;
   placeholder?: string;
   defaultValue?: string;
-  validate?: (value: string) => string | void;
+  validate?: (value: string) => string | Error | undefined;
 }): Promise<string | symbol> {
   return clack.text({
     message: options.message,
@@ -62,7 +62,7 @@ export async function text(options: {
 
 export async function password(options: {
   message: string;
-  validate?: (value: string) => string | void;
+  validate?: (value: string) => string | Error | undefined;
 }): Promise<string | symbol> {
   return clack.password({
     message: options.message,

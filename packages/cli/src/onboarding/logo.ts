@@ -80,6 +80,7 @@ export function getHeader(title: string): string {
 }
 
 export function getDivider(width?: number): string {
-  const w = width || Math.min(getTerminalWidth() - 4, 60);
+  const fallback = Math.min(getTerminalWidth() - 4, 60);
+  const w = Math.max(1, width ?? fallback);
   return pc.dim(symbols.horizontalLine.repeat(w));
 }

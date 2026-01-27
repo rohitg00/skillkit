@@ -109,9 +109,12 @@ export function formatAgentIconsInline(agents: string[]): string {
 }
 
 export function progressBar(value: number, total: number, width: number = 6): string {
-  const filled = Math.round((value / total) * width);
-  const empty = width - filled;
-  return symbols.progressFull.repeat(filled) + symbols.progressEmpty.repeat(empty);
+  if (width <= 0 || total <= 0) return '';
+  const clampedValue = Math.min(Math.max(value, 0), total);
+  const filled = Math.round((clampedValue / total) * width);
+  const safeFilled = Math.min(Math.max(filled, 0), width);
+  const empty = width - safeFilled;
+  return symbols.progressFull.repeat(safeFilled) + symbols.progressEmpty.repeat(empty);
 }
 
 export function formatScore(score: number): string {
