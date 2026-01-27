@@ -85,9 +85,10 @@ export async function select<T extends string>(options: {
   options: Array<{ value: T; label: string; hint?: string }>;
   initialValue?: T;
 }): Promise<T | symbol> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return clack.select({
     message: options.message,
-    options: options.options as { value: T; label?: string; hint?: string }[],
+    options: options.options as any,
     initialValue: options.initialValue,
   });
 }
@@ -151,9 +152,10 @@ export async function groupMultiselect<T extends string>(options: {
   options: Record<string, Array<{ value: T; label: string; hint?: string }>>;
   required?: boolean;
 }): Promise<T[] | symbol> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return clack.groupMultiselect({
     message: options.message,
-    options: options.options as Record<string, { value: T; label?: string; hint?: string }[]>,
+    options: options.options as any,
     required: options.required,
   });
 }
@@ -221,7 +223,8 @@ export async function tasks(
     enabled?: boolean;
   }>
 ): Promise<void> {
-  return clack.tasks(taskList.filter((t) => t.enabled !== false));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return clack.tasks(taskList.filter((t) => t.enabled !== false) as any);
 }
 
 export function summaryBox(options: {
