@@ -1,6 +1,6 @@
 {
   "name": "skillkit",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "description": "Supercharge AI coding agents with portable skills. Install, translate, and share skills across Claude Code, Cursor, Codex, Copilot & 13 more",
   "type": "module",
   "bin": {
