@@ -81,12 +81,26 @@ jobs:
       - name: Publish main skillkit package to GitHub Packages
         working-directory: apps/skillkit
         run: |
-          # Create a temporary package.json with GitHub Packages scope
+          # Create a temporary package.json with GitHub Packages scope and resolved dependencies
           node -e "
+            const fs = require('fs');
+            const path = require('path');
             const pkg = require('./package.json');
+
             pkg.name = '@rohitg00/skillkit';
             pkg.publishConfig = { registry: 'https://npm.pkg.github.com' };
-            require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+
+            // Resolve workspace:* dependencies to actual versions
+            for (const [dep, version] of Object.entries(pkg.dependencies || {})) {
+              if (version.startsWith('workspace:')) {
+                const depName = dep.replace('@skillkit/', '');
+                const depPkgPath = path.join('..', '..', 'packages', depName, 'package.json');
+                const depPkg = JSON.parse(fs.readFileSync(depPkgPath, 'utf8'));
+                pkg.dependencies[dep] = depPkg.version;
+              }
+            }
+
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
           "
           npm publish
         env:
