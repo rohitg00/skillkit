@@ -87,7 +87,7 @@ export async function select<T extends string>(options: {
 }): Promise<T | symbol> {
   return clack.select({
     message: options.message,
-    options: options.options,
+    options: options.options as { value: T; label?: string; hint?: string }[],
     initialValue: options.initialValue,
   });
 }
@@ -153,7 +153,7 @@ export async function groupMultiselect<T extends string>(options: {
 }): Promise<T[] | symbol> {
   return clack.groupMultiselect({
     message: options.message,
-    options: options.options,
+    options: options.options as Record<string, { value: T; label?: string; hint?: string }[]>,
     required: options.required,
   });
 }
@@ -214,10 +214,10 @@ export async function selectInstallMethod(options: {
   });
 }
 
-export async function tasks<T>(
+export async function tasks(
   taskList: Array<{
     title: string;
-    task: (message: (msg: string) => void) => Promise<T>;
+    task: (message: (msg: string) => void) => Promise<string | void>;
     enabled?: boolean;
   }>
 ): Promise<void> {
