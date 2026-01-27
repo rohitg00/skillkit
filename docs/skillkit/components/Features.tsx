@@ -73,8 +73,8 @@ const COMPARISONS = [
 export function Features(): React.ReactElement {
   return (
     <section id="features" className="py-12 border-b border-zinc-800 bg-surface">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8 mb-10 max-w-5xl mx-auto">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8 mb-10">
           <div className="lg:col-span-2">
             <h2 className="text-xl font-bold text-white mb-2 font-mono">Why SkillKit?</h2>
             <p className="text-zinc-500 font-mono text-sm mb-6">
@@ -118,7 +118,7 @@ export function Features(): React.ReactElement {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {FEATURES.map((feature, index) => (
             <div
               key={feature.title}

@@ -27,7 +27,7 @@ export default function App(): React.ReactElement {
   return (
     <div className="min-h-screen bg-background text-zinc-100 font-sans selection:bg-white selection:text-black">
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-zinc-800 bg-background/90 backdrop-blur-md">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-14 items-center justify-between">
             <a href="#" onClick={scrollToTop} className="flex items-center gap-2 cursor-pointer">
               <div className="w-4 h-4 bg-white"></div>

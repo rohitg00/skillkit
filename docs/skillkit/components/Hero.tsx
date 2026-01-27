@@ -112,19 +112,18 @@ export function Hero(): React.ReactElement {
     <div className="relative border-b border-zinc-800 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-zinc-900/50 to-transparent pointer-events-none"></div>
 
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-8 pb-10 relative">
-        <div className="max-w-5xl mx-auto">
-          <div className="hidden lg:block mb-6 overflow-hidden">
-            <pre className="text-zinc-800 text-[8px] leading-none font-mono select-none animate-pulse">
-              {ASCII_LOGO}
-            </pre>
-          </div>
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-8 pb-10 relative">
+        <div className="hidden lg:block mb-6 overflow-hidden">
+          <pre className="text-zinc-800 text-[8px] leading-none font-mono select-none animate-pulse">
+            {ASCII_LOGO}
+          </pre>
+        </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
           <div className="animate-fade-in">
             <div className="inline-flex items-center space-x-2 border border-zinc-800 bg-zinc-900/50 px-2 py-0.5 mb-3 backdrop-blur-sm">
               <span className="flex h-1.5 w-1.5 bg-white rounded-full"></span>
-              <span className="text-xs font-mono text-zinc-400">v1.7.0</span>
+              <span className="text-xs font-mono text-zinc-400">v1.7.1</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white mb-3 font-mono">
@@ -161,7 +160,7 @@ export function Hero(): React.ReactElement {
             </div>
           </div>
 
-          <div className="hidden lg:block relative animate-fade-in-delay w-full lg:max-w-[420px]">
+          <div className="hidden lg:block relative animate-fade-in-delay w-full">
             <div className="absolute -inset-1 bg-gradient-to-r from-zinc-800 via-zinc-700 to-zinc-800 rounded-lg opacity-20 blur-lg"></div>
             <div className="relative border border-zinc-800 bg-black rounded-lg overflow-hidden">
               <div className="flex items-center gap-1.5 px-3 py-2 border-b border-zinc-800 bg-zinc-900/50">
@@ -201,7 +200,6 @@ export function Hero(): React.ReactElement {
                 )}
               </div>
             </div>
-          </div>
           </div>
         </div>
       </div>
