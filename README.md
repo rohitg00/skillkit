@@ -9,6 +9,7 @@
 
 [![npm version](https://img.shields.io/npm/v/skillkit.svg)](https://www.npmjs.com/package/skillkit)
 [![npm downloads](https://img.shields.io/npm/dm/skillkit.svg)](https://www.npmjs.com/package/skillkit)
+[![GitHub Package](https://img.shields.io/badge/GitHub%20Package-@rohitg00/skillkit-blue?logo=github)](https://github.com/rohitg00/skillkit/pkgs/npm/skillkit)
 [![CI](https://github.com/rohitg00/skillkit/actions/workflows/ci.yml/badge.svg)](https://github.com/rohitg00/skillkit/actions/workflows/ci.yml)
 [![Website](https://img.shields.io/badge/Website-skillkit-black)](https://rohitg00.github.io/skillkit/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -424,6 +425,9 @@ bun add -g skillkit
 
 # npx (no install)
 npx skillkit <command>
+
+# GitHub Packages (alternative registry)
+npm install -g @rohitg00/skillkit --registry=https://npm.pkg.github.com
 ```
 
 ## Configuration
@@ -454,3 +458,4 @@ Contributions welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md
 - [Agent Skills Specification](https://agentskills.io/specification)
 - [GitHub Repository](https://github.com/rohitg00/skillkit)
 - [NPM Package](https://www.npmjs.com/package/skillkit)
+- [GitHub Package](https://github.com/rohitg00/skillkit/pkgs/npm/skillkit)
