@@ -1,14 +1,18 @@
 import { Command, Option } from 'clipanion';
-import chalk from 'chalk';
-import ora from 'ora';
 import {
   createMarketplaceAggregator,
   type MarketplaceSearchOptions,
 } from '@skillkit/core';
+import {
+  header,
+  colors,
+  spinner,
+  warn,
+  showMarketplaceInfo,
+  showSkillList,
+  progressBar,
+} from '../onboarding/index.js';
 
-/**
- * Marketplace command - browse and install skills from the marketplace
- */
 export class MarketplaceCommand extends Command {
   static override paths = [['marketplace'], ['market'], ['mp']];
 
@@ -51,6 +55,10 @@ export class MarketplaceCommand extends Command {
     description: 'Output as JSON',
   });
 
+  quiet = Option.Boolean('--quiet,-q', false, {
+    description: 'Minimal output',
+  });
+
   async execute(): Promise<number> {
     const marketplace = createMarketplaceAggregator();
 
@@ -73,11 +81,16 @@ export class MarketplaceCommand extends Command {
   }
 
   private async browseMarketplace(marketplace: ReturnType<typeof createMarketplaceAggregator>): Promise<number> {
-    const spinner = ora('Loading marketplace...').start();
+    if (!this.quiet && !this.json) {
+      header('Skill Marketplace');
+    }
+
+    const s = spinner();
+    s.start('Loading marketplace...');
 
     try {
       const index = await marketplace.getIndex();
-      spinner.stop();
+      s.stop('Marketplace loaded');
 
       if (this.json) {
         console.log(JSON.stringify({
@@ -88,31 +101,31 @@ export class MarketplaceCommand extends Command {
         return 0;
       }
 
-      console.log(chalk.bold('Skill Marketplace\n'));
-      console.log(`Total skills: ${chalk.cyan(index.totalCount)}`);
-      console.log(`Sources: ${chalk.cyan(index.sources.length)}`);
-      console.log(`Last updated: ${chalk.dim(new Date(index.updatedAt).toLocaleString())}\n`);
+      // Show marketplace info
+      showMarketplaceInfo({
+        totalSkills: index.totalCount,
+        sourceCount: index.sources.length,
+        lastUpdated: index.updatedAt,
+      });
 
-      // Show sample skills
-      console.log(chalk.bold('Featured Skills:\n'));
+      // Show featured skills
+      console.log(colors.bold('Featured Skills:'));
+      console.log('');
+
       const featured = index.skills.slice(0, 10);
+      showSkillList(featured.map(skill => ({
+        name: skill.name,
+        description: skill.description,
+        source: skill.source.name,
+      })));
 
-      for (const skill of featured) {
-        console.log(`  ${chalk.cyan(skill.name)}`);
-        if (skill.description) {
-          console.log(`  ${chalk.dim(skill.description.slice(0, 60))}${skill.description.length > 60 ? '...' : ''}`);
-        }
-        console.log(`  ${chalk.dim(`Source: ${skill.source.name}`)}`);
-        console.log();
-      }
-
-      console.log(chalk.dim('Use "skillkit marketplace search <query>" to search for skills.'));
-      console.log(chalk.dim('Use "skillkit marketplace tags" to see popular tags.'));
+      console.log(colors.muted('Use "skillkit marketplace search <query>" to search for skills.'));
+      console.log(colors.muted('Use "skillkit marketplace tags" to see popular tags.'));
 
       return 0;
-    } catch (error) {
-      spinner.fail('Failed to load marketplace');
-      console.error(chalk.red(error instanceof Error ? error.message : String(error)));
+    } catch (err) {
+      s.stop(colors.error('Failed to load marketplace'));
+      console.log(colors.muted(err instanceof Error ? err.message : String(err)));
       return 1;
     }
   }
@@ -120,12 +133,16 @@ export class MarketplaceCommand extends Command {
   private async searchSkills(marketplace: ReturnType<typeof createMarketplaceAggregator>): Promise<number> {
     const query = this.query || this.action;
 
+    if (!this.quiet && !this.json) {
+      header('Search Skills');
+    }
+
     // Validate and parse limit
     let limit = 20;
     if (this.limit) {
       const parsed = parseInt(this.limit, 10);
       if (isNaN(parsed) || parsed <= 0) {
-        console.error(chalk.red('Invalid --limit value. Must be a positive number.'));
+        console.log(colors.error('Invalid --limit value. Must be a positive number.'));
         return 1;
       }
       limit = parsed;
@@ -137,7 +154,8 @@ export class MarketplaceCommand extends Command {
       .map((t) => t.trim())
       .filter((t) => t.length > 0);
 
-    const spinner = ora(`Searching for "${query}"...`).start();
+    const s = spinner();
+    s.start(`Searching for "${query}"...`);
 
     try {
       const options: MarketplaceSearchOptions = {
@@ -148,7 +166,7 @@ export class MarketplaceCommand extends Command {
       };
 
       const result = await marketplace.search(options);
-      spinner.stop();
+      s.stop(`Found ${result.total} skill(s)`);
 
       if (this.json) {
         console.log(JSON.stringify(result));
@@ -156,77 +174,94 @@ export class MarketplaceCommand extends Command {
       }
 
       if (result.skills.length === 0) {
-        console.log(chalk.yellow(`No skills found${query ? ` matching "${query}"` : ''}.`));
+        warn(`No skills found${query ? ` matching "${query}"` : ''}.`);
         return 0;
       }
 
-      console.log(chalk.bold(`Found ${result.total} skill(s):\n`));
+      console.log('');
+      console.log(colors.bold(`Found ${result.total} skill(s):`));
+      console.log('');
 
-      for (const skill of result.skills) {
-        console.log(`${chalk.cyan(skill.name)} ${chalk.dim(`(${skill.source.name})`)}`);
-        if (skill.description) {
-          console.log(`  ${skill.description}`);
-        }
-        if (skill.tags.length > 0) {
-          console.log(`  Tags: ${chalk.dim(skill.tags.join(', '))}`);
-        }
-        console.log();
-      }
+      showSkillList(result.skills.map(skill => ({
+        name: skill.name,
+        description: skill.description,
+        source: skill.source.name,
+      })));
 
       if (result.total > result.skills.length) {
-        console.log(chalk.dim(`Showing ${result.skills.length} of ${result.total} results. Use --limit to see more.`));
+        console.log(colors.muted(`Showing ${result.skills.length} of ${result.total} results. Use --limit to see more.`));
       }
 
       return 0;
-    } catch (error) {
-      spinner.fail('Search failed');
-      console.error(chalk.red(error instanceof Error ? error.message : String(error)));
+    } catch (err) {
+      s.stop(colors.error('Search failed'));
+      console.log(colors.muted(err instanceof Error ? err.message : String(err)));
       return 1;
     }
   }
 
   private async refreshIndex(marketplace: ReturnType<typeof createMarketplaceAggregator>): Promise<number> {
-    const spinner = ora('Refreshing marketplace index...').start();
+    if (!this.quiet) {
+      header('Refresh Marketplace');
+    }
+
+    const s = spinner();
+    s.start('Refreshing marketplace index...');
 
     try {
       const index = await marketplace.refresh();
-      spinner.succeed(`Marketplace refreshed: ${index.totalCount} skills from ${index.sources.length} sources`);
+      s.stop(`Refreshed: ${index.totalCount} skills from ${index.sources.length} sources`);
       return 0;
-    } catch (error) {
-      spinner.fail('Refresh failed');
-      console.error(chalk.red(error instanceof Error ? error.message : String(error)));
+    } catch (err) {
+      s.stop(colors.error('Refresh failed'));
+      console.log(colors.muted(err instanceof Error ? err.message : String(err)));
       return 1;
     }
   }
 
   private async showTags(marketplace: ReturnType<typeof createMarketplaceAggregator>): Promise<number> {
-    const spinner = ora('Loading tags...').start();
+    if (!this.quiet && !this.json) {
+      header('Popular Tags');
+    }
+
+    const s = spinner();
+    s.start('Loading tags...');
 
     try {
       const tags = await marketplace.getPopularTags(30);
-      spinner.stop();
+      s.stop('Tags loaded');
 
       if (this.json) {
         console.log(JSON.stringify(tags));
         return 0;
       }
 
-      console.log(chalk.bold('Popular Tags:\n'));
+      console.log('');
+      console.log(colors.bold('Popular Tags:'));
+      console.log('');
+
+      const maxCount = Math.max(...tags.map(t => t.count));
 
       for (const { tag, count } of tags) {
-        const bar = '█'.repeat(Math.min(count, 20));
-        console.log(`  ${tag.padEnd(15)} ${chalk.cyan(bar)} ${count}`);
+        const bar = progressBar(count, maxCount, 20);
+        console.log(`  ${tag.padEnd(15)} ${colors.dim(bar)} ${colors.muted(String(count))}`);
       }
 
+      console.log('');
+
       return 0;
-    } catch (error) {
-      spinner.fail('Failed to load tags');
-      console.error(chalk.red(error instanceof Error ? error.message : String(error)));
+    } catch (err) {
+      s.stop(colors.error('Failed to load tags'));
+      console.log(colors.muted(err instanceof Error ? err.message : String(err)));
       return 1;
     }
   }
 
   private async showSources(marketplace: ReturnType<typeof createMarketplaceAggregator>): Promise<number> {
+    if (!this.quiet && !this.json) {
+      header('Skill Sources');
+    }
+
     const sources = marketplace.getSources();
 
     if (this.json) {
@@ -234,15 +269,18 @@ export class MarketplaceCommand extends Command {
       return 0;
     }
 
-    console.log(chalk.bold('Skill Sources:\n'));
+    console.log('');
+    console.log(colors.bold('Skill Sources:'));
+    console.log('');
 
     for (const source of sources) {
-      console.log(`${chalk.cyan(source.name)} ${source.official ? chalk.green('(official)') : ''}`);
-      console.log(`  ${chalk.dim(`${source.owner}/${source.repo}`)}`);
+      const officialBadge = source.official ? colors.success(' (official)') : '';
+      console.log(`${colors.cyan(source.name)}${officialBadge}`);
+      console.log(`  ${colors.muted(`${source.owner}/${source.repo}`)}`);
       if (source.description) {
         console.log(`  ${source.description}`);
       }
-      console.log();
+      console.log('');
     }
 
     return 0;

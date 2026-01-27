@@ -1,13 +1,35 @@
 import { existsSync, mkdirSync, cpSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
-import chalk from 'chalk';
-import ora from 'ora';
 import { Command, Option } from 'clipanion';
 import { detectProvider, isLocalPath, getProvider } from '@skillkit/core';
 import type { SkillMetadata, GitProvider, AgentType } from '@skillkit/core';
 import { isPathInside } from '@skillkit/core';
-import { getAdapter, detectAgent } from '@skillkit/agents';
+import { getAdapter, detectAgent, getAllAdapters } from '@skillkit/agents';
 import { getInstallDir, saveSkillMetadata } from '../helpers.js';
+import {
+  welcome,
+  colors,
+  symbols,
+  formatAgent,
+  getAgentIcon,
+  isCancel,
+  spinner,
+  agentMultiselect,
+  skillMultiselect,
+  selectInstallMethod,
+  confirm,
+  outro,
+  cancel,
+  step,
+  success,
+  error,
+  warn,
+  showInstallSummary,
+  showNextSteps,
+  saveLastAgents,
+  getLastAgents,
+  type InstallResult,
+} from '../onboarding/index.js';
 
 export class InstallCommand extends Command {
   static override paths = [['install'], ['i']];
@@ -61,10 +83,20 @@ export class InstallCommand extends Command {
     description: 'Target specific agents (can specify multiple)',
   });
 
+  quiet = Option.Boolean('--quiet,-q', false, {
+    description: 'Minimal output (no logo)',
+  });
+
   async execute(): Promise<number> {
-    const spinner = ora();
+    const isInteractive = process.stdin.isTTY && !this.skills && !this.all && !this.yes;
+    const s = spinner();
 
     try {
+      // Show welcome logo for interactive mode
+      if (isInteractive && !this.quiet) {
+        welcome();
+      }
+
       let providerAdapter = detectProvider(this.source);
 
       if (this.provider) {
@@ -72,40 +104,42 @@ export class InstallCommand extends Command {
       }
 
       if (!providerAdapter) {
-        console.error(chalk.red(`Could not detect provider for: ${this.source}`));
-        console.error(chalk.dim('Use --provider flag or specify source as:'));
-        console.error(chalk.dim('  GitHub: owner/repo or https://github.com/owner/repo'));
-        console.error(chalk.dim('  GitLab: gitlab:owner/repo or https://gitlab.com/owner/repo'));
-        console.error(chalk.dim('  Bitbucket: bitbucket:owner/repo'));
-        console.error(chalk.dim('  Local: ./path or ~/path'));
+        error(`Could not detect provider for: ${this.source}`);
+        console.log(colors.muted('Use --provider flag or specify source as:'));
+        console.log(colors.muted('  GitHub: owner/repo or https://github.com/owner/repo'));
+        console.log(colors.muted('  GitLab: gitlab:owner/repo or https://gitlab.com/owner/repo'));
+        console.log(colors.muted('  Bitbucket: bitbucket:owner/repo'));
+        console.log(colors.muted('  Local: ./path or ~/path'));
         return 1;
       }
 
-      spinner.start(`Fetching from ${providerAdapter.name}...`);
+      s.start(`Fetching from ${providerAdapter.name}...`);
 
       const result = await providerAdapter.clone(this.source, '', { depth: 1 });
 
       if (!result.success || !result.path) {
-        spinner.fail(chalk.red(result.error || 'Failed to fetch source'));
+        s.stop(colors.error(result.error || 'Failed to fetch source'));
         return 1;
       }
 
-      spinner.succeed(`Found ${result.skills?.length || 0} skill(s)`);
+      s.stop(`Found ${result.skills?.length || 0} skill(s)`);
 
       const discoveredSkills = result.discoveredSkills || [];
 
+      // List mode - just show skills and exit
       if (this.list) {
         if (discoveredSkills.length === 0) {
-          console.log(chalk.yellow('\nNo skills found in this repository'));
+          warn('No skills found in this repository');
         } else {
-          console.log(chalk.cyan('\nAvailable skills:\n'));
+          console.log('');
+          console.log(colors.bold('Available skills:'));
+          console.log('');
           for (const skill of discoveredSkills) {
-            console.log(`  ${chalk.green(skill.name)}`);
+            console.log(`  ${colors.success(symbols.stepActive)} ${colors.primary(skill.name)}`);
           }
-          console.log();
-          console.log(chalk.dim(`Total: ${discoveredSkills.length} skill(s)`));
-          console.log(chalk.dim('\nTo install specific skills: skillkit install <source> --skills=skill1,skill2'));
-          console.log(chalk.dim('To install all skills: skillkit install <source> --all'));
+          console.log('');
+          console.log(colors.muted(`Total: ${discoveredSkills.length} skill(s)`));
+          console.log(colors.muted('To install: skillkit install <source> --skills=skill1,skill2'));
         }
 
         const cleanupPath = result.tempRoot || result.path;
@@ -118,76 +152,147 @@ export class InstallCommand extends Command {
 
       let skillsToInstall = discoveredSkills;
 
+      // Non-interactive: use --skills filter
       if (this.skills) {
         const requestedSkills = this.skills.split(',').map(s => s.trim());
         const available = discoveredSkills.map(s => s.name);
         const notFound = requestedSkills.filter(s => !available.includes(s));
 
         if (notFound.length > 0) {
-          console.error(chalk.red(`Skills not found: ${notFound.join(', ')}`));
-          console.error(chalk.dim(`Available: ${available.join(', ')}`));
+          error(`Skills not found: ${notFound.join(', ')}`);
+          console.log(colors.muted(`Available: ${available.join(', ')}`));
           return 1;
         }
 
         skillsToInstall = discoveredSkills.filter(s => requestedSkills.includes(s.name));
       } else if (this.all || this.yes) {
         skillsToInstall = discoveredSkills;
-      } else {
-        skillsToInstall = discoveredSkills;
+      } else if (isInteractive && discoveredSkills.length > 1) {
+        // Interactive skill selection
+        step(`Source: ${colors.cyan(this.source)}`);
 
-        if (skillsToInstall.length > 0) {
-          console.log(chalk.cyan('\nSkills to install:'));
-          skillsToInstall.forEach(s => console.log(chalk.dim(`  - ${s.name}`)));
-          console.log();
+        const skillResult = await skillMultiselect({
+          message: 'Select skills to install',
+          skills: discoveredSkills.map(s => ({ name: s.name })),
+          initialValues: discoveredSkills.map(s => s.name),
+        });
+
+        if (isCancel(skillResult)) {
+          cancel('Installation cancelled');
+          return 0;
         }
+
+        skillsToInstall = discoveredSkills.filter(s => (skillResult as string[]).includes(s.name));
       }
 
       if (skillsToInstall.length === 0) {
-        console.log(chalk.yellow('No skills to install'));
+        warn('No skills to install');
         return 0;
       }
 
+      // Determine target agents
       let targetAgents: AgentType[];
+
       if (this.agent && this.agent.length > 0) {
+        // Explicitly specified agents
         targetAgents = this.agent as AgentType[];
+      } else if (isInteractive) {
+        // Interactive agent selection
+        const allAgentTypes = getAllAdapters().map(a => a.type);
+        const detectedAgent = await detectAgent();
+
+        // Get last selected agents or use detected
+        const lastAgents = getLastAgents();
+        const initialAgents = lastAgents.length > 0
+          ? lastAgents.filter(a => allAgentTypes.includes(a as AgentType))
+          : [detectedAgent];
+
+        const agentResult = await agentMultiselect({
+          message: 'Install to which agents?',
+          agents: allAgentTypes,
+          initialValues: initialAgents,
+        });
+
+        if (isCancel(agentResult)) {
+          cancel('Installation cancelled');
+          return 0;
+        }
+
+        targetAgents = agentResult as AgentType[];
+
+        // Save selection for next time
+        saveLastAgents(targetAgents);
       } else {
+        // Non-interactive: use detected agent
         const detectedAgent = await detectAgent();
         targetAgents = [detectedAgent];
       }
 
+      // Interactive: select installation method
+      let installMethod: 'symlink' | 'copy' = 'copy';
+
+      if (isInteractive && targetAgents.length > 1) {
+        const methodResult = await selectInstallMethod({});
+
+        if (isCancel(methodResult)) {
+          cancel('Installation cancelled');
+          return 0;
+        }
+
+        installMethod = methodResult as 'symlink' | 'copy';
+      }
+
+      // Confirm installation
+      if (isInteractive && !this.yes) {
+        console.log('');
+        const agentDisplay = targetAgents.length <= 3
+          ? targetAgents.map(formatAgent).join(', ')
+          : `${targetAgents.slice(0, 2).map(formatAgent).join(', ')} +${targetAgents.length - 2} more`;
+
+        const confirmResult = await confirm({
+          message: `Install ${skillsToInstall.length} skill(s) to ${agentDisplay}?`,
+          initialValue: true,
+        });
+
+        if (isCancel(confirmResult) || !confirmResult) {
+          cancel('Installation cancelled');
+          return 0;
+        }
+      }
+
+      // Perform installation
       let totalInstalled = 0;
-      const installResults: { agent: string; dir: string; count: number }[] = [];
+      const installResults: InstallResult[] = [];
 
-      for (const agentType of targetAgents) {
-        const adapter = getAdapter(agentType);
-        const installDir = getInstallDir(this.global, agentType);
+      for (const skill of skillsToInstall) {
+        const skillName = skill.name;
+        const sourcePath = skill.path;
+        const installedAgents: string[] = [];
 
-        if (!existsSync(installDir)) {
-          mkdirSync(installDir, { recursive: true });
-        }
+        for (const agentType of targetAgents) {
+          const adapter = getAdapter(agentType);
+          const installDir = getInstallDir(this.global, agentType);
 
-        if (targetAgents.length > 1) {
-          console.log(chalk.cyan(`\nInstalling to ${adapter.name}...`));
-        }
+          if (!existsSync(installDir)) {
+            mkdirSync(installDir, { recursive: true });
+          }
 
-        let installed = 0;
-        for (const skill of skillsToInstall) {
-          const skillName = skill.name;
-          const sourcePath = skill.path;
           const targetPath = join(installDir, skillName);
 
           if (existsSync(targetPath) && !this.force) {
-            console.log(chalk.yellow(`  Skipping ${skillName} (already exists, use --force to overwrite)`));
+            if (!this.quiet) {
+              warn(`Skipping ${skillName} for ${adapter.name} (already exists, use --force)`);
+            }
             continue;
           }
 
           const securityRoot = result.tempRoot || result.path;
           if (!isPathInside(sourcePath, securityRoot)) {
-            console.log(chalk.red(`  Skipping ${skillName} (path traversal detected)`));
+            error(`Skipping ${skillName} (path traversal detected)`);
             continue;
           }
 
-          spinner.start(`Installing ${skillName}...`);
+          s.start(`Installing ${skillName} to ${adapter.name}...`);
 
           try {
             if (existsSync(targetPath)) {
@@ -207,41 +312,66 @@ export class InstallCommand extends Command {
             };
             saveSkillMetadata(targetPath, metadata);
 
-            spinner.succeed(chalk.green(`Installed ${skillName}`));
-            installed++;
-          } catch (error) {
-            spinner.fail(chalk.red(`Failed to install ${skillName}`));
-            console.error(chalk.dim(error instanceof Error ? error.message : String(error)));
+            installedAgents.push(agentType);
+            s.stop(`Installed ${skillName} to ${adapter.name}`);
+          } catch (err) {
+            s.stop(colors.error(`Failed to install ${skillName} to ${adapter.name}`));
+            console.log(colors.muted(err instanceof Error ? err.message : String(err)));
           }
         }
 
-        totalInstalled += installed;
-        installResults.push({ agent: adapter.name, dir: installDir, count: installed });
+        if (installedAgents.length > 0) {
+          totalInstalled++;
+          installResults.push({
+            skillName,
+            method: installMethod,
+            agents: installedAgents,
+            path: join(getInstallDir(this.global, installedAgents[0] as AgentType), skillName),
+          });
+        }
       }
 
+      // Cleanup temp directory
       const cleanupPath = result.tempRoot || result.path;
       if (!isLocalPath(this.source) && cleanupPath && existsSync(cleanupPath)) {
         rmSync(cleanupPath, { recursive: true, force: true });
       }
 
-      console.log();
-      if (targetAgents.length > 1) {
-        console.log(chalk.green(`Installed ${totalInstalled} skill(s) across ${targetAgents.length} agents:`));
-        for (const r of installResults) {
-          console.log(chalk.dim(`  - ${r.agent}: ${r.count} skill(s) to ${r.dir}`));
+      // Show summary
+      if (totalInstalled > 0) {
+        if (isInteractive) {
+          showInstallSummary({
+            totalSkills: totalInstalled,
+            totalAgents: targetAgents.length,
+            results: installResults,
+            source: this.source,
+          });
+
+          outro('Installation complete!');
+
+          if (!this.yes) {
+            showNextSteps({
+              skillNames: installResults.map(r => r.skillName),
+              agentTypes: targetAgents,
+              syncNeeded: true,
+            });
+          }
+        } else {
+          success(`Installed ${totalInstalled} skill(s) to ${targetAgents.length} agent(s)`);
+          for (const r of installResults) {
+            console.log(colors.muted(`  ${symbols.success} ${r.skillName} ${symbols.arrowRight} ${r.agents.map(getAgentIcon).join(' ')}`));
+          }
+          console.log('');
+          console.log(colors.muted('Run `skillkit sync` to update agent configs'));
         }
       } else {
-        console.log(chalk.green(`Installed ${totalInstalled} skill(s) to ${installResults[0]?.dir}`));
-      }
-
-      if (!this.yes) {
-        console.log(chalk.dim('\nRun `skillkit sync` to update your agent config'));
+        warn('No skills were installed');
       }
 
       return 0;
-    } catch (error) {
-      spinner.fail(chalk.red('Installation failed'));
-      console.error(chalk.dim(error instanceof Error ? error.message : String(error)));
+    } catch (err) {
+      s.stop(colors.error('Installation failed'));
+      console.log(colors.muted(err instanceof Error ? err.message : String(err)));
       return 1;
     }
   }

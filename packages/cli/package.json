@@ -21,6 +21,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@clack/prompts": "^0.11.0",
     "@skillkit/core": "workspace:*",
     "@skillkit/agents": "workspace:*",
     "@skillkit/tui": "workspace:*",
@@ -29,6 +30,7 @@
     "got": "^14.4.1",
     "isomorphic-git": "^1.27.1",
     "ora": "^8.1.0",
+    "picocolors": "^1.1.1",
     "yaml": "^2.7.0"
   },
   "devDependencies": {

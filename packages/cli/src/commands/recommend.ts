@@ -1,7 +1,5 @@
 import { Command, Option } from 'clipanion';
 import { resolve } from 'node:path';
-import chalk from 'chalk';
-import ora from 'ora';
 import {
   type ProjectProfile,
   type ScoredSkill,
@@ -14,10 +12,16 @@ import {
   INDEX_PATH,
   KNOWN_SKILL_REPOS,
 } from '@skillkit/core';
+import {
+  header,
+  colors,
+  symbols,
+  spinner,
+  warn,
+  showProjectSummary,
+  progressBar,
+} from '../onboarding/index.js';
 
-/**
- * Recommend command - get smart skill recommendations based on project analysis
- */
 export class RecommendCommand extends Command {
   static override paths = [['recommend'], ['rec']];
 
@@ -97,6 +101,11 @@ export class RecommendCommand extends Command {
     description: 'Project path (default: current directory)',
   });
 
+  // Quiet mode
+  quiet = Option.Boolean('--quiet,-q', false, {
+    description: 'Minimal output',
+  });
+
   async execute(): Promise<number> {
     const targetPath = resolve(this.projectPath || process.cwd());
 
@@ -105,19 +114,23 @@ export class RecommendCommand extends Command {
       return await this.updateIndex();
     }
 
+    if (!this.quiet && !this.json) {
+      header('Skill Recommendations');
+    }
+
     // Load or create project profile
     const profile = await this.getProjectProfile(targetPath);
     if (!profile) {
-      console.error(chalk.red('Failed to analyze project'));
+      console.log(colors.error('Failed to analyze project'));
       return 1;
     }
 
     // Load skill index
     const index = this.loadIndex();
     if (!index || index.skills.length === 0) {
-      console.log(chalk.yellow('No skill index found.'));
-      console.log(chalk.dim('Run "skillkit recommend --update" to fetch skills from known sources.'));
-      console.log(chalk.dim('Or install skills manually with "skillkit install <source>"\n'));
+      warn('No skill index found.');
+      console.log(colors.muted('Run "skillkit recommend --update" to fetch skills from known sources.'));
+      console.log(colors.muted('Or install skills manually with "skillkit install <source>"\n'));
 
       // Still show project profile
       this.showProjectProfile(profile);
@@ -153,19 +166,20 @@ export class RecommendCommand extends Command {
     return 0;
   }
 
-  /**
-   * Get project profile from context or by analyzing project
-   */
   private async getProjectProfile(projectPath: string): Promise<ProjectProfile | null> {
     const manager = new ContextManager(projectPath);
     let context = manager.get();
 
     if (!context) {
       // Auto-analyze project
-      if (!this.json) {
-        console.log(chalk.dim('Analyzing project...\n'));
+      if (!this.json && !this.quiet) {
+        const s = spinner();
+        s.start('Analyzing project...');
+        context = manager.init();
+        s.stop('Project analyzed');
+      } else {
+        context = manager.init();
       }
-      context = manager.init();
     }
 
     if (!context) {
@@ -183,33 +197,18 @@ export class RecommendCommand extends Command {
     };
   }
 
-  /**
-   * Show project profile summary
-   */
   private showProjectProfile(profile: ProjectProfile): void {
-    console.log(chalk.cyan('Project Profile:'));
-    console.log(`  Name: ${chalk.bold(profile.name)}`);
-    if (profile.type) {
-      console.log(`  Type: ${profile.type}`);
-    }
+    const languages = profile.stack.languages.map(l => `${l.name}${l.version ? ` ${l.version}` : ''}`);
+    const frameworks = profile.stack.frameworks.map(f => `${f.name}${f.version ? ` ${f.version}` : ''}`);
 
-    const stackItems: string[] = [];
-    for (const lang of profile.stack.languages) {
-      stackItems.push(`${lang.name}${lang.version ? ` ${lang.version}` : ''}`);
-    }
-    for (const fw of profile.stack.frameworks) {
-      stackItems.push(`${fw.name}${fw.version ? ` ${fw.version}` : ''}`);
-    }
-
-    if (stackItems.length > 0) {
-      console.log(`  Stack: ${chalk.dim(stackItems.join(', '))}`);
-    }
-    console.log();
+    showProjectSummary({
+      name: profile.name,
+      type: profile.type,
+      languages,
+      frameworks,
+    });
   }
 
-  /**
-   * Display recommendations
-   */
   private displayRecommendations(
     recommendations: ScoredSkill[],
     profile: ProjectProfile,
@@ -219,59 +218,59 @@ export class RecommendCommand extends Command {
     this.showProjectProfile(profile);
 
     if (recommendations.length === 0) {
-      console.log(chalk.yellow('No matching skills found.'));
-      console.log(chalk.dim('Try lowering the minimum score with --min-score'));
+      warn('No matching skills found.');
+      console.log(colors.muted('Try lowering the minimum score with --min-score'));
       return;
     }
 
-    console.log(chalk.cyan(`Recommended Skills (${recommendations.length} of ${totalScanned} scanned):\n`));
+    console.log(colors.bold(`Recommended Skills (${recommendations.length} of ${totalScanned} scanned):`));
+    console.log('');
 
     for (const rec of recommendations) {
-      const scoreColor = rec.score >= 70 ? chalk.green : rec.score >= 50 ? chalk.yellow : chalk.dim;
-      const scoreBar = this.getScoreBar(rec.score);
+      let scoreColor: (text: string) => string;
+      if (rec.score >= 70) {
+        scoreColor = colors.success;
+      } else if (rec.score >= 50) {
+        scoreColor = colors.warning;
+      } else {
+        scoreColor = colors.muted;
+      }
+      const scoreBar = progressBar(rec.score, 100, 10);
 
-      console.log(`  ${scoreColor(`${rec.score}%`)} ${scoreBar} ${chalk.bold(rec.skill.name)}`);
+      console.log(`  ${scoreColor(`${rec.score}%`)} ${colors.dim(scoreBar)} ${colors.bold(rec.skill.name)}`);
 
       if (rec.skill.description) {
-        console.log(`      ${chalk.dim(truncate(rec.skill.description, 70))}`);
+        console.log(`      ${colors.muted(truncate(rec.skill.description, 70))}`);
       }
 
       if (rec.skill.source) {
-        console.log(`      ${chalk.dim('Source:')} ${rec.skill.source}`);
+        console.log(`      ${colors.dim('Source:')} ${rec.skill.source}`);
       }
 
       if (this.verbose && rec.reasons.length > 0) {
-        console.log(chalk.dim('      Reasons:'));
+        console.log(colors.dim('      Reasons:'));
         for (const reason of rec.reasons.filter(r => r.weight > 0)) {
-          console.log(`        ${chalk.dim('•')} ${reason.description} (+${reason.weight})`);
+          console.log(`        ${colors.muted(symbols.stepActive)} ${reason.description} (+${reason.weight})`);
         }
       }
 
       if (rec.warnings.length > 0) {
         for (const warning of rec.warnings) {
-          console.log(`      ${chalk.yellow('⚠')} ${warning}`);
+          console.log(`      ${colors.warning(symbols.warning)} ${warning}`);
         }
       }
 
-      console.log();
+      console.log('');
     }
 
-    console.log(chalk.dim('Install with: skillkit install <source>'));
+    console.log(colors.muted('Install with: skillkit install <source>'));
   }
 
-  /**
-   * Generate a visual score bar
-   */
-  private getScoreBar(score: number): string {
-    const filled = Math.round(score / 10);
-    const empty = 10 - filled;
-    return chalk.green('█'.repeat(filled)) + chalk.dim('░'.repeat(empty));
-  }
-
-  /**
-   * Handle search mode
-   */
   private handleSearch(engine: RecommendationEngine, query: string): number {
+    if (!this.quiet && !this.json) {
+      header(`Search: "${query}"`);
+    }
+
     const results = engine.search({
       query,
       limit: this.limit ? parseInt(this.limit, 10) : 10,
@@ -287,35 +286,41 @@ export class RecommendCommand extends Command {
     }
 
     if (results.length === 0) {
-      console.log(chalk.yellow(`No skills found matching "${query}"`));
+      warn(`No skills found matching "${query}"`);
       return 0;
     }
 
-    console.log(chalk.cyan(`Search results for "${query}" (${results.length} found):\n`));
+    console.log('');
+    console.log(colors.bold(`Search results for "${query}" (${results.length} found):`));
+    console.log('');
 
     for (const result of results) {
-      const relevanceColor =
-        result.relevance >= 70 ? chalk.green : result.relevance >= 50 ? chalk.yellow : chalk.dim;
+      let relevanceColor: (text: string) => string;
+      if (result.relevance >= 70) {
+        relevanceColor = colors.success;
+      } else if (result.relevance >= 50) {
+        relevanceColor = colors.warning;
+      } else {
+        relevanceColor = colors.muted;
+      }
+      const relevanceBar = progressBar(result.relevance, 100, 10);
 
-      console.log(`  ${relevanceColor(`${result.relevance}%`)} ${chalk.bold(result.skill.name)}`);
+      console.log(`  ${relevanceColor(`${result.relevance}%`)} ${colors.dim(relevanceBar)} ${colors.bold(result.skill.name)}`);
 
       if (result.snippet) {
-        console.log(`      ${chalk.dim(result.snippet)}`);
+        console.log(`      ${colors.muted(result.snippet)}`);
       }
 
       if (result.matchedTerms.length > 0) {
-        console.log(`      ${chalk.dim('Matched:')} ${result.matchedTerms.join(', ')}`);
+        console.log(`      ${colors.dim('Matched:')} ${result.matchedTerms.join(', ')}`);
       }
 
-      console.log();
+      console.log('');
     }
 
     return 0;
   }
 
-  /**
-   * Load skill index from cache
-   */
   private loadIndex() {
     const index = loadIndexFromCache();
 
@@ -324,63 +329,62 @@ export class RecommendCommand extends Command {
     }
 
     // Check if index is stale
-    if (isIndexStale(index) && !this.json) {
+    if (isIndexStale(index) && !this.json && !this.quiet) {
       const lastUpdated = new Date(index.lastUpdated);
       const hoursSinceUpdate = (Date.now() - lastUpdated.getTime()) / (1000 * 60 * 60);
       console.log(
-        chalk.dim(`Index is ${Math.round(hoursSinceUpdate)} hours old. Run --update to refresh.\n`)
+        colors.muted(`Index is ${Math.round(hoursSinceUpdate)} hours old. Run --update to refresh.\n`)
       );
     }
 
     return index;
   }
 
-  /**
-   * Update skill index from sources
-   */
   private async updateIndex(): Promise<number> {
-    console.log(chalk.cyan('Updating skill index from GitHub repositories...\n'));
-    console.log(chalk.dim(`Sources: ${KNOWN_SKILL_REPOS.map(r => `${r.owner}/${r.repo}`).join(', ')}\n`));
+    if (!this.quiet) {
+      header('Update Skill Index');
+    }
 
-    const spinner = ora('Fetching skills...').start();
+    console.log(colors.muted(`Sources: ${KNOWN_SKILL_REPOS.map(r => `${r.owner}/${r.repo}`).join(', ')}\n`));
+
+    const s = spinner();
+    s.start('Fetching skills...');
 
     try {
       const { index, errors } = await buildSkillIndex(KNOWN_SKILL_REPOS, (message) => {
-        spinner.text = message;
+        s.message(message);
       });
 
-      spinner.stop();
+      s.stop(`Fetched ${index.skills.length} skills`);
 
       // Report any errors
       if (errors.length > 0) {
-        console.log(chalk.yellow('\nWarnings:'));
+        console.log('');
+        console.log(colors.warning('Warnings:'));
         for (const error of errors) {
-          console.log(chalk.dim(`  • ${error}`));
+          console.log(colors.muted(`  ${symbols.stepActive} ${error}`));
         }
-        console.log();
       }
 
       // Save the index
       saveIndex(index);
 
-      console.log(chalk.green(`✓ Updated index with ${index.skills.length} skills`));
+      console.log('');
+      console.log(colors.success(`${symbols.success} Updated index with ${index.skills.length} skills`));
       if (index.sources.length > 0) {
-        console.log(chalk.dim(`  Sources: ${index.sources.map((s) => s.name).join(', ')}`));
+        console.log(colors.muted(`  Sources: ${index.sources.map((s) => s.name).join(', ')}`));
       }
-      console.log(chalk.dim(`  Saved to: ${INDEX_PATH}\n`));
+      console.log(colors.muted(`  Saved to: ${INDEX_PATH}\n`));
 
       return 0;
-    } catch (error) {
-      spinner.fail('Failed to update index');
-      console.error(chalk.red(error instanceof Error ? error.message : String(error)));
+    } catch (err) {
+      s.stop(colors.error('Failed to update index'));
+      console.log(colors.muted(err instanceof Error ? err.message : String(err)));
       return 1;
     }
   }
 }
 
-/**
- * Truncate string to max length
- */
 function truncate(str: string, maxLen: number): string {
   if (str.length <= maxLen) return str;
   return str.slice(0, maxLen - 3) + '...';
