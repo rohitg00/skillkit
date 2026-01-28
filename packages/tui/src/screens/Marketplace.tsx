@@ -109,23 +109,18 @@ export function Marketplace({ onNavigate, cols = 80, rows = 24 }: MarketplacePro
       {/* Featured section */}
       {animPhase >= 3 && (
         <box flexDirection="column">
-          <box flexDirection="row">
-            <text fg={terminalColors.text}>Featured</text>
-            <text fg={terminalColors.textMuted}> · trending</text>
-          </box>
+          <text fg={terminalColors.text}>Featured · <text fg={terminalColors.textMuted}>trending</text></text>
           <text> </text>
 
           {visibleFeatured.map((item, idx) => {
             const selected = idx === selectedIndex;
             const indicator = selected ? '▸' : ' ';
+            // Use single text element to avoid rendering overlap
+            const line = `${indicator}${item.name} ★${item.stars}`;
             return (
-              <box key={item.source} flexDirection="row">
-                <text fg={terminalColors.text}>{indicator}</text>
-                <text fg={selected ? terminalColors.accent : terminalColors.text}>
-                  {item.name}
-                </text>
-                <text fg={terminalColors.recommend}> ★{item.stars}</text>
-              </box>
+              <text key={item.source} fg={selected ? terminalColors.accent : terminalColors.text}>
+                {line}
+              </text>
             );
           })}
 

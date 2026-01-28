@@ -142,19 +142,16 @@ export function Browse({ onNavigate, cols = 80, rows = 24 }: BrowseProps) {
                 const selected = actualIdx === selectedIndex;
                 const indicator = selected ? '▸' : ' ';
                 // Truncate source if needed - clamp to avoid negative slicing
-                const available = Math.max(0, contentWidth - repo.name.length - 6);
-                const safeSlice = Math.max(0, available - 3);
-                const displaySource = available > 0 && repo.source.length > available
-                  ? repo.source.slice(0, safeSlice) + '...'
+                const maxSourceLen = Math.max(0, contentWidth - repo.name.length - 6);
+                const displaySource = maxSourceLen > 3 && repo.source.length > maxSourceLen
+                  ? repo.source.slice(0, maxSourceLen - 3) + '...'
                   : repo.source;
+                // Use single text element to avoid rendering overlap issues
+                const line = `${indicator}${repo.name} · ${displaySource}`;
                 return (
-                  <box key={repo.source} flexDirection="row">
-                    <text fg={terminalColors.text}>{indicator}</text>
-                    <text fg={selected ? terminalColors.accent : terminalColors.text}>
-                      {repo.name}
-                    </text>
-                    <text fg={terminalColors.textMuted}> · {displaySource}</text>
-                  </box>
+                  <text key={repo.source} fg={selected ? terminalColors.accent : terminalColors.text}>
+                    {line}
+                  </text>
                 );
               })}
             </box>

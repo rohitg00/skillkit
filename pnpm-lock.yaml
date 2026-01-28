@@ -131,9 +131,6 @@ importers:
 
   packages/core:
     dependencies:
-      '@types/minimatch':
-        specifier: ^6.0.0
-        version: 6.0.0
       minimatch:
         specifier: ^10.1.1
         version: 10.1.1
@@ -814,10 +811,6 @@ packages:
 
   '@types/http-cache-semantics@4.0.4':
     resolution: {integrity: sha512-1m0bIFVc7eJWyve9S0RnuRgcQqF/Xd5QsUZAZeQFr1Q3/p9JWoQQEqmVy+DPTNpGXwhgIetAoYF8JSc33q29QA==}
-
-  '@types/minimatch@6.0.0':
-    resolution: {integrity: sha512-zmPitbQ8+6zNutpwgcQuLcsEpn/Cj54Kbn7L5pX0Os5kdWplB7xPgEh/g+SWOB/qmows2gpuCaPyduq8ZZRnxA==}
-    deprecated: This is a stub types definition. minimatch provides its own type definitions, so you do not need this installed.
 
   '@types/node@16.9.1':
     resolution: {integrity: sha512-QpLcX9ZSsq3YYUUnD3nFDY8H7wctAhQj/TFKL8Ya8v5fMm3CFXxo8zStsLAl780ltoYoo1WvKUVGBQK+1ifr7g==}
@@ -2347,10 +2340,6 @@ snapshots:
   '@types/estree@1.0.8': {}
 
   '@types/http-cache-semantics@4.0.4': {}
-
-  '@types/minimatch@6.0.0':
-    dependencies:
-      minimatch: 10.1.1
 
   '@types/node@16.9.1': {}
 

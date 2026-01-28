@@ -45,25 +45,16 @@ export function SkillList({
         const pointer = isSelected ? symbols.pointer : symbols.pointerInactive;
         const fg = isSelected ? terminalColors.accent : terminalColors.text;
         const statusIcon = skill.enabled ? symbols.active : symbols.pending;
-        const statusColor = skill.enabled
-          ? terminalColors.success
-          : terminalColors.textMuted;
+        const descPart = skill.description
+          ? ` - ${skill.description.slice(0, 40)}${skill.description.length > 40 ? '...' : ''}`
+          : '';
+        // Use single text element to avoid rendering overlap
+        const line = `${pointer} ${skill.name} ${statusIcon}${descPart}`;
 
         return (
-          <box key={skill.name} flexDirection="row">
-            <text fg={fg}>
-              {isSelected ? <b>{pointer} {skill.name}</b> : <>{pointer} {skill.name}</>}
-            </text>
-            <text fg={terminalColors.textMuted}>
-              {' '}{statusIcon}
-            </text>
-            {skill.description && (
-              <text fg={terminalColors.textMuted}>
-                {' '}- {skill.description.slice(0, 40)}
-                {skill.description.length > 40 ? '...' : ''}
-              </text>
-            )}
-          </box>
+          <text key={skill.name} fg={fg}>
+            {isSelected ? <b>{line}</b> : line}
+          </text>
         );
       })}
 

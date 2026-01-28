@@ -188,15 +188,12 @@ export function Installed({ onNavigate, cols = 80, rows = 24 }: InstalledProps) 
                 const selected = actualIdx === selectedIndex;
                 const indicator = selected ? '▸' : ' ';
                 const statusIcon = skill.enabled !== false ? '●' : '○';
-                const statusColor = skill.enabled !== false ? terminalColors.success : terminalColors.textMuted;
+                // Use single text element to avoid rendering overlap
+                const line = `${indicator}${statusIcon} ${skill.name}`;
                 return (
-                  <box key={skill.name} flexDirection="row">
-                    <text fg={terminalColors.text}>{indicator}</text>
-                    <text fg={statusColor}>{statusIcon} </text>
-                    <text fg={selected ? terminalColors.accent : terminalColors.text}>
-                      {skill.name}
-                    </text>
-                  </box>
+                  <text key={skill.name} fg={selected ? terminalColors.accent : terminalColors.text}>
+                    {line}
+                  </text>
                 );
               })}
 
