@@ -66,7 +66,7 @@ export function SkillSubmitForm(): React.ReactElement {
     }
   }
 
-  function parseSkillContent(content: string): void {
+  const parseSkillContent = useCallback(function(content: string): void {
     const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
     if (frontmatterMatch) {
       const fm = frontmatterMatch[1];
@@ -84,7 +84,7 @@ export function SkillSubmitForm(): React.ReactElement {
       }
     }
     updateField('skillContent', content);
-  }
+  }, []);
 
   async function handleDetect(): Promise<void> {
     if (!githubUrl) return;
@@ -157,10 +157,13 @@ export function SkillSubmitForm(): React.ReactElement {
     setFileName(file.name);
     const reader = new FileReader();
     reader.onload = (event) => {
-      parseSkillContent(event.target?.result as string);
+      const content = event.target?.result;
+      if (typeof content === 'string') {
+        parseSkillContent(content);
+      }
     };
     reader.readAsText(file);
-  }, []);
+  }, [parseSkillContent]);
 
   const handleDrop = useCallback(function(e: React.DragEvent): void {
     e.preventDefault();

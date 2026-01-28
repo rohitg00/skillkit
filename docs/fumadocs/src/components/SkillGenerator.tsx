@@ -94,6 +94,15 @@ function downloadContent(content: string, filename: string): void {
   URL.revokeObjectURL(url);
 }
 
+function isValidUrl(str: string): boolean {
+  try {
+    new URL(str);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // localStorage cache for AI-generated skills
 const CACHE_KEY = 'skillkit_ai_cache';
 const CACHE_VERSION = 1;
@@ -630,14 +639,18 @@ ${skillContent.slice(0, 4000)}${skillContent.length > 4000 ? '\n...(truncated)' 
               <ul className="space-y-1">
                 {generatedSkill.references.map((ref, idx) => (
                   <li key={idx}>
-                    <a
-                      href={ref}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-zinc-400 hover:text-white font-mono text-sm transition-colors"
-                    >
-                      {ref}
-                    </a>
+                    {isValidUrl(ref) ? (
+                      <a
+                        href={ref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-zinc-400 hover:text-white font-mono text-sm transition-colors"
+                      >
+                        {ref}
+                      </a>
+                    ) : (
+                      <span className="text-zinc-400 font-mono text-sm">{ref}</span>
+                    )}
                   </li>
                 ))}
               </ul>

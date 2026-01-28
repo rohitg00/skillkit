@@ -22,6 +22,7 @@ export function Button({
   fullWidth = false,
   isLoading = false,
   disabled,
+  type = 'button',
   ...props
 }: ButtonProps): React.ReactElement {
   const widthClass = fullWidth ? 'w-full' : '';
@@ -36,6 +37,7 @@ export function Button({
   return (
     <button
       className={classes}
+      type={type}
       disabled={disabled || isLoading}
       {...props}
     >

@@ -20,7 +20,7 @@ pnpm build
 
 ## Structure
 
-```
+```text
 docs/fumadocs/
 ├── content/docs/     # MDX documentation files
 ├── src/
