@@ -412,7 +412,7 @@ ${skillContent.slice(0, 4000)}${skillContent.length > 4000 ? '\n...(truncated)' 
             <p className="text-zinc-500 font-mono text-sm mb-4">
               Don't see what you need? Generate a custom skill with AI.
             </p>
-            <Button onClick={handleGenerateWithAI} isLoading={status === LoadingState.LOADING}>
+            <Button onClick={handleGenerateWithAI}>
               GENERATE WITH AI
             </Button>
           </div>

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import React, { type PropsWithChildren } from 'react'
 import { cn } from '../utils'
 import * as Icons from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 type CardProps = PropsWithChildren<{
   title: string
@@ -12,7 +13,7 @@ type CardProps = PropsWithChildren<{
 }>
 
 export const Card: React.FC<CardProps> = ({ title, description, href, icon, children, horizontal = false }) => {
-  const IconComponent = icon ? (Icons as Record<string, React.ComponentType<{ className?: string }>>)[icon] : null
+  const IconComponent = icon ? (Icons as unknown as Record<string, LucideIcon>)[icon] : null
 
   return (
     <Link href={href} className="no-underline flex">

@@ -3,11 +3,12 @@ import type { MDXComponents } from 'mdx/types'
 import { Card } from '@/lib/components/Card'
 import { Columns } from './lib/components/Columns'
 
-export function getMDXComponents(components?: MDXComponents): MDXComponents {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getMDXComponents(components?: MDXComponents): any {
   return {
     ...defaultMdxComponents,
     ...components,
-    Card: Card,
-    Columns: Columns,
+    Card,
+    Columns,
   }
 }
