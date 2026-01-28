@@ -94,7 +94,8 @@ const FILE_PATTERN_PATTERNS = [
 ];
 
 function extractFrontmatter(content: string): Record<string, unknown> | null {
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const match = normalizedContent.match(/^---\s*\n([\s\S]*?)\n---/);
   if (!match) return null;
 
   const frontmatter: Record<string, unknown> = {};
@@ -109,7 +110,7 @@ function extractFrontmatter(content: string): Record<string, unknown> | null {
     }
   }
 
-  return frontmatter;
+  return Object.keys(frontmatter).length > 0 ? frontmatter : null;
 }
 
 function countTokens(text: string): number {
@@ -207,10 +208,16 @@ function evaluateClarity(content: string): ClarityScore {
   };
 }
 
+function countCodeBlocks(content: string): number {
+  const fencedBlocks = content.match(/```[\s\S]*?```/g) || [];
+  return fencedBlocks.length;
+}
+
 function evaluateSpecificity(content: string): SpecificityScore {
   const hasConcreteCommands = countMatches(content, COMMAND_PATTERNS) > 0;
   const hasFilePatterns = hasPattern(content, FILE_PATTERN_PATTERNS);
-  const hasCodeExamples = countMatches(content, CODE_EXAMPLE_PATTERNS) >= 2;
+  const codeBlockCount = countCodeBlocks(content);
+  const hasCodeExamples = codeBlockCount >= 2;
   const vagueTermCount = countVagueTerms(content);
 
   let score = 0;
@@ -257,8 +264,10 @@ function generateWarnings(
   if (specificity.vagueTermCount > 5) {
     warnings.push(`Contains ${specificity.vagueTermCount} vague terms`);
   }
-  if (!specificity.hasCodeExamples) {
+  if (!structure.hasExamples) {
     warnings.push('No code examples provided');
+  } else if (!specificity.hasCodeExamples) {
+    warnings.push('Only one code example provided');
   }
 
   return warnings;
@@ -326,8 +335,12 @@ export function evaluateSkillContent(content: string): QualityScore {
 export function evaluateSkillFile(filePath: string): QualityScore | null {
   if (!existsSync(filePath)) return null;
 
-  const content = readFileSync(filePath, 'utf-8');
-  return evaluateSkillContent(content);
+  try {
+    const content = readFileSync(filePath, 'utf-8');
+    return evaluateSkillContent(content);
+  } catch {
+    return null;
+  }
 }
 
 export function evaluateSkillDirectory(dirPath: string): QualityScore | null {
@@ -356,5 +369,5 @@ export function getQualityGrade(score: number): string {
 }
 
 export function isHighQuality(score: QualityScore): boolean {
-  return score.overall >= 70 && score.warnings.length <= 2;
+  return score.overall >= 80 && score.warnings.length <= 2;
 }

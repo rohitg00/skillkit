@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join, basename, resolve } from 'node:path';
 import { Command, Option } from 'clipanion';
 import {
@@ -137,7 +137,17 @@ export class ValidateCommand extends Command {
   });
 
   async execute(): Promise<number> {
-    const minScore = this.minScore ? parseInt(this.minScore, 10) : 60;
+    let minScore = 60;
+    if (this.minScore) {
+      const parsed = parseInt(this.minScore, 10);
+      if (Number.isNaN(parsed) || parsed < 0 || parsed > 100) {
+        if (!this.json) {
+          warn(`Invalid --min-score value "${this.minScore}", using default: 60`);
+        }
+      } else {
+        minScore = parsed;
+      }
+    }
     const results: Array<{ name: string; quality: QualityScore | null; formatValid: boolean; formatErrors: string[]; path?: string }> = [];
 
     if (this.targets.length > 0) {
@@ -145,12 +155,22 @@ export class ValidateCommand extends Command {
         const resolved = resolve(target);
 
         if (existsSync(resolved)) {
+          const isDirectory = statSync(resolved).isDirectory();
           if (this.all) {
+            if (!isDirectory) {
+              if (!this.json) {
+                warn(`--all requires a directory, but "${target}" is a file`);
+              }
+              continue;
+            }
             const entries = readdirSync(resolved, { withFileTypes: true });
             for (const entry of entries) {
               if (entry.isDirectory()) {
                 const skillPath = join(resolved, entry.name);
-                if (existsSync(join(skillPath, 'SKILL.md'))) {
+                const hasSkillMd = existsSync(join(skillPath, 'SKILL.md'));
+                const hasIndexMdc = existsSync(join(skillPath, 'index.mdc'));
+                const hasNamedMdc = existsSync(join(skillPath, `${entry.name}.mdc`));
+                if (hasSkillMd || hasIndexMdc || hasNamedMdc) {
                   const formatResult = this.quality ? { valid: true, errors: [] } : validateSkill(skillPath);
                   const quality = evaluateSkillDirectory(skillPath);
                   results.push({
@@ -253,7 +273,9 @@ export class ValidateCommand extends Command {
         suggestions: r.quality?.suggestions ?? [],
       }));
       console.log(JSON.stringify(output, null, 2));
-      return 0;
+      const hasFormatFailures = results.some(r => !r.formatValid);
+      const hasBelowThreshold = results.some(r => r.quality && r.quality.overall < minScore);
+      return hasFormatFailures || hasBelowThreshold ? 1 : 0;
     }
 
     header('Skill Validation Report');
