@@ -259,8 +259,8 @@ export class ManifestInstallCommand extends Command {
 
         args.push('--yes');
 
-        const { execSync } = await import('node:child_process');
-        execSync(`skillkit ${args.join(' ')}`, {
+        const { execFileSync } = await import('node:child_process');
+        execFileSync('skillkit', args, {
           stdio: 'pipe',
           encoding: 'utf-8',
         });
@@ -307,7 +307,6 @@ export class ManifestGenerateCommand extends Command {
       return {
         name: skill.name,
         source: metadata?.source || '',
-        agents: metadata?.sourceType ? [metadata.sourceType] : undefined,
       };
     }).filter(s => s.source);
 

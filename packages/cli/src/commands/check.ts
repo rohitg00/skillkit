@@ -57,11 +57,16 @@ export class CheckCommand extends Command {
     let skillsToCheck;
 
     if (this.skills.length > 0) {
-      skillsToCheck = this.skills
-        .map(name => findSkill(name, searchDirs))
-        .filter((s): s is NonNullable<typeof s> => s !== null);
+      const foundSkills = this.skills.map(name => ({
+        name,
+        skill: findSkill(name, searchDirs),
+      }));
 
-      const notFound = this.skills.filter(name => !findSkill(name, searchDirs));
+      skillsToCheck = foundSkills
+        .filter((s): s is { name: string; skill: NonNullable<typeof s.skill> } => s.skill !== null)
+        .map(s => s.skill);
+
+      const notFound = foundSkills.filter(s => s.skill === null).map(s => s.name);
       if (notFound.length > 0) {
         warn(`Skills not found: ${notFound.join(', ')}`);
       }
@@ -149,11 +154,10 @@ export class CheckCommand extends Command {
 
           results.push({
             name: skill.name,
-            hasUpdate: true,
+            hasUpdate: false,
             currentVersion: metadata.updatedAt || metadata.installedAt,
           });
-          updatesAvailable++;
-          if (this.verbose) s.stop(`${skill.name}: may have updates`);
+          if (this.verbose) s.stop(`${skill.name}: remote source (run update to sync)`);
         }
       } catch (err) {
         results.push({

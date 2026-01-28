@@ -119,7 +119,8 @@ export class FindCommand extends Command {
         results = allSkills.filter(skill =>
           skill.name.toLowerCase().includes(query) ||
           skill.description?.toLowerCase().includes(query) ||
-          skill.source.toLowerCase().includes(query)
+          skill.source.toLowerCase().includes(query) ||
+          skill.repoName.toLowerCase().includes(query)
         ).slice(0, limit);
         s.stop(`Found ${results.length} skill(s)`);
       } else {
