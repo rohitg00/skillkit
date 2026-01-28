@@ -1,7 +1,0 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "cd docs/skillkit && npm install",
-  "buildCommand": "cd docs/skillkit && npm run build",
-  "outputDirectory": "docs/skillkit/dist",
-  "framework": "vite"
-}
