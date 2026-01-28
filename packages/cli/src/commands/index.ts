@@ -8,6 +8,7 @@ export { RemoveCommand } from './remove.js';
 export { InstallCommand } from './install.js';
 export { UpdateCommand } from './update.js';
 export { ValidateCommand } from './validate.js';
+export { FixCommand } from './fix.js';
 export { CreateCommand } from './create.js';
 export { UICommand } from './ui.js';
 export { TranslateCommand } from './translate.js';

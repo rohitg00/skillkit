@@ -14,6 +14,7 @@ import {
   RemoveCommand,
   InitCommand,
   ValidateCommand,
+  FixCommand,
   CreateCommand,
   UICommand,
   TranslateCommand,
@@ -83,6 +84,7 @@ cli.register(UpdateCommand);
 cli.register(RemoveCommand);
 cli.register(InitCommand);
 cli.register(ValidateCommand);
+cli.register(FixCommand);
 cli.register(CreateCommand);
 cli.register(UICommand);
 cli.register(TranslateCommand);

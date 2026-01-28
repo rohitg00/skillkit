@@ -20,6 +20,8 @@ import {
   warn,
   showProjectSummary,
   progressBar,
+  formatQualityBadge,
+  getQualityGradeFromScore,
 } from '../onboarding/index.js';
 
 export class RecommendCommand extends Command {
@@ -236,8 +238,12 @@ export class RecommendCommand extends Command {
         scoreColor = colors.muted;
       }
       const scoreBar = progressBar(rec.score, 100, 10);
+      const qualityScore = rec.skill.quality ?? null;
+      const qualityDisplay = qualityScore !== null && qualityScore !== undefined
+        ? ` ${formatQualityBadge(qualityScore)}`
+        : '';
 
-      console.log(`  ${scoreColor(`${rec.score}%`)} ${colors.dim(scoreBar)} ${colors.bold(rec.skill.name)}`);
+      console.log(`  ${scoreColor(`${rec.score}%`)} ${colors.dim(scoreBar)} ${colors.bold(rec.skill.name)}${qualityDisplay}`);
 
       if (rec.skill.description) {
         console.log(`      ${colors.muted(truncate(rec.skill.description, 70))}`);
@@ -251,6 +257,10 @@ export class RecommendCommand extends Command {
         console.log(colors.dim('      Reasons:'));
         for (const reason of rec.reasons.filter(r => r.weight > 0)) {
           console.log(`        ${colors.muted(symbols.stepActive)} ${reason.description} (+${reason.weight})`);
+        }
+        if (qualityScore !== null && qualityScore !== undefined) {
+          const grade = getQualityGradeFromScore(qualityScore);
+          console.log(`        ${colors.muted(symbols.stepActive)} Quality: ${qualityScore}/100 (${grade})`);
         }
       }
 

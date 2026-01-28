@@ -50,14 +50,14 @@ export function Recommend({ onNavigate, cols = 80, rows = 24 }: RecommendProps) 
     return () => clearInterval(interval);
   }, [analyzing]);
 
-  // Recommendations data
+  // Recommendations data (with quality scores)
   const recommendations = useMemo(() => [
-    { name: 'tdd-workflow', reason: 'Based on your test files and coverage patterns', confidence: 95 },
-    { name: 'react-patterns', reason: 'Detected React in package.json with hooks usage', confidence: 88 },
-    { name: 'typescript-strict', reason: 'tsconfig.json found with strict mode disabled', confidence: 82 },
-    { name: 'git-workflow', reason: '.git directory with complex branching detected', confidence: 75 },
-    { name: 'api-design', reason: 'REST endpoints found in your codebase', confidence: 68 },
-    { name: 'docker-compose', reason: 'docker-compose.yml detected for orchestration', confidence: 62 },
+    { name: 'tdd-workflow', reason: 'Based on your test files and coverage patterns', confidence: 95, quality: 92, grade: 'A' },
+    { name: 'react-patterns', reason: 'Detected React in package.json with hooks usage', confidence: 88, quality: 85, grade: 'B' },
+    { name: 'typescript-strict', reason: 'tsconfig.json found with strict mode disabled', confidence: 82, quality: 78, grade: 'C' },
+    { name: 'git-workflow', reason: '.git directory with complex branching detected', confidence: 75, quality: 82, grade: 'B' },
+    { name: 'api-design', reason: 'REST endpoints found in your codebase', confidence: 68, quality: 71, grade: 'C' },
+    { name: 'docker-compose', reason: 'docker-compose.yml detected for orchestration', confidence: 62, quality: 65, grade: 'D' },
   ], []);
 
   const maxVisible = Math.max(3, Math.floor((rows - 10) / 2));
@@ -163,6 +163,7 @@ export function Recommend({ onNavigate, cols = 80, rows = 24 }: RecommendProps) 
           {visibleRecs.map((rec, idx) => {
             const selected = idx === selectedIndex;
             const indicator = selected ? '▸' : ' ';
+            const qualityColor = rec.quality >= 80 ? terminalColors.success : rec.quality >= 60 ? terminalColors.warning : terminalColors.error;
             return (
               <box key={rec.name} flexDirection="column">
                 <box flexDirection="row">
@@ -171,6 +172,7 @@ export function Recommend({ onNavigate, cols = 80, rows = 24 }: RecommendProps) 
                     {rec.name}
                   </text>
                   <text fg={getConfColor(rec.confidence)}> {rec.confidence}%</text>
+                  <text fg={qualityColor}> [{rec.grade}]</text>
                 </box>
                 <text fg={terminalColors.textMuted}>  {rec.reason}</text>
                 <text> </text>

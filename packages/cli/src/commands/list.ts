@@ -1,7 +1,8 @@
 import chalk from 'chalk';
 import { Command, Option } from 'clipanion';
-import { findAllSkills } from '@skillkit/core';
+import { findAllSkills, evaluateSkillDirectory } from '@skillkit/core';
 import { getSearchDirs } from '../helpers.js';
+import { formatQualityBadge, colors } from '../onboarding/index.js';
 
 export class ListCommand extends Command {
   static override paths = [['list'], ['ls'], ['l']];
@@ -21,6 +22,10 @@ export class ListCommand extends Command {
 
   disabled = Option.Boolean('--disabled,-d', false, {
     description: 'Show only disabled skills',
+  });
+
+  quality = Option.Boolean('--quality,-q', false, {
+    description: 'Show quality scores and grades',
   });
 
   json = Option.Boolean('--json,-j', false, {
@@ -44,8 +49,18 @@ export class ListCommand extends Command {
       return a.name.localeCompare(b.name);
     });
 
+    const skillsWithQuality = this.quality || this.json
+      ? skills.map(s => {
+          const quality = evaluateSkillDirectory(s.path);
+          return {
+            ...s,
+            quality: quality?.overall ?? null,
+          };
+        })
+      : skills.map(s => ({ ...s, quality: null as number | null }));
+
     if (this.json) {
-      console.log(JSON.stringify(skills, null, 2));
+      console.log(JSON.stringify(skillsWithQuality, null, 2));
       return 0;
     }
 
@@ -57,13 +72,13 @@ export class ListCommand extends Command {
 
     console.log(chalk.cyan(`Installed skills (${skills.length}):\n`));
 
-    const projectSkills = skills.filter(s => s.location === 'project');
-    const globalSkills = skills.filter(s => s.location === 'global');
+    const projectSkills = skillsWithQuality.filter(s => s.location === 'project');
+    const globalSkills = skillsWithQuality.filter(s => s.location === 'global');
 
     if (projectSkills.length > 0) {
       console.log(chalk.blue('Project skills:'));
       for (const skill of projectSkills) {
-        printSkill(skill);
+        printSkill(skill, this.quality);
       }
       console.log();
     }
@@ -71,7 +86,7 @@ export class ListCommand extends Command {
     if (globalSkills.length > 0) {
       console.log(chalk.dim('Global skills:'));
       for (const skill of globalSkills) {
-        printSkill(skill);
+        printSkill(skill, this.quality);
       }
       console.log();
     }
@@ -86,16 +101,28 @@ export class ListCommand extends Command {
       )
     );
 
+    if (this.quality) {
+      const qualityScores = skillsWithQuality.filter(s => s.quality !== null).map(s => s.quality!);
+      if (qualityScores.length > 0) {
+        const avgQuality = Math.round(qualityScores.reduce((a, b) => a + b, 0) / qualityScores.length);
+        console.log(colors.muted(`Average quality: ${avgQuality}/100`));
+      }
+    }
+
     return 0;
   }
 }
 
-function printSkill(skill: { name: string; description: string; enabled: boolean; location: string }) {
+function printSkill(
+  skill: { name: string; description: string; enabled: boolean; location: string; quality: number | null },
+  showQuality = false
+) {
   const status = skill.enabled ? chalk.green('✓') : chalk.red('○');
   const name = skill.enabled ? skill.name : chalk.dim(skill.name);
   const desc = chalk.dim(truncate(skill.description, 50));
+  const qualityBadge = showQuality && skill.quality !== null ? ` ${formatQualityBadge(skill.quality)}` : '';
 
-  console.log(`  ${status} ${name}`);
+  console.log(`  ${status} ${name}${qualityBadge}`);
   if (skill.description) {
     console.log(`    ${desc}`);
   }

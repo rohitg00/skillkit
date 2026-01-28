@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, cpSync, rmSync, symlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { Command, Option } from 'clipanion';
-import { detectProvider, isLocalPath, getProvider } from '@skillkit/core';
+import { detectProvider, isLocalPath, getProvider, evaluateSkillDirectory } from '@skillkit/core';
 import type { SkillMetadata, GitProvider, AgentType } from '@skillkit/core';
 import { isPathInside } from '@skillkit/core';
 import { getAdapter, detectAgent, getAllAdapters } from '@skillkit/agents';
@@ -28,6 +28,8 @@ import {
   showNextSteps,
   saveLastAgents,
   getLastAgents,
+  formatQualityBadge,
+  getQualityGradeFromScore,
   type InstallResult,
 } from '../onboarding/index.js';
 
@@ -135,7 +137,9 @@ export class InstallCommand extends Command {
           console.log(colors.bold('Available skills:'));
           console.log('');
           for (const skill of discoveredSkills) {
-            console.log(`  ${colors.success(symbols.stepActive)} ${colors.primary(skill.name)}`);
+            const quality = evaluateSkillDirectory(skill.path);
+            const qualityBadge = quality ? ` ${formatQualityBadge(quality.overall)}` : '';
+            console.log(`  ${colors.success(symbols.stepActive)} ${colors.primary(skill.name)}${qualityBadge}`);
           }
           console.log('');
           console.log(colors.muted(`Total: ${discoveredSkills.length} skill(s)`));
@@ -237,9 +241,34 @@ export class InstallCommand extends Command {
         installMethod = methodResult as 'symlink' | 'copy';
       }
 
+      // Check for low-quality skills and warn
+      const lowQualitySkills: Array<{ name: string; score: number; warnings: string[] }> = [];
+      for (const skill of skillsToInstall) {
+        const quality = evaluateSkillDirectory(skill.path);
+        if (quality && quality.overall < 60) {
+          lowQualitySkills.push({
+            name: skill.name,
+            score: quality.overall,
+            warnings: quality.warnings.slice(0, 2),
+          });
+        }
+      }
+
       // Confirm installation
       if (isInteractive && !this.yes) {
         console.log('');
+
+        // Show low-quality warning if any
+        if (lowQualitySkills.length > 0) {
+          console.log(colors.warning(`${symbols.warning} Warning: ${lowQualitySkills.length} skill(s) have low quality scores (< 60)`));
+          for (const lq of lowQualitySkills) {
+            const grade = getQualityGradeFromScore(lq.score);
+            const warningText = lq.warnings.length > 0 ? ` - ${lq.warnings.join(', ')}` : '';
+            console.log(colors.muted(`    - ${lq.name} [${grade}]${warningText}`));
+          }
+          console.log('');
+        }
+
         const agentDisplay = targetAgents.length <= 3
           ? targetAgents.map(formatAgent).join(', ')
           : `${targetAgents.slice(0, 2).map(formatAgent).join(', ')} +${targetAgents.length - 2} more`;

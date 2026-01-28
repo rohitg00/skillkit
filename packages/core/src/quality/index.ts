@@ -1,13 +1,32 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { join, basename } from 'node:path';
 
+export * from './benchmark.js';
+
 export interface QualityScore {
   overall: number;
   structure: StructureScore;
   clarity: ClarityScore;
   specificity: SpecificityScore;
+  advanced: AdvancedScore;
   warnings: string[];
   suggestions: string[];
+}
+
+export interface AdvancedScore {
+  score: number;
+  deprecatedPatterns: string[];
+  conflictingInstructions: string[];
+  securityIssues: string[];
+  completeness: CompletenessResult;
+}
+
+export interface CompletenessResult {
+  score: number;
+  hasTodos: boolean;
+  todoCount: number;
+  emptySections: string[];
+  exampleCoverage: number;
 }
 
 export interface StructureScore {
@@ -92,6 +111,27 @@ const FILE_PATTERN_PATTERNS = [
   /include[s]?\s*[:=]/i,
   /pattern[s]?\s*[:=]/i,
 ];
+
+const DEPRECATED_PATTERNS = [
+  { pattern: /require\s*\(['"][^'"]+['"]\)/g, message: 'Uses CommonJS require() instead of ES modules' },
+  { pattern: /React\.Component/g, message: 'Uses class components instead of functional' },
+  { pattern: /componentDidMount|componentWillUnmount|componentDidUpdate/g, message: 'Uses lifecycle methods instead of hooks' },
+  { pattern: /\bvar\s+\w+\s*=/g, message: 'Uses var instead of const/let' },
+  { pattern: /\.then\s*\([^)]*\)\.catch/g, message: 'Uses .then().catch() instead of async/await' },
+  { pattern: /new\s+Promise\s*\(/g, message: 'Consider using async/await instead of new Promise()' },
+];
+
+const SECURITY_PATTERNS = [
+  { pattern: /password\s*[:=]\s*['"][^'"]+['"]/gi, message: 'Potential hardcoded password' },
+  { pattern: /api[_-]?key\s*[:=]\s*['"][^'"]+['"]/gi, message: 'Potential hardcoded API key' },
+  { pattern: /secret\s*[:=]\s*['"][^'"]+['"]/gi, message: 'Potential hardcoded secret' },
+  { pattern: /token\s*[:=]\s*['"][A-Za-z0-9_-]{20,}['"]/gi, message: 'Potential hardcoded token' },
+  { pattern: /\$\{[^}]*\}/g, message: 'Template literal - ensure proper sanitization in shell commands' },
+  { pattern: /eval\s*\(/g, message: 'Uses eval() - potential code injection risk' },
+  { pattern: /innerHTML\s*=/g, message: 'Uses innerHTML - potential XSS risk' },
+  { pattern: /dangerouslySetInnerHTML/g, message: 'Uses dangerouslySetInnerHTML - potential XSS risk' },
+];
+
 
 function extractFrontmatter(content: string): Record<string, unknown> | null {
   const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -213,6 +253,127 @@ function countCodeBlocks(content: string): number {
   return fencedBlocks.length;
 }
 
+function detectDeprecatedPatterns(content: string): string[] {
+  const codeBlocks = content.match(/```[\s\S]*?```/g) || [];
+  const codeContent = codeBlocks.join('\n');
+  const issues: string[] = [];
+
+  for (const { pattern, message } of DEPRECATED_PATTERNS) {
+    const regex = new RegExp(pattern.source, pattern.flags);
+    if (regex.test(codeContent)) {
+      issues.push(message);
+    }
+  }
+
+  return [...new Set(issues)];
+}
+
+function detectSecurityPatterns(content: string): string[] {
+  const issues: string[] = [];
+
+  for (const { pattern, message } of SECURITY_PATTERNS) {
+    const regex = new RegExp(pattern.source, pattern.flags);
+    if (regex.test(content)) {
+      if (!message.includes('Template literal') || content.includes('bash') || content.includes('shell')) {
+        issues.push(message);
+      }
+    }
+  }
+
+  return [...new Set(issues)];
+}
+
+function detectConflictingInstructions(content: string): string[] {
+  const issues: string[] = [];
+  const lowerContent = content.toLowerCase();
+
+  const alwaysMatches = lowerContent.match(/always\s+(?:use|do|include|add)\s+(\w+)/gi) || [];
+  const neverMatches = lowerContent.match(/never\s+(?:use|do|include|add)\s+(\w+)/gi) || [];
+
+  for (const always of alwaysMatches) {
+    const term = always.replace(/always\s+(?:use|do|include|add)\s+/i, '').toLowerCase();
+    for (const never of neverMatches) {
+      const neverTerm = never.replace(/never\s+(?:use|do|include|add)\s+/i, '').toLowerCase();
+      if (term === neverTerm) {
+        issues.push(`Conflicting instructions: "always" and "never" used with "${term}"`);
+      }
+    }
+  }
+
+  const mustMatches = lowerContent.match(/must\s+(\w+)/gi) || [];
+  const mustNotMatches = lowerContent.match(/must\s+not\s+(\w+)/gi) || [];
+
+  for (const must of mustMatches) {
+    const term = must.replace(/must\s+/i, '').toLowerCase();
+    for (const mustNot of mustNotMatches) {
+      const notTerm = mustNot.replace(/must\s+not\s+/i, '').toLowerCase();
+      if (term === notTerm) {
+        issues.push(`Conflicting instructions: "must" and "must not" used with "${term}"`);
+      }
+    }
+  }
+
+  return [...new Set(issues)];
+}
+
+function assessCompleteness(content: string): CompletenessResult {
+  const todoMatches = content.match(/TODO|FIXME|XXX|HACK/gi) || [];
+  const todoCount = todoMatches.length;
+
+  const headerMatches = content.match(/^#+\s+(.+)$/gm) || [];
+  const emptySections: string[] = [];
+
+  for (let i = 0; i < headerMatches.length - 1; i++) {
+    const currentHeader = headerMatches[i];
+    const currentIndex = content.indexOf(currentHeader);
+    const nextIndex = content.indexOf(headerMatches[i + 1]);
+    const sectionContent = content.slice(currentIndex + currentHeader.length, nextIndex).trim();
+
+    if (sectionContent.length < 20) {
+      const sectionName = currentHeader.replace(/^#+\s+/, '');
+      emptySections.push(sectionName);
+    }
+  }
+
+  const codeBlocks = countCodeBlocks(content);
+  const exampleCoverage = Math.min(100, codeBlocks * 25);
+
+  let score = 100;
+  if (todoCount > 0) score -= Math.min(30, todoCount * 10);
+  if (emptySections.length > 0) score -= Math.min(30, emptySections.length * 10);
+  if (codeBlocks < 2) score -= 20;
+  else if (codeBlocks < 4) score -= 10;
+
+  return {
+    score: Math.max(0, score),
+    hasTodos: todoCount > 0,
+    todoCount,
+    emptySections,
+    exampleCoverage,
+  };
+}
+
+function evaluateAdvanced(content: string): AdvancedScore {
+  const deprecatedPatterns = detectDeprecatedPatterns(content);
+  const conflictingInstructions = detectConflictingInstructions(content);
+  const securityIssues = detectSecurityPatterns(content);
+  const completeness = assessCompleteness(content);
+
+  let score = 100;
+  score -= Math.min(30, deprecatedPatterns.length * 10);
+  score -= Math.min(30, conflictingInstructions.length * 15);
+  score -= Math.min(25, securityIssues.length * 10);
+  score -= Math.round((100 - completeness.score) * 0.15);
+
+  return {
+    score: Math.max(0, score),
+    deprecatedPatterns,
+    conflictingInstructions,
+    securityIssues,
+    completeness,
+  };
+}
+
 function evaluateSpecificity(content: string): SpecificityScore {
   const hasConcreteCommands = countMatches(content, COMMAND_PATTERNS) > 0;
   const hasFilePatterns = hasPattern(content, FILE_PATTERN_PATTERNS);
@@ -242,7 +403,8 @@ function evaluateSpecificity(content: string): SpecificityScore {
 function generateWarnings(
   structure: StructureScore,
   clarity: ClarityScore,
-  specificity: SpecificityScore
+  specificity: SpecificityScore,
+  advanced: AdvancedScore
 ): string[] {
   const warnings: string[] = [];
 
@@ -270,13 +432,27 @@ function generateWarnings(
     warnings.push('Only one code example provided');
   }
 
+  for (const issue of advanced.securityIssues) {
+    warnings.push(`Security: ${issue}`);
+  }
+  for (const conflict of advanced.conflictingInstructions) {
+    warnings.push(conflict);
+  }
+  if (advanced.completeness.hasTodos) {
+    warnings.push(`Contains ${advanced.completeness.todoCount} TODO/FIXME comment(s)`);
+  }
+  if (advanced.completeness.emptySections.length > 0) {
+    warnings.push(`Empty sections: ${advanced.completeness.emptySections.join(', ')}`);
+  }
+
   return warnings;
 }
 
 function generateSuggestions(
   structure: StructureScore,
   clarity: ClarityScore,
-  specificity: SpecificityScore
+  specificity: SpecificityScore,
+  advanced: AdvancedScore
 ): string[] {
   const suggestions: string[] = [];
 
@@ -305,6 +481,22 @@ function generateSuggestions(
     suggestions.push('Add concrete executable commands with flags');
   }
 
+  if (advanced.deprecatedPatterns.length > 0) {
+    suggestions.push('Update code examples to use modern patterns (ES modules, hooks, async/await)');
+  }
+  if (advanced.securityIssues.length > 0) {
+    suggestions.push('Review and remove potential security risks from examples');
+  }
+  if (advanced.completeness.hasTodos) {
+    suggestions.push('Complete or remove TODO/FIXME comments');
+  }
+  if (advanced.completeness.emptySections.length > 0) {
+    suggestions.push('Add content to empty sections or remove them');
+  }
+  if (advanced.completeness.exampleCoverage < 50) {
+    suggestions.push('Add more code examples to improve coverage');
+  }
+
   return suggestions;
 }
 
@@ -312,21 +504,24 @@ export function evaluateSkillContent(content: string): QualityScore {
   const structure = evaluateStructure(content);
   const clarity = evaluateClarity(content);
   const specificity = evaluateSpecificity(content);
+  const advanced = evaluateAdvanced(content);
 
   const overall = Math.round(
-    structure.score * 0.4 +
-    clarity.score * 0.3 +
-    specificity.score * 0.3
+    structure.score * 0.35 +
+    clarity.score * 0.25 +
+    specificity.score * 0.25 +
+    advanced.score * 0.15
   );
 
-  const warnings = generateWarnings(structure, clarity, specificity);
-  const suggestions = generateSuggestions(structure, clarity, specificity);
+  const warnings = generateWarnings(structure, clarity, specificity, advanced);
+  const suggestions = generateSuggestions(structure, clarity, specificity, advanced);
 
   return {
     overall,
     structure,
     clarity,
     specificity,
+    advanced,
     warnings,
     suggestions,
   };

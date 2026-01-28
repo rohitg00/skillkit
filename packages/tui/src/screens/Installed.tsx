@@ -188,10 +188,14 @@ export function Installed({ onNavigate, cols = 80, rows = 24 }: InstalledProps) 
                 const selected = actualIdx === selectedIndex;
                 const indicator = selected ? '▸' : ' ';
                 const statusIcon = skill.enabled !== false ? '●' : '○';
-                // Use single text element to avoid rendering overlap
-                const line = `${indicator}${statusIcon} ${skill.name}`;
+                const qualityBadge = skill.grade ? ` [${skill.grade}]` : '';
+                const warningIndicator = skill.warnings && skill.warnings > 2 ? ' ⚠' : '';
+                const line = `${indicator}${statusIcon} ${skill.name}${qualityBadge}${warningIndicator}`;
+                const badgeColor = skill.quality !== undefined
+                  ? (skill.quality >= 80 ? terminalColors.success : skill.quality >= 60 ? terminalColors.warning : terminalColors.error)
+                  : terminalColors.text;
                 return (
-                  <text key={skill.name} fg={selected ? terminalColors.accent : terminalColors.text}>
+                  <text key={skill.name} fg={selected ? terminalColors.accent : badgeColor}>
                     {line}
                   </text>
                 );

@@ -4,6 +4,9 @@ export interface SkillItem {
   source?: string;
   installs?: number;
   enabled?: boolean;
+  quality?: number;
+  grade?: string;
+  warnings?: number;
 }
 
 export interface RepoInfo {

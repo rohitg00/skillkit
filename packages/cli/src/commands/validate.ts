@@ -8,7 +8,9 @@ import {
   getQualityGrade,
   isHighQuality,
   findAllSkills,
+  benchmarkSkill,
   type QualityScore,
+  type BenchmarkResult,
 } from '@skillkit/core';
 import { getSearchDirs } from '../helpers.js';
 import {
@@ -71,6 +73,29 @@ function printQualityReport(name: string, quality: QualityScore, verbose: boolea
     if (quality.specificity.vagueTermCount > 0) {
       console.log(`    ${colors.warning(symbols.warning)} ${quality.specificity.vagueTermCount} vague term(s)`);
     }
+
+    console.log('');
+    console.log(`  ${colors.muted('Advanced:')} ${formatScore(quality.advanced.score)}/100`);
+    if (quality.advanced.deprecatedPatterns.length > 0) {
+      console.log(`    ${colors.warning(symbols.warning)} ${quality.advanced.deprecatedPatterns.length} deprecated pattern(s)`);
+      for (const pattern of quality.advanced.deprecatedPatterns) {
+        console.log(`      ${colors.muted(symbols.bullet)} ${pattern}`);
+      }
+    }
+    if (quality.advanced.securityIssues.length > 0) {
+      console.log(`    ${colors.error(symbols.error)} ${quality.advanced.securityIssues.length} security issue(s)`);
+      for (const issue of quality.advanced.securityIssues) {
+        console.log(`      ${colors.muted(symbols.bullet)} ${issue}`);
+      }
+    }
+    if (quality.advanced.conflictingInstructions.length > 0) {
+      console.log(`    ${colors.warning(symbols.warning)} ${quality.advanced.conflictingInstructions.length} conflicting instruction(s)`);
+    }
+    console.log(`    Completeness: ${quality.advanced.completeness.score}/100`);
+    console.log(`    Example coverage: ${quality.advanced.completeness.exampleCoverage}%`);
+    if (quality.advanced.completeness.hasTodos) {
+      console.log(`    ${colors.warning(symbols.warning)} ${quality.advanced.completeness.todoCount} TODO/FIXME comment(s)`);
+    }
   }
 
   if (quality.warnings.length > 0) {
@@ -88,6 +113,39 @@ function printQualityReport(name: string, quality: QualityScore, verbose: boolea
       console.log(`    ${colors.muted(symbols.bullet)} ${s}`);
     }
   }
+}
+
+function printBenchmarkReport(benchmark: BenchmarkResult): void {
+  console.log('');
+  console.log(colors.bold('Benchmark Comparison'));
+  console.log('');
+
+  console.log(`  ${colors.muted('Your Score:')} ${formatScore(benchmark.score)}/100 ${formatGrade(benchmark.grade)}`);
+  console.log(`  ${colors.muted('Category Average:')} ${benchmark.categoryAvg}/100`);
+  console.log(`  ${colors.muted('Top Skill Score:')} ${benchmark.topSkillScore}/100`);
+  console.log(`  ${colors.muted('Percentile:')} ${benchmark.percentile}${getOrdinal(benchmark.percentile)}`);
+
+  if (benchmark.comparisonNotes.length > 0) {
+    console.log('');
+    console.log(`  ${colors.muted('Comparison:')}`);
+    for (const note of benchmark.comparisonNotes) {
+      console.log(`    ${colors.muted(symbols.bullet)} ${note}`);
+    }
+  }
+
+  if (benchmark.recommendations.length > 0) {
+    console.log('');
+    console.log(`  ${colors.muted('To Improve:')}`);
+    for (const rec of benchmark.recommendations) {
+      console.log(`    ${colors.info(symbols.info)} ${rec}`);
+    }
+  }
+}
+
+function getOrdinal(n: number): string {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return s[(v - 20) % 10] || s[v] || s[0];
 }
 
 export class ValidateCommand extends Command {
@@ -136,7 +194,23 @@ export class ValidateCommand extends Command {
     description: 'Validate all skills in directory',
   });
 
+  benchmark = Option.Boolean('--benchmark,-b', false, {
+    description: 'Compare skill against category leaders',
+  });
+
+  fix = Option.Boolean('--fix', false, {
+    description: 'Automatically fix common quality issues (runs fix command)',
+  });
+
   async execute(): Promise<number> {
+    if (this.fix && this.targets.length > 0) {
+      const { FixCommand } = await import('./fix.js');
+      const fixCmd = new FixCommand();
+      fixCmd.targets = this.targets;
+      fixCmd.yes = false;
+      return fixCmd.execute();
+    }
+
     let minScore = 60;
     if (this.minScore) {
       const parsed = parseInt(this.minScore, 10);
@@ -258,20 +332,27 @@ export class ValidateCommand extends Command {
     }
 
     if (this.json) {
-      const output = results.map(r => ({
-        name: r.name,
-        path: r.path,
-        formatValid: r.formatValid,
-        formatErrors: r.formatErrors,
-        score: r.quality?.overall ?? null,
-        grade: r.quality ? getQualityGrade(r.quality.overall) : null,
-        highQuality: r.quality ? isHighQuality(r.quality) : false,
-        structure: r.quality?.structure ?? null,
-        clarity: r.quality?.clarity ?? null,
-        specificity: r.quality?.specificity ?? null,
-        warnings: r.quality?.warnings ?? [],
-        suggestions: r.quality?.suggestions ?? [],
-      }));
+      const output = results.map(r => {
+        const result: Record<string, unknown> = {
+          name: r.name,
+          path: r.path,
+          formatValid: r.formatValid,
+          formatErrors: r.formatErrors,
+          score: r.quality?.overall ?? null,
+          grade: r.quality ? getQualityGrade(r.quality.overall) : null,
+          highQuality: r.quality ? isHighQuality(r.quality) : false,
+          structure: r.quality?.structure ?? null,
+          clarity: r.quality?.clarity ?? null,
+          specificity: r.quality?.specificity ?? null,
+          advanced: r.quality?.advanced ?? null,
+          warnings: r.quality?.warnings ?? [],
+          suggestions: r.quality?.suggestions ?? [],
+        };
+        if (this.benchmark && r.quality) {
+          result.benchmark = benchmarkSkill(r.name, r.quality);
+        }
+        return result;
+      });
       console.log(JSON.stringify(output, null, 2));
       const hasFormatFailures = results.some(r => !r.formatValid);
       const hasBelowThreshold = results.some(r => r.quality && r.quality.overall < minScore);
@@ -302,6 +383,11 @@ export class ValidateCommand extends Command {
 
       if (quality) {
         printQualityReport(name, quality, this.verbose);
+
+        if (this.benchmark) {
+          const benchmark = benchmarkSkill(name, quality);
+          printBenchmarkReport(benchmark);
+        }
       }
     }
 

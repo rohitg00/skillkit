@@ -9,6 +9,9 @@ export {
   formatAgentIconsInline,
   progressBar,
   formatScore,
+  formatQualityBadge,
+  formatQualityBadgeCompact,
+  getQualityGradeFromScore,
 } from './theme.js';
 
 export {

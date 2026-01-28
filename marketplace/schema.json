@@ -92,6 +92,12 @@
             ]
           },
           "description": "Compatible AI agents (omit for universal compatibility)"
+        },
+        "quality": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Pre-computed quality score (0-100). Verified sources default to 85."
         }
       }
     }

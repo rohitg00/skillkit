@@ -1,7 +1,7 @@
 /**
  * Skills state management for SkillKit TUI
  */
-import { findAllSkills } from '@skillkit/core';
+import { findAllSkills, evaluateSkillDirectory, getQualityGrade } from '@skillkit/core';
 import { rmSync } from 'node:fs';
 import { resolve, normalize } from 'node:path';
 import { getSearchDirs } from '../utils/helpers.js';
@@ -38,12 +38,18 @@ export function loadSkills(agentType?: AgentType): SkillsState {
     const searchDirs = getSearchDirs(agentType);
     const foundSkills = findAllSkills(searchDirs);
 
-    const skillItems: SkillItem[] = foundSkills.map((s) => ({
-      name: s.name,
-      description: s.description,
-      source: s.metadata?.source,
-      enabled: s.enabled,
-    }));
+    const skillItems: SkillItem[] = foundSkills.map((s) => {
+      const quality = evaluateSkillDirectory(s.path);
+      return {
+        name: s.name,
+        description: s.description,
+        source: s.metadata?.source,
+        enabled: s.enabled,
+        quality: quality?.overall,
+        grade: quality ? getQualityGrade(quality.overall) : undefined,
+        warnings: quality?.warnings.length,
+      };
+    });
 
     return {
       skills: skillItems,

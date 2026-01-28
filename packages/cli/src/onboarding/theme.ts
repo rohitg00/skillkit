@@ -132,3 +132,25 @@ export function formatScore(score: number): string {
   }
   return `${scoreColor(`${score}%`)} ${colors.dim(bar)}`;
 }
+
+export function getQualityGradeFromScore(score: number): string {
+  if (score >= 90) return 'A';
+  if (score >= 80) return 'B';
+  if (score >= 70) return 'C';
+  if (score >= 60) return 'D';
+  return 'F';
+}
+
+export function formatQualityBadge(score: number): string {
+  const grade = getQualityGradeFromScore(score);
+  if (score >= 80) return colors.success(`[${grade}]`);
+  if (score >= 60) return colors.warning(`[${grade}]`);
+  return colors.error(`[${grade}]`);
+}
+
+export function formatQualityBadgeCompact(score: number): string {
+  const grade = getQualityGradeFromScore(score);
+  if (score >= 80) return colors.success(grade);
+  if (score >= 60) return colors.warning(grade);
+  return colors.error(grade);
+}
