@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Button } from './Button';
 
 const ASCII_LOGO = `
- ____  _  __ _  _      _      _  __ _  _____
-/ ___|| |/ /| || |    | |    | |/ /| ||_   _|
-\\___ \\| ' / | || |    | |    | ' / | |  | |
- ___) | . \\ | || |___ | |___ | . \\ | |  | |
-|____/|_|\\_\\|_||_____||_____||_|\\_\\|_|  |_|
+███████╗██╗  ██╗██╗██╗     ██╗     ██╗  ██╗██╗████████╗
+██╔════╝██║ ██╔╝██║██║     ██║     ██║ ██╔╝██║╚══██╔══╝
+███████╗█████╔╝ ██║██║     ██║     █████╔╝ ██║   ██║
+╚════██║██╔═██╗ ██║██║     ██║     ██╔═██╗ ██║   ██║
+███████║██║  ██╗██║███████╗███████╗██║  ██╗██║   ██║
+╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝
 `.trim();
 
 interface TerminalLine {
@@ -116,7 +117,7 @@ export function Hero(): React.ReactElement {
 
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-8 pb-10 relative">
         <div className="hidden lg:block mb-6 overflow-hidden">
-          <pre className="text-zinc-500 text-[11px] leading-tight font-mono select-none whitespace-pre">
+          <pre className="text-zinc-600 text-[10px] leading-none font-mono select-none whitespace-pre" style={{ fontFamily: 'JetBrains Mono, Consolas, monospace' }}>
             {ASCII_LOGO}
           </pre>
         </div>
