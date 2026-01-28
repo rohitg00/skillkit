@@ -1,6 +1,6 @@
 {
   "name": "@skillkit/core",
-  "version": "1.7.6",
+  "version": "1.7.7",
   "description": "Core functionality for SkillKit - skill discovery, parsing, and translation",
   "type": "module",
   "main": "./dist/index.js",
