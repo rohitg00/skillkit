@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './Button';
 
-const ASCII_LOGO = `███████╗██╗  ██╗██╗██╗     ██╗     ██╗  ██╗██╗████████╗
-██╔════╝██║ ██╔╝██║██║     ██║     ██║ ██╔╝██║╚══██╔══╝
-███████╗█████╔╝ ██║██║     ██║     █████╔╝ ██║   ██║
-╚════██║██╔═██╗ ██║██║     ██║     ██╔═██╗ ██║   ██║
-███████║██║  ██╗██║███████╗███████╗██║  ██╗██║   ██║
-╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝`;
+const ASCII_LOGO = `
+ ███████ ██   ██ ██ ██      ██      ██   ██ ██ ████████
+ ██      ██  ██  ██ ██      ██      ██  ██  ██    ██
+ ███████ █████   ██ ██      ██      █████   ██    ██
+      ██ ██  ██  ██ ██      ██      ██  ██  ██    ██
+ ███████ ██   ██ ██ ███████ ███████ ██   ██ ██    ██
+`.trim();
 
 interface TerminalLine {
   type: 'cmd' | 'out';
@@ -115,7 +116,7 @@ export function Hero(): React.ReactElement {
 
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-8 pb-10 relative">
         <div className="hidden lg:block mb-6 overflow-hidden">
-          <pre className="text-zinc-800 text-[8px] leading-none font-mono select-none animate-pulse">
+          <pre className="text-zinc-700 text-[10px] leading-tight font-mono select-none whitespace-pre">
             {ASCII_LOGO}
           </pre>
         </div>
