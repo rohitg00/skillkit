@@ -340,6 +340,15 @@ function assessCompleteness(content: string): CompletenessResult {
     }
   }
 
+  if (headerPositions.length > 0) {
+    const last = headerPositions[headerPositions.length - 1];
+    const tailContent = content.slice(last.index + last.header.length).trim();
+    if (tailContent.length < 20) {
+      const sectionName = last.header.replace(/^#+\s+/, '');
+      emptySections.push(sectionName);
+    }
+  }
+
   const codeBlocks = countCodeBlocks(content);
   const exampleCoverage = Math.min(100, codeBlocks * 25);
 

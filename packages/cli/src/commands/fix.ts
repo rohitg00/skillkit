@@ -105,7 +105,8 @@ function generateFixes(content: string, quality: QualityScore, skillName: string
   }
 
   for (const [vague, replacement] of Object.entries(VAGUE_TERM_REPLACEMENTS)) {
-    const regex = new RegExp(vague, 'gi');
+    const escaped = vague.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escaped, 'gi');
     if (regex.test(content)) {
       fixes.push({
         type: 'replace',
@@ -148,7 +149,8 @@ function applyFixes(content: string, fixes: FixSuggestion[]): string {
         result = result.trimEnd() + '\n' + fix.replacement;
       }
     } else if (fix.type === 'replace' && fix.original && fix.automatic) {
-      const regex = new RegExp(fix.original, 'gi');
+      const escaped = fix.original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(escaped, 'gi');
       result = result.replace(regex, fix.replacement);
     }
   }
@@ -351,33 +353,31 @@ export class FixCommand extends Command {
 function generateDiff(original: string, modified: string): string {
   const originalLines = original.split('\n');
   const modifiedLines = modified.split('\n');
+
+  const originalSet = new Set(originalLines);
+  const modifiedSet = new Set(modifiedLines);
+
+  const added = modifiedLines.filter(line => !originalSet.has(line));
+  const removed = originalLines.filter(line => !modifiedSet.has(line));
+
   const diff: string[] = [];
 
-  let i = 0;
-  let j = 0;
-
-  while (i < modifiedLines.length || j < originalLines.length) {
-    if (i < modifiedLines.length && (j >= originalLines.length || modifiedLines[i] !== originalLines[j])) {
-      if (i < 10 || i >= modifiedLines.length - 3) {
-        diff.push(colors.success(`+ ${modifiedLines[i]}`));
-      }
-      i++;
-    } else if (j < originalLines.length && (i >= modifiedLines.length || originalLines[j] !== modifiedLines[i])) {
-      if (j < 10) {
-        diff.push(colors.error(`- ${originalLines[j]}`));
-      }
-      j++;
-    } else {
-      if (i < 5) {
-        diff.push(colors.muted(`  ${modifiedLines[i]}`));
-      }
-      i++;
-      j++;
-    }
+  for (const line of removed.slice(0, 5)) {
+    diff.push(colors.error(`- ${line}`));
+  }
+  if (removed.length > 5) {
+    diff.push(colors.muted(`  ... and ${removed.length - 5} more removed`));
   }
 
-  if (diff.length > 20) {
-    return diff.slice(0, 20).join('\n') + '\n' + colors.muted(`... and ${diff.length - 20} more lines`);
+  for (const line of added.slice(0, 10)) {
+    diff.push(colors.success(`+ ${line}`));
+  }
+  if (added.length > 10) {
+    diff.push(colors.muted(`  ... and ${added.length - 10} more added`));
+  }
+
+  if (diff.length === 0) {
+    diff.push(colors.muted('  (no visible changes)'));
   }
 
   return diff.join('\n');

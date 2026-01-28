@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, statSync } from 'node:fs';
-import { join, basename, resolve } from 'node:path';
+import { join, basename, resolve, dirname } from 'node:path';
 import { Command, Option } from 'clipanion';
 import {
   validateSkill,
@@ -259,7 +259,8 @@ export class ValidateCommand extends Command {
             }
           } else {
             const isFile = resolved.endsWith('.md') || resolved.endsWith('.mdc');
-            const formatResult = this.quality ? { valid: true, errors: [] } : validateSkill(resolved);
+            const skillDir = isFile ? dirname(resolved) : resolved;
+            const formatResult = this.quality ? { valid: true, errors: [] } : validateSkill(skillDir);
             const quality = isFile ? evaluateSkillFile(resolved) : evaluateSkillDirectory(resolved);
             results.push({
               name: basename(target),
