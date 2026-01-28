@@ -1,0 +1,58 @@
+---
+title: Recommendations
+description: Get smart skill suggestions for your project
+---
+
+# Recommendations
+
+SkillKit analyzes your project and suggests relevant skills.
+
+## Get Recommendations
+
+```bash
+skillkit recommend
+```
+
+Output:
+
+```
+Project: my-app (Next.js + TypeScript + Tailwind)
+
+Recommended Skills:
+  92% vercel-react-best-practices
+  87% tailwind-v4-patterns
+  85% nextjs-app-router
+```
+
+## Filters
+
+```bash
+skillkit recommend --search "auth"
+skillkit recommend --category security
+skillkit recommend --min-score 80
+```
+
+## How It Works
+
+The engine analyzes:
+- **Project structure** - Frameworks, languages, tools
+- **Dependencies** - package.json, requirements.txt
+- **File patterns** - Code patterns in your codebase
+
+## Scoring
+
+Scores based on:
+- Stack match
+- Quality score (0-100)
+- Popularity
+- Task relevance
+
+## Programmatic API
+
+```typescript
+import { RecommendationEngine, analyzeProject } from '@skillkit/core'
+
+const engine = new RecommendationEngine()
+const profile = await analyzeProject('./my-project')
+const recs = engine.recommend(profile)
+```

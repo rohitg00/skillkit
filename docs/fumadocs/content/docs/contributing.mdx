@@ -1,0 +1,68 @@
+---
+title: Contributing
+description: Contribute to SkillKit development
+---
+
+# Contributing
+
+## Setup
+
+```bash
+git clone https://github.com/rohitg00/skillkit.git
+cd skillkit
+pnpm install
+pnpm build
+pnpm test
+```
+
+## Requirements
+
+- Node.js 18+
+- pnpm 8+
+- Bun 1.2+ (TUI)
+
+## Project Structure
+
+```
+skillkit/
+├── packages/
+│   ├── core/     # Business logic
+│   ├── cli/      # CLI
+│   ├── tui/      # Terminal UI
+│   └── agents/   # 32 adapters
+├── marketplace/  # Skills data
+│   ├── skills.json
+│   └── sources.json
+└── docs/
+```
+
+## Development
+
+```bash
+git checkout -b feat/my-feature
+pnpm test
+pnpm lint
+pnpm build
+```
+
+## Code Style
+
+- ES modules
+- `function` keyword
+- Explicit return types
+- No unnecessary comments
+- No nested ternaries
+
+## Commits
+
+```
+feat: add feature
+fix: resolve bug
+docs: update docs
+test: add tests
+```
+
+## Links
+
+- [GitHub Issues](https://github.com/rohitg00/skillkit/issues)
+- [GitHub Discussions](https://github.com/rohitg00/skillkit/discussions)

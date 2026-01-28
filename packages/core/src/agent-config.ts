@@ -212,6 +212,142 @@ export const AGENT_CONFIG: Record<AgentType, AgentDirectoryConfig> = {
     usesFrontmatter: true,
     supportsAutoDiscovery: true,
   },
+
+  // Cline
+  cline: {
+    skillsDir: '.cline/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'xml',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Codebuddy
+  codebuddy: {
+    skillsDir: '.codebuddy/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'xml',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Commandcode
+  commandcode: {
+    skillsDir: '.commandcode/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'xml',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Continue
+  continue: {
+    skillsDir: '.continue/skills',
+    configFile: 'AGENTS.md',
+    globalSkillsDir: '~/.continue/skills',
+    configFormat: 'xml',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Crush
+  crush: {
+    skillsDir: '.crush/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'xml',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Factory
+  factory: {
+    skillsDir: '.factory/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'xml',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // MCPJam
+  mcpjam: {
+    skillsDir: '.mcpjam/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'xml',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Mux
+  mux: {
+    skillsDir: '.mux/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'xml',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Neovate
+  neovate: {
+    skillsDir: '.neovate/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'xml',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // OpenHands
+  openhands: {
+    skillsDir: '.openhands/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'xml',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Pi
+  pi: {
+    skillsDir: '.pi/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'xml',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Qoder
+  qoder: {
+    skillsDir: '.qoder/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'xml',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Qwen
+  qwen: {
+    skillsDir: '.qwen/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'xml',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Vercel
+  vercel: {
+    skillsDir: '.vercel/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'xml',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Zencoder
+  zencoder: {
+    skillsDir: '.zencoder/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'xml',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
 };
 
 /**

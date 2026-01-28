@@ -1,0 +1,160 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --color-skillkit-black: #000000;
+  --color-skillkit-dark: #18181b;
+  --color-skillkit-medium: #71717a;
+  --color-skillkit-light: #fafafa;
+  --color-skillkit-blue: #3b82f6;
+
+  /* Light mode defaults */
+  --color-fd-background: #ffffff;
+  --color-fd-foreground: var(--color-skillkit-black);
+  --color-fd-muted: #f4f4f5;
+  --color-fd-muted-foreground: var(--color-skillkit-medium);
+  --color-fd-popover: #ffffff;
+  --color-fd-popover-foreground: var(--color-skillkit-black);
+  --color-fd-card: #ffffff;
+  --color-fd-card-foreground: var(--color-skillkit-black);
+  --color-fd-border: #e4e4e7;
+  --color-fd-primary: var(--color-skillkit-blue);
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-secondary: #f4f4f5;
+  --color-fd-secondary-foreground: var(--color-skillkit-black);
+  --color-fd-accent: #f4f4f5;
+  --color-fd-accent-foreground: var(--color-skillkit-black);
+  --color-fd-ring: var(--color-skillkit-blue);
+}
+
+/* Dark mode */
+:root.dark {
+  --color-fd-background: var(--color-skillkit-black);
+  --color-fd-foreground: var(--color-skillkit-light);
+  --color-fd-muted: var(--color-skillkit-dark);
+  --color-fd-muted-foreground: #a1a1aa;
+  --color-fd-popover: var(--color-skillkit-dark);
+  --color-fd-popover-foreground: var(--color-skillkit-light);
+  --color-fd-card: var(--color-skillkit-dark);
+  --color-fd-card-foreground: var(--color-skillkit-light);
+  --color-fd-border: #27272a;
+  --color-fd-primary: var(--color-skillkit-blue);
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-secondary: var(--color-skillkit-dark);
+  --color-fd-secondary-foreground: var(--color-skillkit-light);
+  --color-fd-accent: var(--color-skillkit-dark);
+  --color-fd-accent-foreground: var(--color-skillkit-light);
+  --color-fd-ring: var(--color-skillkit-blue);
+}
+
+body {
+  background-color: var(--color-fd-background);
+  color: var(--color-fd-foreground);
+}
+
+::selection {
+  background-color: var(--color-skillkit-blue);
+  color: #ffffff;
+}
+
+/* Light mode code blocks */
+pre {
+  background-color: #f8f8f8 !important;
+  border: 1px solid #e4e4e7;
+}
+
+code {
+  background-color: #f4f4f5;
+  color: var(--color-skillkit-black);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-size: 0.875em;
+}
+
+pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+/* Dark mode code blocks */
+:root.dark pre {
+  background-color: #0d0d0d !important;
+  border: 1px solid #27272a;
+}
+
+:root.dark code {
+  background-color: #27272a;
+  color: #e4e4e7;
+}
+
+:root.dark pre code {
+  background-color: transparent;
+}
+
+/* Inline code in paragraphs */
+p code, li code, td code {
+  font-weight: 500;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-fd-border);
+}
+
+th {
+  font-weight: 600;
+  background-color: var(--color-fd-muted);
+}
+
+/* Lists */
+ul, ol {
+  padding-left: 1.5rem;
+}
+
+li {
+  margin: 0.5rem 0;
+}
+
+/* Landing page animations */
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-scroll {
+  animation: scroll 35s linear infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+.animate-fade-in-delay {
+  animation: fade-in 0.6s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
+/* Landing page specific styles */
+.bg-background {
+  background-color: #000000;
+}
+
+.bg-surface {
+  background-color: rgba(24, 24, 27, 0.5);
+}

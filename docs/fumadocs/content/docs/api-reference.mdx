@@ -1,0 +1,117 @@
+---
+title: API Reference
+description: Core package API for programmatic skill management
+---
+
+# API Reference
+
+The `@skillkit/core` package provides the foundational business logic with zero internal dependencies.
+
+## Installation
+
+```bash
+npm install @skillkit/core
+```
+
+## Module Exports
+
+| Entry Point | Purpose |
+|-------------|---------|
+| `@skillkit/core` | Main exports |
+| `@skillkit/core/types` | Type definitions |
+| `@skillkit/core/discovery` | Skill discovery |
+| `@skillkit/core/parser` | SKILL.md parsing |
+| `@skillkit/core/translator` | Format translation |
+| `@skillkit/core/context` | Project context |
+| `@skillkit/core/recommend` | Recommendation engine |
+
+## Skill Discovery
+
+```typescript
+import { findAllSkills, findSkill } from '@skillkit/core/discovery'
+
+// Find all skills in directory
+const skills = await findAllSkills('./my-project')
+
+// Find specific skill
+const skill = await findSkill('react-patterns')
+```
+
+## Quality Evaluation
+
+```typescript
+import { evaluateSkillContent, getQualityGrade } from '@skillkit/core'
+
+const score = evaluateSkillContent(skillContent)
+// { total: 85, structure: 22, clarity: 25, specificity: 28, advanced: 10 }
+
+const grade = getQualityGrade(score.total)
+// 'B'
+```
+
+**Dimensions (weights out of 100):**
+- Structure (25): Frontmatter, sections
+- Clarity (30): Descriptions, examples
+- Specificity (30): Actionable steps
+- Advanced (15): Tests, versioning
+
+## Translation
+
+```typescript
+import { translateSkill } from '@skillkit/core/translator'
+
+const result = await translateSkill(skillContent, 'cursor')
+// { content: '...', filename: 'skill.mdc' }
+```
+
+## Memory System
+
+```typescript
+import { MemoryCompressor, LearningStore } from '@skillkit/core'
+
+// Compress observations
+const compressor = new MemoryCompressor()
+const learning = await compressor.compress(observations)
+
+// Store and search
+const store = new LearningStore()
+await store.add(learning)
+const results = await store.search('authentication')
+```
+
+## Recommendation Engine
+
+```typescript
+import { RecommendationEngine, analyzeProject } from '@skillkit/core/recommend'
+
+const engine = new RecommendationEngine()
+const profile = await analyzeProject('./my-project')
+const recommendations = engine.recommend(profile)
+```
+
+## Types
+
+```typescript
+interface Skill {
+  name: string
+  description: string
+  path: string
+  content: string
+  metadata: SkillMetadata
+  enabled: boolean
+}
+
+interface QualityScore {
+  total: number      // 0-100
+  structure: number  // 0-25
+  clarity: number    // 0-30
+  specificity: number // 0-30
+  advanced: number   // 0-15
+}
+
+interface Recommendation {
+  skill: Skill
+  score: number
+  reasons: string[]
+}
+```

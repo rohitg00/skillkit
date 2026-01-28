@@ -1,0 +1,104 @@
+---
+title: Configuration
+description: Configure SkillKit at project and user levels
+---
+
+# Configuration
+
+SkillKit uses a layered configuration system with five priority levels (lowest to highest):
+
+1. Default values in code
+2. Global user preferences (`~/.skillkit/preferences.json`)
+3. Project settings (`skillkit.yaml`)
+4. Environment variables
+5. CLI flags
+
+## Project Configuration
+
+Create `skillkit.yaml` in your project root:
+
+```yaml
+version: 1
+agent: cursor              # Override auto-detection
+autoSync: true             # Sync on changes
+
+enabledSkills:
+  - pdf
+  - xlsx
+  - react-patterns
+
+disabledSkills:
+  - deprecated-skill
+
+skillsDir: ./custom-skills  # Custom directory
+
+sources:                   # Default sources
+  - anthropics/skills
+  - vercel-labs/agent-skills
+```
+
+## Manifest File
+
+The `.skills` file enables Git-based team sharing:
+
+```yaml
+version: 1
+skills:
+  - source: anthropics/skills
+    skills: [pdf, xlsx]
+  - source: vercel-labs/agent-skills
+    skills: [react-patterns]
+```
+
+Commands:
+
+```bash
+skillkit manifest init        # Create .skills
+skillkit manifest add <skill> # Add skill
+skillkit manifest install     # Install all
+```
+
+## User Preferences
+
+Global preferences in `~/.skillkit/preferences.json`:
+
+```json
+{
+  "lastAgents": ["claude-code", "cursor"],
+  "defaultAgent": "claude-code",
+  "theme": "dark"
+}
+```
+
+## Environment Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `SKILLKIT_AGENT` | Override default agent |
+| `SKILLKIT_DIR` | Custom SkillKit directory |
+| `SKILLKIT_DEBUG` | Enable debug logging |
+
+## CLI Settings
+
+```bash
+skillkit settings --set agent=cursor
+skillkit settings --set autoSync=true
+skillkit settings --get agent
+```
+
+## Directory Structure
+
+```
+~/.skillkit/
+├── preferences.json   # User preferences
+├── cache/            # Marketplace cache
+└── memory/           # Learning storage
+    ├── observations/
+    ├── learnings/
+    └── index.json
+
+./project/
+├── skillkit.yaml     # Project config
+├── .skills           # Team manifest
+└── skills/           # Local skills
+```

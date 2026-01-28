@@ -1,0 +1,71 @@
+---
+title: Supported Agents
+description: 32 AI coding agents supported by SkillKit
+---
+
+# Supported Agents
+
+SkillKit uses an adapter pattern to support 32 AI coding platforms. Each adapter implements `getConfigPath()` and `generateConfig()` methods.
+
+## Agent Directory Mapping
+
+| Agent | Directory | Format |
+|-------|-----------|--------|
+| Claude Code | `.claude/skills/` | SKILL.md |
+| Cursor | `.cursor/skills/` | .mdc |
+| Codex | `.codex/skills/` | SKILL.md |
+| Gemini CLI | `.gemini/skills/` | SKILL.md |
+| OpenCode | `.opencode/skills/` | SKILL.md |
+| GitHub Copilot | `.github/skills/` | Markdown |
+| Windsurf | `.windsurf/skills/` | Markdown |
+| Antigravity | `.antigravity/skills/` | SKILL.md |
+| Amp | `.amp/skills/` | SKILL.md |
+| Clawdbot | `skills/` | SKILL.md |
+| Droid (Factory) | `.factory/skills/` | SKILL.md |
+| Goose | `.goose/skills/` | SKILL.md |
+| Kilo Code | `.kilocode/skills/` | SKILL.md |
+| Kiro CLI | `.kiro/skills/` | SKILL.md |
+| Roo Code | `.roo/skills/` | SKILL.md |
+| Trae | `.trae/skills/` | SKILL.md |
+| Cline | `.cline/skills/` | SKILL.md |
+| CodeBuddy | `.codebuddy/skills/` | SKILL.md |
+| CommandCode | `.commandcode/skills/` | SKILL.md |
+| Continue | `.continue/skills/` | SKILL.md |
+| Crush | `.crush/skills/` | SKILL.md |
+| Factory | `.factory/skills/` | SKILL.md |
+| MCPJam | `.mcpjam/skills/` | SKILL.md |
+| Mux | `.mux/skills/` | SKILL.md |
+| Neovate | `.neovate/skills/` | SKILL.md |
+| OpenHands | `.openhands/skills/` | SKILL.md |
+| Pi | `.pi/skills/` | SKILL.md |
+| Qoder | `.qoder/skills/` | SKILL.md |
+| Qwen | `.qwen/skills/` | SKILL.md |
+| Vercel | `.vercel/skills/` | SKILL.md |
+| Zencoder | `.zencoder/skills/` | SKILL.md |
+| Universal | `skills/` | SKILL.md |
+
+## Translation System
+
+```
+Universal Format (SKILL.md)
+        ↓
+    Adapter Interface
+        ↓
+Agent-Specific Formats (.mdc, JSON, Markdown)
+```
+
+## Agent Commands
+
+```bash
+skillkit agent list              # List installed agents
+skillkit agent show <name>       # Show agent details
+skillkit agent translate --to cursor  # Translate to format
+skillkit agent sync              # Sync to target agent
+```
+
+## Multi-Agent Installation
+
+```bash
+# Install for multiple agents
+skillkit install anthropics/skills --agent claude-code,cursor,windsurf
+```

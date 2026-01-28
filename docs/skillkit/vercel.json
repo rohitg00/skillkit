@@ -2,5 +2,15 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
-  "framework": "vite"
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/docs/:path*",
+      "destination": "https://skillkit-docs.vercel.app/docs/:path*"
+    },
+    {
+      "source": "/docs",
+      "destination": "https://skillkit-docs.vercel.app/docs"
+    }
+  ]
 }

@@ -1,0 +1,23 @@
+{
+  "title": "SkillKit",
+  "pages": [
+    "index",
+    "installation",
+    "quickstart",
+    "tui",
+    "skills",
+    "agents",
+    "translation",
+    "marketplace",
+    "recommendations",
+    "memory",
+    "workflows",
+    "testing",
+    "commands",
+    "configuration",
+    "api-reference",
+    "cicd",
+    "custom-agents",
+    "contributing"
+  ]
+}

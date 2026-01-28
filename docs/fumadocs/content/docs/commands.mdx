@@ -1,0 +1,285 @@
+---
+title: CLI Commands
+description: Complete reference for all SkillKit CLI commands
+---
+
+# CLI Commands
+
+SkillKit provides 40+ commands organized into functional categories. Built on Clipanion v4 with interactive prompts via @clack/prompts.
+
+## Global Options
+
+| Option | Short | Purpose |
+|--------|-------|---------|
+| `--help` | `-h` | Display command help |
+| `--version` | `-v` | Show version info |
+| `--quiet` | `-q` | Minimal output, no logo |
+
+## Install Command
+
+Install skills from GitHub, GitLab, Bitbucket, or local paths.
+
+```bash
+skillkit install <source> [options]
+```
+
+### Source Formats
+
+| Format | Example |
+|--------|---------|
+| GitHub | `owner/repo` or full URL |
+| GitLab | `gitlab:owner/repo` |
+| Bitbucket | `bitbucket:owner/repo` |
+| Local Path | `./path` or `~/path` |
+
+### Install Options
+
+| Option | Short | Type | Purpose |
+|--------|-------|------|---------|
+| `--skills` | `-s` | string | Comma-separated skill names |
+| `--all` | `-a` | boolean | Install all discovered skills |
+| `--yes` | `-y` | boolean | Skip confirmation prompts |
+| `--global` | `-g` | boolean | Install to global directory |
+| `--force` | `-f` | boolean | Overwrite existing skills |
+| `--provider` | `-p` | string | Force provider: github, gitlab, bitbucket |
+| `--list` | `-l` | boolean | List available skills without installing |
+| `--agent` | — | array | Target specific agents (repeatable) |
+
+### Examples
+
+```bash
+# Interactive installation
+skillkit install anthropics/skills
+
+# CI/CD installation (no prompts)
+skillkit install anthropics/skills --skills=pdf,xlsx --agent claude --yes
+
+# List available skills
+skillkit install anthropics/skills --list
+
+# Force overwrite
+skillkit install anthropics/skills --skills=pdf --force
+
+# Install for multiple agents
+skillkit install anthropics/skills --agent claude --agent cursor
+```
+
+## Remove Command
+
+```bash
+skillkit remove <skill-names> [options]
+```
+
+| Option | Purpose |
+|--------|---------|
+| `--agent` | Target specific agents (default: all) |
+| `--yes` | Skip confirmation |
+| `--keep-metadata` | Remove skill but preserve metadata |
+
+## Update Command
+
+```bash
+skillkit update [skill-names] [options]
+```
+
+| Option | Purpose |
+|--------|---------|
+| `--dry-run` | Check for updates without installing |
+| `--yes` | Skip confirmation prompts |
+| `--agent` | Update in specific agents only |
+
+## Enable/Disable Commands
+
+```bash
+skillkit enable <skill-names> [options]
+skillkit disable <skill-names> [options]
+```
+
+Disabled skills are ignored by the `sync` command. No file changes occur.
+
+## List Command
+
+```bash
+skillkit list [options]
+```
+
+Lists installed skills with quality grades.
+
+## Sync Command
+
+```bash
+skillkit sync [options]
+```
+
+Synchronizes enabled skills to agent configuration files.
+
+## Recommend Command
+
+```bash
+skillkit recommend [options]
+```
+
+AI-powered recommendations based on project analysis.
+
+| Option | Purpose |
+|--------|---------|
+| `--search` | Task-based search |
+| `--category` | Filter by category |
+| `--min-score` | Quality threshold |
+
+## Marketplace Command
+
+```bash
+skillkit marketplace [options]
+skillkit marketplace search <query>
+```
+
+Browse 15,000+ indexed skills from the aggregated catalog.
+
+| Option | Purpose |
+|--------|---------|
+| `--tags` | Filter by tags |
+| `--refresh` | Force refresh index |
+
+## Manifest Commands
+
+Team collaboration via Git-committable `.skills` file.
+
+```bash
+skillkit manifest init          # Create .skills file
+skillkit manifest add <source>  # Add skill source
+skillkit manifest install       # Install from manifest
+```
+
+### Manifest File Format
+
+```text
+# GitHub skills
+anthropics/skills
+vercel-labs/agent-skills
+
+# Local skills
+./local-skills
+
+# Specific versions
+owner/repo@v1.2.3
+```
+
+## Memory Commands
+
+```bash
+skillkit memory status          # View memory status
+skillkit memory search <query>  # Search learnings
+skillkit memory compress        # Compress observations
+skillkit memory export <name>   # Export as skill
+skillkit memory --global        # Use global memory
+```
+
+## Translation Commands
+
+```bash
+skillkit translate <skill> --to <agent>
+skillkit translate --all --to <agent>
+skillkit translate <skill> --to <agent> --dry-run
+```
+
+## Agent Commands
+
+```bash
+skillkit agent list                              # List agents
+skillkit agent show <name>                       # Show details
+skillkit agent create <name>                     # Create agent
+skillkit agent translate --source ./path --to cursor
+skillkit agent translate --source ./path --to cursor --recursive
+skillkit agent sync                              # Sync to target
+skillkit agent validate                          # Validate definitions
+```
+
+## Context Commands
+
+```bash
+skillkit context init    # Initialize project context
+skillkit context sync    # Sync context to agents
+```
+
+## Test Command
+
+```bash
+skillkit test [path]           # Run skill tests
+skillkit test --tags unit      # Filter by tags
+skillkit test --json           # JSON output for CI
+```
+
+## Workflow Commands
+
+```bash
+skillkit workflow list         # List workflows
+skillkit workflow run <name>   # Execute workflow
+skillkit workflow create <name> # Create workflow
+```
+
+## CI/CD Commands
+
+```bash
+skillkit cicd github-action    # Generate GitHub Actions
+skillkit cicd gitlab-ci        # Generate GitLab CI
+skillkit cicd pre-commit       # Generate pre-commit hooks
+```
+
+## Utility Commands
+
+```bash
+skillkit init                  # Initialize project
+skillkit create <name>         # Create new skill
+skillkit validate [path]       # Validate skill format
+skillkit read <skills>         # Read skill content
+skillkit publish               # Publish to marketplace
+skillkit settings --set key=value  # Configure settings
+```
+
+## Interactive TUI
+
+```bash
+skillkit ui    # Launch terminal UI
+skillkit       # Same as above
+```
+
+**Navigation Keys:**
+
+| Key | Action |
+|-----|--------|
+| `h` | Home |
+| `b` | Browse |
+| `m` | Marketplace |
+| `r` | Recommend |
+| `t` | Translate |
+| `c` | Context |
+| `i` | Installed |
+| `s` | Sync |
+| `/` | Help |
+| `q` | Quit |
+
+## Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | Success |
+| 1 | General error |
+| 2 | Invalid arguments |
+| 3 | Configuration issue |
+| 4 | Network problem |
+| 5 | Filesystem error |
+
+## Quality Grades
+
+Skills receive automatic quality scores mapped to grades:
+
+| Grade | Score Range |
+|-------|-------------|
+| A | 90-100 |
+| B | 80-89 |
+| C | 70-79 |
+| D | 60-69 |
+| F | Below 60 |
+
+Skills with score below 60 trigger warning displays before installation.

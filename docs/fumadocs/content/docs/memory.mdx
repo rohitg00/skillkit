@@ -1,0 +1,47 @@
+---
+title: Memory System
+description: Persistent learning across AI agent sessions
+---
+
+# Memory System
+
+Capture learnings from AI sessions and convert them into reusable skills.
+
+## Commands
+
+```bash
+skillkit memory status        # View status
+skillkit memory search <q>    # Search learnings
+skillkit memory compress      # Compress observations
+skillkit memory export <name> # Export as skill
+skillkit memory --global      # Global memory
+```
+
+## How It Works
+
+1. **Observations** - Track patterns during sessions
+2. **Compression** - Distill into reusable knowledge
+3. **Injection** - Load into new sessions
+4. **Export** - Convert to shareable skills
+
+## Storage
+
+```
+~/.skillkit/memory/
+├── observations/   # Raw session data
+├── learnings/      # Compressed knowledge
+└── index.json      # Memory index
+```
+
+## Programmatic API
+
+```typescript
+import { MemoryCompressor, LearningStore } from '@skillkit/core'
+
+const compressor = new MemoryCompressor()
+const learning = await compressor.compress(observations)
+
+const store = new LearningStore()
+await store.add(learning)
+const results = await store.search('authentication')
+```

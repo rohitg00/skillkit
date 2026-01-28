@@ -1,0 +1,65 @@
+---
+title: CI/CD
+description: Integrate SkillKit into CI/CD pipelines
+---
+
+# CI/CD Integration
+
+Generate templates for automated skill management.
+
+## Generate Templates
+
+```bash
+skillkit cicd github-action
+skillkit cicd gitlab-ci
+skillkit cicd pre-commit
+```
+
+## GitHub Actions
+
+```yaml
+name: SkillKit
+on: [push, pull_request]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install -g skillkit
+      - run: skillkit validate
+      - run: skillkit test --json > results.json
+```
+
+## GitLab CI
+
+```yaml
+validate-skills:
+  image: node:20
+  script:
+    - npm install -g skillkit
+    - skillkit validate
+    - skillkit test
+```
+
+## Pre-commit
+
+```yaml
+repos:
+  - repo: local
+    hooks:
+      - id: skillkit-validate
+        name: Validate Skills
+        entry: skillkit validate
+        language: system
+```
+
+## Best Practices
+
+- Validate on PR
+- Test in CI with `--json`
+- Sync only on main branch
+- Cache npm packages

@@ -6,7 +6,6 @@ import { Footer } from './components/Footer';
 import { SkillGenerator } from './components/SkillGenerator';
 import { SkillSubmitForm } from './components/SkillSubmitForm';
 import { Commands } from './components/Commands';
-import { Documentation } from './components/Documentation';
 
 const GITHUB_ICON = (
   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -37,7 +36,7 @@ export default function App(): React.ReactElement {
             </a>
             <div className="flex items-center gap-2 sm:gap-4">
               <a
-                href="#docs"
+                href="https://agentskills.com/docs"
                 className="text-zinc-400 hover:text-white transition-colors text-sm font-mono hidden sm:block"
               >
                 Docs
@@ -70,10 +69,6 @@ export default function App(): React.ReactElement {
         <Agents />
         <Features />
         <Commands />
-
-        <section id="docs" className="py-12 border-b border-zinc-800 bg-surface">
-          <Documentation />
-        </section>
 
         <section id="skills" className="py-12 border-b border-zinc-800">
           <SkillGenerator />

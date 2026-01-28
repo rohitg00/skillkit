@@ -1,0 +1,193 @@
+---
+title: Terminal UI
+description: Interactive keyboard-driven interface for managing skills
+---
+
+# Terminal UI
+
+The TUI provides an interactive, keyboard-driven interface for managing skills with visual browsing, searching, and installation capabilities.
+
+## Launch
+
+```bash
+skillkit ui
+# or just
+skillkit
+```
+
+## Framework
+
+Built on modern technologies:
+- **@opentui/react** - Terminal rendering
+- **React 19.0.0** - Component architecture
+- **Bun 1.2.0+** - Runtime requirement
+
+## Screens
+
+| Screen | Key | Purpose |
+|--------|-----|---------|
+| **Home** | `h` | Entry point dashboard with quick navigation |
+| **Browse** | `b` | Skill repository browser with search |
+| **Marketplace** | `m` | 15,000+ skills with categories |
+| **Installed** | `i` | Local skill management |
+| **Recommend** | `r` | AI-powered suggestions |
+| **Translate** | `t` | Format conversion |
+| **Context** | `c` | Project context management |
+| **Sync** | `s` | Synchronize to agents |
+
+## Keyboard Navigation
+
+### Global Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `h` | Go to Home |
+| `b` | Go to Browse |
+| `m` | Go to Marketplace |
+| `i` | Go to Installed |
+| `r` | Go to Recommend |
+| `t` | Go to Translate |
+| `c` | Go to Context |
+| `s` | Go to Sync |
+| `/` | Open Help |
+| `q` | Quit TUI |
+
+### List Navigation
+
+| Key | Action |
+|-----|--------|
+| `j` or `↓` | Move down |
+| `k` or `↑` | Move up |
+| `Enter` | Select/activate |
+| `Esc` | Go back |
+| `/` | Enter search mode |
+
+### Search Mode
+
+| Key | Action |
+|-----|--------|
+| `/` | Enter search mode |
+| Type | Filter list |
+| `Enter` | Confirm search |
+| `Esc` | Exit search |
+
+## Screen Details
+
+### Home Screen
+
+Dashboard with:
+- Quick navigation shortcuts
+- Recent activity
+- System status
+
+### Browse Screen
+
+Repository browser with:
+- Search functionality
+- Pagination
+- Quality indicators
+- Animation phases for smooth loading
+
+### Installed Screen
+
+Manage local skills:
+- Enable/disable skills
+- Quality grades (A-F)
+- Live search filtering
+- Status icons: `●` enabled, `○` disabled
+
+### Marketplace Screen
+
+Browse 15,000+ skills:
+- Category filtering
+- Featured skills
+- 3-phase animation loading
+- Quality scoring
+
+### Recommend Screen
+
+AI-powered suggestions:
+- Project analysis
+- Confidence scoring
+- Progress tracking
+- Match percentages
+
+## Visual Indicators
+
+### Quality Grades
+
+| Grade | Score | Color |
+|-------|-------|-------|
+| A | 90-100 | Green |
+| B | 80-89 | Green |
+| C | 70-79 | Yellow |
+| D | 60-69 | Red |
+| F | Below 60 | Red |
+
+### Status Icons
+
+| Icon | Meaning |
+|------|---------|
+| `●` | Enabled |
+| `○` | Disabled |
+| `⟁` | Claude Code |
+| `◫` | Cursor |
+| `◎` | Codex |
+| `✦` | Gemini |
+| `⬡` | OpenCode |
+
+## Theme System
+
+The TUI uses a monochromatic design with:
+- Consistent color coding
+- Terminal-compatible colors
+- Visual accents for selection
+- Muted states for disabled items
+
+## Architecture
+
+### State Management
+
+```
+loadSkills()
+  → getSearchDirs(agentType)
+  → findAllSkills(searchDirs)
+  → evaluateSkillDirectory() for each
+  → getQualityGrade(quality.overall)
+  → SkillsState
+```
+
+### Performance Optimizations
+
+- `useMemo` for filtered lists
+- `useCallback` for event handlers
+- Pagination limits rendered items
+- Progressive animation with phases
+
+### Animation Timing
+
+| Animation | Delay |
+|-----------|-------|
+| Entrance | 100ms between phases |
+| Spinner | 80ms interval |
+| Progress | 200ms interval |
+
+## Integration
+
+The TUI integrates with @skillkit/core:
+
+```typescript
+findAllSkills(searchDirs)      // Returns skill metadata
+evaluateSkillDirectory(path)   // Quality metrics
+getQualityGrade(score)         // 0-100 to A-F
+```
+
+## Graceful Exit
+
+The TUI handles shutdown gracefully:
+1. Unmounts React components
+2. Restores terminal state
+3. Cleans up signal handlers
+4. Exits process cleanly
+
+Press `q` from Home screen or `Ctrl+C` to exit.

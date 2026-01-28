@@ -1,0 +1,55 @@
+---
+title: Marketplace
+description: Browse and install from 15,000+ curated skills
+---
+
+# Marketplace
+
+The SkillKit marketplace indexes 15,000+ skills from curated sources.
+
+## Browse
+
+```bash
+skillkit marketplace
+```
+
+## Search
+
+```bash
+skillkit marketplace search "react hooks"
+```
+
+## Filter by Tags
+
+```bash
+skillkit marketplace --tags typescript,testing
+```
+
+## Refresh Index
+
+```bash
+skillkit marketplace refresh
+```
+
+## Popular Sources
+
+| Repository | Description |
+|------------|-------------|
+| [anthropics/skills](https://github.com/anthropics/skills) | PDF, XLSX, DOCX processing |
+| [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | React/Next.js best practices |
+
+## Install from Marketplace
+
+```bash
+skillkit install anthropics/skills
+skillkit install anthropics/skills --skills pdf,xlsx
+skillkit install anthropics/skills --agent claude-code,cursor
+```
+
+## Publish Skills
+
+```bash
+skillkit create my-skill
+skillkit validate my-skill
+skillkit publish
+```

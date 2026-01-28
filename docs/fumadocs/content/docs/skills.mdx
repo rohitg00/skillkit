@@ -1,0 +1,99 @@
+---
+title: Skills
+description: Understanding AI agent skills - format, lifecycle, and quality
+---
+
+# Skills
+
+A skill is an instruction file that teaches AI coding agents how to handle specific tasks. Each skill uses a universal markdown format (SKILL.md) with YAML frontmatter.
+
+## Skills vs Context vs Commands
+
+| Type | Purpose | Format |
+|------|---------|--------|
+| **Skills** | Task-specific reusable instructions | SKILL.md |
+| **Context** | Project-wide environment info | JSON/YAML |
+| **Commands** | Quick-action slash commands | Various |
+
+## Skill Format
+
+```markdown
+---
+name: my-skill
+description: What this skill does
+license: MIT
+metadata:
+  author: your-name
+  version: "1.0"
+  tags:
+    - react
+    - typescript
+---
+
+# My Skill
+
+Instructions for the AI agent.
+
+## When to Use
+
+- Scenario 1
+- Scenario 2
+
+## Steps
+
+1. First step
+2. Second step
+```
+
+## Skill Lifecycle
+
+Skills progress through six stages:
+
+1. **Discovery** - `findAllSkills()` scans directories for SKILL.md files
+2. **Quality Evaluation** - `evaluateSkillContent()` produces 0-100 scores (grades A-F)
+3. **Parsing** - `parseSkillFile()` extracts YAML frontmatter and markdown content
+4. **Translation** - `translateSkill()` converts to agent-specific formats
+5. **Installation** - Skills deployed to agent directories with metadata tracking
+6. **Testing** - Test suites with 14+ assertion types validate skills
+
+## Quality Evaluation
+
+Skills receive scores across four weighted dimensions:
+
+- **Structure** - 25 points: Frontmatter completeness, markdown sections
+- **Clarity** - 30 points: Description quality, instruction precision
+- **Specificity** - 30 points: Concrete examples, actionable steps
+- **Advanced** - 15 points: Test coverage, version info, examples
+
+**Grades:**
+- A: 90 to 100
+- B: 80 to 89
+- C: 70 to 79
+- D: 60 to 69
+- F: below 60
+
+## Skill Sources
+
+| Source | Description |
+|--------|-------------|
+| **GitHub/GitLab** | Remote repository collections |
+| **Local filesystem** | Project-specific skills |
+| **Marketplace** | 15,000+ curated skills with search |
+
+## Creating Skills
+
+```bash
+skillkit create my-skill
+```
+
+Or manually create a `SKILL.md` file following the format above.
+
+## Publishing Skills
+
+```bash
+# Test locally
+skillkit validate ./my-skill
+
+# Publish to marketplace
+skillkit publish
+```

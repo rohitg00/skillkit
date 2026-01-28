@@ -13,7 +13,7 @@ export interface AgentLogo {
 }
 
 /**
- * All 17 supported agents with monochromatic Unicode logos
+ * All 32 supported agents with monochromatic Unicode logos
  */
 export const AGENT_LOGOS: Record<string, AgentLogo> = {
   'claude-code': { icon: '⟁', name: 'Claude Code', company: 'Anthropic' },
@@ -32,6 +32,21 @@ export const AGENT_LOGOS: Record<string, AgentLogo> = {
   'trae': { icon: '◆', name: 'Trae', company: 'ByteDance' },
   'antigravity': { icon: '⊛', name: 'Antigravity', company: '' },
   'clawdbot': { icon: '⟐', name: 'Clawdbot', company: '' },
+  'cline': { icon: '⊕', name: 'Cline', company: '' },
+  'codebuddy': { icon: '⊗', name: 'CodeBuddy', company: '' },
+  'commandcode': { icon: '⊘', name: 'CommandCode', company: '' },
+  'continue': { icon: '⊞', name: 'Continue', company: '' },
+  'crush': { icon: '⊟', name: 'Crush', company: '' },
+  'factory': { icon: '⊠', name: 'Factory', company: '' },
+  'mcpjam': { icon: '⊡', name: 'MCPJam', company: '' },
+  'mux': { icon: '⊢', name: 'Mux', company: '' },
+  'neovate': { icon: '⊣', name: 'Neovate', company: '' },
+  'openhands': { icon: '⊤', name: 'OpenHands', company: '' },
+  'pi': { icon: '⊥', name: 'Pi', company: '' },
+  'qoder': { icon: '⊦', name: 'Qoder', company: '' },
+  'qwen': { icon: '⊧', name: 'Qwen', company: 'Alibaba' },
+  'vercel': { icon: '▲', name: 'Vercel', company: 'Vercel' },
+  'zencoder': { icon: '⊩', name: 'Zencoder', company: '' },
   'universal': { icon: '●', name: 'Universal', company: '' },
 } as const;
 

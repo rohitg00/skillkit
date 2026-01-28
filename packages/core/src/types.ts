@@ -18,6 +18,21 @@ export const AgentType = z.enum([
   'trae',
   'windsurf',
   'universal',
+  'cline',
+  'codebuddy',
+  'commandcode',
+  'continue',
+  'crush',
+  'factory',
+  'mcpjam',
+  'mux',
+  'neovate',
+  'openhands',
+  'pi',
+  'qoder',
+  'qwen',
+  'vercel',
+  'zencoder',
 ]);
 export type AgentType = z.infer<typeof AgentType>;
 

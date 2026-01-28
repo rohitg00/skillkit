@@ -1,0 +1,67 @@
+---
+title: Workflows
+description: Compose skills into multi-step orchestrations
+---
+
+# Workflows
+
+Compose skills into multi-step processes.
+
+## Commands
+
+```bash
+skillkit workflow list        # List workflows
+skillkit workflow run <name>  # Run workflow
+skillkit workflow create <name>  # Create workflow
+```
+
+## Workflow File
+
+```yaml
+name: feature-development
+description: Complete feature workflow
+
+steps:
+  - name: plan
+    skill: planning
+
+  - name: implement
+    skill: coding-standards
+
+  - name: test
+    skill: testing-patterns
+
+  - name: review
+    skill: code-review
+```
+
+## Features
+
+### Conditional Steps
+
+```yaml
+steps:
+  - name: security
+    skill: security-audit
+    condition: "files.any('**/*.ts')"
+```
+
+### Parallel Execution
+
+```yaml
+steps:
+  - name: checks
+    parallel:
+      - skill: linting
+      - skill: testing
+```
+
+## Programmatic API
+
+```typescript
+import { WorkflowOrchestrator } from '@skillkit/core'
+
+const orchestrator = new WorkflowOrchestrator()
+const workflow = await orchestrator.load('./workflow.yaml')
+await orchestrator.run(workflow)
+```

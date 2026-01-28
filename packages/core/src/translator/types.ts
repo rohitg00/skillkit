@@ -31,6 +31,21 @@ export const AGENT_FORMAT_MAP: Record<AgentType, FormatCategory> = {
   'cursor': 'cursor-mdc',
   'windsurf': 'markdown-rules',
   'github-copilot': 'markdown-rules',
+  'cline': 'skill-md',
+  'codebuddy': 'skill-md',
+  'commandcode': 'skill-md',
+  'continue': 'skill-md',
+  'crush': 'skill-md',
+  'factory': 'skill-md',
+  'mcpjam': 'skill-md',
+  'mux': 'skill-md',
+  'neovate': 'skill-md',
+  'openhands': 'skill-md',
+  'pi': 'skill-md',
+  'qoder': 'skill-md',
+  'qwen': 'skill-md',
+  'vercel': 'skill-md',
+  'zencoder': 'skill-md',
 };
 
 /**

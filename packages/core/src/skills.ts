@@ -8,10 +8,20 @@ export const SKILL_DISCOVERY_PATHS = [
   'skills/.curated',
   'skills/.experimental',
   'skills/.system',
+  'agents',
   '.agents/skills',
   '.agent/skills',
+  '.amp/skills',
+  '.antigravity/skills',
   '.claude/skills',
+  '.cline/skills',
+  '.clawdbot/skills',
+  '.codebuddy/skills',
   '.codex/skills',
+  '.commandcode/skills',
+  '.continue/skills',
+  '.copilot/skills',
+  '.crush/skills',
   '.cursor/skills',
   '.factory/skills',
   '.gemini/skills',
@@ -19,13 +29,19 @@ export const SKILL_DISCOVERY_PATHS = [
   '.goose/skills',
   '.kilocode/skills',
   '.kiro/skills',
+  '.mcpjam/skills',
+  '.mux/skills',
+  '.neovate/skills',
   '.opencode/skills',
+  '.openhands/skills',
+  '.pi/skills',
+  '.qoder/skills',
+  '.qwen/skills',
   '.roo/skills',
   '.trae/skills',
+  '.vercel/skills',
   '.windsurf/skills',
-  '.clawdbot/skills',
-  '.antigravity/skills',
-  '.copilot/skills',
+  '.zencoder/skills',
 ];
 
 function discoverSkillsInDir(dir: string): Skill[] {
@@ -38,13 +54,18 @@ function discoverSkillsInDir(dir: string): Skill[] {
   const entries = readdirSync(dir, { withFileTypes: true });
 
   for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
+    if (entry.isDirectory()) {
+      const skillPath = join(dir, entry.name);
+      const skillMdPath = join(skillPath, 'SKILL.md');
 
-    const skillPath = join(dir, entry.name);
-    const skillMdPath = join(skillPath, 'SKILL.md');
-
-    if (existsSync(skillMdPath)) {
-      const skill = parseSkill(skillPath);
+      if (existsSync(skillMdPath)) {
+        const skill = parseSkill(skillPath);
+        if (skill) {
+          skills.push(skill);
+        }
+      }
+    } else if (entry.isFile() && entry.name.endsWith('.md') && entry.name !== 'README.md') {
+      const skill = parseStandaloneSkill(join(dir, entry.name));
       if (skill) {
         skills.push(skill);
       }
@@ -52,6 +73,38 @@ function discoverSkillsInDir(dir: string): Skill[] {
   }
 
   return skills;
+}
+
+function parseStandaloneSkill(filePath: string, location: SkillLocation = 'project'): Skill | null {
+  if (!existsSync(filePath)) {
+    return null;
+  }
+
+  try {
+    const content = readFileSync(filePath, 'utf-8');
+    const frontmatter = extractFrontmatter(content);
+
+    if (!frontmatter) {
+      return null;
+    }
+
+    const name = (frontmatter.name as string) || basename(filePath, '.md');
+    const description = (frontmatter.description as string) || 'No description available';
+
+    if (!name || name.length === 0) {
+      return null;
+    }
+
+    return {
+      name,
+      description,
+      path: filePath,
+      location,
+      enabled: true,
+    };
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -77,20 +130,27 @@ function discoverSkillsRecursive(
         continue;
       }
 
-      if (!entry.isDirectory()) continue;
-
       const entryPath = join(dir, entry.name);
-      const skillMdPath = join(entryPath, 'SKILL.md');
 
-      if (existsSync(skillMdPath)) {
-        const skill = parseSkill(entryPath);
+      if (entry.isDirectory()) {
+        const skillMdPath = join(entryPath, 'SKILL.md');
+
+        if (existsSync(skillMdPath)) {
+          const skill = parseSkill(entryPath);
+          if (skill && !seen.has(skill.name)) {
+            seen.add(skill.name);
+            skills.push(skill);
+          }
+        } else {
+          const subSkills = discoverSkillsRecursive(entryPath, seen, maxDepth, currentDepth + 1);
+          skills.push(...subSkills);
+        }
+      } else if (entry.isFile() && entry.name.endsWith('.md') && entry.name !== 'README.md') {
+        const skill = parseStandaloneSkill(entryPath);
         if (skill && !seen.has(skill.name)) {
           seen.add(skill.name);
           skills.push(skill);
         }
-      } else {
-        const subSkills = discoverSkillsRecursive(entryPath, seen, maxDepth, currentDepth + 1);
-        skills.push(...subSkills);
       }
     }
   } catch {}

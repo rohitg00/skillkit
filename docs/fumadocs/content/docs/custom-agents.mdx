@@ -1,0 +1,59 @@
+---
+title: Custom Agents
+description: Create custom AI sub-agent definitions
+---
+
+# Custom Agents
+
+Create and manage custom AI sub-agents.
+
+## Commands
+
+```bash
+skillkit agent list              # List agents
+skillkit agent show <name>       # Show details
+skillkit agent create <name>     # Create agent
+skillkit agent translate         # Translate format
+skillkit agent sync              # Sync to target
+skillkit agent validate          # Validate
+```
+
+## Agent Definition
+
+```yaml
+name: my-agent
+description: Custom agent for tasks
+format: skill.md
+skillsDir: .my-agent/skills/
+
+capabilities:
+  - code-generation
+  - code-review
+
+triggers:
+  - pattern: "create component"
+    action: generate-component
+```
+
+## Structure
+
+```
+.my-agent/
+├── agent.yaml    # Definition
+├── skills/       # Agent skills
+└── config/       # Settings
+```
+
+## Translation
+
+```bash
+skillkit agent translate --source ./my-agent --to cursor
+skillkit agent translate --source ./agents --to cursor --recursive
+```
+
+## Validation
+
+```bash
+skillkit agent validate
+skillkit agent validate ./my-agent
+```

@@ -16,7 +16,7 @@
 
 ## Supercharge Every AI Coding Agent
 
-**Give your AI agents new abilities with portable, reusable skills.** Install from a curated marketplace, create your own, and use them across Claude Code, Cursor, Codex, Windsurf, GitHub Copilot, and 12 more agents.
+**Give your AI agents new abilities with portable, reusable skills.** Install from a curated marketplace, create your own, and use them across Claude Code, Cursor, Codex, Windsurf, GitHub Copilot, and 27 more agents.
 
 > **What are AI Agent Skills?** Skills are instruction files that teach AI coding agents how to handle specific tasks - like processing PDFs, following React best practices, or enforcing security patterns. Think of them as plugins for your AI assistant.
 
@@ -28,7 +28,7 @@ npm install -g skillkit
 
 **The problem:** You've built amazing skills for Claude Code. Now you want to try Cursor. Or your team uses different agents. Each agent has different formats and directories. Without SkillKit, you either rewrite everything, lock yourself into one agent, or give up on skills entirely.
 
-**The solution:** SkillKit translates skills between all 17 agents automatically. Write once, use everywhere.
+**The solution:** SkillKit translates skills between all 32 agents automatically. Write once, use everywhere.
 
 ## See It In Action
 
@@ -69,7 +69,7 @@ SkillKit features a polished, interactive CLI with visual feedback:
 | **Multi-Agent Support** | Manual rewrite for each agent | One command, all agents |
 | **Team Collaboration** | Email skills back and forth | Git-based bundles, remote sync |
 | **Skill Discovery** | Search GitHub manually | Smart recommendations for your stack |
-| **Format Translation** | Learn each agent's format | Automatic conversion (17 formats) |
+| **Format Translation** | Learn each agent's format | Automatic conversion (32 formats) |
 | **Context Sync** | Configure each agent separately | One config, synced everywhere |
 | **Session Memory** | Knowledge dies with each session | Persistent learning across agents |
 | **Skill Testing** | Hope it works | Test framework with assertions |

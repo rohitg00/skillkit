@@ -1,0 +1,66 @@
+---
+title: Testing
+description: Test skills with 14+ assertion types
+---
+
+# Testing
+
+SkillKit includes a testing framework with 14+ assertion types.
+
+## Run Tests
+
+```bash
+skillkit test              # All tests
+skillkit test ./my-skill   # Specific skill
+skillkit test --tags unit  # By tag
+skillkit test --json       # CI output
+```
+
+## Test File
+
+Create `test.yaml` alongside your skill:
+
+```yaml
+name: my-skill-tests
+skill: my-skill
+
+tests:
+  - name: validates input
+    input: |
+      Process this file
+    assertions:
+      - contains: "processed"
+      - not_contains: "error"
+```
+
+## Assertion Types
+
+| Assertion | Description |
+|-----------|-------------|
+| `contains` | Text present |
+| `not_contains` | Text absent |
+| `matches` | Regex match |
+| `starts_with` | Prefix check |
+| `ends_with` | Suffix check |
+| `has_section` | Markdown section |
+| `has_code_block` | Code block with lang |
+| `word_count_min` | Minimum words |
+| `word_count_max` | Maximum words |
+| `no_todos` | No TODO comments |
+| `has_frontmatter` | YAML present |
+
+## CI Integration
+
+```yaml
+- name: Test Skills
+  run: skillkit test --json > results.json
+```
+
+## Programmatic API
+
+```typescript
+import { SkillTestRunner } from '@skillkit/core'
+
+const runner = new SkillTestRunner()
+const results = await runner.run('./my-skill')
+```

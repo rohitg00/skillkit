@@ -1,0 +1,69 @@
+---
+title: SkillKit Documentation
+description: Universal CLI for managing AI agent skills across 32 coding platforms
+---
+
+# SkillKit
+
+SkillKit is a universal command-line interface (CLI) and programmatic toolkit for managing AI agent skills across **32 AI coding platforms**.
+
+**Current Version:** v1.7.5
+
+## The Problem
+
+Each AI coding agent uses different skill formats and directory structures:
+- Claude Code uses `.claude/skills/` with SKILL.md
+- Cursor uses `.cursor/skills/` with .mdc format
+- GitHub Copilot uses `.github/skills/`
+
+Without SkillKit, you either rewrite skills for each agent, lock into one platform, or abandon skills entirely.
+
+## The Solution
+
+SkillKit provides a **"write once, deploy everywhere"** platform. Maintain a single skill definition that automatically translates across all 32 platforms.
+
+## Quick Install
+
+```bash
+npm install -g skillkit
+skillkit init
+skillkit install anthropics/skills
+skillkit sync
+```
+
+## Key Features
+
+| Feature | Description |
+|---------|-------------|
+| **Cross-Platform Translation** | Automatic conversion between 32 agent formats |
+| **Skill Discovery** | 15,000+ marketplace skills with AI recommendations |
+| **Team Collaboration** | Git-based `.skills` manifest for sharing |
+| **Quality Evaluation** | 0-100 scoring with A-F grades |
+| **Interactive TUI** | Beautiful terminal interface |
+| **Memory System** | Persistent learning across sessions |
+
+## Architecture
+
+| Tier | Components |
+|------|------------|
+| **User Interfaces** | CLI (Clipanion v4), TUI (OpenTUI/React), Documentation |
+| **Business Logic** | @skillkit/core, @skillkit/agents (32 adapters) |
+| **External Systems** | GitHub/GitLab, Marketplace (15,000+ skills) |
+
+## Supported Agents
+
+Claude Code, Cursor, Codex, Gemini CLI, OpenCode, GitHub Copilot, Windsurf, Antigravity, Amp, Clawdbot, Droid, Goose, Kilo Code, Kiro CLI, Roo Code, Trae, Cline, CodeBuddy, Continue, Crush, Factory, MCPJam, Mux, Neovate, OpenHands, Pi, Qoder, Qwen, Vercel, Zencoder, CommandCode, Universal
+
+## Popular Sources
+
+| Repository | Skills |
+|------------|--------|
+| anthropics/skills | PDF, XLSX, DOCX processing |
+| vercel-labs/agent-skills | React/Next.js best practices |
+
+## Get Started
+
+1. [Installation](/docs/installation) - Install and initialize
+2. [Quick Start](/docs/quickstart) - 5-minute guide
+3. [Commands](/docs/commands) - Full CLI reference
+4. [Skills](/docs/skills) - Skill format and lifecycle

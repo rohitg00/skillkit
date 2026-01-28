@@ -1,0 +1,173 @@
+---
+title: Quick Start
+description: Get up and running with SkillKit in 5 minutes
+---
+
+# Quick Start
+
+This guide walks you through installing SkillKit, setting up your first project, and installing skills.
+
+## 1. Install SkillKit
+
+```bash
+npm install -g skillkit
+```
+
+Verify installation:
+
+```bash
+skillkit --version
+```
+
+## 2. Initialize Your Project
+
+Navigate to your project directory and run:
+
+```bash
+skillkit init
+```
+
+This starts an interactive onboarding that:
+
+1. **Detects your AI agent** - Scans for `.claude/`, `.cursor/`, `.github/` directories
+2. **Creates directories** - Sets up the skills folder for your agent
+3. **Saves preferences** - Remembers your choices for future commands
+
+### Quick Agent Selection
+
+Three options appear for faster interaction:
+
+- **"Same as last time"** - Reuse previous agent choices
+- **"All detected agents"** - Select every agent found
+- **"Select specific agents"** - Open full selection menu
+
+## 3. Get Recommendations
+
+SkillKit analyzes your project and suggests relevant skills:
+
+```bash
+skillkit recommend
+```
+
+Example output:
+
+```
+Project: my-app (Next.js + TypeScript + Tailwind)
+
+Recommended Skills:
+  92% vercel-react-best-practices
+  87% tailwind-v4-patterns
+  85% nextjs-app-router
+  78% typescript-strict-mode
+```
+
+## 4. Install Skills
+
+### Interactive Installation
+
+```bash
+skillkit install anthropics/skills
+```
+
+This prompts you to:
+- Select which skills to install
+- Choose target agents
+- Pick installation method (symlink or copy)
+
+### Non-Interactive Installation
+
+For CI/CD or scripting:
+
+```bash
+skillkit install anthropics/skills --skills=pdf,xlsx --agent claude --yes
+```
+
+### List Available Skills
+
+Preview without installing:
+
+```bash
+skillkit install anthropics/skills --list
+```
+
+## 5. Sync to Your Agent
+
+Deploy installed skills to your agent's configuration:
+
+```bash
+skillkit sync
+```
+
+## 6. Launch the TUI
+
+For a visual interface:
+
+```bash
+skillkit ui
+# or just
+skillkit
+```
+
+**Navigation:** `h` Home | `m` Marketplace | `r` Recommend | `i` Installed | `s` Sync | `q` Quit
+
+## Complete Example
+
+```bash
+# Install SkillKit
+npm install -g skillkit
+
+# Initialize in your project
+cd my-project
+skillkit init
+
+# Get recommendations
+skillkit recommend
+
+# Install from official marketplace
+skillkit install anthropics/skills
+
+# Install for multiple agents
+skillkit install vercel-labs/agent-skills --agent claude,cursor,windsurf
+
+# Sync to agents
+skillkit sync
+```
+
+## Team Collaboration
+
+Share skills with your team using manifest files:
+
+```bash
+# Create manifest
+skillkit manifest init
+
+# Add skill sources
+skillkit manifest add anthropics/skills
+skillkit manifest add ./local-skills
+
+# Team members install from manifest
+skillkit manifest install
+```
+
+The `.skills` file can be committed to Git for team-wide consistency.
+
+## User Preferences
+
+Your choices are saved to `~/.skillkit/preferences.json`:
+
+```json
+{
+  "lastSelectedAgents": ["claude", "cursor"],
+  "autoSync": true,
+  "marketplace": {
+    "lastRefresh": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+## Next Steps
+
+- **Browse Marketplace** - `skillkit marketplace`
+- **Create Custom Skills** - `skillkit create my-skill`
+- **Translate Between Agents** - `skillkit translate skill --to cursor`
+- **View All Commands** - `skillkit --help`

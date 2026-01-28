@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SkillKit Marketplace",
+  "description": "Schema for SkillKit marketplace skills index",
+  "type": "object",
+  "required": ["version", "skills"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "description": "Schema version number"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date",
+      "description": "Last update date (YYYY-MM-DD)"
+    },
+    "skills": {
+      "type": "array",
+      "description": "List of skills in the marketplace",
+      "items": {
+        "$ref": "#/definitions/Skill"
+      }
+    }
+  },
+  "definitions": {
+    "Skill": {
+      "type": "object",
+      "required": ["id", "name", "source", "tags"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+/[a-zA-Z0-9_-]+$",
+          "description": "Unique identifier: owner/repo/skill-name"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Human-readable skill name"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Brief description of the skill"
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+$",
+          "description": "GitHub repository: owner/repo"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "minItems": 1,
+          "maxItems": 10,
+          "description": "Tags for categorization (lowercase, hyphenated)"
+        },
+        "author": {
+          "type": "string",
+          "description": "Skill author name or GitHub username"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Semantic version (e.g., 1.0.0)"
+        },
+        "agents": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "claude-code",
+              "cursor",
+              "codex",
+              "gemini-cli",
+              "opencode",
+              "antigravity",
+              "amp",
+              "clawdbot",
+              "droid",
+              "github-copilot",
+              "goose",
+              "kilo",
+              "kiro-cli",
+              "roo",
+              "trae",
+              "windsurf",
+              "universal"
+            ]
+          },
+          "description": "Compatible AI agents (omit for universal compatibility)"
+        }
+      }
+    }
+  }
+}

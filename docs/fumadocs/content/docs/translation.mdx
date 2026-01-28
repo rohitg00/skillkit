@@ -1,0 +1,55 @@
+---
+title: Translation
+description: Convert skills between AI agent formats
+---
+
+# Translation
+
+SkillKit automatically converts between all 32 agent formats using an adapter pattern.
+
+## Basic Translation
+
+```bash
+skillkit translate react-patterns --to cursor
+```
+
+## Translate All
+
+```bash
+skillkit translate --all --to windsurf
+```
+
+## Preview Mode
+
+```bash
+skillkit translate my-skill --to codex --dry-run
+```
+
+## Batch Translation
+
+```bash
+skillkit agent translate --source ./my-skills --to cursor
+skillkit agent translate --source ./skills --to cursor --recursive
+```
+
+## Format Mapping
+
+| Source | Target | Notes |
+|--------|--------|-------|
+| SKILL.md | .mdc | Cursor format |
+| SKILL.md | Markdown | GitHub Copilot |
+| .mdc | SKILL.md | Reverse conversion |
+
+## How It Works
+
+```
+Universal Format (SKILL.md)
+        ↓
+    Adapter Interface
+        ↓
+Agent-Specific Formats
+```
+
+Each adapter implements:
+- `getConfigPath()` - Returns skill directory
+- `generateConfig()` - Converts content to target format

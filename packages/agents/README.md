@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@skillkit/agents.svg)](https://www.npmjs.com/package/@skillkit/agents)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-**Agent adapters for SkillKit** - configuration and detection for 17 AI coding agents.
+**Agent adapters for SkillKit** - configuration and detection for 32 AI coding agents.
 
 ## Installation
 
@@ -11,7 +11,7 @@
 npm install @skillkit/agents
 ```
 
-## Supported Agents (17)
+## Supported Agents (32)
 
 | Agent | Config Format | Project Skills | Global Skills |
 |-------|--------------|----------------|---------------|
@@ -20,18 +20,33 @@ npm install @skillkit/agents
 | Codex | SKILL.md | `.codex/skills/` | `~/.codex/skills/` |
 | Gemini CLI | SKILL.md | `.gemini/skills/` | `~/.gemini/skills/` |
 | OpenCode | SKILL.md | `.opencode/skills/` | `~/.config/opencode/skills/` |
-| Antigravity | SKILL.md | `.antigravity/skills/` | `~/.gemini/antigravity/skills/` |
-| Amp | SKILL.md | `.agents/skills/` | `~/.config/agents/skills/` |
-| Clawdbot | SKILL.md | `skills/` | `~/.clawdbot/skills/` |
-| Droid (Factory) | SKILL.md | `.factory/skills/` | `~/.factory/skills/` |
-| GitHub Copilot | Markdown | `.github/skills/` | `~/.copilot/skills/` |
-| Goose | SKILL.md | `.goose/skills/` | `~/.config/goose/skills/` |
+| Antigravity | SKILL.md | `.antigravity/skills/` | - |
+| Amp | SKILL.md | `.amp/skills/` | - |
+| Clawdbot | SKILL.md | `.clawdbot/skills/` | - |
+| Cline | SKILL.md | `.cline/skills/` | - |
+| CodeBuddy | SKILL.md | `.codebuddy/skills/` | - |
+| CommandCode | SKILL.md | `.commandcode/skills/` | - |
+| Continue | SKILL.md | `.continue/skills/` | `~/.continue/skills/` |
+| Crush | SKILL.md | `.crush/skills/` | - |
+| Droid (Factory) | SKILL.md | `.factory/skills/` | - |
+| Factory | SKILL.md | `.factory/skills/` | - |
+| GitHub Copilot | Markdown | `.github/skills/` | - |
+| Goose | SKILL.md | `.goose/skills/` | `~/.goose/skills/` |
 | Kilo Code | SKILL.md | `.kilocode/skills/` | `~/.kilocode/skills/` |
 | Kiro CLI | SKILL.md | `.kiro/skills/` | `~/.kiro/skills/` |
+| MCPJam | SKILL.md | `.mcpjam/skills/` | - |
+| Mux | SKILL.md | `.mux/skills/` | - |
+| Neovate | SKILL.md | `.neovate/skills/` | - |
+| OpenHands | SKILL.md | `.openhands/skills/` | - |
+| Pi | SKILL.md | `.pi/skills/` | - |
+| Qoder | SKILL.md | `.qoder/skills/` | - |
+| Qwen | SKILL.md | `.qwen/skills/` | - |
 | Roo Code | SKILL.md | `.roo/skills/` | `~/.roo/skills/` |
-| Trae | SKILL.md | `.trae/skills/` | `~/.trae/skills/` |
+| Trae | SKILL.md | `.trae/skills/` | - |
+| Vercel | SKILL.md | `.vercel/skills/` | - |
 | Windsurf | Markdown | `.windsurf/skills/` | `~/.codeium/windsurf/skills/` |
-| Universal | SKILL.md | `skills/` | `~/.agent/skills/` |
+| Zencoder | SKILL.md | `.zencoder/skills/` | - |
+| Universal | SKILL.md | `skills/` | - |
 
 ## Usage
 
@@ -155,14 +170,29 @@ type AgentType =
   | 'antigravity'
   | 'amp'
   | 'clawdbot'
+  | 'cline'
+  | 'codebuddy'
+  | 'commandcode'
+  | 'continue'
+  | 'crush'
   | 'droid'
+  | 'factory'
   | 'github-copilot'
   | 'goose'
   | 'kilo'
   | 'kiro-cli'
+  | 'mcpjam'
+  | 'mux'
+  | 'neovate'
+  | 'openhands'
+  | 'pi'
+  | 'qoder'
+  | 'qwen'
   | 'roo'
   | 'trae'
+  | 'vercel'
   | 'windsurf'
+  | 'zencoder'
   | 'universal';
 ```
 
