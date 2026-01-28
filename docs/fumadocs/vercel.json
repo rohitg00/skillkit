@@ -1,7 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "next build",
-  "installCommand": "npm install",
+  "buildCommand": "npx next build",
+  "installCommand": "npm install --legacy-peer-deps",
   "outputDirectory": ".next",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "env": {
+    "TURBO_TEAM": "",
+    "TURBO_DISABLED": "1"
+  }
 }
