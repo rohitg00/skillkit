@@ -133,7 +133,7 @@ function main(): void {
   console.log(`Verified sources: ${verified} skills (quality >= 85)`);
 
   const averageQuality = Math.round(
-    data.skills.reduce((sum, s) => sum + (s.quality || 70), 0) / data.skills.length
+    data.skills.reduce((sum, s) => sum + (s.quality ?? 70), 0) / data.skills.length
   );
   console.log(`Average quality: ${averageQuality}`);
 

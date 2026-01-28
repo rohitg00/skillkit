@@ -320,11 +320,18 @@ function assessCompleteness(content: string): CompletenessResult {
   const todoMatches = content.match(/TODO|FIXME|XXX|HACK/gi) || [];
   const todoCount = todoMatches.length;
 
-  const headerRegex = /^#+\s+(.+)$/gm;
   const headerPositions: Array<{ header: string; index: number }> = [];
-  let match;
-  while ((match = headerRegex.exec(content)) !== null) {
-    headerPositions.push({ header: match[0], index: match.index });
+  const lines = content.split('\n');
+  let inFence = false;
+  let offset = 0;
+
+  for (const line of lines) {
+    if (/^```|^~~~/.test(line)) {
+      inFence = !inFence;
+    } else if (!inFence && /^#+\s+.+$/.test(line)) {
+      headerPositions.push({ header: line, index: offset });
+    }
+    offset += line.length + 1;
   }
 
   const emptySections: string[] = [];

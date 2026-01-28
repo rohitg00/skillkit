@@ -203,7 +203,12 @@ export class ValidateCommand extends Command {
   });
 
   async execute(): Promise<number> {
-    if (this.fix && this.targets.length > 0) {
+    if (this.fix) {
+      if (this.targets.length === 0) {
+        error('--fix requires at least one target');
+        console.log(colors.muted('Usage: skillkit validate --fix <skill-name>'));
+        return 1;
+      }
       const { FixCommand } = await import('./fix.js');
       const fixCmd = new FixCommand();
       fixCmd.targets = this.targets;
