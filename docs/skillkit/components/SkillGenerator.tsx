@@ -560,19 +560,20 @@ ${skillContent.slice(0, 4000)}${skillContent.length > 4000 ? '\n...(truncated)' 
             )}
           </Card>
 
-          <div className="flex border-b border-zinc-800 mb-6">
+          <div className="flex overflow-x-auto border-b border-zinc-800 mb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
             {(['principles', 'patterns', 'antipatterns'] as const).map((tab) => (
               <button
                 key={tab}
+                type="button"
                 onClick={() => setActiveTab(tab)}
-                className={`px-6 py-3 font-mono text-sm uppercase tracking-wider transition-colors ${
+                className={`px-3 sm:px-6 py-3 font-mono text-xs sm:text-sm uppercase tracking-wider transition-colors whitespace-nowrap flex-shrink-0 ${
                   activeTab === tab
                     ? 'text-white border-b-2 border-white -mb-px'
                     : 'text-zinc-500 hover:text-zinc-300'
                 }`}
               >
                 {tab === 'antipatterns' ? 'Anti-Patterns' : tab}
-                <span className="ml-2 text-xs text-zinc-600">
+                <span className="ml-1 sm:ml-2 text-xs text-zinc-600">
                   ({tab === 'principles' ? generatedSkill.principles.length : tab === 'patterns' ? generatedSkill.patterns.length : generatedSkill.antiPatterns.length})
                 </span>
               </button>

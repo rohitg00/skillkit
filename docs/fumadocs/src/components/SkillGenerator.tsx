@@ -508,50 +508,54 @@ ${skillContent.slice(0, 4000)}${skillContent.length > 4000 ? '\n...(truncated)' 
 
       {viewMode === 'generated' && generatedSkill && (
         <div className="animate-fade-in-up">
-          <div className="flex items-start justify-between mb-8 border-b border-zinc-800 pb-6">
-            <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-2 mb-2">
-                <h3 className="text-xl sm:text-2xl font-bold text-white">{generatedSkill.title}</h3>
-                <span className="text-xs font-mono text-zinc-500 bg-zinc-900 px-2 py-1 border border-zinc-800">
-                  v{generatedSkill.version}
-                </span>
-                <span className="text-xs font-mono text-purple-400 bg-purple-900/30 px-2 py-1 border border-purple-800/50">
-                  AI Generated
-                </span>
-                {isFromCache && (
-                  <span className="text-xs font-mono text-green-400 bg-green-900/30 px-2 py-1 border border-green-800/50">
-                    Cached
+          <div className="mb-8 border-b border-zinc-800 pb-6">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white">{generatedSkill.title}</h3>
+                  <span className="text-xs font-mono text-zinc-500 bg-zinc-900 px-2 py-1 border border-zinc-800">
+                    v{generatedSkill.version}
                   </span>
-                )}
-              </div>
-              <p className="text-zinc-400 font-mono text-sm mb-4">{generatedSkill.description}</p>
-              <div className="flex flex-wrap gap-2">
-                {generatedSkill.tags.map((tag, idx) => (
-                  <span key={idx} className="text-xs bg-zinc-900 text-zinc-400 px-2 py-1 border border-zinc-800">
-                    {tag}
+                  <span className="text-xs font-mono text-purple-400 bg-purple-900/30 px-2 py-1 border border-purple-800/50">
+                    AI Generated
                   </span>
-                ))}
+                  {isFromCache && (
+                    <span className="text-xs font-mono text-green-400 bg-green-900/30 px-2 py-1 border border-green-800/50">
+                      Cached
+                    </span>
+                  )}
+                </div>
+                <p className="text-zinc-400 font-mono text-xs sm:text-sm mb-4">{generatedSkill.description}</p>
+                <div className="flex flex-wrap gap-2">
+                  {generatedSkill.tags.map((tag, idx) => (
+                    <span key={idx} className="text-xs bg-zinc-900 text-zinc-400 px-2 py-1 border border-zinc-800">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 shrink-0 ml-4">
-              <button
-                onClick={downloadGeneratedSkillMd}
-                className="flex items-center justify-center gap-2 bg-white text-black px-4 py-2 font-mono text-sm hover:bg-zinc-200 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                DOWNLOAD
-              </button>
-              <button
-                onClick={submitToMarketplace}
-                className="flex items-center justify-center gap-2 bg-purple-600 text-white px-4 py-2 font-mono text-sm hover:bg-purple-500 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                SUBMIT
-              </button>
+              <div className="flex flex-row gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={downloadGeneratedSkillMd}
+                  className="flex items-center justify-center gap-2 bg-white text-black px-3 sm:px-4 py-2 font-mono text-xs sm:text-sm hover:bg-zinc-200 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  <span className="hidden sm:inline">DOWNLOAD</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={submitToMarketplace}
+                  className="flex items-center justify-center gap-2 bg-purple-600 text-white px-3 sm:px-4 py-2 font-mono text-xs sm:text-sm hover:bg-purple-500 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <span className="hidden sm:inline">SUBMIT</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -569,19 +573,20 @@ ${skillContent.slice(0, 4000)}${skillContent.length > 4000 ? '\n...(truncated)' 
             )}
           </Card>
 
-          <div className="flex border-b border-zinc-800 mb-6">
+          <div className="flex overflow-x-auto border-b border-zinc-800 mb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
             {(['principles', 'patterns', 'antipatterns'] as const).map((tab) => (
               <button
                 key={tab}
+                type="button"
                 onClick={() => setActiveTab(tab)}
-                className={`px-6 py-3 font-mono text-sm uppercase tracking-wider transition-colors ${
+                className={`px-3 sm:px-6 py-3 font-mono text-xs sm:text-sm uppercase tracking-wider transition-colors whitespace-nowrap flex-shrink-0 ${
                   activeTab === tab
                     ? 'text-white border-b-2 border-white -mb-px'
                     : 'text-zinc-500 hover:text-zinc-300'
                 }`}
               >
                 {tab === 'antipatterns' ? 'Anti-Patterns' : tab}
-                <span className="ml-2 text-xs text-zinc-600">
+                <span className="ml-1 sm:ml-2 text-xs text-zinc-600">
                   ({tab === 'principles' ? generatedSkill.principles.length : tab === 'patterns' ? generatedSkill.patterns.length : generatedSkill.antiPatterns.length})
                 </span>
               </button>
