@@ -32,9 +32,9 @@ npm install -g skillkit
 
 ## See It In Action
 
-<video src="https://raw.githubusercontent.com/rohitg00/skillkit/main/docs/skillkit/public/skillkit-demo.mp4" controls width="100%"></video>
+<video src="https://raw.githubusercontent.com/rohitg00/skillkit/main/docs/video/skillkit.mp4" controls width="100%"></video>
 
-> **Note:** If the video doesn't play above, [watch it here](https://raw.githubusercontent.com/rohitg00/skillkit/main/docs/skillkit/public/skillkit-demo.mp4)
+> **Note:** If the video doesn't play above, [watch it here](https://raw.githubusercontent.com/rohitg00/skillkit/main/docs/video/skillkit.mp4)
 
 ```bash
 # Install a skill for ALL your agents at once
