@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npx next build",
-  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "pnpm build",
+  "installCommand": "pnpm install",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "env": {

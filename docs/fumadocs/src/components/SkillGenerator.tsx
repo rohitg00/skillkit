@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from './Button';
 import { Card } from './Card';
@@ -17,6 +19,16 @@ const PRIORITY_COLORS = {
   may: 'bg-blue-900/50 text-blue-300 border-blue-800',
 } as const;
 
+function escapeYamlString(str: string): string {
+  if (!str) return '';
+  return str
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t');
+}
+
 function PriorityBadge({ priority }: PriorityBadgeProps): React.ReactElement {
   const colorClass = PRIORITY_COLORS[priority as keyof typeof PRIORITY_COLORS] || PRIORITY_COLORS.may;
   return (
@@ -27,12 +39,19 @@ function PriorityBadge({ priority }: PriorityBadgeProps): React.ReactElement {
 }
 
 function generateSkillMd(skill: AgentSkill): string {
+  const escapedTags = skill.tags.length > 0
+    ? skill.tags.map(t => `"${escapeYamlString(t)}"`).join(', ')
+    : '';
+  const escapedGlobs = skill.filePatterns?.length
+    ? skill.filePatterns.map(p => `"${escapeYamlString(p)}"`).join(', ')
+    : '';
+
   const frontmatter = `---
-name: "${skill.name}"
-description: "${skill.description}"
-version: "${skill.version}"
-tags: [${skill.tags.map(t => `"${t}"`).join(', ')}]
-${skill.filePatterns?.length ? `globs: [${skill.filePatterns.map(p => `"${p}"`).join(', ')}]` : ''}
+name: "${escapeYamlString(skill.name)}"
+description: "${escapeYamlString(skill.description)}"
+version: "${escapeYamlString(skill.version)}"
+tags: [${escapedTags}]
+${escapedGlobs ? `globs: [${escapedGlobs}]` : ''}
 ---`;
 
   const principlesSection = skill.principles.map(p =>

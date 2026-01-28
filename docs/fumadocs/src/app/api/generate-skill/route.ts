@@ -1,6 +1,33 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { NextRequest, NextResponse } from "next/server";
 
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 10;
+
+function getRateLimitKey(request: NextRequest): string {
+  const forwarded = request.headers.get("x-forwarded-for");
+  const ip = forwarded ? forwarded.split(",")[0].trim() : "unknown";
+  return ip;
+}
+
+function checkRateLimit(key: string): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const entry = rateLimitMap.get(key);
+
+  if (!entry || now > entry.resetTime) {
+    rateLimitMap.set(key, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - 1 };
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return { allowed: false, remaining: 0 };
+  }
+
+  entry.count++;
+  return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - entry.count };
+}
+
 const agentSkillSchema: Schema = {
   type: Type.OBJECT,
   properties: {
@@ -69,19 +96,51 @@ const agentSkillSchema: Schema = {
   required: ["name", "title", "description", "version", "tags", "applicability", "principles", "patterns", "antiPatterns"]
 };
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  const rateLimitKey = getRateLimitKey(request);
+  const { allowed, remaining } = checkRateLimit(rateLimitKey);
+
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded. Please try again later." },
+      {
+        status: 429,
+        headers: {
+          "X-RateLimit-Remaining": "0",
+          "Retry-After": "60",
+        },
+      }
+    );
+  }
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  if (typeof body !== "object" || body === null) {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  const { topic } = body as { topic?: unknown };
+
+  if (typeof topic !== "string") {
+    return NextResponse.json({ error: "Topic is required and must be a string" }, { status: 400 });
+  }
+
+  const sanitizedTopic = topic.trim().slice(0, 500);
+  if (!sanitizedTopic) {
+    return NextResponse.json({ error: "Topic cannot be empty" }, { status: 400 });
+  }
+
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return NextResponse.json({ error: "Gemini API key not configured" }, { status: 500 });
   }
 
   try {
-    const { topic } = await request.json();
-    const sanitizedTopic = topic?.trim().slice(0, 500) || '';
-    if (!sanitizedTopic) {
-      return NextResponse.json({ error: "Topic is required" }, { status: 400 });
-    }
-
     const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",
@@ -119,7 +178,11 @@ Guidelines:
     }
 
     const data = JSON.parse(response.text);
-    return NextResponse.json(data);
+    return NextResponse.json(data, {
+      headers: {
+        "X-RateLimit-Remaining": String(remaining),
+      },
+    });
   } catch (error) {
     console.error("Gemini API Error:", error);
     return NextResponse.json({ error: "Failed to generate skill" }, { status: 500 });
