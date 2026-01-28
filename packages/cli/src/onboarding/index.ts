@@ -83,7 +83,7 @@ import {
   getLastAgents,
 } from './preferences.js';
 
-let VERSION = '1.7.3';
+let VERSION = '1.7.4';
 let AGENT_COUNT = 17;
 
 export function setVersion(version: string): void {
