@@ -5,6 +5,10 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/_next/:path*",
+      "destination": "https://skillkit-docs.vercel.app/_next/:path*"
+    },
+    {
       "source": "/docs/:path*",
       "destination": "https://skillkit-docs.vercel.app/docs/:path*"
     },
