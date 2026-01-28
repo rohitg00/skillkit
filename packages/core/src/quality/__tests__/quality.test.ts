@@ -164,12 +164,21 @@ Use this skill when:
   });
 
   describe('isHighQuality', () => {
+    const defaultAdvanced = {
+      score: 100,
+      deprecatedPatterns: [],
+      conflictingInstructions: [],
+      securityIssues: [],
+      completeness: { score: 100, hasTodos: false, todoCount: 0, emptySections: [], exampleCoverage: 100 },
+    };
+
     it('should return true for high scoring skills with few warnings', () => {
       const score = {
         overall: 80,
         structure: { score: 80, hasMetadata: true, hasDescription: true, hasTriggers: true, hasExamples: true, hasBoundaries: true, hasWhenToUse: true },
         clarity: { score: 80, lineCount: 100, tokenCount: 500, avgSentenceLength: 15, hasHeaders: true },
         specificity: { score: 80, hasConcreteCommands: true, hasFilePatterns: true, hasCodeExamples: true, vagueTermCount: 0 },
+        advanced: defaultAdvanced,
         warnings: [],
         suggestions: [],
       };
@@ -182,6 +191,7 @@ Use this skill when:
         structure: { score: 50, hasMetadata: false, hasDescription: false, hasTriggers: false, hasExamples: false, hasBoundaries: false, hasWhenToUse: false },
         clarity: { score: 50, lineCount: 100, tokenCount: 500, avgSentenceLength: 15, hasHeaders: true },
         specificity: { score: 50, hasConcreteCommands: false, hasFilePatterns: false, hasCodeExamples: false, vagueTermCount: 5 },
+        advanced: { ...defaultAdvanced, score: 50 },
         warnings: ['Missing triggers', 'No examples'],
         suggestions: [],
       };
@@ -194,6 +204,7 @@ Use this skill when:
         structure: { score: 75, hasMetadata: true, hasDescription: true, hasTriggers: false, hasExamples: false, hasBoundaries: false, hasWhenToUse: false },
         clarity: { score: 75, lineCount: 100, tokenCount: 500, avgSentenceLength: 15, hasHeaders: true },
         specificity: { score: 75, hasConcreteCommands: true, hasFilePatterns: true, hasCodeExamples: false, vagueTermCount: 0 },
+        advanced: { ...defaultAdvanced, score: 75 },
         warnings: ['Warning 1', 'Warning 2', 'Warning 3'],
         suggestions: [],
       };

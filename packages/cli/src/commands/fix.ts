@@ -216,7 +216,14 @@ export class FixCommand extends Command {
       if (existsSync(resolved)) {
         if (resolved.endsWith('.md') || resolved.endsWith('.mdc')) {
           filePath = resolved;
-          skillName = basename(resolved, '.md').replace('.mdc', '');
+          const fileName = basename(resolved);
+          if (fileName.endsWith('.mdc')) {
+            skillName = fileName.slice(0, -4);
+          } else if (fileName.endsWith('.md')) {
+            skillName = fileName.slice(0, -3);
+          } else {
+            skillName = fileName;
+          }
         } else {
           const skillMd = join(resolved, 'SKILL.md');
           const indexMdc = join(resolved, 'index.mdc');

@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env node
 /**
  * Compute quality scores for marketplace skills
  *
@@ -6,12 +6,16 @@
  * For detailed quality evaluation, skills would need to be fetched and analyzed individually.
  *
  * Usage:
- *   npx ts-node scripts/compute-quality.ts
+ *   npx tsx scripts/compute-quality.ts
  *   pnpm tsx scripts/compute-quality.ts
  */
 
 import { readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 interface Skill {
   id: string;
@@ -116,7 +120,7 @@ function main() {
   console.log(`Verified sources: ${verified} skills (quality >= 85)`);
   console.log(`Average quality: ${Math.round(data.skills.reduce((sum, s) => sum + (s.quality || 70), 0) / data.skills.length)}`);
 
-  writeFileSync(skillsPath, JSON.stringify(data, null, 2));
+  writeFileSync(skillsPath, JSON.stringify(data, null, 2) + '\n');
   console.log('Saved skills.json');
 }
 

@@ -320,17 +320,22 @@ function assessCompleteness(content: string): CompletenessResult {
   const todoMatches = content.match(/TODO|FIXME|XXX|HACK/gi) || [];
   const todoCount = todoMatches.length;
 
-  const headerMatches = content.match(/^#+\s+(.+)$/gm) || [];
+  const headerRegex = /^#+\s+(.+)$/gm;
+  const headerPositions: Array<{ header: string; index: number }> = [];
+  let match;
+  while ((match = headerRegex.exec(content)) !== null) {
+    headerPositions.push({ header: match[0], index: match.index });
+  }
+
   const emptySections: string[] = [];
 
-  for (let i = 0; i < headerMatches.length - 1; i++) {
-    const currentHeader = headerMatches[i];
-    const currentIndex = content.indexOf(currentHeader);
-    const nextIndex = content.indexOf(headerMatches[i + 1]);
-    const sectionContent = content.slice(currentIndex + currentHeader.length, nextIndex).trim();
+  for (let i = 0; i < headerPositions.length - 1; i++) {
+    const current = headerPositions[i];
+    const next = headerPositions[i + 1];
+    const sectionContent = content.slice(current.index + current.header.length, next.index).trim();
 
     if (sectionContent.length < 20) {
-      const sectionName = currentHeader.replace(/^#+\s+/, '');
+      const sectionName = current.header.replace(/^#+\s+/, '');
       emptySections.push(sectionName);
     }
   }
