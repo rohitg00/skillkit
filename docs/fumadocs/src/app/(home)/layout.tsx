@@ -36,7 +36,7 @@ export default function HomeLayout({
               <a
                 href="https://www.npmjs.com/package/skillkit"
                 target="_blank"
-                rel="noreferrer"
+                rel="noreferrer noopener"
                 className="text-zinc-400 hover:text-red-500 transition-colors p-2"
                 aria-label="npm"
               >
@@ -45,7 +45,7 @@ export default function HomeLayout({
               <a
                 href="https://github.com/rohitg00/skillkit"
                 target="_blank"
-                rel="noreferrer"
+                rel="noreferrer noopener"
                 className="text-zinc-400 hover:text-white transition-colors p-2"
                 aria-label="GitHub"
               >

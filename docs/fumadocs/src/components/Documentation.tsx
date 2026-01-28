@@ -453,7 +453,7 @@ export function Documentation(): React.ReactElement {
         <a
           href="https://deepwiki.com/rohitg00/skillkit"
           target="_blank"
-          rel="noreferrer"
+          rel="noreferrer noopener"
           className="inline-flex items-center gap-2 mt-2 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
         >
           <span>Powered by DeepWiki</span>
@@ -464,11 +464,13 @@ export function Documentation(): React.ReactElement {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        <nav className="lg:w-48 flex-shrink-0">
+        <nav className="lg:w-48 flex-shrink-0" aria-label="Documentation sections">
           <div className="sticky top-20 space-y-1">
             {sections.map(section => (
               <button
                 key={section.id}
+                type="button"
+                aria-current={activeSection === section.id ? 'page' : undefined}
                 onClick={() => setActiveSection(section.id)}
                 className={`w-full text-left px-3 py-2 text-sm font-mono rounded transition-colors ${
                   activeSection === section.id
