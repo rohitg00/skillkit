@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'SkillKit - Universal Skills for AI Coding Agents',
     description: 'One CLI to install, sync, and manage skills across Claude Code, Cursor, Windsurf, Copilot, and 28 more agents.',
-    url: 'https://agentskills.com',
+    url: 'https://agenstskills.com',
     siteName: 'SkillKit',
     images: [{ url: '/og-image.png', width: 1200, height: 630 }],
     type: 'website',

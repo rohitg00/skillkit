@@ -18,7 +18,7 @@ export function Footer(): React.ReactElement {
           </p>
           <span className="hidden sm:inline text-zinc-700">•</span>
           <a
-            href="https://agentskills.io"
+            href="https://agenstskills.com"
             target="_blank"
             rel="noreferrer"
             className="text-zinc-600 hover:text-zinc-400 text-xs font-mono transition-colors"
