@@ -10,7 +10,7 @@ interface PageProps {
 
 export default async function Page(props: PageProps) {
   const params = await props.params
-  const page = source.getPage(params.slug)
+  const page = source.getPage(params.slug ?? [])
   if (!page) notFound()
 
   const MDX = page.data.body
@@ -32,7 +32,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const params = await props.params
-  const page = source.getPage(params.slug)
+  const page = source.getPage(params.slug ?? [])
   if (!page) notFound()
 
   return {

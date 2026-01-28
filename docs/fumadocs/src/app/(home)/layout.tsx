@@ -29,7 +29,7 @@ export default function HomeLayout({
             <div className="flex items-center gap-2 sm:gap-4">
               <Link
                 href="/docs"
-                className="text-zinc-400 hover:text-white transition-colors text-sm font-mono hidden sm:block"
+                className="text-zinc-400 hover:text-white transition-colors text-sm font-mono"
               >
                 Docs
               </Link>
