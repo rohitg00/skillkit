@@ -1,7 +1,7 @@
 {
   "name": "@skillkit/agents",
   "version": "1.7.9",
-  "description": "Agent adapters for SkillKit - supports 17+ AI coding agents",
+  "description": "Agent adapters for SkillKit - supports 32 AI coding agents",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

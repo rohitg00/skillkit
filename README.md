@@ -17,7 +17,7 @@
 
 ## Supercharge Every AI Coding Agent
 
-**Give your AI agents new abilities with portable, reusable skills.** Install from a curated marketplace, create your own, and use them across Claude Code, Cursor, Codex, Windsurf, GitHub Copilot, and 27 more agents.
+**Give your AI agents new abilities with portable, reusable skills.** Install from a curated marketplace, create your own, and use them across Claude Code, Cursor, Codex, Windsurf, GitHub Copilot, and 27 more agents (32 total).
 
 > **What are AI Agent Skills?** Skills are instruction files that teach AI coding agents how to handle specific tasks - like processing PDFs, following React best practices, or enforcing security patterns. Think of them as plugins for your AI assistant.
 
@@ -119,7 +119,7 @@ skillkit agent translate --source ./my-skills --to cursor
 skillkit agent translate --source ./kubernetes-skills --to cursor --recursive
 ```
 
-**Supported Agents:** Claude Code, Cursor, Codex, Gemini CLI, OpenCode, Antigravity, Amp, Clawdbot, Droid, GitHub Copilot, Goose, Kilo, Kiro, Roo, Trae, Windsurf, Universal
+**Supported Agents (32):** Claude Code, Cursor, Codex, Gemini CLI, OpenCode, Antigravity, Amp, Clawdbot, Droid, GitHub Copilot, Goose, Kilo, Kiro, Roo, Trae, Windsurf, Universal, Cline, CodeBuddy, CommandCode, Continue, Crush, Factory, MCPJam, Mux, Neovate, OpenHands, Pi, Qoder, Qwen, Vercel, Zencoder
 
 ### Smart Recommendations
 
@@ -241,7 +241,7 @@ skillkit cicd gitlab-ci
 skillkit cicd pre-commit
 ```
 
-## Supported Agents (17)
+## Supported Agents (32)
 
 | Agent | Format | Skills Directory |
 |-------|--------|------------------|
@@ -262,6 +262,21 @@ skillkit cicd pre-commit
 | Trae | SKILL.md | `.trae/skills/` |
 | Windsurf | Markdown | `.windsurf/skills/` |
 | Universal | SKILL.md | `skills/` |
+| Cline | SKILL.md | `.cline/skills/` |
+| CodeBuddy | SKILL.md | `.codebuddy/skills/` |
+| CommandCode | SKILL.md | `.commandcode/skills/` |
+| Continue | SKILL.md | `.continue/skills/` |
+| Crush | SKILL.md | `.crush/skills/` |
+| Factory | SKILL.md | `.factory/skills/` |
+| MCPJam | SKILL.md | `.mcpjam/skills/` |
+| Mux | SKILL.md | `.mux/skills/` |
+| Neovate | SKILL.md | `.neovate/skills/` |
+| OpenHands | SKILL.md | `.openhands/skills/` |
+| Pi | SKILL.md | `.pi/skills/` |
+| Qoder | SKILL.md | `.qoder/skills/` |
+| Qwen | SKILL.md | `.qwen/skills/` |
+| Vercel | SKILL.md | `.vercel/skills/` |
+| Zencoder | SKILL.md | `.zencoder/skills/` |
 
 ## All Commands
 

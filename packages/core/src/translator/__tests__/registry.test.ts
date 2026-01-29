@@ -329,7 +329,7 @@ Follow these guidelines`;
   });
 
   describe('supported agents', () => {
-    it('should support all 17 agents', () => {
+    it('should support all 32 agents', () => {
       const allAgents = [
         'claude-code',
         'cursor',

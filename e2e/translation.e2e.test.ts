@@ -2,7 +2,7 @@
  * E2E Tests: Skill Translation Commands
  *
  * Tests for: translate, context, recommend
- * Validates translation to all 17 supported agents
+ * Validates translation to all 32 supported agents
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -16,7 +16,7 @@ import {
   testFileExists,
 } from './helpers/cli-runner.js';
 
-// All 17 supported agents
+// All 32 supported agents
 const SUPPORTED_AGENTS = [
   'claude-code',
   'cursor',
@@ -35,6 +35,21 @@ const SUPPORTED_AGENTS = [
   'trae',
   'windsurf',
   'universal',
+  'cline',
+  'codebuddy',
+  'commandcode',
+  'continue',
+  'crush',
+  'factory',
+  'mcpjam',
+  'mux',
+  'neovate',
+  'openhands',
+  'pi',
+  'qoder',
+  'qwen',
+  'vercel',
+  'zencoder',
 ] as const;
 
 describe('E2E: Skill Translation', () => {

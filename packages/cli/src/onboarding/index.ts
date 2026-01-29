@@ -88,7 +88,7 @@ import {
 } from './preferences.js';
 
 let VERSION = '1.7.6';
-let AGENT_COUNT = 17;
+let AGENT_COUNT = 32;
 
 export function setVersion(version: string): void {
   VERSION = version;

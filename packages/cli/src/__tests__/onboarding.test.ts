@@ -96,11 +96,11 @@ describe('Onboarding Module', () => {
     it('should generate full logo with version', async () => {
       const { getFullLogo } = await import('../onboarding/logo.js');
 
-      const logo = getFullLogo('1.7.2', 17);
+      const logo = getFullLogo('1.7.2', 32);
       // Full logo uses block characters (███), not literal text
       expect(logo).toContain('\u2588'); // █ block character
       expect(logo).toContain('v1.7.2');
-      expect(logo).toContain('17 agents');
+      expect(logo).toContain('32 agents');
     });
 
     it('should generate compact logo', async () => {

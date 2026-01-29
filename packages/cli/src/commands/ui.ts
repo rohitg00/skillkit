@@ -14,7 +14,7 @@ export class UICommand extends Command {
       
       Features:
       - Browse and discover skills from the marketplace
-      - Manage installed skills across 17+ AI coding agents
+      - Manage installed skills across 32 AI coding agents
       - Sync skills between agents
       - AI-powered recommendations
       - Team collaboration

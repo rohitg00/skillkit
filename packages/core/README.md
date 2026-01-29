@@ -14,7 +14,7 @@ npm install @skillkit/core
 ## Key Features
 
 - **Skill Discovery**: Find and parse SKILL.md files from any source
-- **Cross-Agent Translation**: Convert skills between 17 agent formats (Claude Code, Cursor, Windsurf, etc.)
+- **Cross-Agent Translation**: Convert skills between 32 agent formats (Claude Code, Cursor, Windsurf, etc.)
 - **Project Context Detection**: Analyze project stack, dependencies, and configurations
 - **Smart Recommendations**: AI-powered skill suggestions based on project profile
 - **Session Memory**: Capture and persist learnings across AI coding sessions
@@ -278,7 +278,7 @@ await hooks.trigger('pre-commit', { files: ['src/index.ts'] });
 
 ## Supported Agents
 
-The translator supports all 17 SkillKit-compatible agents:
+The translator supports all 32 SkillKit-compatible agents:
 
 | Agent | Format |
 |-------|--------|
