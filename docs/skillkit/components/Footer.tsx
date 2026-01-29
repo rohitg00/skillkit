@@ -20,7 +20,7 @@ export function Footer(): React.ReactElement {
           <a
             href="https://agentskills.io"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="text-zinc-600 hover:text-zinc-400 text-xs font-mono transition-colors"
           >
             Agent Skills standard

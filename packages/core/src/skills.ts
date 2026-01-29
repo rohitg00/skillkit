@@ -292,7 +292,9 @@ export function loadMetadata(skillPath: string): SkillMetadata | null {
 }
 
 export function readSkillContent(skillPath: string): string | null {
-  const skillMdPath = join(skillPath, 'SKILL.md');
+  const skillMdPath = skillPath.endsWith('.md')
+    ? skillPath
+    : join(skillPath, 'SKILL.md');
 
   if (!existsSync(skillMdPath)) {
     return null;
@@ -343,9 +345,10 @@ export function findAllSkills(searchDirs: string[]): Skill[] {
 export function validateSkill(skillPath: string): { valid: boolean; errors: string[]; warnings?: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
-  const dirName = basename(skillPath);
+  const isStandalone = skillPath.endsWith('.md');
+  const dirName = isStandalone ? basename(skillPath, '.md') : basename(skillPath);
+  const skillMdPath = isStandalone ? skillPath : join(skillPath, 'SKILL.md');
 
-  const skillMdPath = join(skillPath, 'SKILL.md');
   if (!existsSync(skillMdPath)) {
     errors.push('Missing SKILL.md file');
     return { valid: false, errors };

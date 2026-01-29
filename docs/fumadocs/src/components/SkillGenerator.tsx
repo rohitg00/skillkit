@@ -469,7 +469,7 @@ ${skillContent.slice(0, 4000)}${skillContent.length > 4000 ? '\n...(truncated)' 
                 {selectedSkill.sourceUrl && (
                   <>
                     <span>•</span>
-                    <a href={selectedSkill.sourceUrl} target="_blank" rel="noreferrer" className="hover:text-white">
+                    <a href={selectedSkill.sourceUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white">
                       View on GitHub
                     </a>
                   </>
@@ -503,7 +503,7 @@ ${skillContent.slice(0, 4000)}${skillContent.length > 4000 ? '\n...(truncated)' 
               <a
                 href={selectedSkill.sourceUrl}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-zinc-800 text-white px-4 py-2 font-mono text-sm hover:bg-zinc-700 transition-colors"
               >
                 View on GitHub

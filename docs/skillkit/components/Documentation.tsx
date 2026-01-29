@@ -451,7 +451,7 @@ export function Documentation(): React.ReactElement {
         <a
           href="https://deepwiki.com/rohitg00/skillkit"
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className="inline-flex items-center gap-2 mt-2 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
         >
           <span>Powered by DeepWiki</span>

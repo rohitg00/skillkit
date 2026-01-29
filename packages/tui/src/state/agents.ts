@@ -92,6 +92,6 @@ export function getAgentAdapter(type: AgentType) {
 }
 
 /**
- * Total number of supported agents
+ * Total number of supported agents (derived from adapters)
  */
-export const TOTAL_AGENTS = 32;
+export const TOTAL_AGENTS = getAllAdapters().length;

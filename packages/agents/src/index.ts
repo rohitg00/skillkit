@@ -9,6 +9,7 @@ import { AntigravityAdapter } from './antigravity.js';
 import { AmpAdapter } from './amp.js';
 import { ClawdbotAdapter } from './clawdbot.js';
 import { DroidAdapter } from './droid.js';
+import { FactoryAdapter } from './factory.js';
 import { GitHubCopilotAdapter } from './github-copilot.js';
 import { GooseAdapter } from './goose.js';
 import { KiloAdapter } from './kilo.js';
@@ -28,6 +29,7 @@ export * from './antigravity.js';
 export * from './amp.js';
 export * from './clawdbot.js';
 export * from './droid.js';
+export * from './factory.js';
 export * from './github-copilot.js';
 export * from './goose.js';
 export * from './kilo.js';
@@ -63,7 +65,7 @@ const adapters: Record<AgentType, AgentAdapter> = {
   commandcode: new UniversalAdapter(),
   continue: new UniversalAdapter(),
   crush: new UniversalAdapter(),
-  factory: new UniversalAdapter(),
+  factory: new FactoryAdapter(),
   mcpjam: new UniversalAdapter(),
   mux: new UniversalAdapter(),
   neovate: new UniversalAdapter(),
