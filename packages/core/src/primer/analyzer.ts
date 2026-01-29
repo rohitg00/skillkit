@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { join, basename } from 'node:path';
+import { join, basename, relative, sep } from 'node:path';
 import type {
   PrimerAnalysis,
   PackageManager,
@@ -125,7 +125,8 @@ export class PrimerAnalyzer {
       try {
         const entries = readdirSync(dir, { withFileTypes: true });
         for (const entry of entries) {
-          const relativePath = join(dir, entry.name).replace(this.projectPath + '/', '');
+          const fullPath = join(dir, entry.name);
+          const relativePath = relative(this.projectPath, fullPath);
           if (entry.name.startsWith('.') && entry.name !== '.github' && entry.name !== '.env.example') {
             if (!entry.isDirectory()) {
               this.files.add(relativePath);
@@ -137,7 +138,7 @@ export class PrimerAnalyzer {
           }
           this.files.add(relativePath);
           if (entry.isDirectory()) {
-            scan(join(dir, entry.name), depth + 1);
+            scan(fullPath, depth + 1);
           }
         }
       } catch {
@@ -289,8 +290,8 @@ export class PrimerAnalyzer {
     return languages;
   }
 
-  private detectPackageManagers(): string[] {
-    const managers: Set<string> = new Set();
+  private detectPackageManagers(): PackageManager[] {
+    const managers: Set<PackageManager> = new Set();
 
     for (const [file, manager] of Object.entries(PACKAGE_MANAGER_FILES)) {
       if (this.hasFile(file)) {
@@ -302,8 +303,8 @@ export class PrimerAnalyzer {
       const packageManager = this.packageJson.packageManager;
       if (typeof packageManager === 'string') {
         const match = packageManager.match(/^(npm|pnpm|yarn|bun)@/);
-        if (match) {
-          managers.add(match[1]);
+        if (match && ['npm', 'pnpm', 'yarn', 'bun'].includes(match[1])) {
+          managers.add(match[1] as PackageManager);
         }
       }
     }
@@ -316,11 +317,11 @@ export class PrimerAnalyzer {
       hasWorkspaces: false,
     };
 
-    if (this.hasFile('src')) {
+    if (this.hasFile('packages') || this.hasFile('apps')) {
+      structure.type = 'monorepo';
+    } else if (this.hasFile('src')) {
       structure.type = 'src-based';
       structure.srcDir = 'src';
-    } else if (this.hasFile('packages') || this.hasFile('apps')) {
-      structure.type = 'monorepo';
     } else if (this.hasFile('lib')) {
       structure.type = 'src-based';
       structure.srcDir = 'lib';
@@ -582,7 +583,7 @@ export class PrimerAnalyzer {
     let directories = 0;
 
     for (const file of this.files) {
-      if (file.includes('/')) {
+      if (file.includes(sep)) {
         directories++;
       }
       files++;

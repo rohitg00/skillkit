@@ -91,7 +91,7 @@ export const PrimerAnalysis = z.object({
     repository: z.string().optional(),
   }),
   languages: z.array(Detection).default([]),
-  packageManagers: z.array(z.string()).default([]),
+  packageManagers: z.array(PackageManager).default([]),
   stack: ProjectStack,
   patterns: ProjectPatterns.optional(),
   structure: ProjectStructure.optional(),

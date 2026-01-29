@@ -323,6 +323,9 @@ skillkit primer --all-agents  # Generate for all 32 agents
 skillkit primer --agent claude-code,cursor  # Specific agents only
 skillkit primer --dry-run     # Preview without writing files
 skillkit primer --analyze-only  # Only show codebase analysis
+skillkit primer --output ./instructions  # Write to custom directory
+skillkit primer --json        # Output analysis as JSON (for scripting)
+skillkit primer --json --analyze-only  # Machine-readable analysis
 ```
 
 Inspired by [primer](https://github.com/pierceboggan/primer) but extended for all SkillKit agents.

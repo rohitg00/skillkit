@@ -61,6 +61,7 @@ export class PrimerGenerator {
     const warnings: string[] = [];
     const errors: string[] = [];
     const generated: GeneratedInstruction[] = [];
+    const seenPaths = new Map<string, string>();
 
     this.analysis = analyzePrimer(this.projectPath);
 
@@ -80,6 +81,15 @@ export class PrimerGenerator {
       try {
         const instruction = this.generateForAgent(agent);
         if (instruction) {
+          const existingAgent = seenPaths.get(instruction.filepath);
+          if (existingAgent) {
+            warnings.push(
+              `Skipping ${agent}: output path "${instruction.filename}" already used by ${existingAgent}`
+            );
+            continue;
+          }
+          seenPaths.set(instruction.filepath, agent);
+
           if (!this.options.dryRun) {
             this.writeInstruction(instruction);
           }

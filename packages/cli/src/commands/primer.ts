@@ -107,7 +107,6 @@ export class PrimerCommand extends Command {
 
     try {
       const result = generatePrimer(projectPath, {
-        projectPath,
         agents,
         allAgents: this.allAgents,
         outputDir: this.output ? resolve(this.output) : undefined,

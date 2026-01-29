@@ -173,6 +173,7 @@ describe('Primer', () => {
       });
 
       expect(result.success).toBe(true);
+      expect(result.generated.length).toBeGreaterThan(0);
       const instruction = result.generated[0];
 
       expect(instruction.content).toContain('# test-project');
