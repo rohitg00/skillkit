@@ -14,6 +14,120 @@ import { analyzePrimer } from './analyzer.js';
 
 const ALL_AGENTS: AgentType[] = Object.keys(AGENT_CONFIG) as AgentType[];
 
+type OutputFormat = 'markdown' | 'mdc' | 'json' | 'xml';
+
+interface FormatRenderer {
+  h1(text: string): string;
+  h2(text: string): string;
+  h3(text: string): string;
+  bold(text: string): string;
+  code(text: string): string;
+  codeBlock(code: string, lang?: string): string;
+  list(items: string[]): string;
+  keyValue(key: string, value: string): string;
+  paragraph(text: string): string;
+  separator(): string;
+  wrap(content: string, metadata?: Record<string, unknown>): string;
+}
+
+const markdownRenderer: FormatRenderer = {
+  h1: (text) => `# ${text}`,
+  h2: (text) => `## ${text}`,
+  h3: (text) => `### ${text}`,
+  bold: (text) => `**${text}**`,
+  code: (text) => `\`${text}\``,
+  codeBlock: (code, lang = '') => `\`\`\`${lang}\n${code}\n\`\`\``,
+  list: (items) => items.map(item => `- ${item}`).join('\n'),
+  keyValue: (key, value) => `**${key}:** ${value}`,
+  paragraph: (text) => text,
+  separator: () => '',
+  wrap: (content) => content,
+};
+
+const mdcRenderer: FormatRenderer = {
+  h1: (text) => `# ${text}`,
+  h2: (text) => `## ${text}`,
+  h3: (text) => `### ${text}`,
+  bold: (text) => `**${text}**`,
+  code: (text) => `\`${text}\``,
+  codeBlock: (code, lang = '') => `\`\`\`${lang}\n${code}\n\`\`\``,
+  list: (items) => items.map(item => `- ${item}`).join('\n'),
+  keyValue: (key, value) => `**${key}:** ${value}`,
+  paragraph: (text) => text,
+  separator: () => '',
+  wrap: (content, metadata) => {
+    if (metadata && Object.keys(metadata).length > 0) {
+      const yaml = Object.entries(metadata)
+        .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
+        .join('\n');
+      return `---\n${yaml}\n---\n\n${content}`;
+    }
+    return content;
+  },
+};
+
+const jsonRenderer: FormatRenderer = {
+  h1: (text) => text,
+  h2: (text) => text,
+  h3: (text) => text,
+  bold: (text) => text,
+  code: (text) => text,
+  codeBlock: (code) => code,
+  list: (items) => items.join(', '),
+  keyValue: (key, value) => `${key}: ${value}`,
+  paragraph: (text) => text,
+  separator: () => '',
+  wrap: (content, metadata) => {
+    try {
+      const data = { ...metadata, content };
+      return JSON.stringify(data, null, 2);
+    } catch {
+      return content;
+    }
+  },
+};
+
+const xmlRenderer: FormatRenderer = {
+  h1: (text) => `<h1>${escapeXml(text)}</h1>`,
+  h2: (text) => `<h2>${escapeXml(text)}</h2>`,
+  h3: (text) => `<h3>${escapeXml(text)}</h3>`,
+  bold: (text) => `<strong>${escapeXml(text)}</strong>`,
+  code: (text) => `<code>${escapeXml(text)}</code>`,
+  codeBlock: (code, lang = '') => `<pre${lang ? ` lang="${lang}"` : ''}><code>${escapeXml(code)}</code></pre>`,
+  list: (items) => `<ul>\n${items.map(item => `  <li>${escapeXml(item)}</li>`).join('\n')}\n</ul>`,
+  keyValue: (key, value) => `<dt>${escapeXml(key)}</dt><dd>${escapeXml(value)}</dd>`,
+  paragraph: (text) => `<p>${escapeXml(text)}</p>`,
+  separator: () => '',
+  wrap: (content, metadata) => {
+    const attrs = metadata
+      ? Object.entries(metadata).map(([k, v]) => `${k}="${escapeXml(String(v))}"`).join(' ')
+      : '';
+    return `<?xml version="1.0" encoding="UTF-8"?>\n<instructions${attrs ? ' ' + attrs : ''}>\n${content}\n</instructions>`;
+  },
+};
+
+function escapeXml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function getRenderer(format: OutputFormat): FormatRenderer {
+  switch (format) {
+    case 'mdc':
+      return mdcRenderer;
+    case 'json':
+      return jsonRenderer;
+    case 'xml':
+      return xmlRenderer;
+    default:
+      return markdownRenderer;
+  }
+}
+
 export class PrimerGenerator {
   private projectPath: string;
   private options: PrimerOptions;
@@ -139,7 +253,7 @@ export class PrimerGenerator {
   }
 
   private getDefaultTemplate(agent: AgentType, config: AgentDirectoryConfig): AgentInstructionTemplate {
-    const formatMap: Record<string, 'markdown' | 'json' | 'mdc' | 'xml'> = {
+    const formatMap: Record<string, OutputFormat> = {
       '.md': 'markdown',
       '.json': 'json',
       '.mdc': 'mdc',
@@ -161,10 +275,17 @@ export class PrimerGenerator {
   private generateContent(template: AgentInstructionTemplate): string {
     if (!this.analysis) return '';
 
+    const format = template.format as OutputFormat;
+    const renderer = getRenderer(format);
+
+    if (format === 'json') {
+      return this.generateJsonContent(template);
+    }
+
     const sections: string[] = [];
 
     for (const section of template.sectionOrder) {
-      const content = this.generateSection(section, template);
+      const content = this.generateSection(section, template, renderer);
       if (content) {
         sections.push(content);
       }
@@ -181,271 +302,310 @@ export class PrimerGenerator {
     }
 
     if (this.options.customInstructions) {
-      result += '\n\n## Custom Instructions\n\n' + this.options.customInstructions;
+      result += '\n\n' + renderer.h2('Custom Instructions') + '\n\n' + this.options.customInstructions;
     }
 
-    return result;
+    const metadata = format === 'mdc' ? {
+      title: this.analysis.project.name,
+      type: this.analysis.project.type,
+      generated: new Date().toISOString(),
+    } : undefined;
+
+    return renderer.wrap(result, metadata);
   }
 
-  private generateSection(section: string, template: AgentInstructionTemplate): string {
+  private generateJsonContent(template: AgentInstructionTemplate): string {
+    if (!this.analysis) return '{}';
+
+    const data: Record<string, unknown> = {
+      project: this.analysis.project,
+      languages: this.analysis.languages.map(l => l.name),
+      packageManagers: this.analysis.packageManagers,
+      stack: {
+        frameworks: this.analysis.stack.frameworks.map(f => ({ name: f.name, version: f.version })),
+        libraries: this.analysis.stack.libraries.map(l => ({ name: l.name, version: l.version })),
+        styling: this.analysis.stack.styling.map(s => s.name),
+        testing: this.analysis.stack.testing.map(t => t.name),
+        databases: this.analysis.stack.databases.map(d => d.name),
+      },
+      commands: this.analysis.buildCommands,
+      conventions: this.analysis.conventions,
+      structure: this.analysis.structure,
+      importantFiles: this.analysis.importantFiles,
+      generated: {
+        agent: template.agent,
+        timestamp: new Date().toISOString(),
+      },
+    };
+
+    if (this.options.customInstructions) {
+      data.customInstructions = this.options.customInstructions;
+    }
+
+    return JSON.stringify(data, null, 2);
+  }
+
+  private generateSection(section: string, template: AgentInstructionTemplate, renderer: FormatRenderer): string {
     if (!this.analysis) return '';
 
     switch (section) {
       case 'overview':
-        return this.generateOverviewSection();
+        return this.generateOverviewSection(renderer);
       case 'stack':
-        return this.generateStackSection();
+        return this.generateStackSection(renderer);
       case 'commands':
-        return this.generateCommandsSection();
+        return this.generateCommandsSection(renderer);
       case 'conventions':
-        return this.generateConventionsSection();
+        return this.generateConventionsSection(renderer);
       case 'structure':
-        return this.generateStructureSection();
+        return this.generateStructureSection(renderer);
       case 'guidelines':
-        return this.generateGuidelinesSection(template.agent);
+        return this.generateGuidelinesSection(template.agent, renderer);
       default:
         return '';
     }
   }
 
-  private generateOverviewSection(): string {
+  private generateOverviewSection(renderer: FormatRenderer): string {
     if (!this.analysis) return '';
 
     const { project, languages } = this.analysis;
     const lines: string[] = [];
 
-    lines.push(`# ${project.name}`);
+    lines.push(renderer.h1(project.name));
     lines.push('');
 
     if (project.description) {
-      lines.push(project.description);
+      lines.push(renderer.paragraph(project.description));
       lines.push('');
     }
 
     if (project.type) {
-      lines.push(`**Project Type:** ${this.formatProjectType(project.type)}`);
+      lines.push(renderer.keyValue('Project Type', this.formatProjectType(project.type)));
     }
 
     if (languages.length > 0) {
       const langNames = languages.map(l => this.capitalize(l.name)).join(', ');
-      lines.push(`**Languages:** ${langNames}`);
+      lines.push(renderer.keyValue('Languages', langNames));
     }
 
     if (project.version) {
-      lines.push(`**Version:** ${project.version}`);
+      lines.push(renderer.keyValue('Version', project.version));
     }
 
     return lines.join('\n');
   }
 
-  private generateStackSection(): string {
+  private generateStackSection(renderer: FormatRenderer): string {
     if (!this.analysis) return '';
 
     const { stack, packageManagers } = this.analysis;
     const lines: string[] = [];
 
-    lines.push('## Technology Stack');
+    lines.push(renderer.h2('Technology Stack'));
     lines.push('');
 
     if (stack.frameworks.length > 0) {
-      lines.push('### Frameworks');
-      for (const fw of stack.frameworks) {
+      lines.push(renderer.h3('Frameworks'));
+      const items = stack.frameworks.map(fw => {
         const version = fw.version ? ` (${fw.version})` : '';
-        lines.push(`- ${this.capitalize(fw.name)}${version}`);
-      }
+        return `${this.capitalize(fw.name)}${version}`;
+      });
+      lines.push(renderer.list(items));
       lines.push('');
     }
 
     if (stack.libraries.length > 0) {
-      lines.push('### Libraries');
-      for (const lib of stack.libraries) {
+      lines.push(renderer.h3('Libraries'));
+      const items = stack.libraries.map(lib => {
         const version = lib.version ? ` (${lib.version})` : '';
-        lines.push(`- ${this.capitalize(lib.name)}${version}`);
-      }
+        return `${this.capitalize(lib.name)}${version}`;
+      });
+      lines.push(renderer.list(items));
       lines.push('');
     }
 
     if (stack.styling.length > 0) {
-      lines.push('### Styling');
-      for (const style of stack.styling) {
-        lines.push(`- ${this.capitalize(style.name)}`);
-      }
+      lines.push(renderer.h3('Styling'));
+      lines.push(renderer.list(stack.styling.map(s => this.capitalize(s.name))));
       lines.push('');
     }
 
     if (stack.testing.length > 0) {
-      lines.push('### Testing');
-      for (const test of stack.testing) {
-        lines.push(`- ${this.capitalize(test.name)}`);
-      }
+      lines.push(renderer.h3('Testing'));
+      lines.push(renderer.list(stack.testing.map(t => this.capitalize(t.name))));
       lines.push('');
     }
 
     if (stack.databases.length > 0) {
-      lines.push('### Databases');
-      for (const db of stack.databases) {
-        lines.push(`- ${this.capitalize(db.name)}`);
-      }
+      lines.push(renderer.h3('Databases'));
+      lines.push(renderer.list(stack.databases.map(d => this.capitalize(d.name))));
       lines.push('');
     }
 
     if (packageManagers.length > 0) {
-      lines.push('### Package Manager');
-      lines.push(`- ${packageManagers.map(pm => this.capitalize(pm)).join(', ')}`);
+      lines.push(renderer.h3('Package Manager'));
+      lines.push(renderer.list([packageManagers.map(pm => this.capitalize(pm)).join(', ')]));
       lines.push('');
     }
 
     return lines.join('\n');
   }
 
-  private generateCommandsSection(): string {
+  private generateCommandsSection(renderer: FormatRenderer): string {
     if (!this.analysis || !this.analysis.buildCommands) return '';
 
     const { buildCommands } = this.analysis;
     const lines: string[] = [];
+    const commands: string[] = [];
 
-    lines.push('## Development Commands');
+    lines.push(renderer.h2('Development Commands'));
     lines.push('');
-    lines.push('```bash');
 
     if (buildCommands.install) {
-      lines.push(`# Install dependencies`);
-      lines.push(buildCommands.install);
-      lines.push('');
+      commands.push(`# Install dependencies`);
+      commands.push(buildCommands.install);
+      commands.push('');
     }
 
     if (buildCommands.dev) {
-      lines.push(`# Start development server`);
-      lines.push(buildCommands.dev);
-      lines.push('');
+      commands.push(`# Start development server`);
+      commands.push(buildCommands.dev);
+      commands.push('');
     }
 
     if (buildCommands.build) {
-      lines.push(`# Build for production`);
-      lines.push(buildCommands.build);
-      lines.push('');
+      commands.push(`# Build for production`);
+      commands.push(buildCommands.build);
+      commands.push('');
     }
 
     if (buildCommands.test) {
-      lines.push(`# Run tests`);
-      lines.push(buildCommands.test);
-      lines.push('');
+      commands.push(`# Run tests`);
+      commands.push(buildCommands.test);
+      commands.push('');
     }
 
     if (buildCommands.lint) {
-      lines.push(`# Run linter`);
-      lines.push(buildCommands.lint);
-      lines.push('');
+      commands.push(`# Run linter`);
+      commands.push(buildCommands.lint);
+      commands.push('');
     }
 
     if (buildCommands.format) {
-      lines.push(`# Format code`);
-      lines.push(buildCommands.format);
+      commands.push(`# Format code`);
+      commands.push(buildCommands.format);
     }
 
-    lines.push('```');
+    lines.push(renderer.codeBlock(commands.join('\n'), 'bash'));
 
     return lines.join('\n');
   }
 
-  private generateConventionsSection(): string {
+  private generateConventionsSection(renderer: FormatRenderer): string {
     if (!this.analysis) return '';
 
     const { conventions, patterns } = this.analysis;
     const lines: string[] = [];
 
-    lines.push('## Code Conventions');
+    lines.push(renderer.h2('Code Conventions'));
     lines.push('');
 
     if (conventions) {
+      const items: string[] = [];
       if (conventions.indentation) {
-        lines.push(`- **Indentation:** ${conventions.indentation}`);
+        items.push(`${renderer.bold('Indentation:')} ${conventions.indentation}`);
       }
       if (conventions.quotes) {
-        lines.push(`- **Quotes:** ${conventions.quotes}`);
+        items.push(`${renderer.bold('Quotes:')} ${conventions.quotes}`);
       }
       if (conventions.semicolons !== undefined) {
-        lines.push(`- **Semicolons:** ${conventions.semicolons ? 'required' : 'omitted'}`);
+        items.push(`${renderer.bold('Semicolons:')} ${conventions.semicolons ? 'required' : 'omitted'}`);
       }
       if (conventions.trailingCommas) {
-        lines.push(`- **Trailing Commas:** ${conventions.trailingCommas}`);
+        items.push(`${renderer.bold('Trailing Commas:')} ${conventions.trailingCommas}`);
       }
       if (conventions.maxLineLength) {
-        lines.push(`- **Max Line Length:** ${conventions.maxLineLength}`);
+        items.push(`${renderer.bold('Max Line Length:')} ${conventions.maxLineLength}`);
+      }
+      if (items.length > 0) {
+        lines.push(renderer.list(items));
       }
     }
 
     if (patterns) {
       lines.push('');
-      lines.push('### Patterns');
+      lines.push(renderer.h3('Patterns'));
+      const items: string[] = [];
       if (patterns.components) {
-        lines.push(`- **Components:** ${patterns.components}`);
+        items.push(`${renderer.bold('Components:')} ${patterns.components}`);
       }
       if (patterns.stateManagement) {
-        lines.push(`- **State Management:** ${patterns.stateManagement}`);
+        items.push(`${renderer.bold('State Management:')} ${patterns.stateManagement}`);
       }
       if (patterns.apiStyle) {
-        lines.push(`- **API Style:** ${patterns.apiStyle}`);
+        items.push(`${renderer.bold('API Style:')} ${patterns.apiStyle}`);
       }
       if (patterns.styling) {
-        lines.push(`- **Styling:** ${patterns.styling}`);
+        items.push(`${renderer.bold('Styling:')} ${patterns.styling}`);
       }
       if (patterns.testing) {
-        lines.push(`- **Testing:** ${patterns.testing}`);
+        items.push(`${renderer.bold('Testing:')} ${patterns.testing}`);
       }
       if (patterns.linting) {
-        lines.push(`- **Linting:** ${patterns.linting}`);
+        items.push(`${renderer.bold('Linting:')} ${patterns.linting}`);
       }
       if (patterns.formatting) {
-        lines.push(`- **Formatting:** ${patterns.formatting}`);
+        items.push(`${renderer.bold('Formatting:')} ${patterns.formatting}`);
+      }
+      if (items.length > 0) {
+        lines.push(renderer.list(items));
       }
     }
 
     return lines.join('\n');
   }
 
-  private generateStructureSection(): string {
+  private generateStructureSection(renderer: FormatRenderer): string {
     if (!this.analysis) return '';
 
     const { structure, importantFiles } = this.analysis;
     const lines: string[] = [];
 
-    lines.push('## Project Structure');
+    lines.push(renderer.h2('Project Structure'));
     lines.push('');
 
     if (structure) {
       if (structure.type) {
-        lines.push(`**Structure Type:** ${structure.type}`);
+        lines.push(renderer.keyValue('Structure Type', structure.type));
       }
       if (structure.srcDir) {
-        lines.push(`**Source Directory:** \`${structure.srcDir}/\``);
+        lines.push(renderer.keyValue('Source Directory', renderer.code(`${structure.srcDir}/`)));
       }
       if (structure.testDir) {
-        lines.push(`**Test Directory:** \`${structure.testDir}/\``);
+        lines.push(renderer.keyValue('Test Directory', renderer.code(`${structure.testDir}/`)));
       }
       if (structure.hasWorkspaces && structure.workspaces) {
-        lines.push(`**Workspaces:** ${structure.workspaces.join(', ')}`);
+        lines.push(renderer.keyValue('Workspaces', structure.workspaces.join(', ')));
       }
       lines.push('');
     }
 
     if (importantFiles.length > 0) {
-      lines.push('### Important Files');
-      for (const file of importantFiles.slice(0, 15)) {
-        lines.push(`- \`${file}\``);
-      }
+      lines.push(renderer.h3('Important Files'));
+      lines.push(renderer.list(importantFiles.slice(0, 15).map(f => renderer.code(f))));
     }
 
     return lines.join('\n');
   }
 
-  private generateGuidelinesSection(_agent: AgentType): string {
+  private generateGuidelinesSection(_agent: AgentType, renderer: FormatRenderer): string {
     if (!this.analysis) return '';
 
     const { stack, patterns } = this.analysis;
     const lines: string[] = [];
 
-    lines.push('## Development Guidelines');
+    lines.push(renderer.h2('Development Guidelines'));
     lines.push('');
 
     const hasReact = stack.frameworks.some(f => f.name === 'react' || f.name === 'nextjs');
@@ -456,59 +616,74 @@ export class PrimerGenerator {
     const hasZod = stack.libraries.some(l => l.name === 'zod');
 
     if (hasTypeScript) {
-      lines.push('### TypeScript');
-      lines.push('- Use strict TypeScript with proper type annotations');
-      lines.push('- Prefer `interface` for object types, `type` for unions/intersections');
-      lines.push('- Avoid `any` - use `unknown` when type is uncertain');
+      lines.push(renderer.h3('TypeScript'));
+      lines.push(renderer.list([
+        'Use strict TypeScript with proper type annotations',
+        'Prefer `interface` for object types, `type` for unions/intersections',
+        'Avoid `any` - use `unknown` when type is uncertain',
+      ]));
       lines.push('');
     }
 
     if (hasReact) {
-      lines.push('### React');
-      lines.push('- Use functional components with hooks');
-      lines.push('- Prefer composition over inheritance');
-      lines.push('- Keep components small and focused');
+      lines.push(renderer.h3('React'));
+      const reactItems = [
+        'Use functional components with hooks',
+        'Prefer composition over inheritance',
+        'Keep components small and focused',
+      ];
       if (patterns?.stateManagement) {
-        lines.push(`- Use ${patterns.stateManagement} for state management`);
+        reactItems.push(`Use ${patterns.stateManagement} for state management`);
       }
+      lines.push(renderer.list(reactItems));
       lines.push('');
     }
 
     if (hasVue) {
-      lines.push('### Vue');
-      lines.push('- Use Composition API with `<script setup>`');
-      lines.push('- Keep components small and focused');
+      lines.push(renderer.h3('Vue'));
+      lines.push(renderer.list([
+        'Use Composition API with `<script setup>`',
+        'Keep components small and focused',
+      ]));
       lines.push('');
     }
 
     if (hasTailwind) {
-      lines.push('### Styling');
-      lines.push('- Use Tailwind CSS utility classes');
-      lines.push('- Follow mobile-first responsive design');
-      lines.push('- Extract repeated patterns to components');
+      lines.push(renderer.h3('Styling'));
+      lines.push(renderer.list([
+        'Use Tailwind CSS utility classes',
+        'Follow mobile-first responsive design',
+        'Extract repeated patterns to components',
+      ]));
       lines.push('');
     }
 
     if (hasPrisma) {
-      lines.push('### Database');
-      lines.push('- Use Prisma for database operations');
-      lines.push('- Keep database queries in dedicated service files');
-      lines.push('- Use transactions for related operations');
+      lines.push(renderer.h3('Database'));
+      lines.push(renderer.list([
+        'Use Prisma for database operations',
+        'Keep database queries in dedicated service files',
+        'Use transactions for related operations',
+      ]));
       lines.push('');
     }
 
     if (hasZod) {
-      lines.push('### Validation');
-      lines.push('- Use Zod for runtime validation');
-      lines.push('- Define schemas alongside types');
+      lines.push(renderer.h3('Validation'));
+      lines.push(renderer.list([
+        'Use Zod for runtime validation',
+        'Define schemas alongside types',
+      ]));
       lines.push('');
     }
 
-    lines.push('### General');
-    lines.push('- Follow existing code patterns and conventions');
-    lines.push('- Write clear, self-documenting code');
-    lines.push('- Keep functions small and focused');
-    lines.push('- Add tests for new functionality');
+    lines.push(renderer.h3('General'));
+    lines.push(renderer.list([
+      'Follow existing code patterns and conventions',
+      'Write clear, self-documenting code',
+      'Keep functions small and focused',
+      'Add tests for new functionality',
+    ]));
 
     return lines.join('\n');
   }
