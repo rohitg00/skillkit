@@ -53,3 +53,4 @@ export {
   ManifestInstallCommand,
   ManifestGenerateCommand,
 } from './manifest.js';
+export { PrimerCommand } from './primer.js';

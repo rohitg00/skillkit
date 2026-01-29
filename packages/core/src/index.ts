@@ -77,3 +77,6 @@ export * from './skill-translator.js';
 export * from './manifest/index.js';
 
 export * from './quality/index.js';
+
+// Primer (AI Instruction Generator)
+export * from './primer/index.js';
