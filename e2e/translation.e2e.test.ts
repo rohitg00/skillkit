@@ -35,6 +35,21 @@ const SUPPORTED_AGENTS = [
   'trae',
   'windsurf',
   'universal',
+  'cline',
+  'codebuddy',
+  'commandcode',
+  'continue',
+  'crush',
+  'factory',
+  'mcpjam',
+  'mux',
+  'neovate',
+  'openhands',
+  'pi',
+  'qoder',
+  'qwen',
+  'vercel',
+  'zencoder',
 ] as const;
 
 describe('E2E: Skill Translation', () => {

@@ -66,6 +66,21 @@ describe('E2E: Onboarding UI', () => {
         'Antigravity',
         'Clawdbot',
         'Universal',
+        'Cline',
+        'CodeBuddy',
+        'CommandCode',
+        'Continue',
+        'Crush',
+        'Factory',
+        'MCPJam',
+        'Mux',
+        'Neovate',
+        'OpenHands',
+        'Pi',
+        'Qoder',
+        'Qwen',
+        'Vercel',
+        'Zencoder',
       ];
 
       for (const agent of agents) {
