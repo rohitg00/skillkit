@@ -34,7 +34,7 @@ pnpm ui
 - **Animated UI** - Smooth entrance animations and transitions
 - **Browse Skills** - Explore skill repositories with search and filtering
 - **Smart Recommendations** - AI-powered skill suggestions with match scores
-- **Cross-Agent Translation** - Convert skills between 17+ agent formats
+- **Cross-Agent Translation** - Convert skills between 32 agent formats
 - **Team Collaboration** - Share and sync skills across teams
 - **Responsive Design** - Adapts to any terminal size
 

@@ -17,7 +17,7 @@
 
 ## Supercharge Every AI Coding Agent
 
-**Give your AI agents new abilities with portable, reusable skills.** Install from a curated marketplace, create your own, and use them across Claude Code, Cursor, Codex, Windsurf, GitHub Copilot, and 27 more agents.
+**Give your AI agents new abilities with portable, reusable skills.** Install from a curated marketplace, create your own, and use them across Claude Code, Cursor, Codex, Windsurf, GitHub Copilot, and 27 more agents (32 total).
 
 > **What are AI Agent Skills?** Skills are instruction files that teach AI coding agents how to handle specific tasks - like processing PDFs, following React best practices, or enforcing security patterns. Think of them as plugins for your AI assistant.
 
@@ -241,7 +241,7 @@ skillkit cicd gitlab-ci
 skillkit cicd pre-commit
 ```
 
-## Supported Agents (17)
+## Supported Agents (32)
 
 | Agent | Format | Skills Directory |
 |-------|--------|------------------|

@@ -44,7 +44,7 @@ describe('E2E: Onboarding UI', () => {
       expect(result.success).toBe(true);
     });
 
-    it('should display all 17 agents', async () => {
+    it('should display all 32 agents', async () => {
       const result = await runCli(['init', '--list']);
       const output = result.stdout + result.stderr;
 

@@ -28,7 +28,7 @@ import {
   type CrossAgentSkill,
 } from '@skillkit/core';
 
-// All 17 supported agents
+// All 32 supported agents
 const SUPPORTED_AGENTS = [
   'claude-code',
   'cursor',

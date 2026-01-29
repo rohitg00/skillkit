@@ -7,7 +7,7 @@
  *
  * Key features:
  * - Methodology packs: Collections of related skills (testing, debugging, planning)
- * - Universal translation: Skills work across all 17 supported agents
+ * - Universal translation: Skills work across all 32 supported agents
  * - Pack management: Install, uninstall, and sync methodology skills
  * - Community-driven: Open for custom methodology contributions
  */

@@ -1,6 +1,6 @@
 # SkillKit
 
-Universal skills manager for AI coding agents. Install, manage, and sync skills across 17+ AI agents including Claude Code, Cursor, Codex, Gemini CLI, and more.
+Universal skills manager for AI coding agents. Install, manage, and sync skills across 32 AI agents including Claude Code, Cursor, Codex, Gemini CLI, and more.
 
 ## Installation
 
@@ -150,7 +150,7 @@ skillkit memory compress
 skillkit memory export auth-insight --output auth-skill.md
 ```
 
-## Supported Agents (17)
+## Supported Agents (32)
 
 Claude Code, Cursor, Codex, Gemini CLI, Windsurf, GitHub Copilot, OpenCode, Antigravity, Amp, Clawdbot, Droid, Goose, Kilo, Kiro, Roo, Trae, Universal
 
