@@ -17,13 +17,15 @@ const SHORTCUTS = [
     { key: 'r', desc: 'Recommendations' },
     { key: 'i', desc: 'Installed skills' },
     { key: 's', desc: 'Sync settings' },
+    { key: 'f', desc: 'Find skills' },
   ]},
   { section: 'Actions', items: [
     { key: 't', desc: 'Translate skills' },
     { key: 'w', desc: 'Workflows' },
     { key: 'x', desc: 'Execute' },
     { key: 'n', desc: 'Plan' },
-    { key: 'y', desc: 'History' },
+    { key: 'v', desc: 'Validate' },
+    { key: 'u', desc: 'Publish' },
   ]},
   { section: 'Team & Config', items: [
     { key: 'a', desc: 'Team settings' },
@@ -35,10 +37,10 @@ const SHORTCUTS = [
   ]},
   { section: 'Global', items: [
     { key: '/', desc: 'This help screen' },
+    { key: 'd', desc: 'Open docs' },
     { key: 'esc', desc: 'Go back / Home' },
     { key: 'q', desc: 'Quit application' },
     { key: 'j/k', desc: 'Navigate lists' },
-    { key: 'enter', desc: 'Select item' },
   ]},
 ];
 

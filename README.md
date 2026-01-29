@@ -12,6 +12,7 @@
 [![GitHub Package](https://img.shields.io/badge/GitHub%20Package-@rohitg00/skillkit-blue?logo=github)](https://github.com/rohitg00/skillkit/pkgs/npm/skillkit)
 [![CI](https://github.com/rohitg00/skillkit/actions/workflows/ci.yml/badge.svg)](https://github.com/rohitg00/skillkit/actions/workflows/ci.yml)
 [![Website](https://img.shields.io/badge/Website-agenstskills.com-black)](https://agenstskills.com)
+[![Docs](https://img.shields.io/badge/Docs-agenstskills.com/docs-blue)](https://agenstskills.com/docs)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Supercharge Every AI Coding Agent
@@ -272,9 +273,11 @@ skillkit remove <skills>      # Remove installed skills
 skillkit update [skills]      # Update skills from source
 skillkit list                 # List installed skills
 skillkit enable <skills>      # Enable specific skills
-skillkit disable <skills>     # Disable specific skills
+skillkit pause <skills>       # Temporarily pause skills
+skillkit resume <skills>      # Resume paused skills
 skillkit sync                 # Sync skills to agent config
 skillkit read <skills>        # Read skill content for AI
+skillkit status               # Show skill and agent status
 ```
 
 ### Discovery & Recommendations
@@ -283,6 +286,8 @@ skillkit read <skills>        # Read skill content for AI
 skillkit recommend            # Get smart recommendations
 skillkit marketplace          # Browse skill marketplace
 skillkit marketplace search   # Search marketplace
+skillkit find <query>         # Quick skill search
+skillkit check                # Check skill health and updates
 ```
 
 ### Translation & Context
@@ -317,20 +322,60 @@ skillkit memory compress      # Compress observations
 skillkit memory export        # Export as skill
 ```
 
-### Testing & Workflows
+### Quality & Testing
 
 ```bash
 skillkit test                 # Run skill tests
-skillkit workflow run         # Execute workflow
-skillkit cicd                 # Generate CI/CD templates
+skillkit validate             # Validate skill format
+skillkit fix                  # Auto-fix skill issues
+skillkit audit                # Audit skills for security/quality
+skillkit manifest             # Generate skill manifest
 ```
 
-### Utilities
+### Team Collaboration
 
 ```bash
-skillkit init                 # Initialize in project
-skillkit validate             # Validate skill format
+skillkit team init            # Initialize team workspace
+skillkit team share           # Share skills with team
+skillkit team import          # Import team skills
+skillkit team sync            # Sync team skills
+skillkit team list            # List team members
+```
+
+### Workflows & Automation
+
+```bash
+skillkit workflow run         # Execute workflow
+skillkit plan create          # Create execution plan
+skillkit plan execute         # Execute a plan
+skillkit cicd init            # Generate CI/CD templates
+skillkit hook register        # Register lifecycle hooks
+skillkit command generate     # Generate slash commands
+```
+
+### Plugins & Extensions
+
+```bash
+skillkit plugin list          # List available plugins
+skillkit plugin install       # Install a plugin
+skillkit plugin enable        # Enable a plugin
+skillkit methodology list     # List methodologies
+skillkit methodology load     # Load a methodology
+```
+
+### Publishing & Sharing
+
+```bash
+skillkit publish              # Publish skill to marketplace
 skillkit create               # Create new skill
+skillkit init                 # Initialize in project
+```
+
+### Configuration
+
+```bash
+skillkit settings             # View/edit settings
+skillkit settings --set key=value  # Update setting
 ```
 
 ## Creating Skills
@@ -469,6 +514,8 @@ Contributions welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md
 
 ## Links
 
+- [Documentation](https://agenstskills.com/docs)
+- [Website](https://agenstskills.com)
 - [Agent Skills Specification](https://agentskills.io/specification)
 - [GitHub Repository](https://github.com/rohitg00/skillkit)
 - [NPM Package](https://www.npmjs.com/package/skillkit)

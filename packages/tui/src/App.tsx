@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useKeyboard } from '@opentui/react';
+import { exec } from 'node:child_process';
 import { type Screen, NAV_KEYS } from './state/types.js';
 import { Sidebar } from './components/Sidebar.js';
 import { Splash } from './components/Splash.js';
@@ -8,6 +9,13 @@ import {
   Translate, Context, Memory, Team, Plugins, Methodology,
   Plan, Workflow, Execute, History, Sync, Help,
 } from './screens/index.js';
+
+const DOCS_URL = 'https://agenstskills.com/docs';
+
+function openUrl(url: string): void {
+  const cmd = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open';
+  exec(`${cmd} ${url}`);
+}
 
 interface AppProps {
   onExit?: (code?: number) => void;
@@ -51,6 +59,11 @@ export function App({ onExit }: AppProps = {}) {
 
     if (key.name === 'q' || (key.ctrl && key.name === 'c')) {
       onExit ? onExit(0) : process.exit(0);
+      return;
+    }
+
+    if (key.name === 'd') {
+      openUrl(DOCS_URL);
       return;
     }
 
