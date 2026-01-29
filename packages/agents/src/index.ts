@@ -81,8 +81,16 @@ export function getAdapter(type: AgentType): AgentAdapter {
   return adapters[type];
 }
 
-export function getAllAdapters(): AgentAdapter[] {
-  return Object.values(adapters);
+export interface AgentAdapterWithType extends AgentAdapter {
+  readonly agentType: AgentType;
+}
+
+export function getAllAdapters(): AgentAdapterWithType[] {
+  return Object.entries(adapters).map(([type, adapter]) => ({
+    ...adapter,
+    type: type as AgentType,
+    agentType: type as AgentType,
+  }));
 }
 
 export async function detectAgent(): Promise<AgentType> {
