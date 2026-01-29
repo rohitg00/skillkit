@@ -12,40 +12,7 @@ import type {
 import { AGENT_INSTRUCTION_TEMPLATES } from './types.js';
 import { analyzePrimer } from './analyzer.js';
 
-const ALL_AGENTS: AgentType[] = [
-  'claude-code',
-  'cursor',
-  'codex',
-  'gemini-cli',
-  'opencode',
-  'antigravity',
-  'amp',
-  'clawdbot',
-  'droid',
-  'github-copilot',
-  'goose',
-  'kilo',
-  'kiro-cli',
-  'roo',
-  'trae',
-  'windsurf',
-  'universal',
-  'cline',
-  'codebuddy',
-  'commandcode',
-  'continue',
-  'crush',
-  'factory',
-  'mcpjam',
-  'mux',
-  'neovate',
-  'openhands',
-  'pi',
-  'qoder',
-  'qwen',
-  'vercel',
-  'zencoder',
-];
+const ALL_AGENTS: AgentType[] = Object.keys(AGENT_CONFIG) as AgentType[];
 
 export class PrimerGenerator {
   private projectPath: string;
@@ -172,10 +139,21 @@ export class PrimerGenerator {
   }
 
   private getDefaultTemplate(agent: AgentType, config: AgentDirectoryConfig): AgentInstructionTemplate {
+    const formatMap: Record<string, 'markdown' | 'json' | 'mdc' | 'xml'> = {
+      '.md': 'markdown',
+      '.json': 'json',
+      '.mdc': 'mdc',
+      '.xml': 'xml',
+    };
+    const ext = config.configFile.includes('.')
+      ? '.' + config.configFile.split('.').pop()
+      : '.md';
+    const format = formatMap[ext] || 'markdown';
+
     return {
       agent,
       filename: config.configFile,
-      format: 'markdown',
+      format,
       sectionOrder: ['overview', 'stack', 'commands', 'conventions', 'structure', 'guidelines'],
     };
   }

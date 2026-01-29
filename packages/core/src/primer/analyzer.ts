@@ -232,10 +232,15 @@ export class PrimerAnalyzer {
     }
 
     if (this.hasFile('pyproject.toml') || this.hasFile('requirements.txt') || this.hasFile('setup.py')) {
+      const source = this.hasFile('pyproject.toml')
+        ? 'pyproject.toml'
+        : this.hasFile('requirements.txt')
+          ? 'requirements.txt'
+          : 'setup.py';
       languages.push({
         name: 'python',
         confidence: 100,
-        source: 'pyproject.toml',
+        source,
       });
     }
 
@@ -597,7 +602,9 @@ export class PrimerAnalyzer {
 
   private hasFile(name: string): boolean {
     if (name.includes('*')) {
-      const regex = new RegExp(name.replace(/\*/g, '.*'));
+      const regex = new RegExp(
+        name.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')
+      );
       for (const file of this.files) {
         if (regex.test(file)) return true;
       }
