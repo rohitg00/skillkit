@@ -1,6 +1,6 @@
 {
   "name": "@skillkit/agents",
-  "version": "1.7.11",
+  "version": "2.0.0",
   "description": "Agent adapters for SkillKit - supports 32 AI coding agents",
   "type": "module",
   "main": "./dist/index.js",

@@ -57,6 +57,8 @@ import {
   ManifestInstallCommand,
   ManifestGenerateCommand,
   PrimerCommand,
+  MeshCommand,
+  MessageCommand,
 } from '@skillkit/cli';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -128,5 +130,7 @@ cli.register(ManifestRemoveCommand);
 cli.register(ManifestInstallCommand);
 cli.register(ManifestGenerateCommand);
 cli.register(PrimerCommand);
+cli.register(MeshCommand);
+cli.register(MessageCommand);
 
 cli.runExit(process.argv.slice(2));

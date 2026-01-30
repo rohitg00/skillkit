@@ -54,3 +54,5 @@ export {
   ManifestGenerateCommand,
 } from './manifest.js';
 export { PrimerCommand } from './primer.js';
+export { MeshCommand } from './mesh.js';
+export { MessageCommand } from './message.js';

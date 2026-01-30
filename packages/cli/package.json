@@ -1,6 +1,6 @@
 {
   "name": "@skillkit/cli",
-  "version": "1.7.11",
+  "version": "2.0.0",
   "description": "CLI commands for SkillKit",
   "type": "module",
   "main": "./dist/index.js",
@@ -25,6 +25,9 @@
     "@skillkit/core": "workspace:*",
     "@skillkit/agents": "workspace:*",
     "@skillkit/tui": "workspace:*",
+    "@skillkit/memory": "workspace:*",
+    "@skillkit/mesh": "workspace:*",
+    "@skillkit/messaging": "workspace:*",
     "chalk": "^5.3.0",
     "clipanion": "^4.0.0-rc.4",
     "got": "^14.4.1",

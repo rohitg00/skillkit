@@ -1,0 +1,51 @@
+{
+  "name": "@skillkit/mesh",
+  "version": "2.0.0",
+  "description": "Peer mesh network for multi-machine agent distribution",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@skillkit/core": "workspace:*",
+    "ws": "^8.16.0",
+    "got": "^14.2.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.10",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rohitg00/skillkit.git",
+    "directory": "packages/mesh"
+  },
+  "keywords": [
+    "skillkit",
+    "mesh",
+    "peer",
+    "network",
+    "distributed"
+  ],
+  "license": "Apache-2.0"
+}

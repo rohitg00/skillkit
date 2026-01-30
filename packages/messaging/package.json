@@ -1,0 +1,49 @@
+{
+  "name": "@skillkit/messaging",
+  "version": "2.0.0",
+  "description": "Inter-agent messaging system for SkillKit",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@skillkit/core": "workspace:*",
+    "@skillkit/mesh": "workspace:*",
+    "got": "^14.2.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rohitg00/skillkit.git",
+    "directory": "packages/messaging"
+  },
+  "keywords": [
+    "skillkit",
+    "messaging",
+    "agents",
+    "communication"
+  ],
+  "license": "Apache-2.0"
+}

@@ -1,6 +1,6 @@
 {
   "name": "skillkit",
-  "version": "1.7.11",
+  "version": "2.0.0",
   "description": "Supercharge AI coding agents with portable skills. Install, translate, and share skills across Claude Code, Cursor, Codex, Copilot & 13 more",
   "type": "module",
   "bin": {
@@ -57,6 +57,9 @@
     "@skillkit/agents": "workspace:*",
     "@skillkit/cli": "workspace:*",
     "@skillkit/tui": "workspace:*",
+    "@skillkit/memory": "workspace:*",
+    "@skillkit/mesh": "workspace:*",
+    "@skillkit/messaging": "workspace:*",
     "clipanion": "^4.0.0-rc.4"
   },
   "devDependencies": {
