@@ -16,17 +16,15 @@ interface TerminalLine {
 }
 
 const TERMINAL_LINES: TerminalLine[] = [
-  { type: 'cmd', text: 'skillkit primer --analyze-only' },
-  { type: 'out', text: '  → TypeScript, React, Next.js' },
-  { type: 'out', text: '  → vitest, tailwindcss, eslint' },
-  { type: 'cmd', text: 'skillkit primer --all-agents' },
-  { type: 'out', text: '→ Generated 32 instruction files' },
+  { type: 'cmd', text: 'skillkit recommend' },
+  { type: 'out', text: '  92% react-best-practices' },
+  { type: 'out', text: '  87% typescript-strict' },
   { type: 'cmd', text: 'skillkit install anthropics/skills' },
-  { type: 'out', text: '→ 3 skills → 5 agents' },
-  { type: 'cmd', text: 'skillkit translate --to cursor' },
-  { type: 'out', text: '  ✓ Translated to .mdc format' },
-  { type: 'cmd', text: 'skillkit sync' },
-  { type: 'out', text: '→ Synced to 32 agents' },
+  { type: 'out', text: '→ Installed 3 skills' },
+  { type: 'cmd', text: 'skillkit sync --agent cursor,claude' },
+  { type: 'out', text: '  ✓ Synced to 2 agents' },
+  { type: 'cmd', text: 'skillkit translate my-skill --to codex' },
+  { type: 'out', text: '→ Converted to SKILL.md format' },
 ];
 
 const FADE_ANIMATION_STYLES = `
@@ -122,7 +120,7 @@ export function Hero(): React.ReactElement {
           </pre>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-start">
           <div className="animate-fade-in">
             <div className="inline-flex items-center space-x-2 border border-zinc-800 bg-zinc-900/50 px-2 py-0.5 mb-3 backdrop-blur-sm">
               <span className="flex h-1.5 w-1.5 bg-white rounded-full"></span>
@@ -163,7 +161,7 @@ export function Hero(): React.ReactElement {
             </div>
           </div>
 
-          <div className="hidden lg:block relative animate-fade-in-delay w-full">
+          <div className="hidden md:block relative animate-fade-in-delay w-full">
             <div className="absolute -inset-1 bg-gradient-to-r from-zinc-800 via-zinc-700 to-zinc-800 rounded-lg opacity-20 blur-lg"></div>
             <div className="relative border border-zinc-800 bg-black rounded-lg overflow-hidden">
               <div className="flex items-center gap-1.5 px-3 py-2 border-b border-zinc-800 bg-zinc-900/50">
@@ -172,7 +170,7 @@ export function Hero(): React.ReactElement {
                 <div className="w-2.5 h-2.5 rounded-full bg-zinc-700"></div>
                 <span className="ml-2 text-zinc-500 text-xs font-mono">skillkit</span>
               </div>
-              <div className="p-4 font-mono text-xs min-h-[200px] max-h-[280px]">
+              <div className="p-3 md:p-4 font-mono text-[10px] md:text-xs min-h-[180px] md:min-h-[200px] max-h-[240px] md:max-h-[280px]">
                 {TERMINAL_LINES.slice(0, visibleLines).map((line, index) => (
                   <div key={index} className="mb-1">
                     {line.type === 'cmd' ? (

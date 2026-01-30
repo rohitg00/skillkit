@@ -490,7 +490,7 @@ ${skillContent.slice(0, 4000)}${skillContent.length > 4000 ? '\n...(truncated)' 
             <p className="text-zinc-500 font-mono text-sm mb-3">Install with SkillKit:</p>
             <pre className="border border-zinc-800 p-3 sm:p-4 text-sm overflow-x-auto max-w-full" style={{ backgroundColor: '#09090b' }}>
               <code className="font-mono text-xs sm:text-sm break-all sm:break-normal" style={{ color: '#d4d4d8' }}>
-                npx skillkit install {selectedSkill.id.split('/').slice(0, 2).join('/')}
+                npx skillkit@latest install {selectedSkill.id.split('/').slice(0, 2).join('/')}
               </code>
             </pre>
           </div>

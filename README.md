@@ -492,12 +492,43 @@ const profile = await analyzeProject('./my-project');
 const recs = engine.recommend(profile);
 ```
 
-## Popular Skill Repositories
+## Skill Sources & Attribution
 
-| Repository | Description |
-|------------|-------------|
-| [anthropics/skills](https://github.com/anthropics/skills) | Official Claude Code marketplace - PDF, XLSX, DOCX processing |
-| [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | React/Next.js best practices, web design guidelines |
+SkillKit aggregates skills from trusted sources. We credit and link back to all original creators. Each source retains its original license.
+
+### Official Partner Sources
+
+| Repository | Description | License |
+|------------|-------------|---------|
+| [anthropics/skills](https://github.com/anthropics/skills) | Official Claude Code skills from Anthropic | Apache 2.0 |
+| [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | Next.js, React, and Vercel platform skills | MIT |
+| [expo/skills](https://github.com/expo/skills) | Mobile development with Expo and React Native | MIT |
+| [remotion-dev/skills](https://github.com/remotion-dev/skills) | Programmatic video creation with React | MIT |
+| [supabase/agent-skills](https://github.com/supabase/agent-skills) | Database, auth, and backend skills | Apache 2.0 |
+| [stripe/ai](https://github.com/stripe/ai) | Payment integration and Stripe API patterns | MIT |
+
+### Community Contributors
+
+| Repository | Description | License |
+|------------|-------------|---------|
+| [trailofbits/skills](https://github.com/trailofbits/skills) | Security analysis and vulnerability detection | Apache 2.0 |
+| [obra/superpowers](https://github.com/obra/superpowers) | Test-driven development and workflow automation | MIT |
+| [wshobson/agents](https://github.com/wshobson/agents) | Development patterns and agent configurations (48 agents) | MIT |
+| [ComposioHQ/awesome-claude-skills](https://github.com/ComposioHQ/awesome-claude-skills) | Curated collection of Claude Code skills | MIT |
+| [travisvn/awesome-claude-skills](https://github.com/travisvn/awesome-claude-skills) | Community-curated skill collection | MIT |
+| [langgenius/dify](https://github.com/langgenius/dify) | AI application development platform patterns | Apache 2.0 |
+| [better-auth/skills](https://github.com/better-auth/skills) | Authentication and authorization patterns | MIT |
+| [onmax/nuxt-skills](https://github.com/onmax/nuxt-skills) | Vue.js and Nuxt framework skills | MIT |
+| [elysiajs/skills](https://github.com/elysiajs/skills) | Bun runtime and ElysiaJS framework | MIT |
+| [kadajett/agent-nestjs-skills](https://github.com/kadajett/agent-nestjs-skills) | NestJS backend framework patterns | MIT |
+| [cloudai-x/threejs-skills](https://github.com/cloudai-x/threejs-skills) | 3D graphics and WebGL development | MIT |
+| [dimillian/skills](https://github.com/dimillian/skills) | iOS and SwiftUI development patterns | MIT |
+| [waynesutton/convexskills](https://github.com/waynesutton/convexskills) | Convex backend development | MIT |
+| [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) | Obsidian plugin and vault management | MIT |
+| [giuseppe-trisciuoglio/developer-kit](https://github.com/giuseppe-trisciuoglio/developer-kit) | UI component libraries (Shadcn/Radix) | MIT |
+| [openrouterteam/agent-skills](https://github.com/openrouterteam/agent-skills) | OpenRouter API integration patterns | MIT |
+
+**Want to add your skills?** [Submit your repository](https://github.com/rohitg00/skillkit/issues/new?template=add-source.md) to be included in SkillKit
 
 ## Installation Options
 

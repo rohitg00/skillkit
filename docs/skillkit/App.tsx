@@ -6,6 +6,9 @@ import { Footer } from './components/Footer';
 import { SkillGenerator } from './components/SkillGenerator';
 import { SkillSubmitForm } from './components/SkillSubmitForm';
 import { Commands } from './components/Commands';
+import { StackBuilder } from './components/StackBuilder';
+import { TrendingSkills } from './components/TrendingSkills';
+import { Attribution } from './components/Attribution';
 
 const GITHUB_ICON = (
   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -24,6 +27,14 @@ function scrollToTop(e: React.MouseEvent): void {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+function scrollToSection(e: React.MouseEvent, sectionId: string): void {
+  e.preventDefault();
+  const element = document.getElementById(sectionId);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
 export default function App(): React.ReactElement {
   return (
     <div className="min-h-screen text-zinc-100 font-sans selection:bg-white selection:text-black" style={{ backgroundColor: '#000000' }}>
@@ -34,10 +45,40 @@ export default function App(): React.ReactElement {
               <div className="w-4 h-4 bg-white"></div>
               <span className="text-base font-bold tracking-tight text-white font-mono">SKILLKIT</span>
             </a>
+            <div className="hidden sm:flex items-center gap-4 text-xs font-mono">
+              <a
+                href="#stack"
+                onClick={(e) => scrollToSection(e, 'stack')}
+                className="text-zinc-500 hover:text-white transition-colors"
+              >
+                Stack
+              </a>
+              <a
+                href="#trending"
+                onClick={(e) => scrollToSection(e, 'trending')}
+                className="text-zinc-500 hover:text-white transition-colors"
+              >
+                Trending
+              </a>
+              <a
+                href="#skills"
+                onClick={(e) => scrollToSection(e, 'skills')}
+                className="text-zinc-500 hover:text-white transition-colors"
+              >
+                Find Skills
+              </a>
+              <a
+                href="#sources"
+                onClick={(e) => scrollToSection(e, 'sources')}
+                className="text-zinc-500 hover:text-white transition-colors"
+              >
+                Sources
+              </a>
+            </div>
             <div className="flex items-center gap-2 sm:gap-4">
               <a
                 href="https://agenstskills.com/docs"
-                className="text-zinc-400 hover:text-white transition-colors text-sm font-mono"
+                className="text-zinc-400 hover:text-white transition-colors text-sm font-mono hidden sm:block"
               >
                 Docs
               </a>
@@ -66,9 +107,85 @@ export default function App(): React.ReactElement {
 
       <main className="pt-14">
         <Hero />
+
+        <div className="border-b border-zinc-800 py-4 bg-zinc-950">
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+              <a
+                href="https://www.npmjs.com/package/skillkit"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center"
+              >
+                <img
+                  src="https://img.shields.io/npm/v/skillkit.svg?style=flat&color=white&labelColor=000000"
+                  alt="npm version"
+                  className="h-5"
+                />
+              </a>
+              <a
+                href="https://www.npmjs.com/package/skillkit"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center"
+              >
+                <img
+                  src="https://img.shields.io/npm/dt/skillkit.svg?style=flat&color=white&labelColor=000000"
+                  alt="npm downloads"
+                  className="h-5"
+                />
+              </a>
+              <a
+                href="https://github.com/rohitg00/skillkit"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center"
+              >
+                <img
+                  src="https://img.shields.io/github/stars/rohitg00/skillkit?style=flat&color=white&labelColor=000000"
+                  alt="GitHub stars"
+                  className="h-5"
+                />
+              </a>
+              <a
+                href="https://github.com/rohitg00/skillkit/blob/main/LICENSE"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center"
+              >
+                <img
+                  src="https://img.shields.io/badge/License-Apache%202.0-white?style=flat&labelColor=000000"
+                  alt="License"
+                  className="h-5"
+                />
+              </a>
+              <a
+                href="https://github.com/rohitg00/skillkit"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center"
+              >
+                <img
+                  src="https://img.shields.io/badge/PRs-welcome-white?style=flat&labelColor=000000"
+                  alt="PRs Welcome"
+                  className="h-5"
+                />
+              </a>
+            </div>
+          </div>
+        </div>
+
         <Agents />
         <Features />
         <Commands />
+
+        <section id="stack">
+          <StackBuilder />
+        </section>
+
+        <section id="trending">
+          <TrendingSkills />
+        </section>
 
         <section id="skills" className="py-12 border-b border-zinc-800">
           <SkillGenerator />
@@ -84,6 +201,10 @@ export default function App(): React.ReactElement {
             </div>
             <SkillSubmitForm />
           </div>
+        </section>
+
+        <section id="sources">
+          <Attribution />
         </section>
       </main>
 
