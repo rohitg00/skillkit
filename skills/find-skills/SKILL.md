@@ -100,9 +100,11 @@ Install for the user:
 npx skillkit@latest install <owner/repo>
 ```
 
-Or install specific skill:
+Or install specific skill (non-interactive):
 ```bash
-npx skillkit@latest install <owner/repo> --skill <skill-name>
+npx skillkit@latest install owner/repo --skills skill-name
+npx skillkit@latest install anthropics/skills --skills frontend-design
+npx skillkit@latest install vercel-labs/agent-skills -s react-best-practices
 ```
 
 ## Common Searches
@@ -135,3 +137,9 @@ If no matching skill exists:
 
 - Website: https://agentskills.com
 - GitHub: https://github.com/rohitg00/skillkit
+
+## Important Notes
+
+- Use `owner/repo` format, NOT full URLs
+- Use `--skills` (plural) or `-s` flag for specific skills
+- Add `@latest` to npx for latest version: `npx skillkit@latest`
