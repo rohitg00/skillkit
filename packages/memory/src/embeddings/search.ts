@@ -28,7 +28,7 @@ export class SemanticSearch {
 
     const results = await this.adapter.semanticSearch(
       queryEmbedding,
-      limit * 2,
+      limit * 5,
       agentId,
       category,
       tier
