@@ -87,6 +87,150 @@ import { RecommendationEngine, analyzeProject } from '@skillkit/core/recommend'
 const engine = new RecommendationEngine()
 const profile = await analyzeProject('./my-project')
 const recommendations = engine.recommend(profile)
+
+// Recommendations with scores and reasons
+recommendations.forEach(rec => {
+  console.log(`${rec.score}% - ${rec.skill.name}`)
+  console.log(`Reasons: ${rec.reasons.join(', ')}`)
+})
+```
+
+## Primer (Auto-Generate Instructions)
+
+```typescript
+import { analyzeProject, generateInstructions } from '@skillkit/core'
+
+// Analyze project
+const analysis = await analyzeProject('./my-project')
+console.log(analysis.techStack)
+// { framework: 'Next.js', language: 'TypeScript', styling: 'Tailwind' }
+
+// Generate instructions for specific agents
+const instructions = await generateInstructions(analysis, {
+  agents: ['claude', 'cursor', 'windsurf'],
+  includeExamples: true,
+  tone: 'detailed',
+})
+
+// Write to files
+for (const [agent, content] of Object.entries(instructions)) {
+  await fs.writeFile(`.${agent}/instructions.md`, content)
+}
+```
+
+## Mesh Network
+
+```typescript
+import { MeshHost, PeerIdentity } from '@skillkit/mesh'
+
+// Generate identity
+const identity = await PeerIdentity.generate()
+
+// Create mesh host
+const host = new MeshHost({
+  hostId: 'my-workstation',
+  identity,
+  security: { mode: 'secure' },
+})
+
+await host.start()
+
+// Send message to peer
+await host.send('peer-fingerprint', {
+  type: 'skill-sync',
+  payload: { skills: ['react-patterns'] },
+})
+
+// Listen for messages
+host.on('message', (msg) => {
+  console.log('Received:', msg.type, 'from', msg.from)
+})
+```
+
+## Inter-Agent Messaging
+
+```typescript
+import { MessagingClient } from '@skillkit/messaging'
+
+// Create messaging client
+const messaging = new MessagingClient({
+  meshHost: host,
+  storagePath: '~/.skillkit/messages',
+})
+
+await messaging.init()
+
+// Send a message
+await messaging.send({
+  to: 'claude@laptop',
+  subject: 'Code review completed',
+  body: 'I reviewed the auth module...',
+  priority: 'normal',
+})
+
+// Listen for new messages
+messaging.on('message', (msg) => {
+  console.log('New message from:', msg.from)
+  console.log('Subject:', msg.subject)
+})
+
+// Get inbox
+const inbox = await messaging.getInbox({ unread: true })
+```
+
+## Workflow Orchestration
+
+```typescript
+import { WorkflowEngine, WorkflowStep } from '@skillkit/core'
+
+// Define workflow
+const workflow = {
+  name: 'feature-development',
+  steps: [
+    { skill: 'tdd-workflow', action: 'write-tests' },
+    { skill: 'code-implementation', action: 'implement' },
+    { skill: 'code-review', action: 'review' },
+    { skill: 'documentation', action: 'update-docs' },
+  ],
+}
+
+// Execute workflow
+const engine = new WorkflowEngine()
+const result = await engine.run(workflow)
+
+console.log('Workflow completed:', result.status)
+console.log('Steps executed:', result.steps.length)
+```
+
+## Skill Testing
+
+```typescript
+import { SkillTestRunner, SkillTest } from '@skillkit/core'
+
+// Define test
+const test: SkillTest = {
+  name: 'pdf-processing',
+  setup: async () => {
+    // Setup test environment
+  },
+  assertions: [
+    {
+      type: 'file_exists',
+      path: './output.pdf',
+    },
+    {
+      type: 'content_includes',
+      text: 'Expected content',
+    },
+  ],
+}
+
+// Run test
+const runner = new SkillTestRunner()
+const result = await runner.run(test)
+
+console.log('Test passed:', result.passed)
+console.log('Assertions:', result.assertions)
 ```
 
 ## Types
@@ -99,6 +243,15 @@ interface Skill {
   content: string
   metadata: SkillMetadata
   enabled: boolean
+  agent: string
+}
+
+interface SkillMetadata {
+  version?: string
+  author?: string
+  tags?: string[]
+  dependencies?: string[]
+  quality?: QualityScore
 }
 
 interface QualityScore {
@@ -114,4 +267,154 @@ interface Recommendation {
   score: number
   reasons: string[]
 }
+
+interface ProjectAnalysis {
+  techStack: {
+    framework?: string
+    language: string
+    styling?: string
+    testing?: string
+    packageManager: string
+  }
+  patterns: {
+    architecture: string
+    codeStyle: Record<string, any>
+    directory: string
+  }
+  dependencies: Record<string, string>
+}
+
+interface MeshMessage {
+  from: string
+  to: string
+  type: string
+  payload: any
+  timestamp: number
+  signature?: string
+}
+
+interface WorkflowResult {
+  status: 'success' | 'failure'
+  steps: WorkflowStepResult[]
+  duration: number
+}
 ```
+
+## Package Exports
+
+### @skillkit/core
+
+```typescript
+export {
+  // Discovery
+  findAllSkills,
+  findSkill,
+  
+  // Quality
+  evaluateSkillContent,
+  getQualityGrade,
+  
+  // Translation
+  translateSkill,
+  
+  // Memory
+  MemoryCompressor,
+  LearningStore,
+  
+  // Recommendations
+  RecommendationEngine,
+  analyzeProject,
+  
+  // Primer
+  generateInstructions,
+  
+  // Workflows
+  WorkflowEngine,
+  
+  // Testing
+  SkillTestRunner,
+}
+```
+
+### @skillkit/mesh
+
+```typescript
+export {
+  MeshHost,
+  PeerIdentity,
+  PeerRegistry,
+  SecureTransport,
+}
+```
+
+### @skillkit/messaging
+
+```typescript
+export {
+  MessagingClient,
+  MessageBuilder,
+  MessageRouter,
+}
+```
+
+### @skillkit/memory
+
+```typescript
+export {
+  MemoryStore,
+  TierManager,
+  EmbeddingEncoder,
+}
+```
+
+## Full Example: Custom Build Pipeline
+
+```typescript
+import {
+  analyzeProject,
+  generateInstructions,
+  RecommendationEngine,
+  translateSkill,
+} from '@skillkit/core'
+
+async function setupProject() {
+  // 1. Analyze project
+  const analysis = await analyzeProject('./my-project')
+  
+  // 2. Generate base instructions
+  const instructions = await generateInstructions(analysis, {
+    agents: ['claude', 'cursor', 'windsurf'],
+  })
+  
+  // 3. Get recommendations
+  const engine = new RecommendationEngine()
+  const recommendations = engine.recommend(analysis)
+  
+  // 4. Install top recommendations
+  const topSkills = recommendations.slice(0, 5)
+  for (const rec of topSkills) {
+    console.log(`Installing ${rec.skill.name} (${rec.score}% match)`)
+  }
+  
+  // 5. Translate skills to all agents
+  for (const agent of ['claude', 'cursor', 'windsurf']) {
+    const translated = await translateSkill(
+      topSkills[0].skill.content,
+      agent
+    )
+    await fs.writeFile(`.${agent}/skills/${translated.filename}`, translated.content)
+  }
+  
+  console.log('✅ Project setup complete!')
+}
+
+setupProject()
+```
+
+## Next Steps
+
+- [Commands Reference](/docs/commands) - CLI commands
+- [Memory System](/docs/memory) - Persistent learning
+- [Mesh Network](/docs/mesh) - Multi-machine setup
+- [Workflows](/docs/workflows) - Automation
+- [Testing](/docs/testing) - Skill validation
