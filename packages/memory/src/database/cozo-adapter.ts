@@ -34,6 +34,7 @@ export class CozoAdapter {
 
   async close(): Promise<void> {
     if (this.db) {
+      this.db.close();
       this.db = null;
       this.initialized = false;
     }

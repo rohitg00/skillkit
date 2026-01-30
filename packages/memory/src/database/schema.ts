@@ -2,7 +2,8 @@ import type { CozoDb } from 'cozo-node';
 
 export const MEMORY_SCHEMA = `
 :create memories {
-  id: String,
+  id: String
+  =>
   agent_id: String,
   category: String,
   tier: String,
@@ -14,23 +15,22 @@ export const MEMORY_SCHEMA = `
   last_accessed_at: String,
   tags: [String],
   metadata: String
-  =>
 }
 
 :create memory_vec {
-  id: String,
-  embedding: <F32; 384>
+  id: String
   =>
+  embedding: <F32; 384>
 }
 
 :create memory_links {
-  id: String,
+  id: String
+  =>
   source_id: String,
   target_id: String,
   relationship_type: String,
   strength: Float,
   created_at: String
-  =>
 }
 
 ::hnsw create memory_vec:embedding_idx {
@@ -46,7 +46,8 @@ export const MEMORY_SCHEMA = `
 
 export const CREATE_MEMORIES_TABLE = `
 :create memories {
-  id: String,
+  id: String
+  =>
   agent_id: String,
   category: String,
   tier: String,
@@ -58,27 +59,26 @@ export const CREATE_MEMORIES_TABLE = `
   last_accessed_at: String,
   tags: [String],
   metadata: String
-  =>
 }
 `;
 
 export const CREATE_MEMORY_VEC_TABLE = `
 :create memory_vec {
-  id: String,
-  embedding: <F32; 384>
+  id: String
   =>
+  embedding: <F32; 384>
 }
 `;
 
 export const CREATE_MEMORY_LINKS_TABLE = `
 :create memory_links {
-  id: String,
+  id: String
+  =>
   source_id: String,
   target_id: String,
   relationship_type: String,
   strength: Float,
   created_at: String
-  =>
 }
 `;
 

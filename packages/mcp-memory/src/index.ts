@@ -1,5 +1,6 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { fileURLToPath } from 'node:url';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -21,18 +22,28 @@ const AGENT_ID = process.env.SKILLKIT_AGENT_ID || 'mcp-memory-server';
 const DB_PATH = process.env.SKILLKIT_MEMORY_DB_PATH;
 
 let memoryStore: MemoryStore | null = null;
+let memoryStoreInit: Promise<MemoryStore> | null = null;
 
 async function getMemoryStore(): Promise<MemoryStore> {
-  if (!memoryStore) {
-    memoryStore = await createMemoryStore(AGENT_ID, DB_PATH);
+  if (memoryStore) {
+    return memoryStore;
   }
-  return memoryStore;
+  if (!memoryStoreInit) {
+    memoryStoreInit = createMemoryStore(AGENT_ID, DB_PATH);
+  }
+  try {
+    memoryStore = await memoryStoreInit;
+    return memoryStore;
+  } catch (error) {
+    memoryStoreInit = null;
+    throw error;
+  }
 }
 
 const server = new Server(
   {
     name: 'skillkit-memory-server',
-    version: '2.0.0',
+    version: '1.7.11',
   },
   {
     capabilities: {
@@ -375,22 +386,22 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'memory_reinforce': {
         const input = ReinforceMemoryInputSchema.parse(args);
-        try {
-          const memory = await store.reinforce(input.id, input.amount ?? 0.1);
-          return {
-            content: [
-              {
-                type: 'text',
-                text: `Memory reinforced:\n\nID: ${memory.id}\nNew Score: ${memory.reinforcementScore.toFixed(2)}\nTier: ${memory.tier}`,
-              },
-            ],
-          };
-        } catch {
+        const existing = await store.get(input.id);
+        if (!existing) {
           return {
             content: [{ type: 'text', text: `Memory not found: ${input.id}` }],
             isError: true,
           };
         }
+        const memory = await store.reinforce(input.id, input.amount ?? 0.1);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Memory reinforced:\n\nID: ${memory.id}\nNew Score: ${memory.reinforcementScore.toFixed(2)}\nTier: ${memory.tier}`,
+            },
+          ],
+        };
       }
 
       case 'memory_stats': {
@@ -487,9 +498,12 @@ async function main() {
   console.error('SkillKit Memory MCP Server running on stdio');
 }
 
-main().catch((error) => {
-  console.error('Fatal error:', error);
-  process.exit(1);
-});
+const isMain = process.argv[1] === fileURLToPath(import.meta.url);
+if (isMain) {
+  main().catch((error) => {
+    console.error('Fatal error:', error);
+    process.exit(1);
+  });
+}
 
 export { server };

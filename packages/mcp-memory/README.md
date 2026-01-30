@@ -56,7 +56,7 @@ Add to your Cursor MCP settings:
 ### memory_store
 Store a new memory with semantic embedding.
 
-```
+```js
 memory_store({
   content: "User prefers TypeScript over JavaScript",
   category: "preference",
@@ -67,7 +67,7 @@ memory_store({
 ### memory_search
 Semantic search through stored memories.
 
-```
+```js
 memory_search({
   query: "What programming languages does the user prefer?",
   limit: 5,
@@ -78,7 +78,7 @@ memory_search({
 ### memory_recall
 Recall memories by category, tier, or tags.
 
-```
+```js
 memory_recall({
   category: "decision",
   tier: "long",
@@ -89,21 +89,21 @@ memory_recall({
 ### memory_get
 Get a specific memory by ID.
 
-```
+```js
 memory_get({ id: "memory-uuid" })
 ```
 
 ### memory_forget
 Delete a memory.
 
-```
+```js
 memory_forget({ id: "memory-uuid" })
 ```
 
 ### memory_link
 Create relationships between memories.
 
-```
+```js
 memory_link({
   sourceId: "memory-1",
   targetId: "memory-2",
@@ -115,7 +115,7 @@ memory_link({
 ### memory_reinforce
 Strengthen or weaken a memory. Strong memories get promoted to long-term tier.
 
-```
+```js
 memory_reinforce({
   id: "memory-uuid",
   amount: 0.1  // positive to strengthen, negative to weaken
@@ -125,7 +125,7 @@ memory_reinforce({
 ### memory_stats
 Get memory statistics.
 
-```
+```js
 memory_stats({})
 ```
 

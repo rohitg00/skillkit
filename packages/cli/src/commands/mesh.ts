@@ -124,7 +124,12 @@ export class MeshCommand extends Command {
       const { randomUUID } = await import('node:crypto');
 
       const [address, portStr] = this.arg.split(':');
-      const port = portStr ? parseInt(portStr, 10) : (this.port ? parseInt(this.port, 10) : DEFAULT_PORT);
+      const portValue = portStr ?? this.port;
+      const port = portValue ? Number(portValue) : DEFAULT_PORT;
+      if (!Number.isInteger(port) || port < 1 || port > 65535) {
+        console.error(chalk.red(`Invalid port: ${portValue}`));
+        return 1;
+      }
 
       const host = {
         id: randomUUID(),

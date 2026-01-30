@@ -5,6 +5,6 @@ describe('@skillkit/mesh', () => {
     const mesh = await import('../index.js');
     expect(mesh).toBeDefined();
     expect(mesh.DEFAULT_PORT).toBe(9876);
-    expect(mesh.MESH_VERSION).toBe('1.0.0');
+    expect(mesh.MESH_VERSION).toBe('1.7.11');
   });
 });
