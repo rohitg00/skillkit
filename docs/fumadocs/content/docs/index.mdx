@@ -7,7 +7,7 @@ description: Universal CLI for managing AI agent skills across 32 coding platfor
 
 SkillKit is a universal command-line interface (CLI) and programmatic toolkit for managing AI agent skills across **32 AI coding platforms**.
 
-**Current Version:** v1.8.0
+**Current Version:** v1.7.5
 
 ## The Problem
 
@@ -25,80 +25,22 @@ SkillKit provides a **"write once, deploy everywhere"** platform. Maintain a sin
 ## Quick Install
 
 ```bash
-# Run instantly with npx (no install required)
-npx skillkit@latest
-
-# Or install globally for frequent use
 npm install -g skillkit
 skillkit init
 skillkit install anthropics/skills
 skillkit sync
 ```
 
-## Core Features
+## Key Features
 
 | Feature | Description |
 |---------|-------------|
 | **Cross-Platform Translation** | Automatic conversion between 32 agent formats |
-| **Smart Recommendations** | AI-powered skill suggestions based on your tech stack |
-| **Session Memory** | Persistent learning that survives across sessions |
-| **Primer** | Auto-generate agent instructions from your codebase |
-| **Mesh Network** | Multi-machine agent distribution with encrypted P2P |
-| **Inter-Agent Messaging** | Send messages between AI agents across your network |
+| **Skill Discovery** | 15,000+ marketplace skills with AI recommendations |
 | **Team Collaboration** | Git-based `.skills` manifest for sharing |
-| **Workflow Orchestration** | Compose skills into multi-step automated workflows |
-| **Skill Testing** | Built-in test framework with assertions |
-| **CI/CD Integration** | GitHub Actions, GitLab CI, and pre-commit hooks |
-| **TypeScript API** | Full programmatic access to all features |
-| **Interactive TUI** | Beautiful terminal interface with real-time updates |
-
-## Advanced Capabilities
-
-### Session Memory System
-
-Your AI agents learn patterns during sessions—then forget everything. SkillKit captures these learnings and makes them permanent.
-
-```bash
-skillkit memory compress      # Compress learnings
-skillkit memory search auth   # Search knowledge
-skillkit memory export auth-patterns  # Export as skill
-```
-
-[Learn more →](/docs/memory)
-
-### Primer - Auto-Generate Instructions
-
-Automatically generate CLAUDE.md, .cursorrules, and agent instructions by analyzing your codebase.
-
-```bash
-skillkit primer                # Analyze project
-skillkit primer --all-agents   # Generate for all 32 agents
-```
-
-[Learn more →](/docs/primer)
-
-### Mesh Network
-
-Run agents across multiple machines with encrypted P2P communication.
-
-```bash
-skillkit mesh init       # Initialize mesh node
-skillkit mesh discover   # Find peers on LAN
-skillkit mesh security init  # Setup Ed25519 encryption
-```
-
-[Learn more →](/docs/mesh)
-
-### Inter-Agent Messaging
-
-Send messages between AI agents across your mesh network.
-
-```bash
-skillkit message send    # Send to another agent
-skillkit message inbox   # Check your inbox
-```
-
-[Learn more →](/docs/messaging)
+| **Quality Evaluation** | 0-100 scoring with A-F grades |
+| **Interactive TUI** | Beautiful terminal interface |
+| **Memory System** | Persistent learning across sessions |
 
 ## Architecture
 
@@ -106,23 +48,18 @@ skillkit message inbox   # Check your inbox
 |------|------------|
 | **User Interfaces** | CLI (Clipanion v4), TUI (OpenTUI/React), Documentation |
 | **Business Logic** | @skillkit/core, @skillkit/agents (32 adapters) |
-| **Data Layer** | @skillkit/memory (CozoDB), @skillkit/mesh (WebSocket/UDP) |
 | **External Systems** | GitHub/GitLab, Marketplace (15,000+ skills) |
 
-## Supported Agents (32)
+## Supported Agents
 
 Claude Code, Cursor, Codex, Gemini CLI, OpenCode, GitHub Copilot, Windsurf, Antigravity, Amp, Clawdbot, Droid, Goose, Kilo Code, Kiro CLI, Roo Code, Trae, Cline, CodeBuddy, Continue, Crush, Factory, MCPJam, Mux, Neovate, OpenHands, Pi, Qoder, Qwen, Vercel, Zencoder, CommandCode, Universal
 
-[Full agent details →](/docs/agents)
-
-## Popular Skill Sources
+## Popular Sources
 
 | Repository | Skills |
 |------------|--------|
 | anthropics/skills | PDF, XLSX, DOCX processing |
 | vercel-labs/agent-skills | React/Next.js best practices |
-| nextlevelbuilder/ui-ux-pro-max-skill | UI/UX design patterns |
-| superdesigndev/superdesign-skill | Modern design systems |
 
 ## Get Started
 
@@ -130,19 +67,3 @@ Claude Code, Cursor, Codex, Gemini CLI, OpenCode, GitHub Copilot, Windsurf, Anti
 2. [Quick Start](/docs/quickstart) - 5-minute guide
 3. [Commands](/docs/commands) - Full CLI reference
 4. [Skills](/docs/skills) - Skill format and lifecycle
-5. [API Reference](/docs/api-reference) - Programmatic access
-
-## Use Cases
-
-- **Multi-Agent Developer** - Write skills once, use across Claude, Cursor, Windsurf, and more
-- **Team Lead** - Share skills via Git-based manifest, ensure team alignment
-- **New Project Starter** - Auto-generate agent instructions with Primer
-- **Enterprise Architect** - Distribute agents across multiple machines with Mesh Network
-
-## Enterprise Features
-
-- **Private Registries** - Host internal skills in private repos
-- **Git-Based Sync** - Skills live in your repo, push to share
-- **CI/CD Integration** - Auto-validate and deploy skills on every commit
-- **TypeScript API** - Full programmatic access for custom workflows
-- **Security** - Ed25519 encryption, XChaCha20-Poly1305, TLS 1.3

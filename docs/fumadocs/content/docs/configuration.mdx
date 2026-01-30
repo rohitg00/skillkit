@@ -86,132 +86,19 @@ skillkit settings --set autoSync=true
 skillkit settings --get agent
 ```
 
-## Advanced Configuration
-
-### Memory System
-
-```yaml
-# skillkit.yaml
-memory:
-  enabled: true
-  tier: personal              # personal, project, global
-  compression:
-    minObservations: 10       # Compress after N observations
-    autoExport: true          # Auto-export as skills
-  storage:
-    backend: cozodb           # cozodb, sqlite, memory
-    path: ~/.skillkit/memory
-```
-
-### Mesh Network
-
-```yaml
-# skillkit.yaml
-mesh:
-  enabled: true
-  hostId: my-workstation
-  discovery:
-    method: local              # local, tailscale, manual
-    port: 9876
-  security:
-    mode: secure               # development, signed, secure, strict
-    keyPath: ~/.skillkit/mesh/keys
-  peers:
-    - id: laptop-dev
-      address: 192.168.1.100
-      trusted: true
-```
-
-### Messaging
-
-```yaml
-# skillkit.yaml
-messaging:
-  enabled: true
-  storagePath: ~/.skillkit/messages
-  notifications: true
-  autoArchive:
-    enabled: true
-    afterDays: 30
-```
-
-### Primer
-
-```yaml
-# skillkit.yaml
-primer:
-  autoGenerate: true           # Generate on changes
-  agents:
-    priority: [claude, cursor, windsurf]
-  customize:
-    tone: detailed             # concise, detailed, technical
-    includeExamples: true
-  exclude:
-    - node_modules
-    - dist
-    - .next
-```
-
 ## Directory Structure
 
 ```
 ~/.skillkit/
 ├── preferences.json   # User preferences
 ├── cache/            # Marketplace cache
-├── memory/           # Learning storage
-│   ├── observations/
-│   ├── learnings/
-│   └── index.json
-├── mesh/             # Mesh network
-│   ├── keys/        # Encryption keys
-│   ├── peers.json   # Known peers
-│   └── config.json
-└── messages/        # Inter-agent messages
-    ├── inbox/
-    ├── sent/
-    └── archived/
+└── memory/           # Learning storage
+    ├── observations/
+    ├── learnings/
+    └── index.json
 
 ./project/
 ├── skillkit.yaml     # Project config
 ├── .skills           # Team manifest
-├── skills/           # Local skills
-└── .skillkit/        # Project-specific
-    ├── cache/
-    ├── primer-config.json
-    └── memory/
+└── skills/           # Local skills
 ```
-
-## Configuration Profiles
-
-Create different profiles for different environments:
-
-```yaml
-# skillkit.yaml
-profiles:
-  development:
-    agent: claude
-    autoSync: true
-    mesh:
-      security:
-        mode: development
-  
-  production:
-    agent: universal
-    autoSync: false
-    mesh:
-      security:
-        mode: strict
-```
-
-Use profiles:
-
-```bash
-skillkit --profile production sync
-```
-
-## Next Steps
-
-- [Primer](/docs/primer) - Auto-generate instructions
-- [Memory System](/docs/memory) - Persistent learning
-- [Mesh Network](/docs/mesh) - Multi-machine setup
-- [Team Collaboration](/docs/teams) - Team configuration

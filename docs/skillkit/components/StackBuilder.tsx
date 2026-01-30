@@ -1,12 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { searchSkills, IndexedSkill, SKILLS_INDEX } from '../data/skills-index';
 
 interface StackItem extends IndexedSkill {
   addedAt: number;
 }
-
-// Default starter skills to show on load
-const DEFAULT_SKILLS = ['react', 'typescript', 'nextjs'];
 
 const POPULAR_STACKS = [
   {
@@ -56,20 +53,6 @@ export function StackBuilder(): React.ReactElement {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<IndexedSkill[]>([]);
   const [copied, setCopied] = useState(false);
-
-  // Load default skills on mount
-  useEffect(() => {
-    const initialStack: StackItem[] = [];
-    DEFAULT_SKILLS.forEach(query => {
-      const results = searchSkills(query);
-      if (results.length > 0 && !initialStack.some(s => s.id === results[0].id)) {
-        initialStack.push({ ...results[0], addedAt: Date.now() });
-      }
-    });
-    if (initialStack.length > 0) {
-      setStack(initialStack);
-    }
-  }, []);
 
   function handleSearch(query: string): void {
     setSearchQuery(query);

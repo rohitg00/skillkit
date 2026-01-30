@@ -8,8 +8,8 @@ interface Feature {
 
 const FEATURES: Feature[] = [
   {
-    title: 'Smart Recommendations',
-    description: 'AI analyzes your codebase and suggests perfect skills.',
+    title: 'Primer',
+    description: 'Generate AI instructions from codebase analysis.',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -17,86 +17,85 @@ const FEATURES: Feature[] = [
     )
   },
   {
-    title: 'Auto Translation',
-    description: 'Write once, deploy to 32 agents. Zero manual conversion.',
+    title: 'Multi-Agent',
+    description: 'Deploy to 32 AI coding agents with one command.',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
       </svg>
     )
   },
   {
-    title: 'Session Memory',
-    description: 'AI learnings persist across sessions and projects.',
+    title: 'Mesh Network',
+    description: 'Multi-machine agent distribution with encrypted P2P.',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
       </svg>
     )
   },
   {
-    title: 'Primer',
-    description: 'Auto-generate agent instructions for all 32 agents from your codebase.',
+    title: 'Security',
+    description: 'Ed25519 signing, TLS, and encrypted storage.',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
       </svg>
     )
   },
   {
-    title: 'Workflows',
-    description: 'Compose multi-step automated skill sequences.',
+    title: 'Terminal UI',
+    description: 'Beautiful interactive TUI for browsing & installing.',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
       </svg>
     )
   },
   {
-    title: 'Team Sync',
-    description: 'Git-based .skills manifest for consistency.',
+    title: 'Messaging',
+    description: 'Inter-agent messaging across the mesh.',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
       </svg>
     )
   },
   {
-    title: 'Testing',
-    description: 'Built-in test framework with assertions.',
+    title: 'Plugins',
+    description: 'Extend with custom plugins & hooks.',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z" />
       </svg>
     )
   },
   {
-    title: 'CI/CD',
-    description: 'GitHub Actions, GitLab CI, pre-commit.',
+    title: 'Manifest',
+    description: '.skills file for team-wide consistency.',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
     )
   },
   {
-    title: 'TS API',
-    description: 'Programmatic access for custom tooling.',
+    title: 'Slash Commands',
+    description: 'Generate /commands for Claude, Cursor & more.',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
       </svg>
     )
   }
 ];
 
 const COMPARISONS = [
-  ['Agent Support', '1 agent', '32 agents'],
-  ['Setup', 'Write rules manually', 'Auto-generate (Primer)'],
-  ['Learning', 'Lost each session', 'Persistent memory'],
-  ['Translation', 'Rewrite for each', 'One-click conversion'],
-  ['Team Sharing', 'Copy/paste files', '.skills manifest'],
-  ['Discovery', 'Search forums', 'AI recommendations'],
+  ['Agents', '1', '32'],
+  ['Instructions', 'Manual', 'Primer Auto'],
+  ['Translation', 'Manual', 'Auto'],
+  ['Sharing', 'Copy/paste', '.skills manifest'],
+  ['Discovery', 'Forums', 'CLI + AI'],
 ] as const;
 
 export function Features(): React.ReactElement {
@@ -115,11 +114,11 @@ export function Features(): React.ReactElement {
                 <div className="text-zinc-600 text-[10px] sm:text-xs font-mono">Agents</div>
               </div>
               <div>
-                <div className="text-2xl sm:text-3xl font-bold text-white font-mono">50+</div>
+                <div className="text-2xl sm:text-3xl font-bold text-white font-mono">40+</div>
                 <div className="text-zinc-600 text-[10px] sm:text-xs font-mono">Commands</div>
               </div>
               <div>
-                <div className="text-2xl sm:text-3xl font-bold text-white font-mono">15K+</div>
+                <div className="text-2xl sm:text-3xl font-bold text-white font-mono">15K</div>
                 <div className="text-zinc-600 text-[10px] sm:text-xs font-mono">Skills</div>
               </div>
             </div>
@@ -147,7 +146,7 @@ export function Features(): React.ReactElement {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {FEATURES.map((feature, index) => (
             <div
               key={feature.title}
