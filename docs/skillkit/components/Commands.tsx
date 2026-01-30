@@ -29,8 +29,8 @@ const COMMAND_GROUPS: CommandGroup[] = [
     commands: [
       { cmd: 'mesh init', desc: 'Initialize mesh network' },
       { cmd: 'mesh discover', desc: 'Find hosts on LAN' },
-      { cmd: 'mesh security init', desc: 'Setup encryption keys' },
-      { cmd: 'mesh peer trust <id>', desc: 'Trust a peer' },
+      { cmd: 'message send', desc: 'Send to another agent' },
+      { cmd: 'message inbox', desc: 'View inbox' },
     ],
   },
   {
