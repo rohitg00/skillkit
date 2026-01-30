@@ -25,6 +25,15 @@ const COMMAND_GROUPS: CommandGroup[] = [
     ],
   },
   {
+    name: 'Mesh',
+    commands: [
+      { cmd: 'mesh init', desc: 'Initialize mesh network' },
+      { cmd: 'mesh discover', desc: 'Find hosts on LAN' },
+      { cmd: 'mesh security init', desc: 'Setup encryption keys' },
+      { cmd: 'mesh peer trust <id>', desc: 'Trust a peer' },
+    ],
+  },
+  {
     name: 'Team',
     commands: [
       { cmd: 'manifest init', desc: 'Create .skills file' },
