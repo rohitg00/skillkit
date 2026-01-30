@@ -1,0 +1,6 @@
+---
+version: 2.0.1
+commit: ":up: chore(version): bmp to v%.%.%"
+files:
+  README.md: v%.%.%
+  package.json: '"version": "%.%.%"'

@@ -29,9 +29,15 @@ h1, h2, h3, h4, h5, h6, .font-mono {
   background: #3f3f46;
 }
 
-/* Smooth scrolling */
+/* Smooth scrolling - respects user preferences */
 html {
   scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 /* Terminal scanline effect */

@@ -1,0 +1,57 @@
+{
+  "name": "@noble/ed25519",
+  "version": "2.3.0",
+  "description": "Fastest 4KB JS implementation of ed25519 EDDSA signatures compliant with RFC8032, FIPS 186-5 & ZIP215",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "index.ts"
+  ],
+  "type": "module",
+  "main": "index.js",
+  "module": "index.js",
+  "types": "index.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc",
+    "build:release": "npx jsbt esbuild test/build",
+    "lint": "prettier --check 'index.ts' 'test/**/*.{js,ts}'",
+    "format": "prettier --write 'index.ts' 'test/**/*.{js,ts}'",
+    "test": "node test/index.js",
+    "test:bun": "bun test/index.js",
+    "test:deno": "deno --allow-env --allow-read test/index.js",
+    "bench": "node test/benchmark.js"
+  },
+  "author": "Paul Miller (https://paulmillr.com)",
+  "homepage": "https://paulmillr.com/noble/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paulmillr/noble-ed25519.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@noble/hashes": "2.0.0-beta.1",
+    "@paulmillr/jsbt": "0.4.1",
+    "@types/node": "24.0.0",
+    "fast-check": "4.1.1",
+    "micro-bmark": "0.4.2",
+    "micro-should": "0.5.3",
+    "prettier": "3.5.3",
+    "typescript": "5.8.3"
+  },
+  "keywords": [
+    "ed25519",
+    "rfc8032",
+    "fips186",
+    "signature",
+    "eddsa",
+    "noble",
+    "cryptography",
+    "elliptic curve",
+    "rfc7748",
+    "zip215",
+    "x25519",
+    "curve25519"
+  ],
+  "funding": "https://paulmillr.com/funding/"
+}

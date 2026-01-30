@@ -1,0 +1,40 @@
+{
+  "name": "typanion",
+  "description": "Simple runtime TypeScript validator library",
+  "homepage": "https://mael.dev/typanion/",
+  "version": "3.14.0",
+  "main": "lib/index",
+  "license": "MIT",
+  "sideEffects": false,
+  "repository": {
+    "url": "https://github.com/arcanis/typanion",
+    "type": "git"
+  },
+  "workspaces": [
+    "website"
+  ],
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^8.2.1",
+    "@types/chai": "^4.2.11",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^17.0.21",
+    "chai": "^4.3.4",
+    "mocha": "^8.0.1",
+    "rollup": "^2.17.0",
+    "ts-node": "^8.10.2",
+    "tslib": "^2.0.0",
+    "typescript": "^4.6.3"
+  },
+  "scripts": {
+    "prepack": "rm -rf lib && rollup -c",
+    "postpack": "rm -rf lib",
+    "test": "yarn tsc && TS_NODE_TRANSPILE_ONLY=true mocha --require ts-node/register --extension ts tests/**/*.test.ts"
+  },
+  "publishConfig": {
+    "main": "lib/index"
+  },
+  "files": [
+    "lib"
+  ],
+  "packageManager": "yarn@4.0.0-rc.2"
+}

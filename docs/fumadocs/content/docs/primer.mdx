@@ -158,7 +158,10 @@ skillkit primer --force
 
 ```bash
 # Auto-generate on git hooks
-echo "skillkit primer --incremental" >> .git/hooks/post-checkout
+cat > .git/hooks/post-checkout << 'EOF'
+#!/usr/bin/env bash
+skillkit primer --incremental
+EOF
 chmod +x .git/hooks/post-checkout
 ```
 

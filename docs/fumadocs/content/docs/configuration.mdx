@@ -192,13 +192,15 @@ profiles:
     agent: claude
     autoSync: true
     mesh:
-      security: development
+      security:
+        mode: development
   
   production:
     agent: universal
     autoSync: false
     mesh:
-      security: strict
+      security:
+        mode: strict
 ```
 
 Use profiles:

@@ -1,0 +1,71 @@
+import { type RenderableOptions, Renderable } from "../Renderable";
+import type { OptimizedBuffer } from "../buffer";
+import { type BorderCharacters, type BorderSides, type BorderSidesConfig, type BorderStyle } from "../lib";
+import { type ColorInput, RGBA } from "../lib/RGBA";
+import type { RenderContext } from "../types";
+export interface BoxOptions<TRenderable extends Renderable = BoxRenderable> extends RenderableOptions<TRenderable> {
+    backgroundColor?: string | RGBA;
+    borderStyle?: BorderStyle;
+    border?: boolean | BorderSides[];
+    borderColor?: string | RGBA;
+    customBorderChars?: BorderCharacters;
+    shouldFill?: boolean;
+    title?: string;
+    titleAlignment?: "left" | "center" | "right";
+    focusedBorderColor?: ColorInput;
+    gap?: number | `${number}%`;
+    rowGap?: number | `${number}%`;
+    columnGap?: number | `${number}%`;
+}
+export declare class BoxRenderable extends Renderable {
+    protected _backgroundColor: RGBA;
+    protected _border: boolean | BorderSides[];
+    protected _borderStyle: BorderStyle;
+    protected _borderColor: RGBA;
+    protected _focusedBorderColor: RGBA;
+    private _customBorderCharsObj;
+    protected _customBorderChars?: Uint32Array;
+    protected borderSides: BorderSidesConfig;
+    shouldFill: boolean;
+    protected _title?: string;
+    protected _titleAlignment: "left" | "center" | "right";
+    protected _defaultOptions: {
+        backgroundColor: string;
+        borderStyle: "single";
+        border: false;
+        borderColor: string;
+        shouldFill: true;
+        titleAlignment: "left";
+        focusedBorderColor: string;
+    };
+    constructor(ctx: RenderContext, options: BoxOptions);
+    private initializeBorder;
+    get customBorderChars(): BorderCharacters | undefined;
+    set customBorderChars(value: BorderCharacters | undefined);
+    get backgroundColor(): RGBA;
+    set backgroundColor(value: RGBA | string | undefined);
+    get border(): boolean | BorderSides[];
+    set border(value: boolean | BorderSides[]);
+    get borderStyle(): BorderStyle;
+    set borderStyle(value: BorderStyle);
+    get borderColor(): RGBA;
+    set borderColor(value: RGBA | string);
+    get focusedBorderColor(): RGBA;
+    set focusedBorderColor(value: RGBA | string);
+    get title(): string | undefined;
+    set title(value: string | undefined);
+    get titleAlignment(): "left" | "center" | "right";
+    set titleAlignment(value: "left" | "center" | "right");
+    protected renderSelf(buffer: OptimizedBuffer): void;
+    protected getScissorRect(): {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    };
+    private applyYogaBorders;
+    private applyYogaGap;
+    set gap(gap: number | `${number}%` | undefined);
+    set rowGap(rowGap: number | `${number}%` | undefined);
+    set columnGap(columnGap: number | `${number}%` | undefined);
+}

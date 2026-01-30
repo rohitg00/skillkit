@@ -1,0 +1,33 @@
+{
+  "name": "bun-webgpu-darwin-arm64",
+  "version": "0.1.4",
+  "description": "Prebuilt darwin-arm64 binaries for bun-webgpu",
+  "main": "index.ts",
+  "types": "index.ts",
+  "license": "Apache-2.0",
+  "author": "SST",
+  "homepage": "https://github.com/kommander/bun-webgpu",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kommander/bun-webgpu"
+  },
+  "bugs": {
+    "url": "https://github.com/kommander/bun-webgpu/issues"
+  },
+  "keywords": [
+    "webgpu",
+    "bun",
+    "gpu",
+    "graphics",
+    "compute",
+    "dawn",
+    "prebuild",
+    "prebuilt"
+  ],
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "arm64"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "mode": "pre",
+  "tag": "alpha",
+  "initialVersions": {
+    "stage-js": "1.0.0-alpha.13"
+  },
+  "changesets": [
+    "five-bobcats-approve",
+    "lazy-peas-rest",
+    "nine-elephants-poke",
+    "two-llamas-ring"
+  ]
+}

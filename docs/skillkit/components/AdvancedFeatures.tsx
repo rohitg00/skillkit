@@ -112,12 +112,16 @@ export function AdvancedFeatures(): React.ReactElement {
         </div>
 
         {/* Feature Tabs */}
-        <div className="flex justify-center gap-1 sm:gap-2 mb-8 flex-wrap">
+        <div className="flex justify-center gap-1 sm:gap-2 mb-8 flex-wrap" role="tablist" aria-label="Advanced features">
           {ADVANCED_FEATURES.map((f) => {
             const isActive = f.id === activeFeature;
             return (
               <button
                 key={f.id}
+                role="tab"
+                aria-selected={isActive}
+                aria-controls={`tabpanel-${f.id}`}
+                id={`tab-${f.id}`}
                 onClick={() => setActiveFeature(f.id)}
                 className={`group relative px-2 sm:px-4 py-1.5 sm:py-2 font-mono text-xs sm:text-sm transition-all duration-300 ${
                   isActive 
@@ -135,7 +139,12 @@ export function AdvancedFeatures(): React.ReactElement {
         </div>
 
         {/* Feature Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-start">
+        <div 
+          className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-start"
+          role="tabpanel"
+          id={`tabpanel-${feature.id}`}
+          aria-labelledby={`tab-${feature.id}`}
+        >
           {/* Left: Description */}
           <div className="space-y-4 sm:space-y-6">
             <div className="flex items-start gap-3 sm:gap-4">

@@ -1,0 +1,573 @@
+// @bun
+import {
+  __require,
+  __toESM
+} from "./chunk-e11q5a3p.js";
+
+// src/components/index.ts
+import {
+  ASCIIFontRenderable,
+  BoxRenderable,
+  CodeRenderable,
+  DiffRenderable,
+  InputRenderable,
+  LineNumberRenderable,
+  MarkdownRenderable,
+  ScrollBoxRenderable,
+  SelectRenderable,
+  TabSelectRenderable,
+  TextareaRenderable,
+  TextRenderable
+} from "@opentui/core";
+
+// src/components/text.ts
+import { TextAttributes, TextNodeRenderable } from "@opentui/core";
+var textNodeKeys = ["span", "b", "strong", "i", "em", "u", "br", "a"];
+
+class SpanRenderable extends TextNodeRenderable {
+  ctx;
+  constructor(ctx, options) {
+    super(options);
+    this.ctx = ctx;
+  }
+}
+
+class TextModifierRenderable extends SpanRenderable {
+  constructor(options, modifier) {
+    super(null, options);
+    if (modifier === "b" || modifier === "strong") {
+      this.attributes = (this.attributes || 0) | TextAttributes.BOLD;
+    } else if (modifier === "i" || modifier === "em") {
+      this.attributes = (this.attributes || 0) | TextAttributes.ITALIC;
+    } else if (modifier === "u") {
+      this.attributes = (this.attributes || 0) | TextAttributes.UNDERLINE;
+    }
+  }
+}
+
+class BoldSpanRenderable extends TextModifierRenderable {
+  constructor(_ctx, options) {
+    super(options, "b");
+  }
+}
+
+class ItalicSpanRenderable extends TextModifierRenderable {
+  constructor(_ctx, options) {
+    super(options, "i");
+  }
+}
+
+class UnderlineSpanRenderable extends TextModifierRenderable {
+  constructor(_ctx, options) {
+    super(options, "u");
+  }
+}
+
+class LineBreakRenderable extends SpanRenderable {
+  constructor(_ctx, options) {
+    super(null, options);
+    this.add();
+  }
+  add() {
+    return super.add(`
+`);
+  }
+}
+
+class LinkRenderable extends SpanRenderable {
+  constructor(_ctx, options) {
+    const linkOptions = {
+      ...options,
+      link: { url: options.href }
+    };
+    super(null, linkOptions);
+  }
+}
+
+// src/components/index.ts
+var baseComponents = {
+  box: BoxRenderable,
+  text: TextRenderable,
+  code: CodeRenderable,
+  diff: DiffRenderable,
+  markdown: MarkdownRenderable,
+  input: InputRenderable,
+  select: SelectRenderable,
+  textarea: TextareaRenderable,
+  scrollbox: ScrollBoxRenderable,
+  "ascii-font": ASCIIFontRenderable,
+  "tab-select": TabSelectRenderable,
+  "line-number": LineNumberRenderable,
+  span: SpanRenderable,
+  br: LineBreakRenderable,
+  b: BoldSpanRenderable,
+  strong: BoldSpanRenderable,
+  i: ItalicSpanRenderable,
+  em: ItalicSpanRenderable,
+  u: UnderlineSpanRenderable,
+  a: LinkRenderable
+};
+var componentCatalogue = { ...baseComponents };
+function extend(objects) {
+  Object.assign(componentCatalogue, objects);
+}
+function getComponentCatalogue() {
+  return componentCatalogue;
+}
+
+// src/components/app.tsx
+import { createContext, useContext } from "react";
+var AppContext = createContext({
+  keyHandler: null,
+  renderer: null
+});
+var useAppContext = () => {
+  return useContext(AppContext);
+};
+
+// src/reconciler/renderer.ts
+import { CliRenderEvents, engine } from "@opentui/core";
+import React2 from "react";
+
+// src/components/error-boundary.tsx
+import React from "react";
+
+// jsx-dev-runtime.js
+import { Fragment, jsxDEV } from "react/jsx-dev-runtime";
+
+// src/components/error-boundary.tsx
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  render() {
+    if (this.state.hasError && this.state.error) {
+      return /* @__PURE__ */ jsxDEV("box", {
+        style: { flexDirection: "column", padding: 2 },
+        children: /* @__PURE__ */ jsxDEV("text", {
+          fg: "red",
+          children: this.state.error.stack || this.state.error.message
+        }, undefined, false, undefined, this)
+      }, undefined, false, undefined, this);
+    }
+    return this.props.children;
+  }
+}
+
+// src/reconciler/reconciler.ts
+import ReactReconciler from "react-reconciler";
+import { ConcurrentRoot } from "react-reconciler/constants";
+
+// src/reconciler/host-config.ts
+import { TextNodeRenderable as TextNodeRenderable2 } from "@opentui/core";
+// package.json
+var package_default = {
+  name: "@opentui/react",
+  version: "0.1.75",
+  description: "React renderer for building terminal user interfaces using OpenTUI core",
+  license: "MIT",
+  repository: {
+    type: "git",
+    url: "https://github.com/anomalyco/opentui",
+    directory: "packages/react"
+  },
+  module: "src/index.ts",
+  type: "module",
+  private: true,
+  main: "src/index.ts",
+  exports: {
+    ".": {
+      import: "./src/index.ts",
+      types: "./src/index.ts"
+    },
+    "./test-utils": {
+      import: "./src/test-utils.ts",
+      types: "./src/test-utils.d.ts"
+    },
+    "./jsx-runtime": {
+      import: "./jsx-runtime.js",
+      types: "./jsx-runtime.d.ts"
+    },
+    "./jsx-dev-runtime": {
+      import: "./jsx-dev-runtime.js",
+      types: "./jsx-dev-runtime.d.ts"
+    }
+  },
+  scripts: {
+    build: "bun run scripts/build.ts",
+    "build:dev": "bun run scripts/build.ts --dev",
+    publish: "bun run scripts/publish.ts",
+    test: "bun test"
+  },
+  devDependencies: {
+    "@types/bun": "latest",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-reconciler": "^0.32.0",
+    "@types/ws": "^8.18.1",
+    react: ">=19.0.0",
+    "react-devtools-core": "^7.0.1",
+    typescript: "^5",
+    ws: "^8.18.0"
+  },
+  peerDependencies: {
+    react: ">=19.0.0",
+    "react-devtools-core": "^7.0.1",
+    ws: "^8.18.0"
+  },
+  peerDependenciesMeta: {
+    "react-devtools-core": {
+      optional: true
+    },
+    ws: {
+      optional: true
+    }
+  },
+  dependencies: {
+    "@opentui/core": "workspace:*",
+    "react-reconciler": "^0.32.0"
+  }
+};
+
+// src/reconciler/host-config.ts
+import { createContext as createContext2 } from "react";
+import { DefaultEventPriority, NoEventPriority } from "react-reconciler/constants";
+
+// src/utils/id.ts
+var idCounter = new Map;
+function getNextId(type) {
+  if (!idCounter.has(type)) {
+    idCounter.set(type, 0);
+  }
+  const value = idCounter.get(type) + 1;
+  idCounter.set(type, value);
+  return `${type}-${value}`;
+}
+
+// src/utils/index.ts
+import {
+  InputRenderable as InputRenderable2,
+  InputRenderableEvents,
+  isRenderable,
+  SelectRenderable as SelectRenderable2,
+  SelectRenderableEvents,
+  TabSelectRenderable as TabSelectRenderable2,
+  TabSelectRenderableEvents
+} from "@opentui/core";
+function initEventListeners(instance, eventName, listener, previousListener) {
+  if (previousListener) {
+    instance.off(eventName, previousListener);
+  }
+  if (listener) {
+    instance.on(eventName, listener);
+  }
+}
+function setStyle(instance, styles, oldStyles) {
+  if (oldStyles != null && typeof oldStyles === "object") {
+    for (const styleName in oldStyles) {
+      if (oldStyles.hasOwnProperty(styleName)) {
+        if (styles == null || !styles.hasOwnProperty(styleName)) {
+          instance[styleName] = null;
+        }
+      }
+    }
+  }
+  if (styles != null && typeof styles === "object") {
+    for (const styleName in styles) {
+      if (styles.hasOwnProperty(styleName)) {
+        const value = styles[styleName];
+        const oldValue = oldStyles?.[styleName];
+        if (value !== oldValue) {
+          instance[styleName] = value;
+        }
+      }
+    }
+  }
+}
+function setProperty(instance, type, propKey, propValue, oldPropValue) {
+  switch (propKey) {
+    case "onChange":
+      if (instance instanceof InputRenderable2) {
+        initEventListeners(instance, InputRenderableEvents.CHANGE, propValue, oldPropValue);
+      } else if (instance instanceof SelectRenderable2) {
+        initEventListeners(instance, SelectRenderableEvents.SELECTION_CHANGED, propValue, oldPropValue);
+      } else if (instance instanceof TabSelectRenderable2) {
+        initEventListeners(instance, TabSelectRenderableEvents.SELECTION_CHANGED, propValue, oldPropValue);
+      }
+      break;
+    case "onInput":
+      if (instance instanceof InputRenderable2) {
+        initEventListeners(instance, InputRenderableEvents.INPUT, propValue, oldPropValue);
+      }
+      break;
+    case "onSubmit":
+      if (instance instanceof InputRenderable2) {
+        initEventListeners(instance, InputRenderableEvents.ENTER, propValue, oldPropValue);
+      }
+      break;
+    case "onSelect":
+      if (instance instanceof SelectRenderable2) {
+        initEventListeners(instance, SelectRenderableEvents.ITEM_SELECTED, propValue, oldPropValue);
+      } else if (instance instanceof TabSelectRenderable2) {
+        initEventListeners(instance, TabSelectRenderableEvents.ITEM_SELECTED, propValue, oldPropValue);
+      }
+      break;
+    case "focused":
+      if (isRenderable(instance)) {
+        if (!!propValue) {
+          instance.focus();
+        } else {
+          instance.blur();
+        }
+      }
+      break;
+    case "style":
+      setStyle(instance, propValue, oldPropValue);
+      break;
+    case "children":
+      break;
+    default:
+      instance[propKey] = propValue;
+  }
+}
+function setInitialProperties(instance, type, props) {
+  for (const propKey in props) {
+    if (!props.hasOwnProperty(propKey)) {
+      continue;
+    }
+    const propValue = props[propKey];
+    if (propValue == null) {
+      continue;
+    }
+    setProperty(instance, type, propKey, propValue);
+  }
+}
+function updateProperties(instance, type, oldProps, newProps) {
+  for (const propKey in oldProps) {
+    const oldProp = oldProps[propKey];
+    if (oldProps.hasOwnProperty(propKey) && oldProp != null && !newProps.hasOwnProperty(propKey)) {
+      setProperty(instance, type, propKey, null, oldProp);
+    }
+  }
+  for (const propKey in newProps) {
+    const newProp = newProps[propKey];
+    const oldProp = oldProps[propKey];
+    if (newProps.hasOwnProperty(propKey) && newProp !== oldProp && (newProp != null || oldProp != null)) {
+      setProperty(instance, type, propKey, newProp, oldProp);
+    }
+  }
+}
+
+// src/reconciler/host-config.ts
+var currentUpdatePriority = NoEventPriority;
+var hostConfig = {
+  supportsMutation: true,
+  supportsPersistence: false,
+  supportsHydration: false,
+  createInstance(type, props, rootContainerInstance, hostContext) {
+    if (textNodeKeys.includes(type) && !hostContext.isInsideText) {
+      throw new Error(`Component of type "${type}" must be created inside of a text node`);
+    }
+    const id = getNextId(type);
+    const components = getComponentCatalogue();
+    if (!components[type]) {
+      throw new Error(`Unknown component type: ${type}`);
+    }
+    return new components[type](rootContainerInstance.ctx, {
+      id,
+      ...props
+    });
+  },
+  appendChild(parent, child) {
+    parent.add(child);
+  },
+  removeChild(parent, child) {
+    parent.remove(child.id);
+  },
+  insertBefore(parent, child, beforeChild) {
+    parent.insertBefore(child, beforeChild);
+  },
+  insertInContainerBefore(parent, child, beforeChild) {
+    parent.insertBefore(child, beforeChild);
+  },
+  removeChildFromContainer(parent, child) {
+    parent.remove(child.id);
+  },
+  prepareForCommit(containerInfo) {
+    return null;
+  },
+  resetAfterCommit(containerInfo) {
+    containerInfo.requestRender();
+  },
+  getRootHostContext(rootContainerInstance) {
+    return { isInsideText: false };
+  },
+  getChildHostContext(parentHostContext, type, rootContainerInstance) {
+    const isInsideText = ["text", ...textNodeKeys].includes(type);
+    return { ...parentHostContext, isInsideText };
+  },
+  shouldSetTextContent(type, props) {
+    return false;
+  },
+  createTextInstance(text, rootContainerInstance, hostContext) {
+    if (!hostContext.isInsideText) {
+      throw new Error("Text must be created inside of a text node");
+    }
+    return TextNodeRenderable2.fromString(text);
+  },
+  scheduleTimeout: setTimeout,
+  cancelTimeout: clearTimeout,
+  noTimeout: -1,
+  shouldAttemptEagerTransition() {
+    return false;
+  },
+  finalizeInitialChildren(instance, type, props, rootContainerInstance, hostContext) {
+    setInitialProperties(instance, type, props);
+    return false;
+  },
+  commitMount(instance, type, props, internalInstanceHandle) {},
+  commitUpdate(instance, type, oldProps, newProps, internalInstanceHandle) {
+    updateProperties(instance, type, oldProps, newProps);
+    instance.requestRender();
+  },
+  commitTextUpdate(textInstance, oldText, newText) {
+    textInstance.children = [newText];
+    textInstance.requestRender();
+  },
+  appendChildToContainer(container, child) {
+    container.add(child);
+  },
+  appendInitialChild(parent, child) {
+    parent.add(child);
+  },
+  hideInstance(instance) {
+    instance.visible = false;
+    instance.requestRender();
+  },
+  unhideInstance(instance, props) {
+    instance.visible = true;
+    instance.requestRender();
+  },
+  hideTextInstance(textInstance) {
+    textInstance.visible = false;
+    textInstance.requestRender();
+  },
+  unhideTextInstance(textInstance, text) {
+    textInstance.visible = true;
+    textInstance.requestRender();
+  },
+  clearContainer(container) {
+    const children = container.getChildren();
+    children.forEach((child) => container.remove(child.id));
+  },
+  setCurrentUpdatePriority(newPriority) {
+    currentUpdatePriority = newPriority;
+  },
+  getCurrentUpdatePriority: () => currentUpdatePriority,
+  resolveUpdatePriority() {
+    if (currentUpdatePriority !== NoEventPriority) {
+      return currentUpdatePriority;
+    }
+    return DefaultEventPriority;
+  },
+  maySuspendCommit() {
+    return false;
+  },
+  NotPendingTransition: null,
+  HostTransitionContext: createContext2(null),
+  resetFormInstance() {},
+  requestPostPaintCallback() {},
+  trackSchedulerEvent() {},
+  resolveEventType() {
+    return null;
+  },
+  resolveEventTimeStamp() {
+    return -1.1;
+  },
+  preloadInstance() {
+    return true;
+  },
+  startSuspendingCommit() {},
+  suspendInstance() {},
+  waitForCommitToBeReady() {
+    return null;
+  },
+  detachDeletedInstance(instance) {
+    if (!instance.parent) {
+      instance.destroyRecursively();
+    }
+  },
+  getPublicInstance(instance) {
+    return instance;
+  },
+  preparePortalMount(containerInfo) {},
+  isPrimaryRenderer: true,
+  getInstanceFromNode() {
+    return null;
+  },
+  beforeActiveInstanceBlur() {},
+  afterActiveInstanceBlur() {},
+  prepareScopeUpdate() {},
+  getInstanceFromScope() {
+    return null;
+  },
+  rendererPackageName: "@opentui/react",
+  rendererVersion: package_default.version
+};
+
+// src/reconciler/reconciler.ts
+var reconciler = ReactReconciler(hostConfig);
+if (process.env["DEV"] === "true") {
+  try {
+    await import("./chunk-fcedq94e.js");
+  } catch (error) {
+    if (error.code === "ERR_MODULE_NOT_FOUND") {
+      console.warn(`
+The environment variable DEV is set to true, so opentui tried to import \`react-devtools-core\`,
+but this failed as it was not installed. Debugging with React DevTools requires it.
+
+To install use this command:
+
+$ bun add react-devtools-core@7 -d
+        `.trim() + `
+`);
+    } else {
+      throw error;
+    }
+  }
+}
+reconciler.injectIntoDevTools();
+function _render(element, root) {
+  const container = reconciler.createContainer(root, ConcurrentRoot, null, false, null, "", console.error, console.error, console.error, console.error, null);
+  reconciler.updateContainer(element, container, null, () => {});
+  return container;
+}
+
+// src/reconciler/renderer.ts
+var _r = reconciler;
+var flushSync = _r.flushSyncFromReconciler ?? _r.flushSync;
+var { createPortal } = reconciler;
+function createRoot(renderer) {
+  let container = null;
+  const cleanup = () => {
+    if (container) {
+      reconciler.updateContainer(null, container, null, () => {});
+      reconciler.flushSyncWork();
+      container = null;
+    }
+  };
+  renderer.once(CliRenderEvents.DESTROY, cleanup);
+  return {
+    render: (node) => {
+      engine.attach(renderer);
+      container = _render(React2.createElement(AppContext.Provider, { value: { keyHandler: renderer.keyInput, renderer } }, React2.createElement(ErrorBoundary, null, node)), renderer.root);
+    },
+    unmount: cleanup
+  };
+}
+
+export { baseComponents, componentCatalogue, extend, getComponentCatalogue, AppContext, useAppContext, flushSync, createPortal, createRoot };

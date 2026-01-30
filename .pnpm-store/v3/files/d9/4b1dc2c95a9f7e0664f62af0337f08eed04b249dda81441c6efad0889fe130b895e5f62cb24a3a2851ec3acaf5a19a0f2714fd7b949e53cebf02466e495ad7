@@ -1,0 +1,73 @@
+{
+	"name": "byte-counter",
+	"version": "0.1.0",
+	"description": "Count bytes passing through a stream",
+	"license": "MIT",
+	"repository": "sindresorhus/byte-counter",
+	"funding": "https://github.com/sponsors/sindresorhus",
+	"author": {
+		"name": "Sindre Sorhus",
+		"email": "sindresorhus@gmail.com",
+		"url": "https://sindresorhus.com"
+	},
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./index.d.ts",
+			"default": "./index.js"
+		},
+		"./node": {
+			"types": "./node.d.ts",
+			"default": "./node.js"
+		}
+	},
+	"sideEffects": false,
+	"engines": {
+		"node": ">=20"
+	},
+	"scripts": {
+		"test": "xo && node --test"
+	},
+	"files": [
+		"index.js",
+		"index.d.ts",
+		"node.js",
+		"node.d.ts",
+		"utilities.js"
+	],
+	"keywords": [
+		"stream",
+		"transform",
+		"byte",
+		"count",
+		"counter",
+		"bytes",
+		"size",
+		"length",
+		"measure",
+		"throughput",
+		"passthrough",
+		"data",
+		"transfer",
+		"web",
+		"streams",
+		"whatwg"
+	],
+	"devDependencies": {
+		"@types/node": "^24.9.2",
+		"eslint-import-resolver-node": "^0.3.9",
+		"xo": "^1.2.2"
+	},
+	"xo": {
+		"settings": {
+			"import-x/resolver": {
+				"node": {
+					"extensions": [
+						".js",
+						".d.ts"
+					]
+				}
+			}
+		}
+	}
+}
