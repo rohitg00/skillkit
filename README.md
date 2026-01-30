@@ -354,6 +354,37 @@ skillkit memory compress      # Compress observations
 skillkit memory export        # Export as skill
 ```
 
+### Mesh Network
+
+```bash
+skillkit mesh init            # Initialize mesh network
+skillkit mesh add <address>   # Add a host to mesh
+skillkit mesh remove <id>     # Remove a host from mesh
+skillkit mesh list            # List known hosts
+skillkit mesh discover        # Discover hosts on LAN
+skillkit mesh health          # Check host health
+skillkit mesh status          # Show mesh status
+
+# Security
+skillkit mesh security init   # Setup encryption keys
+skillkit mesh security status # Show security status
+skillkit mesh peer trust <id> # Trust a peer
+skillkit mesh peer revoke <id># Revoke peer trust
+skillkit mesh peer list       # List trusted peers
+```
+
+### Inter-Agent Messaging
+
+```bash
+skillkit message send         # Send message to agent
+skillkit message inbox        # View inbox
+skillkit message read <id>    # Read a message
+skillkit message reply <id>   # Reply to message
+skillkit message archive <id> # Archive message
+skillkit message sent         # View sent messages
+skillkit message status       # Messaging status
+```
+
 ### Quality & Testing
 
 ```bash

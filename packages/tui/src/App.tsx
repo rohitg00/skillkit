@@ -7,7 +7,7 @@ import { Splash } from './components/Splash.js';
 import {
   Home, Browse, Installed, Marketplace, Settings, Recommend,
   Translate, Context, Memory, Team, Plugins, Methodology,
-  Plan, Workflow, Execute, History, Sync, Help,
+  Plan, Workflow, Execute, History, Sync, Help, Mesh, Message,
 } from './screens/index.js';
 
 const DOCS_URL = 'https://agenstskills.com/docs';
@@ -107,6 +107,8 @@ export function App({ onExit }: AppProps = {}) {
       case 'history': return <History {...screenProps} />;
       case 'sync': return <Sync {...screenProps} />;
       case 'help': return <Help {...screenProps} />;
+      case 'mesh': return <Mesh {...screenProps} />;
+      case 'message': return <Message {...screenProps} />;
       default: return <Home {...screenProps} />;
     }
   };

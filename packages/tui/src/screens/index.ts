@@ -20,3 +20,5 @@ export { Methodology } from './Methodology.js';
 export { Plan } from './Plan.js';
 export { Settings } from './Settings.js';
 export { Help } from './Help.js';
+export { Mesh } from './Mesh.js';
+export { Message } from './Message.js';
