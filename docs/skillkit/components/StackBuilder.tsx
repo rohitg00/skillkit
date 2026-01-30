@@ -62,7 +62,7 @@ export function StackBuilder(): React.ReactElement {
     const newItems: StackItem[] = [];
     presetSkills.forEach(query => {
       const results = searchSkills(query);
-      if (results.length > 0 && !stack.some(s => s.id === results[0].id)) {
+      if (results.length > 0 && !stack.some(s => s.id === results[0].id) && !newItems.some(s => s.id === results[0].id)) {
         newItems.push({ ...results[0], addedAt: Date.now() });
       }
     });
@@ -71,19 +71,22 @@ export function StackBuilder(): React.ReactElement {
 
   function generateInstallCommand(): string {
     if (stack.length === 0) return '';
-    const skillIds = stack.map(s => s.id.split('/').slice(0, 2).join('/'));
+    const skillIds = [...new Set(stack.map(s => s.id.split('/').slice(0, 2).join('/')))];
     if (skillIds.length === 1) {
       return `npx skillkit@latest install ${skillIds[0]}`;
     }
     return `npx skillkit@latest install ${skillIds.join(' ')}`;
   }
 
-  function copyCommand(): void {
+  async function copyCommand(): Promise<void> {
     const cmd = generateInstallCommand();
-    if (cmd) {
-      navigator.clipboard.writeText(cmd);
+    if (!cmd) return;
+    try {
+      await navigator.clipboard.writeText(cmd);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard API failed, silently ignore
     }
   }
 
@@ -169,7 +172,8 @@ export function StackBuilder(): React.ReactElement {
                       </div>
                       <button
                         onClick={() => removeFromStack(skill.id)}
-                        className="ml-2 text-zinc-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                        aria-label={`Remove ${skill.name} from stack`}
+                        className="ml-2 text-zinc-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

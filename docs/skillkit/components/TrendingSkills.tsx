@@ -25,7 +25,7 @@ const TRENDING_SKILLS = [
 
 function getTrendingSkills(): IndexedSkill[] {
   return TRENDING_SKILLS
-    .map(id => SKILLS_INDEX.find(s => s.id.includes(id.split('/').pop() || '')))
+    .map(id => SKILLS_INDEX.find(s => s.id === id))
     .filter((s): s is IndexedSkill => s !== undefined)
     .slice(0, 8);
 }

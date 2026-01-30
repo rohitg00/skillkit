@@ -32,6 +32,7 @@ function scrollToSection(e: React.MouseEvent, sectionId: string): void {
   const element = document.getElementById(sectionId);
   if (element) {
     element.scrollIntoView({ behavior: 'smooth' });
+    history.replaceState(null, '', `#${sectionId}`);
   }
 }
 
@@ -179,19 +180,19 @@ export default function App(): React.ReactElement {
         <Features />
         <Commands />
 
-        <section id="stack">
+        <section id="stack" style={{ scrollMarginTop: '4rem' }}>
           <StackBuilder />
         </section>
 
-        <section id="trending">
+        <section id="trending" style={{ scrollMarginTop: '4rem' }}>
           <TrendingSkills />
         </section>
 
-        <section id="skills" className="py-12 border-b border-zinc-800">
+        <section id="skills" className="py-12 border-b border-zinc-800" style={{ scrollMarginTop: '4rem' }}>
           <SkillGenerator />
         </section>
 
-        <section id="submit" className="py-12 border-b border-zinc-800" style={{ backgroundColor: '#09090b' }}>
+        <section id="submit" className="py-12 border-b border-zinc-800" style={{ backgroundColor: '#09090b', scrollMarginTop: '4rem' }}>
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-white mb-2 font-mono">Submit Your Skill</h2>
@@ -203,7 +204,7 @@ export default function App(): React.ReactElement {
           </div>
         </section>
 
-        <section id="sources">
+        <section id="sources" style={{ scrollMarginTop: '4rem' }}>
           <Attribution />
         </section>
       </main>
