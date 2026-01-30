@@ -136,6 +136,55 @@ skillkit install vercel-labs/agent-skills --agent claude,cursor,windsurf
 skillkit sync
 ```
 
+## 7. Advanced Features
+
+### Auto-Generate Instructions (Primer)
+
+Let SkillKit analyze your codebase and generate optimized instructions:
+
+```bash
+skillkit primer                # Analyze and generate
+skillkit primer --all-agents   # Generate for all 32 agents
+```
+
+[Learn more about Primer →](/docs/primer)
+
+### Session Memory
+
+Capture learnings from your AI sessions:
+
+```bash
+skillkit memory compress       # Compress learnings
+skillkit memory search auth    # Search knowledge
+skillkit memory export auth-skill  # Export as skill
+```
+
+[Learn more about Memory →](/docs/memory)
+
+### Mesh Network (Multi-Machine)
+
+Distribute agents across multiple machines:
+
+```bash
+skillkit mesh init             # Initialize mesh node
+skillkit mesh discover         # Find peers on LAN
+skillkit mesh security init    # Setup encryption
+```
+
+[Learn more about Mesh →](/docs/mesh)
+
+### Inter-Agent Messaging
+
+Send messages between AI agents:
+
+```bash
+skillkit message send          # Send to another agent
+skillkit message inbox         # Check your inbox
+skillkit message reply <id>    # Reply to message
+```
+
+[Learn more about Messaging →](/docs/messaging)
+
 ## Team Collaboration
 
 Share skills with your team using manifest files:
@@ -154,6 +203,41 @@ skillkit manifest install
 
 The `.skills` file can be committed to Git for team-wide consistency.
 
+## Workflows & Automation
+
+### Workflow Orchestration
+
+Compose skills into multi-step workflows:
+
+```bash
+skillkit workflow create feature-development
+skillkit workflow run feature-development
+```
+
+[Learn more about Workflows →](/docs/workflows)
+
+### Skill Testing
+
+Test skills before deployment:
+
+```bash
+skillkit test                  # Run all tests
+skillkit test --tags unit      # Run specific tests
+```
+
+[Learn more about Testing →](/docs/testing)
+
+### CI/CD Integration
+
+Generate GitHub Actions, GitLab CI configs:
+
+```bash
+skillkit cicd init --provider github
+skillkit cicd init --provider gitlab
+```
+
+[Learn more about CI/CD →](/docs/cicd)
+
 ## User Preferences
 
 Your choices are saved to `~/.skillkit/preferences.json`:
@@ -168,9 +252,44 @@ Your choices are saved to `~/.skillkit/preferences.json`:
 }
 ```
 
+## Complete Workflow Example
+
+```bash
+# 1. Install SkillKit
+npm install -g skillkit
+
+# 2. Initialize in your project
+cd my-project
+skillkit init
+
+# 3. Auto-generate base instructions
+skillkit primer --all-agents
+
+# 4. Get smart recommendations
+skillkit recommend
+
+# 5. Install recommended skills
+skillkit install anthropics/skills
+
+# 6. Setup mesh network (optional)
+skillkit mesh init
+
+# 7. Setup session memory (optional)
+skillkit memory compress
+
+# 8. Sync everything to agents
+skillkit sync
+
+# 9. Launch TUI for visual management
+skillkit
+```
+
 ## Next Steps
 
 - **Browse Marketplace** - `skillkit marketplace`
 - **Create Custom Skills** - `skillkit create my-skill`
 - **Translate Between Agents** - `skillkit translate skill --to cursor`
+- **Auto-Generate Instructions** - `skillkit primer`
+- **Setup Memory System** - `skillkit memory compress`
 - **View All Commands** - `skillkit --help`
+- **API Reference** - [Programmatic Access →](/docs/api-reference)

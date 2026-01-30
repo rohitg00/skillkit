@@ -16,15 +16,17 @@ interface TerminalLine {
 }
 
 const TERMINAL_LINES: TerminalLine[] = [
+  { type: 'cmd', text: 'skillkit primer --all-agents' },
+  { type: 'out', text: '→ Analyzing codebase...' },
+  { type: 'out', text: '  ✓ Generated CLAUDE.md' },
+  { type: 'out', text: '  ✓ Generated .cursorrules' },
   { type: 'cmd', text: 'skillkit recommend' },
-  { type: 'out', text: '  92% react-best-practices' },
-  { type: 'out', text: '  87% typescript-strict' },
-  { type: 'cmd', text: 'skillkit install anthropics/skills' },
-  { type: 'out', text: '→ Installed 3 skills' },
-  { type: 'cmd', text: 'skillkit sync --agent cursor,claude' },
-  { type: 'out', text: '  ✓ Synced to 2 agents' },
-  { type: 'cmd', text: 'skillkit translate my-skill --to codex' },
-  { type: 'out', text: '→ Converted to SKILL.md format' },
+  { type: 'out', text: '  92% vercel-react-best-practices' },
+  { type: 'out', text: '  87% typescript-strict-mode' },
+  { type: 'cmd', text: 'skillkit install anthropics/skills --agent all' },
+  { type: 'out', text: '→ Installed to 32 agents' },
+  { type: 'cmd', text: 'skillkit memory compress' },
+  { type: 'out', text: '→ 12 learnings persisted' },
 ];
 
 const FADE_ANIMATION_STYLES = `
@@ -128,13 +130,14 @@ export function Hero(): React.ReactElement {
             </div>
 
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white mb-3 font-mono">
-              Universal Skills for<br />
-              <span className="text-zinc-500">AI Coding Agents</span>
+              Write Once.<br />
+              <span className="text-zinc-500">Deploy to 32 Agents.</span>
             </h1>
 
             <p className="text-sm text-zinc-400 mb-5 max-w-lg font-mono leading-relaxed">
-              One CLI to install, sync, and manage skills across Claude Code, Cursor,
-              Windsurf, Copilot, and 28 more agents. 15,000+ skills ready to use.
+              The universal skill platform for AI coding agents. Auto-generate instructions 
+              with Primer, persist learnings with Memory, distribute across Mesh networks. 
+              One CLI for Claude, Cursor, Windsurf, Copilot, and 28 more.
             </p>
 
             <div className="flex flex-wrap items-center gap-3 mb-4">
