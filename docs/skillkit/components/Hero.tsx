@@ -206,6 +206,32 @@ export function Hero(): React.ReactElement {
             </div>
           </div>
         </div>
+
+        {/* Video Demo */}
+        <div className="mt-8 sm:mt-10 animate-fade-in-delay">
+          <div className="relative mx-auto max-w-3xl">
+            <div className="absolute -inset-1 bg-gradient-to-r from-zinc-800 via-zinc-600 to-zinc-800 rounded-lg opacity-30 blur-xl"></div>
+            <div className="relative border border-zinc-800 bg-black rounded-lg overflow-hidden">
+              <div className="flex items-center gap-1.5 px-3 py-2 border-b border-zinc-800 bg-zinc-900/50">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-green-500/80"></div>
+                <span className="ml-2 text-zinc-500 text-xs font-mono">skillkit demo</span>
+              </div>
+              <video
+                className="w-full"
+                autoPlay
+                loop
+                muted
+                playsInline
+                poster="/og-image.png"
+              >
+                <source src="/skillkit.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
+        </div>
       </div>
 
       <style>{FADE_ANIMATION_STYLES}</style>
