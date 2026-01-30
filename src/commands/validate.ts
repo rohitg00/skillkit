@@ -8,7 +8,7 @@ export class ValidateCommand extends Command {
   static override paths = [['validate'], ['v']];
 
   static override usage = Command.Usage({
-    description: 'Validate skill(s) against the Agent Skills specification (agentskills.io)',
+    description: 'Validate skill(s) against the Agent Skills specification (agenstskills.com)',
     examples: [
       ['Validate a skill directory', '$0 validate ./my-skill'],
       ['Validate all skills in a directory', '$0 validate ./skills --all'],
@@ -77,7 +77,7 @@ export class ValidateCommand extends Command {
 
     if (hasErrors) {
       console.log(chalk.red('Validation failed'));
-      console.log(chalk.dim('See https://agentskills.io/specification for the complete format'));
+      console.log(chalk.dim('See https://agenstskills.com for the complete format'));
       return 1;
     }
 

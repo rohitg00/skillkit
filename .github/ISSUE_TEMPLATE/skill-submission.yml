@@ -83,7 +83,7 @@ body:
       options:
         - label: Repository is public
           required: true
-        - label: SKILL.md follows the agentskills.io standard format
+        - label: SKILL.md follows the agenstskills.com standard format
           required: true
         - label: Skill has been tested with at least one AI agent
           required: false

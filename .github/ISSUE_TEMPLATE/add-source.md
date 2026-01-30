@@ -35,7 +35,7 @@ assignees: rohitg00
 - [ ] Repository is public
 - [ ] Repository contains valid SKILL.md files
 - [ ] Repository has a clear license
-- [ ] Skills follow the [Agent Skills specification](https://agentskills.io/specification)
+- [ ] Skills follow the [Agent Skills specification](https://agenstskills.com)
 
 ## Additional Context
 

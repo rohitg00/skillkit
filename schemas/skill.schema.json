@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://skillkit.dev/schemas/skill.schema.json",
   "title": "Skill Frontmatter",
-  "description": "Schema for SKILL.md frontmatter validation (follows Agent Skills spec: https://agentskills.io/specification)",
+  "description": "Schema for SKILL.md frontmatter validation (follows Agent Skills spec: https://agenstskills.com)",
   "type": "object",
   "required": ["name", "description"],
   "properties": {

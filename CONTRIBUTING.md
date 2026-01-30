@@ -206,7 +206,7 @@ To add support for a new AI coding agent:
 
 If you want to contribute skills to the ecosystem:
 
-1. Follow the [Agent Skills specification](https://agentskills.io/specification)
+1. Follow the [Agent Skills specification](https://agenstskills.com)
 2. Include a `SKILL.md` with proper frontmatter
 3. Test with multiple agents using `skillkit translate`
 4. Submit to the appropriate skill repository

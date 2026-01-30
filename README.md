@@ -420,7 +420,7 @@ skillkit create my-skill
 
 ### Manual Creation
 
-Create a `SKILL.md` file following the [Agent Skills specification](https://agentskills.io/specification):
+Create a `SKILL.md` file following the [Agent Skills specification](https://agenstskills.com):
 
 ```markdown
 ---
@@ -579,7 +579,7 @@ Contributions welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md
 
 - [Documentation](https://agenstskills.com/docs)
 - [Website](https://agenstskills.com)
-- [Agent Skills Specification](https://agentskills.io/specification)
+- [Agent Skills Specification](https://agenstskills.com)
 - [GitHub Repository](https://github.com/rohitg00/skillkit)
 - [NPM Package](https://www.npmjs.com/package/skillkit)
 - [GitHub Package](https://github.com/rohitg00/skillkit/pkgs/npm/skillkit)
