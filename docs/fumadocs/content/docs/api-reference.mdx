@@ -98,6 +98,7 @@ recommendations.forEach(rec => {
 ## Primer (Auto-Generate Instructions)
 
 ```typescript
+import { promises as fs } from 'node:fs'
 import { analyzeProject, generateInstructions } from '@skillkit/core'
 
 // Analyze project
@@ -152,9 +153,9 @@ host.on('message', (msg) => {
 ```typescript
 import { MessagingClient } from '@skillkit/messaging'
 
-// Create messaging client
+// Create messaging client (host is a MeshHost instance from the example above)
 const messaging = new MessagingClient({
-  meshHost: host,
+  meshHost: host, // See MeshHost setup in "Mesh Network" section above
   storagePath: '~/.skillkit/messages',
 })
 
@@ -370,6 +371,7 @@ export {
 ## Full Example: Custom Build Pipeline
 
 ```typescript
+import { promises as fs } from 'node:fs'
 import {
   analyzeProject,
   generateInstructions,
@@ -380,22 +382,22 @@ import {
 async function setupProject() {
   // 1. Analyze project
   const analysis = await analyzeProject('./my-project')
-  
+
   // 2. Generate base instructions
   const instructions = await generateInstructions(analysis, {
     agents: ['claude', 'cursor', 'windsurf'],
   })
-  
+
   // 3. Get recommendations
   const engine = new RecommendationEngine()
   const recommendations = engine.recommend(analysis)
-  
+
   // 4. Install top recommendations
   const topSkills = recommendations.slice(0, 5)
   for (const rec of topSkills) {
     console.log(`Installing ${rec.skill.name} (${rec.score}% match)`)
   }
-  
+
   // 5. Translate skills to all agents
   for (const agent of ['claude', 'cursor', 'windsurf']) {
     const translated = await translateSkill(
@@ -404,7 +406,7 @@ async function setupProject() {
     )
     await fs.writeFile(`.${agent}/skills/${translated.filename}`, translated.content)
   }
-  
+
   console.log('✅ Project setup complete!')
 }
 

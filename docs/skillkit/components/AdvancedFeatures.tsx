@@ -120,12 +120,12 @@ export function AdvancedFeatures(): React.ReactElement {
                 key={f.id}
                 role="tab"
                 aria-selected={isActive}
-                aria-controls={`tabpanel-${f.id}`}
+                aria-controls="advanced-features-panel"
                 id={`tab-${f.id}`}
                 onClick={() => setActiveFeature(f.id)}
                 className={`group relative px-2 sm:px-4 py-1.5 sm:py-2 font-mono text-xs sm:text-sm transition-all duration-300 ${
-                  isActive 
-                    ? 'text-white' 
+                  isActive
+                    ? 'text-white'
                     : 'text-zinc-500 hover:text-zinc-300'
                 }`}
               >
@@ -139,11 +139,11 @@ export function AdvancedFeatures(): React.ReactElement {
         </div>
 
         {/* Feature Content */}
-        <div 
+        <div
           className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-start"
           role="tabpanel"
-          id={`tabpanel-${feature.id}`}
-          aria-labelledby={`tab-${feature.id}`}
+          id="advanced-features-panel"
+          aria-labelledby={`tab-${activeFeature}`}
         >
           {/* Left: Description */}
           <div className="space-y-4 sm:space-y-6">
