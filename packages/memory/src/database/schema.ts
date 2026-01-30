@@ -99,7 +99,7 @@ export async function initializeSchema(db: CozoDb): Promise<void> {
 
   for (const table of tables) {
     try {
-      await db.run(`?[x] := *${table}[x] :limit 1`);
+      await db.run(`?[id] := *${table}{id} :limit 1`);
     } catch {
       switch (table) {
         case 'memories':

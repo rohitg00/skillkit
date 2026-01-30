@@ -104,6 +104,7 @@ export async function waitForHost(
 export class HealthMonitor {
   private interval: NodeJS.Timeout | null = null;
   private running = false;
+  private checking = false;
   private onStatusChange?: (host: Host, oldStatus: HostStatus, newStatus: HostStatus) => void;
 
   constructor(options: { onStatusChange?: (host: Host, oldStatus: HostStatus, newStatus: HostStatus) => void } = {}) {
@@ -118,7 +119,12 @@ export class HealthMonitor {
     await this.checkAll();
 
     this.interval = setInterval(() => {
-      this.checkAll();
+      if (!this.checking) {
+        this.checking = true;
+        this.checkAll().finally(() => {
+          this.checking = false;
+        });
+      }
     }, intervalMs);
   }
 

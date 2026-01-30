@@ -8,6 +8,24 @@ import { DEFAULT_PORT, MESH_VERSION } from '../types.js';
 
 const HOSTS_FILE_PATH = join(homedir(), '.skillkit', 'hosts.json');
 
+let fileLock: Promise<void> | null = null;
+
+async function withFileLock<T>(fn: () => Promise<T>): Promise<T> {
+  while (fileLock) {
+    await fileLock;
+  }
+
+  let resolve: () => void;
+  fileLock = new Promise<void>(r => { resolve = r; });
+
+  try {
+    return await fn();
+  } finally {
+    fileLock = null;
+    resolve!();
+  }
+}
+
 export async function getHostsFilePath(): Promise<string> {
   return HOSTS_FILE_PATH;
 }
@@ -57,37 +75,43 @@ export async function getLocalHostConfig(): Promise<HostConfig> {
 }
 
 export async function updateLocalHostConfig(updates: Partial<HostConfig>): Promise<HostConfig> {
-  const hostsFile = await loadHostsFile();
-  hostsFile.localHost = { ...hostsFile.localHost, ...updates };
-  await saveHostsFile(hostsFile);
-  return hostsFile.localHost;
+  return withFileLock(async () => {
+    const hostsFile = await loadHostsFile();
+    hostsFile.localHost = { ...hostsFile.localHost, ...updates };
+    await saveHostsFile(hostsFile);
+    return hostsFile.localHost;
+  });
 }
 
 export async function addKnownHost(host: Host): Promise<void> {
-  const hostsFile = await loadHostsFile();
+  return withFileLock(async () => {
+    const hostsFile = await loadHostsFile();
 
-  const existingIndex = hostsFile.knownHosts.findIndex(h => h.id === host.id);
-  if (existingIndex >= 0) {
-    hostsFile.knownHosts[existingIndex] = host;
-  } else {
-    hostsFile.knownHosts.push(host);
-  }
+    const existingIndex = hostsFile.knownHosts.findIndex(h => h.id === host.id);
+    if (existingIndex >= 0) {
+      hostsFile.knownHosts[existingIndex] = host;
+    } else {
+      hostsFile.knownHosts.push(host);
+    }
 
-  await saveHostsFile(hostsFile);
+    await saveHostsFile(hostsFile);
+  });
 }
 
 export async function removeKnownHost(hostId: string): Promise<boolean> {
-  const hostsFile = await loadHostsFile();
+  return withFileLock(async () => {
+    const hostsFile = await loadHostsFile();
 
-  const initialLength = hostsFile.knownHosts.length;
-  hostsFile.knownHosts = hostsFile.knownHosts.filter(h => h.id !== hostId);
+    const initialLength = hostsFile.knownHosts.length;
+    hostsFile.knownHosts = hostsFile.knownHosts.filter(h => h.id !== hostId);
 
-  if (hostsFile.knownHosts.length < initialLength) {
-    await saveHostsFile(hostsFile);
-    return true;
-  }
+    if (hostsFile.knownHosts.length < initialLength) {
+      await saveHostsFile(hostsFile);
+      return true;
+    }
 
-  return false;
+    return false;
+  });
 }
 
 export async function getKnownHosts(): Promise<Host[]> {

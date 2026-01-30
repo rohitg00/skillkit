@@ -19,6 +19,7 @@ export class WebSocketTransport {
   private messageHandlers: Set<MessageHandler> = new Set();
   private connected = false;
   private reconnectTimer: NodeJS.Timeout | null = null;
+  private manualClose = false;
 
   constructor(host: Host, options: WebSocketTransportOptions = {}) {
     this.url = `ws://${host.address}:${host.port}/ws`;
@@ -60,7 +61,7 @@ export class WebSocketTransport {
 
       this.socket.on('close', () => {
         this.connected = false;
-        if (this.options.reconnect) {
+        if (this.options.reconnect && !this.manualClose) {
           this.scheduleReconnect();
         }
       });
@@ -75,6 +76,8 @@ export class WebSocketTransport {
   }
 
   disconnect(): void {
+    this.manualClose = true;
+
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;

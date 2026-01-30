@@ -32,7 +32,12 @@ export async function initializeEncoder(options: EncoderOptions = {}): Promise<v
     } as any);
   })();
 
-  await initPromise;
+  try {
+    await initPromise;
+  } catch (error) {
+    initPromise = null;
+    throw error;
+  }
 }
 
 export async function encode(text: string): Promise<number[]> {
@@ -124,6 +129,12 @@ export function isEncoderReady(): boolean {
 }
 
 export async function disposeEncoder(): Promise<void> {
+  if (embeddingPipeline) {
+    try {
+      await embeddingPipeline.dispose();
+    } catch {
+    }
+  }
   embeddingPipeline = null;
   initPromise = null;
 }

@@ -46,9 +46,11 @@ export class LocalDiscovery {
         try {
           this.socket!.addMembership(MULTICAST_ADDR);
           this.socket!.setBroadcast(true);
-          this.socket!.setMulticastTTL(128);
+          this.socket!.setMulticastTTL(1);
           resolve();
         } catch (err) {
+          this.socket?.close();
+          this.socket = null;
           reject(err);
         }
       });
@@ -59,7 +61,9 @@ export class LocalDiscovery {
     await this.announce();
 
     this.announceInterval = setInterval(() => {
-      this.announce();
+      void this.announce().catch(err => {
+        console.error('Discovery announce error:', err);
+      });
     }, this.options.interval);
   }
 
@@ -136,7 +140,12 @@ export class LocalDiscovery {
 
   private async handleMessage(msg: Buffer, rinfo: { address: string; port: number }): Promise<void> {
     try {
-      const message = JSON.parse(msg.toString()) as DiscoveryMessage;
+      const message = JSON.parse(msg.toString()) as Partial<DiscoveryMessage>;
+
+      if (!message || (message.type !== 'announce' && message.type !== 'query' && message.type !== 'response')) return;
+      if (!message.hostId || !message.hostName) return;
+      const port = Number(message.port);
+      if (!Number.isInteger(port) || port < 1 || port > 65535) return;
 
       const localConfig = await getLocalHostConfig();
       if (message.hostId === localConfig.id) return;
@@ -144,8 +153,8 @@ export class LocalDiscovery {
       const host: Host = {
         id: message.hostId,
         name: message.hostName,
-        address: message.address || rinfo.address,
-        port: message.port,
+        address: rinfo.address,
+        port,
         tailscaleIP: message.tailscaleIP,
         status: 'online',
         lastSeen: new Date().toISOString(),
