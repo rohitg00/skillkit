@@ -56,6 +56,12 @@ export interface DiscoveryMessage {
   timestamp: string;
 }
 
+export interface SignedDiscoveryMessage extends DiscoveryMessage {
+  signature: string;
+  publicKey: string;
+  fingerprint: string;
+}
+
 export interface HealthCheckResult {
   hostId: string;
   address: string;
@@ -83,14 +89,36 @@ export interface TransportMessage {
   timestamp: string;
 }
 
+export interface SecureTransportMessage extends TransportMessage {
+  signature: string;
+  senderFingerprint: string;
+  senderPublicKey: string;
+  nonce: string;
+  encrypted?: boolean;
+}
+
+export interface EncryptedTransportMessage {
+  id: string;
+  senderFingerprint: string;
+  nonce: string;
+  ciphertext: string;
+  timestamp: string;
+}
+
 export interface TransportOptions {
   timeout?: number;
   retries?: number;
   retryDelay?: number;
 }
 
+export interface SecureTransportOptions extends TransportOptions {
+  requireEncryption?: boolean;
+  requireAuth?: boolean;
+  authToken?: string;
+}
+
 export const DEFAULT_PORT = 9876;
 export const DEFAULT_DISCOVERY_PORT = 9877;
 export const HEALTH_CHECK_TIMEOUT = 5000;
 export const DISCOVERY_INTERVAL = 30000;
-export const MESH_VERSION = '1.0.0';
+export const MESH_VERSION = '1.7.11';

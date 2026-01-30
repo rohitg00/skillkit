@@ -7,6 +7,12 @@ export {
 } from './local.js';
 
 export {
+  SecureLocalDiscovery,
+  discoverOnceSecure,
+  type SecureLocalDiscoveryOptions,
+} from './secure-local.js';
+
+export {
   getTailscaleStatus,
   isTailscaleAvailable,
   getTailscaleIP,

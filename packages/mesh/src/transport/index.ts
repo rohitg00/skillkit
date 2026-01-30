@@ -11,3 +11,18 @@ export {
   type WebSocketTransportOptions,
   type MessageHandler,
 } from './websocket.js';
+
+export {
+  SecureWebSocketTransport,
+  SecureWebSocketServer,
+  type SecureWebSocketOptions,
+  type SecureMessageHandler,
+} from './secure-websocket.js';
+
+export {
+  SecureHttpTransport,
+  sendToHostSecure,
+  broadcastToHostsSecure,
+  verifySecureMessage,
+  type SecureHttpTransportOptions,
+} from './secure-http.js';

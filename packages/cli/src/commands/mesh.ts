@@ -18,6 +18,8 @@ export class MeshCommand extends Command {
       - health:    Check health of all hosts
       - discover:  Discover hosts on local network
       - status:    Show mesh network status
+      - security:  Security management (init, status)
+      - peer:      Peer trust management (trust, revoke, list)
     `,
     examples: [
       ['Initialize mesh', '$0 mesh init'],
@@ -27,17 +29,25 @@ export class MeshCommand extends Command {
       ['List all hosts', '$0 mesh list'],
       ['Check health', '$0 mesh health'],
       ['Discover hosts', '$0 mesh discover'],
+      ['Initialize security', '$0 mesh security init'],
+      ['Show security status', '$0 mesh security status'],
+      ['Trust a peer', '$0 mesh peer trust <fingerprint>'],
+      ['Revoke a peer', '$0 mesh peer revoke <fingerprint>'],
+      ['List trusted peers', '$0 mesh peer list --trusted'],
     ],
   });
 
   action = Option.String({ required: false });
   arg = Option.String({ required: false });
+  subArg = Option.String({ required: false });
   name = Option.String('--name,-n', { description: 'Name for the host' });
   port = Option.String('--port,-p', { description: 'Port number' });
   tailscale = Option.Boolean('--tailscale,-t', false, { description: 'Include Tailscale peers' });
   timeout = Option.String('--timeout', { description: 'Timeout in milliseconds' });
   json = Option.Boolean('--json,-j', false, { description: 'Output in JSON format' });
   verbose = Option.Boolean('--verbose,-v', false, { description: 'Show detailed output' });
+  trusted = Option.Boolean('--trusted', false, { description: 'Show only trusted peers' });
+  securityLevel = Option.String('--security', { description: 'Security level: development, signed, secure, strict' });
 
   async execute(): Promise<number> {
     const action = this.action || 'status';
@@ -57,9 +67,13 @@ export class MeshCommand extends Command {
         return this.discoverHosts();
       case 'status':
         return this.showStatus();
+      case 'security':
+        return this.handleSecurity();
+      case 'peer':
+        return this.handlePeer();
       default:
         console.error(chalk.red(`Unknown action: ${action}`));
-        console.log(chalk.gray('Available actions: init, add, remove, list, health, discover, status'));
+        console.log(chalk.gray('Available actions: init, add, remove, list, health, discover, status, security, peer'));
         return 1;
     }
   }
@@ -379,6 +393,263 @@ export class MeshCommand extends Command {
       return 0;
     } catch (err: any) {
       console.error(chalk.red(`Failed to get status: ${err.message}`));
+      return 1;
+    }
+  }
+
+  private async handleSecurity(): Promise<number> {
+    const subAction = this.arg || 'status';
+
+    switch (subAction) {
+      case 'init':
+        return this.initSecurity();
+      case 'status':
+        return this.showSecurityStatus();
+      default:
+        console.error(chalk.red(`Unknown security action: ${subAction}`));
+        console.log(chalk.gray('Available actions: init, status'));
+        return 1;
+    }
+  }
+
+  private async initSecurity(): Promise<number> {
+    try {
+      const { SecureKeystore, TLSManager, getLocalHostConfig, describeSecurityLevel, DEFAULT_SECURITY_CONFIG } = await import('@skillkit/mesh');
+
+      console.log(chalk.bold('\nInitializing mesh security...\n'));
+
+      const keystore = new SecureKeystore();
+      const identity = await keystore.loadOrCreateIdentity();
+
+      console.log(chalk.green('✓ Identity created/loaded'));
+      console.log(`  Fingerprint: ${chalk.cyan(identity.fingerprint)}`);
+      console.log(`  Public Key: ${chalk.gray(identity.publicKeyHex.slice(0, 32))}...`);
+
+      const localConfig = await getLocalHostConfig();
+      const tlsManager = new TLSManager();
+      const certInfo = await tlsManager.loadOrCreateCertificate(localConfig.id, 'localhost');
+
+      console.log(chalk.green('\n✓ TLS certificate generated'));
+      console.log(`  Fingerprint: ${chalk.gray(certInfo.fingerprint.slice(0, 16))}...`);
+      console.log(`  Valid until: ${certInfo.notAfter.toLocaleDateString()}`);
+
+      console.log(chalk.green('\n✓ Security initialized'));
+      console.log(`  Mode: ${chalk.cyan(describeSecurityLevel(DEFAULT_SECURITY_CONFIG))}`);
+
+      console.log(chalk.gray('\nOther hosts can trust this peer using:'));
+      console.log(chalk.gray(`  skillkit mesh peer trust ${identity.fingerprint}`));
+
+      console.log();
+      return 0;
+    } catch (err: any) {
+      console.error(chalk.red(`Failed to initialize security: ${err.message}`));
+      return 1;
+    }
+  }
+
+  private async showSecurityStatus(): Promise<number> {
+    try {
+      const {
+        SecureKeystore,
+        TLSManager,
+        getLocalHostConfig,
+        describeSecurityLevel,
+        DEFAULT_SECURITY_CONFIG,
+        isSecurityEnabled,
+      } = await import('@skillkit/mesh');
+
+      const keystore = new SecureKeystore();
+
+      console.log(chalk.bold('\nMesh Security Status\n'));
+
+      const hasIdentity = await keystore.hasIdentity();
+
+      if (hasIdentity) {
+        const identity = await keystore.loadOrCreateIdentity();
+        const trustedPeers = await keystore.getTrustedPeers();
+        const revokedPeers = await keystore.getRevokedFingerprints();
+
+        console.log(chalk.cyan('Identity:'));
+        console.log(`  Fingerprint: ${chalk.green(identity.fingerprint)}`);
+        console.log(`  Public Key: ${chalk.gray(identity.publicKeyHex.slice(0, 32))}...`);
+
+        console.log(chalk.cyan('\nTrust:'));
+        console.log(`  Trusted peers: ${trustedPeers.length}`);
+        console.log(`  Revoked peers: ${revokedPeers.length}`);
+
+        if (this.verbose && trustedPeers.length > 0) {
+          console.log(chalk.cyan('\nTrusted Peers:'));
+          for (const peer of trustedPeers) {
+            console.log(`  ${chalk.green('●')} ${peer.name || peer.fingerprint.slice(0, 16)}`);
+            console.log(`    Fingerprint: ${chalk.gray(peer.fingerprint)}`);
+            console.log(`    Added: ${new Date(peer.addedAt).toLocaleDateString()}`);
+          }
+        }
+      } else {
+        console.log(chalk.yellow('Identity: Not initialized'));
+        console.log(chalk.gray('Run "skillkit mesh security init" to initialize.'));
+      }
+
+      const localConfig = await getLocalHostConfig();
+      const tlsManager = new TLSManager();
+      const hasCert = await tlsManager.hasCertificate(localConfig.id);
+
+      console.log(chalk.cyan('\nTLS:'));
+      if (hasCert) {
+        const certInfo = await tlsManager.loadCertificate(localConfig.id);
+        console.log(`  Certificate: ${chalk.green('Available')}`);
+        if (certInfo) {
+          console.log(`  Fingerprint: ${chalk.gray(certInfo.fingerprint.slice(0, 16))}...`);
+        }
+      } else {
+        console.log(`  Certificate: ${chalk.yellow('Not generated')}`);
+      }
+
+      console.log(chalk.cyan('\nConfiguration:'));
+      console.log(`  Security level: ${chalk.cyan(describeSecurityLevel(DEFAULT_SECURITY_CONFIG))}`);
+      console.log(`  Discovery mode: ${DEFAULT_SECURITY_CONFIG.discovery.mode}`);
+      console.log(`  Transport encryption: ${DEFAULT_SECURITY_CONFIG.transport.encryption}`);
+      console.log(`  Auth required: ${DEFAULT_SECURITY_CONFIG.transport.requireAuth ? chalk.green('yes') : chalk.gray('no')}`);
+
+      if (this.json) {
+        const identity = hasIdentity ? await keystore.loadOrCreateIdentity() : null;
+        console.log(JSON.stringify({
+          hasIdentity,
+          fingerprint: identity?.fingerprint,
+          hasCertificate: hasCert,
+          securityEnabled: isSecurityEnabled(DEFAULT_SECURITY_CONFIG),
+          config: DEFAULT_SECURITY_CONFIG,
+        }, null, 2));
+      }
+
+      console.log();
+      return 0;
+    } catch (err: any) {
+      console.error(chalk.red(`Failed to get security status: ${err.message}`));
+      return 1;
+    }
+  }
+
+  private async handlePeer(): Promise<number> {
+    const subAction = this.arg;
+
+    if (!subAction) {
+      console.error(chalk.red('Error: Peer action is required'));
+      console.log(chalk.gray('Usage: skillkit mesh peer <trust|revoke|list> [fingerprint]'));
+      return 1;
+    }
+
+    switch (subAction) {
+      case 'trust':
+        return this.trustPeer();
+      case 'revoke':
+        return this.revokePeer();
+      case 'list':
+        return this.listPeers();
+      default:
+        console.error(chalk.red(`Unknown peer action: ${subAction}`));
+        console.log(chalk.gray('Available actions: trust, revoke, list'));
+        return 1;
+    }
+  }
+
+  private async trustPeer(): Promise<number> {
+    const fingerprint = this.subArg;
+
+    if (!fingerprint) {
+      console.error(chalk.red('Error: Fingerprint is required'));
+      console.log(chalk.gray('Usage: skillkit mesh peer trust <fingerprint> [--name <name>]'));
+      return 1;
+    }
+
+    try {
+      const { SecureKeystore } = await import('@skillkit/mesh');
+
+      const keystore = new SecureKeystore();
+
+      const isRevoked = await keystore.isRevoked(fingerprint);
+      if (isRevoked) {
+        console.log(chalk.yellow(`Peer ${fingerprint.slice(0, 8)} was previously revoked. Removing from revoked list...`));
+      }
+
+      await keystore.addTrustedPeer(fingerprint, '', this.name);
+
+      console.log(chalk.green(`✓ Trusted peer: ${this.name || fingerprint.slice(0, 16)}`));
+      console.log(`  Fingerprint: ${chalk.gray(fingerprint)}`);
+
+      return 0;
+    } catch (err: any) {
+      console.error(chalk.red(`Failed to trust peer: ${err.message}`));
+      return 1;
+    }
+  }
+
+  private async revokePeer(): Promise<number> {
+    const fingerprint = this.subArg;
+
+    if (!fingerprint) {
+      console.error(chalk.red('Error: Fingerprint is required'));
+      console.log(chalk.gray('Usage: skillkit mesh peer revoke <fingerprint>'));
+      return 1;
+    }
+
+    try {
+      const { SecureKeystore } = await import('@skillkit/mesh');
+
+      const keystore = new SecureKeystore();
+      await keystore.revokePeer(fingerprint);
+
+      console.log(chalk.green(`✓ Revoked peer: ${fingerprint.slice(0, 16)}`));
+      console.log(chalk.gray('This peer will no longer be trusted for mesh communication.'));
+
+      return 0;
+    } catch (err: any) {
+      console.error(chalk.red(`Failed to revoke peer: ${err.message}`));
+      return 1;
+    }
+  }
+
+  private async listPeers(): Promise<number> {
+    try {
+      const { SecureKeystore } = await import('@skillkit/mesh');
+
+      const keystore = new SecureKeystore();
+      const trustedPeers = await keystore.getTrustedPeers();
+      const revokedFingerprints = await keystore.getRevokedFingerprints();
+
+      if (this.json) {
+        console.log(JSON.stringify({ trusted: trustedPeers, revoked: revokedFingerprints }, null, 2));
+        return 0;
+      }
+
+      console.log(chalk.bold('\nPeer Trust Status\n'));
+
+      if (this.trusted || trustedPeers.length > 0) {
+        console.log(chalk.cyan('Trusted Peers:'));
+        if (trustedPeers.length === 0) {
+          console.log(chalk.gray('  No trusted peers.'));
+        } else {
+          for (const peer of trustedPeers) {
+            console.log(`  ${chalk.green('●')} ${peer.name || 'Unknown'}`);
+            console.log(`    Fingerprint: ${chalk.gray(peer.fingerprint)}`);
+            console.log(`    Added: ${new Date(peer.addedAt).toLocaleDateString()}`);
+          }
+        }
+      }
+
+      if (!this.trusted && revokedFingerprints.length > 0) {
+        console.log(chalk.cyan('\nRevoked Peers:'));
+        for (const fp of revokedFingerprints) {
+          console.log(`  ${chalk.red('●')} ${chalk.gray(fp)}`);
+        }
+      }
+
+      console.log(chalk.gray(`\nTotal: ${trustedPeers.length} trusted, ${revokedFingerprints.length} revoked`));
+      console.log();
+
+      return 0;
+    } catch (err: any) {
+      console.error(chalk.red(`Failed to list peers: ${err.message}`));
       return 1;
     }
   }

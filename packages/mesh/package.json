@@ -1,6 +1,6 @@
 {
   "name": "@skillkit/mesh",
-  "version": "2.0.0",
+  "version": "1.7.11",
   "description": "Peer mesh network for multi-machine agent distribution",
   "type": "module",
   "main": "./dist/index.js",
@@ -23,6 +23,11 @@
   },
   "dependencies": {
     "@skillkit/core": "workspace:*",
+    "@noble/ed25519": "^2.1.0",
+    "@noble/curves": "^1.7.0",
+    "@noble/ciphers": "^1.0.0",
+    "@noble/hashes": "^1.5.0",
+    "jose": "^5.8.0",
     "ws": "^8.16.0",
     "got": "^14.2.0"
   },
