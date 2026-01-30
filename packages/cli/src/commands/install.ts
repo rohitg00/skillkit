@@ -34,7 +34,7 @@ import {
 } from '../onboarding/index.js';
 
 export class InstallCommand extends Command {
-  static override paths = [['install'], ['i']];
+  static override paths = [['install'], ['i'], ['add']];
 
   static override usage = Command.Usage({
     description: 'Install skills from GitHub, GitLab, Bitbucket, or local path',
