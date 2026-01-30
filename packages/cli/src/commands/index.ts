@@ -17,7 +17,13 @@ export { RecommendCommand } from './recommend.js';
 export { StatusCommand } from './status.js';
 export { PauseCommand } from './pause.js';
 export { ResumeCommand } from './resume.js';
-export { WorkflowRunCommand, WorkflowListCommand, WorkflowCreateCommand } from './workflow/index.js';
+export {
+  WorkflowRunCommand,
+  WorkflowListCommand,
+  WorkflowCreateCommand,
+  WorkflowPipelineCommand,
+  WorkflowPipelineListCommand,
+} from './workflow/index.js';
 export { RunCommand } from './run.js';
 export { TestCommand } from './test.js';
 export { MarketplaceCommand } from './marketplace.js';
@@ -27,9 +33,14 @@ export { CICDCommand } from './cicd.js';
 export { TeamCommand } from './team.js';
 export { PluginCommand } from './plugin.js';
 export { MethodologyCommand } from './methodology.js';
-export { HookCommand } from './hook.js';
+export {
+  HookCommand,
+  HookTemplateListCommand,
+  HookTemplateApplyCommand,
+  HookTemplateShowCommand,
+} from './hook.js';
 export { PlanCommand } from './plan.js';
-export { CommandCmd } from './command.js';
+export { CommandCmd, CommandAvailableCommand, CommandInstallCommand } from './command.js';
 export { AICommand } from './ai.js';
 export { AuditCommand } from './audit.js';
 export { PublishCommand } from './publish.js';
@@ -41,6 +52,8 @@ export {
   AgentTranslateCommand,
   AgentSyncCommand,
   AgentValidateCommand,
+  AgentInstallCommand,
+  AgentAvailableCommand,
 } from './agent.js';
 
 export { CheckCommand } from './check.js';
@@ -56,3 +69,38 @@ export {
 export { PrimerCommand } from './primer.js';
 export { MeshCommand } from './mesh.js';
 export { MessageCommand } from './message.js';
+export {
+  LearnCommand,
+  PatternStatusCommand,
+  PatternFeedbackCommand,
+  PatternApproveCommand,
+  PatternRejectCommand,
+  PatternExportCommand,
+  PatternImportCommand,
+  PatternClusterCommand,
+} from './learn.js';
+export {
+  SessionCommand,
+  SessionStatusCommand,
+  SessionStartCommand,
+  SessionLoadCommand,
+  SessionListCommand,
+  SessionNoteCommand,
+  SessionCompleteCommand,
+  SessionInProgressCommand,
+} from './session.js';
+export {
+  ProfileCommand,
+  ProfileListCommand,
+  ProfileCreateCommand,
+  ProfileRemoveCommand,
+} from './profile.js';
+export {
+  GuidelineCommand,
+  GuidelineListCommand,
+  GuidelineShowCommand,
+  GuidelineEnableCommand,
+  GuidelineDisableCommand,
+  GuidelineCreateCommand,
+  GuidelineRemoveCommand,
+} from './guideline.js';

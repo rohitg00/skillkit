@@ -33,6 +33,10 @@
     "./recommend": {
       "import": "./dist/recommend/index.js",
       "types": "./dist/recommend/index.d.ts"
+    },
+    "./learning": {
+      "import": "./dist/learning/index.js",
+      "types": "./dist/learning/index.d.ts"
     }
   },
   "files": [

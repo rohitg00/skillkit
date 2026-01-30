@@ -80,3 +80,12 @@ export * from './quality/index.js';
 
 // Primer (AI Instruction Generator)
 export * from './primer/index.js';
+
+// Pattern Learning System
+export * from './learning/index.js';
+
+// Operational Profiles
+export * from './profiles/index.js';
+
+// Coding Guidelines System
+export * from './guidelines/index.js';

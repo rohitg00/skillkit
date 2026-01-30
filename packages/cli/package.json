@@ -24,6 +24,7 @@
     "@clack/prompts": "^0.11.0",
     "@skillkit/core": "workspace:*",
     "@skillkit/agents": "workspace:*",
+    "@skillkit/resources": "workspace:*",
     "@skillkit/tui": "workspace:*",
     "@skillkit/memory": "workspace:*",
     "@skillkit/mesh": "workspace:*",

@@ -20,6 +20,14 @@ import {
   type CustomAgent,
   type AgentType,
 } from '@skillkit/core';
+import {
+  getBundledAgents,
+  getBundledAgent,
+  getAvailableAgents,
+  installBundledAgent,
+  isAgentInstalled,
+  type BundledAgent,
+} from '@skillkit/resources';
 // Agent discovery uses root directories, not skill directories
 
 export class AgentCommand extends Command {
@@ -625,6 +633,206 @@ function generateAgentTemplate(name: string, description: string, model?: string
 
 function formatAgentName(name: string): string {
   return name
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+export class AgentInstallCommand extends Command {
+  static override paths = [['agent', 'install']];
+
+  static override usage = Command.Usage({
+    description: 'Install a bundled agent template',
+    details: `
+      Installs a bundled agent template from @skillkit/resources.
+      These are battle-tested agent configurations for common tasks.
+
+      Use 'agent available' to see agents that can be installed.
+    `,
+    examples: [
+      ['Install code-reviewer agent', '$0 agent install code-reviewer'],
+      ['Install globally', '$0 agent install architect --global'],
+      ['Force overwrite existing', '$0 agent install tdd-guide --force'],
+      ['Install all bundled agents', '$0 agent install --all'],
+    ],
+  });
+
+  name = Option.String({ required: false });
+
+  global = Option.Boolean('--global,-g', false, {
+    description: 'Install to global agents directory',
+  });
+
+  force = Option.Boolean('--force,-f', false, {
+    description: 'Overwrite if agent already exists',
+  });
+
+  all = Option.Boolean('--all,-a', false, {
+    description: 'Install all bundled agents',
+  });
+
+  async execute(): Promise<number> {
+    if (this.all) {
+      return this.installAll();
+    }
+
+    if (!this.name) {
+      console.log(chalk.yellow('Please specify an agent name or use --all'));
+      console.log(chalk.dim('Run `skillkit agent available` to see available agents'));
+      return 1;
+    }
+
+    const agent = getBundledAgent(this.name);
+    if (!agent) {
+      console.log(chalk.red(`Bundled agent not found: ${this.name}`));
+      console.log(chalk.dim('Run `skillkit agent available` to see available agents'));
+      return 1;
+    }
+
+    const result = installBundledAgent(this.name, {
+      global: this.global,
+      force: this.force,
+    });
+
+    if (result.success) {
+      console.log(chalk.green(`✓ Installed: ${agent.name}`));
+      console.log(chalk.dim(`  Path: ${result.path}`));
+      console.log(chalk.dim(`  Invoke with: @${agent.id}`));
+    } else {
+      console.log(chalk.red(`✗ Failed: ${result.message}`));
+      return 1;
+    }
+
+    return 0;
+  }
+
+  private async installAll(): Promise<number> {
+    const agents = getBundledAgents();
+    console.log(chalk.cyan(`Installing ${agents.length} bundled agents...\n`));
+
+    let successCount = 0;
+    let skipCount = 0;
+    let errorCount = 0;
+
+    for (const agent of agents) {
+      const result = installBundledAgent(agent.id, {
+        global: this.global,
+        force: this.force,
+      });
+
+      if (result.success) {
+        console.log(chalk.green(`  ✓ ${agent.name}`));
+        successCount++;
+      } else if (result.message.includes('already exists')) {
+        console.log(chalk.yellow(`  ○ ${agent.name} (already installed)`));
+        skipCount++;
+      } else {
+        console.log(chalk.red(`  ✗ ${agent.name}: ${result.message}`));
+        errorCount++;
+      }
+    }
+
+    console.log();
+    console.log(
+      chalk.dim(
+        `Installed: ${successCount}, Skipped: ${skipCount}, Errors: ${errorCount}`
+      )
+    );
+
+    return errorCount > 0 ? 1 : 0;
+  }
+}
+
+export class AgentAvailableCommand extends Command {
+  static override paths = [['agent', 'available'], ['agent', 'bundled']];
+
+  static override usage = Command.Usage({
+    description: 'List bundled agents available for installation',
+    examples: [
+      ['List available agents', '$0 agent available'],
+      ['Show JSON output', '$0 agent available --json'],
+      ['Filter by category', '$0 agent available --category testing'],
+    ],
+  });
+
+  json = Option.Boolean('--json,-j', false, {
+    description: 'Output as JSON',
+  });
+
+  category = Option.String('--category,-c', {
+    description: 'Filter by category (planning, development, testing, review, documentation, security, refactoring)',
+  });
+
+  installed = Option.Boolean('--installed,-i', false, {
+    description: 'Show only installed bundled agents',
+  });
+
+  async execute(): Promise<number> {
+    let agents: BundledAgent[];
+
+    if (this.installed) {
+      agents = getBundledAgents().filter(a => isAgentInstalled(a.id));
+    } else {
+      agents = getAvailableAgents();
+    }
+
+    if (this.category) {
+      agents = agents.filter(a => a.category === this.category);
+    }
+
+    if (this.json) {
+      console.log(JSON.stringify(agents, null, 2));
+      return 0;
+    }
+
+    if (agents.length === 0) {
+      if (this.installed) {
+        console.log(chalk.yellow('No bundled agents installed'));
+        console.log(chalk.dim('Run `skillkit agent install <name>` to install'));
+      } else {
+        console.log(chalk.green('All bundled agents are already installed!'));
+      }
+      return 0;
+    }
+
+    const title = this.installed
+      ? 'Installed Bundled Agents'
+      : 'Available Bundled Agents';
+
+    console.log(chalk.cyan(`${title} (${agents.length}):\n`));
+
+    const categories = new Map<string, BundledAgent[]>();
+    for (const agent of agents) {
+      const cat = agent.category;
+      if (!categories.has(cat)) {
+        categories.set(cat, []);
+      }
+      categories.get(cat)!.push(agent);
+    }
+
+    for (const [category, catAgents] of categories) {
+      console.log(chalk.blue(`  ${formatCategoryName(category)}`));
+      for (const agent of catAgents) {
+        const installed = isAgentInstalled(agent.id);
+        const status = installed ? chalk.green('✓') : chalk.dim('○');
+        const model = agent.model ? chalk.blue(`[${agent.model}]`) : '';
+        console.log(`    ${status} ${chalk.bold(agent.id)} ${model}`);
+        console.log(`      ${chalk.dim(agent.description)}`);
+      }
+      console.log();
+    }
+
+    if (!this.installed) {
+      console.log(chalk.dim('Install with: skillkit agent install <name>'));
+      console.log(chalk.dim('Install all: skillkit agent install --all'));
+    }
+
+    return 0;
+  }
+}
+
+function formatCategoryName(category: string): string {
+  return category
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');

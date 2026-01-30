@@ -17,6 +17,13 @@ import {
   supportsSlashCommands,
 } from '@skillkit/core';
 import type { SlashCommand, AgentType } from '@skillkit/core';
+import {
+  getCommandTemplates,
+  getCommandTemplate,
+  getCommandTemplatesByCategory,
+  type CommandTemplate,
+  type CommandCategory,
+} from '@skillkit/resources';
 
 export class CommandCmd extends Command {
   static paths = [['command']];
@@ -497,5 +504,134 @@ export class CommandCmd extends Command {
         }
       }
     }
+  }
+}
+
+export class CommandAvailableCommand extends Command {
+  static override paths = [['command', 'available']];
+
+  static override usage = Command.Usage({
+    category: 'Commands',
+    description: 'List available bundled command templates',
+    examples: [
+      ['List all available', '$0 command available'],
+      ['Filter by category', '$0 command available --category testing'],
+    ],
+  });
+
+  category = Option.String('--category,-c', {
+    description: 'Filter by category (testing, planning, development, review, workflow, learning)',
+  });
+
+  json = Option.Boolean('--json,-j', false, {
+    description: 'Output as JSON',
+  });
+
+  async execute(): Promise<number> {
+    const templates = this.category
+      ? getCommandTemplatesByCategory(this.category as CommandCategory)
+      : getCommandTemplates();
+
+    if (this.json) {
+      this.context.stdout.write(JSON.stringify(templates, null, 2) + '\n');
+      return 0;
+    }
+
+    this.context.stdout.write(`Available Command Templates (${templates.length}):\n\n`);
+
+    const byCategory = new Map<string, CommandTemplate[]>();
+    for (const template of templates) {
+      const cat = template.category || 'general';
+      if (!byCategory.has(cat)) {
+        byCategory.set(cat, []);
+      }
+      byCategory.get(cat)!.push(template);
+    }
+
+    for (const [category, catTemplates] of byCategory) {
+      this.context.stdout.write(`  ${category.toUpperCase()}\n`);
+      for (const template of catTemplates) {
+        const agent = template.agent ? ` [${template.agent}]` : '';
+        this.context.stdout.write(`    ${template.trigger}${agent}\n`);
+        this.context.stdout.write(`      ${template.description}\n`);
+      }
+      this.context.stdout.write('\n');
+    }
+
+    this.context.stdout.write('Install with: skillkit command install <id>\n');
+
+    return 0;
+  }
+}
+
+export class CommandInstallCommand extends Command {
+  static override paths = [['command', 'install']];
+
+  static override usage = Command.Usage({
+    category: 'Commands',
+    description: 'Install a bundled command template',
+    examples: [
+      ['Install TDD command', '$0 command install tdd'],
+      ['Install code review', '$0 command install code-review'],
+    ],
+  });
+
+  id = Option.String({ required: true });
+
+  async execute(): Promise<number> {
+    const template = getCommandTemplate(this.id);
+
+    if (!template) {
+      this.context.stderr.write(`Command template not found: ${this.id}\n`);
+      this.context.stderr.write('Run "skillkit command available" to see available templates.\n');
+      return 1;
+    }
+
+    const command: SlashCommand = {
+      name: template.id,
+      description: template.description,
+      skill: `template:${template.id}`,
+      category: template.category,
+      examples: template.examples,
+      metadata: {
+        templateId: template.id,
+        trigger: template.trigger,
+        agent: template.agent,
+        prompt: template.prompt,
+      },
+    };
+
+    const configPath = resolve(process.cwd(), '.skillkit', 'commands.json');
+    let commands: SlashCommand[] = [];
+
+    if (existsSync(configPath)) {
+      const content = await readFile(configPath, 'utf-8');
+      const config = JSON.parse(content);
+      commands = config.commands || [];
+    }
+
+    const existing = commands.findIndex((c) => c.name === template.id);
+    if (existing >= 0) {
+      commands[existing] = command;
+      this.context.stdout.write(`Updated command: ${template.trigger}\n`);
+    } else {
+      commands.push(command);
+      this.context.stdout.write(`Installed command: ${template.trigger}\n`);
+    }
+
+    await mkdir(dirname(configPath), { recursive: true });
+    await writeFile(
+      configPath,
+      JSON.stringify({ version: '1.0.0', commands }, null, 2)
+    );
+
+    this.context.stdout.write(`  Name: ${template.name}\n`);
+    this.context.stdout.write(`  Description: ${template.description}\n`);
+    if (template.agent) {
+      this.context.stdout.write(`  Agent: ${template.agent}\n`);
+    }
+    this.context.stdout.write(`\nSaved to: ${configPath}\n`);
+
+    return 0;
   }
 }

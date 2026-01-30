@@ -6,6 +6,8 @@ import {
   AgentType as AgentTypeSchema,
   generatePrimer,
   analyzePrimer,
+  analyzeGitHistory,
+  addPattern,
   AGENT_CONFIG,
 } from '@skillkit/core';
 
@@ -71,6 +73,14 @@ export class PrimerCommand extends Command {
     description: 'Project directory to analyze (default: current directory)',
   });
 
+  learn = Option.Boolean('--learn,-l', false, {
+    description: 'Extract learnable patterns from git history',
+  });
+
+  commits = Option.String('--commits', {
+    description: 'Number of commits to analyze for learning (default: 100)',
+  });
+
   async execute(): Promise<number> {
     const projectPath = resolve(this.directory || process.cwd());
 
@@ -78,7 +88,59 @@ export class PrimerCommand extends Command {
       return this.runAnalysis(projectPath);
     }
 
+    if (this.learn) {
+      return this.runLearn(projectPath);
+    }
+
     return this.runGenerate(projectPath);
+  }
+
+  private async runLearn(projectPath: string): Promise<number> {
+    console.log(chalk.cyan('Analyzing codebase and extracting patterns...\n'));
+
+    const analysis = analyzePrimer(projectPath);
+    if (this.verbose) {
+      this.printAnalysis(analysis);
+      console.log();
+    }
+
+    console.log(chalk.bold('Analyzing git history for patterns...\n'));
+
+    const gitResult = analyzeGitHistory(projectPath, {
+      commits: this.commits ? parseInt(this.commits) : 100,
+    });
+
+    console.log(`  Commits analyzed: ${gitResult.commitCount}`);
+    console.log(`  Languages: ${gitResult.languages.join(', ') || 'N/A'}`);
+    console.log(`  Frameworks: ${gitResult.frameworks.join(', ') || 'N/A'}`);
+    console.log();
+
+    if (gitResult.patterns.length === 0) {
+      console.log(chalk.yellow('No learnable patterns found.'));
+      return 0;
+    }
+
+    console.log(chalk.bold(`Extracted ${gitResult.patterns.length} patterns:\n`));
+
+    for (const pattern of gitResult.patterns.slice(0, 10)) {
+      const confidence = chalk.blue(`${(pattern.confidence * 100).toFixed(0)}%`);
+      console.log(`  ${chalk.dim('○')} ${pattern.title} [${pattern.category}] ${confidence}`);
+      addPattern(pattern);
+    }
+
+    if (gitResult.patterns.length > 10) {
+      console.log(chalk.dim(`  ... and ${gitResult.patterns.length - 10} more saved`));
+      for (const pattern of gitResult.patterns.slice(10)) {
+        addPattern(pattern);
+      }
+    }
+
+    console.log();
+    console.log(chalk.green(`✓ Saved ${gitResult.patterns.length} patterns`));
+    console.log(chalk.dim('View with: skillkit learn --show'));
+    console.log(chalk.dim('Approve with: skillkit pattern approve <id>'));
+
+    return 0;
   }
 
   private async runAnalysis(projectPath: string): Promise<number> {
