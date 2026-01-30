@@ -140,6 +140,14 @@ export class PeerIdentity {
     return bytesToHex(this.keypair.publicKey);
   }
 
+  get privateKey(): Uint8Array {
+    return this.keypair.privateKey;
+  }
+
+  get privateKeyHex(): string {
+    return bytesToHex(this.keypair.privateKey);
+  }
+
   get fingerprint(): string {
     return this.keypair.fingerprint;
   }

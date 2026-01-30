@@ -1,11 +1,12 @@
-import { SignJWT, jwtVerify } from 'jose';
-import { randomBytes } from 'node:crypto';
+import { SignJWT, jwtVerify, importPKCS8, importSPKI, type KeyLike } from 'jose';
+import { randomBytes, createPrivateKey, createPublicKey } from 'node:crypto';
 import { PeerIdentity } from '../crypto/identity.js';
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
 
 export interface AuthToken {
   hostId: string;
   fingerprint: string;
+  publicKey: string;
   capabilities: string[];
   iat: number;
   exp: number;
@@ -37,13 +38,38 @@ const CHALLENGE_EXPIRY_MS = 30 * 1000;
 
 export class AuthManager {
   private identity: PeerIdentity;
-  private jwtSecret: Uint8Array;
   private pendingChallenges: Map<string, { expected: string; expires: number }> =
     new Map();
 
-  constructor(identity: PeerIdentity, jwtSecret?: Uint8Array) {
+  constructor(identity: PeerIdentity) {
     this.identity = identity;
-    this.jwtSecret = jwtSecret || randomBytes(32);
+  }
+
+  private async getSigningKey(): Promise<KeyLike> {
+    const privateKeyObj = createPrivateKey({
+      key: Buffer.concat([
+        Buffer.from('302e020100300506032b657004220420', 'hex'),
+        Buffer.from(this.identity.privateKey),
+      ]),
+      format: 'der',
+      type: 'pkcs8',
+    });
+    const pem = privateKeyObj.export({ type: 'pkcs8', format: 'pem' }) as string;
+    return importPKCS8(pem, 'EdDSA');
+  }
+
+  private async getVerifyingKey(publicKeyHex: string): Promise<KeyLike> {
+    const publicKeyBytes = hexToBytes(publicKeyHex);
+    const publicKeyObj = createPublicKey({
+      key: Buffer.concat([
+        Buffer.from('302a300506032b6570032100', 'hex'),
+        Buffer.from(publicKeyBytes),
+      ]),
+      format: 'der',
+      type: 'spki',
+    });
+    const pem = publicKeyObj.export({ type: 'spki', format: 'pem' }) as string;
+    return importSPKI(pem, 'EdDSA');
   }
 
   async createToken(
@@ -52,33 +78,53 @@ export class AuthManager {
     ttlSeconds: number = DEFAULT_TOKEN_TTL
   ): Promise<string> {
     const now = Math.floor(Date.now() / 1000);
+    const signingKey = await this.getSigningKey();
 
     const token = await new SignJWT({
       hostId,
       fingerprint: this.identity.fingerprint,
+      publicKey: this.identity.publicKeyHex,
       capabilities,
     })
-      .setProtectedHeader({ alg: 'HS256' })
+      .setProtectedHeader({ alg: 'EdDSA' })
       .setIssuedAt(now)
       .setExpirationTime(now + ttlSeconds)
       .setIssuer('skillkit-mesh')
-      .sign(this.jwtSecret);
+      .sign(signingKey);
 
     return token;
   }
 
   async verifyToken(token: string): Promise<AuthToken | null> {
     try {
-      const { payload } = await jwtVerify(token, this.jwtSecret, {
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        return null;
+      }
+
+      const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
+
+      if (!payload.publicKey) {
+        return null;
+      }
+
+      const computedFingerprint = PeerIdentity.computeFingerprint(hexToBytes(payload.publicKey));
+      if (computedFingerprint !== payload.fingerprint) {
+        return null;
+      }
+
+      const verifyingKey = await this.getVerifyingKey(payload.publicKey);
+      const { payload: verified } = await jwtVerify(token, verifyingKey, {
         issuer: 'skillkit-mesh',
       });
 
       return {
-        hostId: payload.hostId as string,
-        fingerprint: payload.fingerprint as string,
-        capabilities: (payload.capabilities as string[]) || [],
-        iat: payload.iat as number,
-        exp: payload.exp as number,
+        hostId: verified.hostId as string,
+        fingerprint: verified.fingerprint as string,
+        publicKey: verified.publicKey as string,
+        capabilities: (verified.capabilities as string[]) || [],
+        iat: verified.iat as number,
+        exp: verified.exp as number,
       };
     } catch {
       return null;
