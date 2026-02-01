@@ -43,29 +43,45 @@ export function Plan(props: PlanProps) {
 
   const loadData = async () => {
     setState((s) => ({ ...s, loading: true, error: null }));
-    const result = await loadPlansList();
-    setState(result);
+    try {
+      const result = await loadPlansList();
+      setState(result);
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        loading: false,
+        error: err instanceof Error ? err.message : 'Failed to load plans',
+      }));
+    }
   };
 
   const handleValidate = async () => {
     const plans = state().plans;
-    if (plans.length === 0) return;
+    if (plans.length === 0 || validating()) return;
 
     const planItem = plans[selectedIndex()];
     if (!planItem) return;
 
     setValidating(true);
-    const plan = await loadPlan(planItem.path);
-    if (plan) {
-      const validation = await validatePlan(plan);
-      setState((s) => ({ ...s, current: plan, validation }));
+    try {
+      const plan = await loadPlan(planItem.path);
+      if (plan) {
+        const validation = await validatePlan(plan);
+        setState((s) => ({ ...s, current: plan, validation }));
+      }
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        error: err instanceof Error ? err.message : 'Validation failed',
+      }));
+    } finally {
+      setValidating(false);
     }
-    setValidating(false);
   };
 
   const handleExecute = async (dryRun: boolean = false) => {
     const plans = state().plans;
-    if (plans.length === 0) return;
+    if (plans.length === 0 || executing()) return;
 
     const planItem = plans[selectedIndex()];
     if (!planItem) return;
@@ -73,25 +89,33 @@ export function Plan(props: PlanProps) {
     setExecuting(true);
     setExecutionProgress(0);
 
-    const plan = await loadPlan(planItem.path);
-    if (!plan) {
-      setExecuting(false);
-      return;
-    }
-
-    const executeFn = dryRun ? executePlanDryRun : executePlan;
-    let completedCount = 0;
-    const totalTasks = plan.tasks.length;
-    const result = await executeFn(plan, undefined, (event) => {
-      if (event === 'plan:task_completed') {
-        completedCount++;
-        setExecutionProgress((completedCount / totalTasks) * 100);
+    try {
+      const plan = await loadPlan(planItem.path);
+      if (!plan) {
+        setExecuting(false);
+        return;
       }
-    });
 
-    setState((s) => ({ ...s, execution: result }));
-    setExecuting(false);
-    loadData();
+      const executeFn = dryRun ? executePlanDryRun : executePlan;
+      let completedCount = 0;
+      const totalTasks = plan.tasks?.length || 0;
+      const result = await executeFn(plan, undefined, (event) => {
+        if (event === 'plan:task_completed') {
+          completedCount++;
+          setExecutionProgress(totalTasks > 0 ? (completedCount / totalTasks) * 100 : 100);
+        }
+      });
+
+      setState((s) => ({ ...s, execution: result }));
+      loadData();
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        error: err instanceof Error ? err.message : 'Execution failed',
+      }));
+    } finally {
+      setExecuting(false);
+    }
   };
 
   const handleKeyNav = (delta: number) => {

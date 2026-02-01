@@ -41,53 +41,85 @@ export function Methodology(props: MethodologyProps) {
 
   const loadData = async () => {
     setState((s) => ({ ...s, loading: true, error: null }));
-    const result = await loadMethodologies();
-    setState(result);
+    try {
+      const result = await loadMethodologies();
+      setState(result);
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        loading: false,
+        error: err instanceof Error ? err.message : 'Failed to load methodologies',
+      }));
+    }
   };
 
   const handleInstall = async () => {
     const packs = state().packs;
-    if (packs.length === 0) return;
+    if (packs.length === 0 || installing()) return;
 
     const pack = packs[selectedIndex()];
     if (!pack || pack.installed) return;
 
     setInstalling(true);
-    const result = await installMethodologyPack(pack.name);
-    if (result) {
-      await loadData();
+    try {
+      const result = await installMethodologyPack(pack.name);
+      if (result) {
+        await loadData();
+      }
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        error: err instanceof Error ? err.message : 'Failed to install pack',
+      }));
+    } finally {
+      setInstalling(false);
     }
-    setInstalling(false);
   };
 
   const handleUninstall = async () => {
     const packs = state().packs;
-    if (packs.length === 0) return;
+    if (packs.length === 0 || installing()) return;
 
     const pack = packs[selectedIndex()];
     if (!pack || !pack.installed) return;
 
     setInstalling(true);
-    const success = await uninstallMethodologyPack(pack.name);
-    if (success) {
-      await loadData();
+    try {
+      const success = await uninstallMethodologyPack(pack.name);
+      if (success) {
+        await loadData();
+      }
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        error: err instanceof Error ? err.message : 'Failed to uninstall pack',
+      }));
+    } finally {
+      setInstalling(false);
     }
-    setInstalling(false);
   };
 
   const handleSync = async () => {
     const packs = state().packs;
-    if (packs.length === 0) return;
+    if (packs.length === 0 || syncing()) return;
 
     const pack = packs[selectedIndex()];
     if (!pack || !pack.installed) return;
 
     setSyncing(true);
-    const result = await syncMethodologyPack(pack.name);
-    if (result) {
-      await loadData();
+    try {
+      const result = await syncMethodologyPack(pack.name);
+      if (result) {
+        await loadData();
+      }
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        error: err instanceof Error ? err.message : 'Failed to sync pack',
+      }));
+    } finally {
+      setSyncing(false);
     }
-    setSyncing(false);
   };
 
   const handleKeyNav = (delta: number) => {

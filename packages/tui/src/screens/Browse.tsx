@@ -132,7 +132,12 @@ export function Browse(props: BrowseProps) {
   const handleOpenRepo = () => {
     const repo = filteredRepos()[selectedIndex()];
     if (repo) {
-      loadRepoSkills(selectedIndex());
+      const actualIndex = repos().findIndex(
+        (r) => r.source === repo.source && r.name === repo.name
+      );
+      if (actualIndex !== -1) {
+        loadRepoSkills(actualIndex);
+      }
       setShowSkills(true);
     }
   };

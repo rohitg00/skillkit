@@ -104,25 +104,43 @@ export function Translate(props: TranslateProps) {
   const handlePreview = () => {
     const skill = selectedSkill();
     const target = targetAgent();
-    if (!skill || !target) return;
+    if (!skill || !target || !skill.path) {
+      setError('No skill path available for preview');
+      return;
+    }
 
-    const content = readSkillContent(skill.path);
-    if (!content) return;
+    try {
+      const content = readSkillContent(skill.path);
+      if (!content) {
+        setError('Could not read skill content');
+        return;
+      }
 
-    const previewResult = previewTranslation(content, target);
-    setPreview(previewResult);
+      const previewResult = previewTranslation(content, target);
+      setPreview(previewResult);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Preview failed');
+    }
   };
 
   const handleTranslate = async () => {
     const skill = selectedSkill();
     const target = targetAgent();
-    if (!skill || !target) return;
+    if (!skill || !target || !skill.path) {
+      setError('No skill path available for translation');
+      return;
+    }
 
     const content = readSkillContent(skill.path);
-    if (!content) return;
+    if (!content) {
+      setError('Could not read skill content');
+      return;
+    }
 
     setTranslating(true);
     setResult(null);
+    setError(null);
 
     try {
       const translationResult = translate(content, target);
@@ -133,9 +151,9 @@ export function Translate(props: TranslateProps) {
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Translation failed');
+    } finally {
+      setTranslating(false);
     }
-
-    setTranslating(false);
   };
 
   const handleKeyNav = (delta: number) => {

@@ -1,4 +1,5 @@
-import { createSignal, createEffect, onCleanup, Show, For } from 'solid-js';
+import { createSignal, createEffect, Show, For } from 'solid-js';
+import { useKeyboard } from '@opentui/solid';
 import { type Screen } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
 import { Header } from '../components/Header.js';
@@ -33,37 +34,66 @@ export function Context(props: ContextProps) {
 
   const sections = ['Overview', 'Languages', 'Frameworks', 'Libraries', 'Patterns'];
 
+  const moveSection = (delta: number) => {
+    setSelectedSection((i) =>
+      Math.max(0, Math.min(sections.length - 1, i + delta))
+    );
+  };
+
+  useKeyboard((key: { name?: string }) => {
+    if (key.name === 'h' || key.name === 'left') moveSection(-1);
+    else if (key.name === 'l' || key.name === 'right') moveSection(1);
+    else if (key.name === 'r') handleRefresh();
+    else if (key.name === 'e') handleExport();
+    else if (key.name === 'escape') props.onNavigate('home');
+  });
+
   createEffect(() => {
     loadData();
   });
 
   const loadData = async () => {
     setState((s) => ({ ...s, loading: true, error: null }));
-
-    const result = await loadProjectContext();
-    setState(result);
-
-    if (!result.context) {
-      const analyzed = await analyzeProjectContext();
-      setState(analyzed);
+    try {
+      let result = await loadProjectContext();
+      if (!result.context) {
+        result = await analyzeProjectContext();
+      }
+      setState(result);
+      setTags(await getStackTags());
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        loading: false,
+        analyzing: false,
+        error: err instanceof Error ? err.message : 'Failed to load context',
+      }));
     }
-
-    const stackTags = await getStackTags();
-    setTags(stackTags);
   };
 
   const handleRefresh = async () => {
-    setState((s) => ({ ...s, analyzing: true }));
-    const result = await refreshContext();
-    setState(result);
-    const stackTags = await getStackTags();
-    setTags(stackTags);
+    setState((s) => ({ ...s, analyzing: true, error: null }));
+    try {
+      const result = await refreshContext();
+      setState(result);
+      setTags(await getStackTags());
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        analyzing: false,
+        error: err instanceof Error ? err.message : 'Failed to refresh context',
+      }));
+    }
   };
 
   const handleExport = async () => {
-    const exported = await exportContext(undefined, 'json');
-    if (exported) {
-      console.log('Context exported');
+    try {
+      await exportContext(undefined, 'json');
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        error: err instanceof Error ? err.message : 'Failed to export context',
+      }));
     }
   };
 

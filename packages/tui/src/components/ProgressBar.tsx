@@ -10,13 +10,14 @@ interface ProgressBarProps {
 }
 
 export function ProgressBar(props: ProgressBarProps) {
-  const width = () => props.width ?? 20;
+  const width = () => Math.max(1, Math.round(props.width ?? 20));
+  const safeProgress = () => (Number.isFinite(props.progress) ? props.progress : 0);
   const showPercentage = () => props.showPercentage ?? true;
   const color = () => props.color ?? 'accent';
 
-  const clampedProgress = () => Math.max(0, Math.min(100, props.progress));
+  const clampedProgress = () => Math.max(0, Math.min(100, safeProgress()));
   const filledWidth = () => Math.round((clampedProgress() / 100) * width());
-  const emptyWidth = () => width() - filledWidth();
+  const emptyWidth = () => Math.max(0, width() - filledWidth());
 
   const filled = () => symbols.progressFilled.repeat(filledWidth());
   const empty = () => symbols.progressEmpty.repeat(emptyWidth());

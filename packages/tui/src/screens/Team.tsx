@@ -44,17 +44,34 @@ export function Team(props: TeamProps) {
 
   const loadData = async () => {
     setState((s) => ({ ...s, loading: true, error: null }));
-    const result = await loadTeamConfig();
-    setState(result);
+    try {
+      const result = await loadTeamConfig();
+      setState(result);
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        loading: false,
+        error: err instanceof Error ? err.message : 'Failed to load team',
+      }));
+    }
   };
 
   const handleInitialize = async () => {
+    if (initializing()) return;
     setInitializing(true);
-    const success = await initializeTeam('My Team');
-    if (success) {
-      await loadData();
+    try {
+      const success = await initializeTeam('My Team');
+      if (success) {
+        await loadData();
+      }
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        error: err instanceof Error ? err.message : 'Failed to initialize team',
+      }));
+    } finally {
+      setInitializing(false);
     }
-    setInitializing(false);
   };
 
   const handleKeyNav = (delta: number) => {
