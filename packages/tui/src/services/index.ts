@@ -11,8 +11,36 @@ export * from './team.service.js';
 export * from './methodology.service.js';
 export * from './recommend.service.js';
 export * from './context.service.js';
-export * from './executor.service.js';
-export * from './translator.service.js';
+
+export {
+  ExecutorServiceState,
+  AgentAvailability,
+  getAgentAvailability,
+  listAvailableAgents,
+  executeSkill,
+  executeSkillWithAgent,
+  formatSkillPrompt,
+  getExecutionInstructions,
+  executorService,
+} from './executor.service.js';
+
+export type { AgentType } from './executor.service.js';
+
+export {
+  TranslationDisplay,
+  TranslationOptions,
+  CanonicalSkill,
+  TranslatorServiceState,
+  getSupportedAgents,
+  checkCanTranslate,
+  translate,
+  translateFromFile,
+  parseSkill,
+  detectFormat,
+  previewTranslation,
+  getAgentFormatInfo,
+  translatorService,
+} from './translator.service.js';
 
 export { memoryService } from './memory.service.js';
 export { workflowService } from './workflow.service.js';
@@ -22,5 +50,3 @@ export { teamService } from './team.service.js';
 export { methodologyService } from './methodology.service.js';
 export { recommendService } from './recommend.service.js';
 export { contextService } from './context.service.js';
-export { executorService } from './executor.service.js';
-export { translatorService } from './translator.service.js';

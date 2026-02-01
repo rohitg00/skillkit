@@ -1,5 +1,4 @@
-import { Show, For } from 'solid-js';
-import { useSidebar } from '../context/sidebar.js';
+import { Show, For, createSignal } from 'solid-js';
 import { terminalColors } from '../theme/colors.js';
 import { symbols, AGENT_LOGOS } from '../theme/symbols.js';
 
@@ -11,7 +10,15 @@ interface RightSidebarProps {
 const TOP_AGENTS = ['claude-code', 'cursor', 'codex'] as const;
 
 export function RightSidebar(props: RightSidebarProps) {
-  const { sections, toggleSection } = useSidebar();
+  const [sections, setSections] = createSignal({
+    context: true,
+    agents: true,
+    tasks: false,
+  });
+
+  const toggleSection = (key: keyof ReturnType<typeof sections>) => {
+    setSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   return (
     <box
