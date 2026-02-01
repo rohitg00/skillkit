@@ -52,6 +52,7 @@ import {
   AgentListCommand,
   AgentShowCommand,
   AgentCreateCommand,
+  AgentFromSkillCommand,
   AgentTranslateCommand,
   AgentSyncCommand,
   AgentValidateCommand,
@@ -153,6 +154,7 @@ cli.register(AgentCommand);
 cli.register(AgentListCommand);
 cli.register(AgentShowCommand);
 cli.register(AgentCreateCommand);
+cli.register(AgentFromSkillCommand);
 cli.register(AgentTranslateCommand);
 cli.register(AgentSyncCommand);
 cli.register(AgentValidateCommand);

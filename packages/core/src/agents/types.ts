@@ -64,7 +64,12 @@ export const AgentFrontmatter = z.object({
   /** Allowed tools for this agent */
   allowedTools: z.union([
     z.array(z.string()),
-    z.string(), // YAML-style list in frontmatter
+    z.string(),
+  ]).optional(),
+  /** Tools (Claude Code native format alias for allowedTools) */
+  tools: z.union([
+    z.array(z.string()),
+    z.string(),
   ]).optional(),
   /** Agent-scoped hooks */
   hooks: z.array(AgentHook).optional(),

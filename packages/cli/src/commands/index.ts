@@ -49,6 +49,7 @@ export {
   AgentListCommand,
   AgentShowCommand,
   AgentCreateCommand,
+  AgentFromSkillCommand,
   AgentTranslateCommand,
   AgentSyncCommand,
   AgentValidateCommand,

@@ -17,8 +17,14 @@ import {
   validateAgent,
   translateAgent,
   getAgentTargetDirectory,
+  discoverSkills,
+  readSkillContent,
+  generateSubagentFromSkill,
   type CustomAgent,
   type AgentType,
+  type Skill,
+  type AgentPermissionMode,
+  type SkillToSubagentOptions,
 } from '@skillkit/core';
 import {
   getBundledAgents,
@@ -43,17 +49,19 @@ export class AgentCommand extends Command {
       that can be invoked with @mentions or the --agent flag.
 
       Sub-commands:
-        agent list      - List all installed agents
-        agent show      - Show agent details
-        agent create    - Create a new agent
-        agent translate - Translate agents between formats
-        agent sync      - Sync agents to target AI agent
-        agent validate  - Validate agent definitions
+        agent list       - List all installed agents
+        agent show       - Show agent details
+        agent create     - Create a new agent
+        agent from-skill - Convert a skill to a subagent
+        agent translate  - Translate agents between formats
+        agent sync       - Sync agents to target AI agent
+        agent validate   - Validate agent definitions
     `,
     examples: [
       ['List all agents', '$0 agent list'],
       ['Show agent details', '$0 agent show architect'],
       ['Create new agent', '$0 agent create security-reviewer'],
+      ['Convert skill to subagent', '$0 agent from-skill code-simplifier'],
       ['Translate to Cursor format', '$0 agent translate --to cursor'],
       ['Sync agents', '$0 agent sync --agent claude-code'],
     ],
@@ -64,6 +72,7 @@ export class AgentCommand extends Command {
     console.log('  agent list              List all installed agents');
     console.log('  agent show <name>       Show agent details');
     console.log('  agent create <name>     Create a new agent');
+    console.log('  agent from-skill <name> Convert a skill to a subagent');
     console.log('  agent translate         Translate agents between formats');
     console.log('  agent sync              Sync agents to target AI agent');
     console.log('  agent validate [path]   Validate agent definitions');
@@ -825,6 +834,139 @@ export class AgentAvailableCommand extends Command {
     if (!this.installed) {
       console.log(chalk.dim('Install with: skillkit agent install <name>'));
       console.log(chalk.dim('Install all: skillkit agent install --all'));
+    }
+
+    return 0;
+  }
+}
+
+export class AgentFromSkillCommand extends Command {
+  static override paths = [['agent', 'from-skill']];
+
+  static override usage = Command.Usage({
+    description: 'Convert a skill into a Claude Code subagent',
+    details: `
+      Converts a SkillKit skill into a Claude Code native subagent format.
+      The generated .md file can be used with @mentions in Claude Code.
+
+      By default, the subagent references the skill (skills: [skill-name]).
+      Use --inline to embed the full skill content in the system prompt.
+    `,
+    examples: [
+      ['Convert skill to subagent', '$0 agent from-skill code-simplifier'],
+      ['Create global subagent', '$0 agent from-skill code-simplifier --global'],
+      ['Embed skill content inline', '$0 agent from-skill code-simplifier --inline'],
+      ['Set model for subagent', '$0 agent from-skill code-simplifier --model opus'],
+      ['Preview without writing', '$0 agent from-skill code-simplifier --dry-run'],
+    ],
+  });
+
+  skillName = Option.String({ required: true });
+
+  inline = Option.Boolean('--inline,-i', false, {
+    description: 'Embed full skill content in system prompt',
+  });
+
+  model = Option.String('--model,-m', {
+    description: 'Model to use (sonnet, opus, haiku)',
+  });
+
+  permission = Option.String('--permission,-p', {
+    description: 'Permission mode (default, plan, auto-edit, full-auto)',
+  });
+
+  global = Option.Boolean('--global,-g', false, {
+    description: 'Create in ~/.claude/agents/ instead of .claude/agents/',
+  });
+
+  output = Option.String('--output,-o', {
+    description: 'Custom output filename (without .md)',
+  });
+
+  dryRun = Option.Boolean('--dry-run,-n', false, {
+    description: 'Preview without writing files',
+  });
+
+  async execute(): Promise<number> {
+    const skills = discoverSkills(process.cwd());
+    const skill = skills.find((s: Skill) => s.name === this.skillName);
+
+    if (!skill) {
+      console.log(chalk.red(`Skill not found: ${this.skillName}`));
+      console.log(chalk.dim('Available skills:'));
+      for (const s of skills.slice(0, 10)) {
+        console.log(chalk.dim(`  - ${s.name}`));
+      }
+      if (skills.length > 10) {
+        console.log(chalk.dim(`  ... and ${skills.length - 10} more`));
+      }
+      return 1;
+    }
+
+    const skillContent = readSkillContent(skill.path);
+    if (!skillContent) {
+      console.log(chalk.red(`Could not read skill content: ${skill.path}`));
+      return 1;
+    }
+
+    const options: SkillToSubagentOptions = {
+      inline: this.inline,
+    };
+
+    if (this.model) {
+      const validModels = ['sonnet', 'opus', 'haiku', 'inherit'];
+      if (!validModels.includes(this.model)) {
+        console.log(chalk.red(`Invalid model: ${this.model}`));
+        console.log(chalk.dim(`Valid options: ${validModels.join(', ')}`));
+        return 1;
+      }
+      options.model = this.model as 'sonnet' | 'opus' | 'haiku' | 'inherit';
+    }
+
+    if (this.permission) {
+      const validModes = ['default', 'plan', 'auto-edit', 'full-auto', 'bypassPermissions'];
+      if (!validModes.includes(this.permission)) {
+        console.log(chalk.red(`Invalid permission mode: ${this.permission}`));
+        console.log(chalk.dim(`Valid options: ${validModes.join(', ')}`));
+        return 1;
+      }
+      options.permissionMode = this.permission as AgentPermissionMode;
+    }
+
+    const content = generateSubagentFromSkill(skill, skillContent, options);
+
+    const filename = this.output ? `${this.output}.md` : `${skill.name}.md`;
+    const targetDir = this.global
+      ? join(homedir(), '.claude', 'agents')
+      : join(process.cwd(), '.claude', 'agents');
+    const outputPath = join(targetDir, filename);
+
+    if (this.dryRun) {
+      console.log(chalk.cyan('Preview (dry run):\n'));
+      console.log(chalk.dim(`Would write to: ${outputPath}`));
+      console.log(chalk.dim('─'.repeat(50)));
+      console.log(content);
+      console.log(chalk.dim('─'.repeat(50)));
+      return 0;
+    }
+
+    if (!existsSync(targetDir)) {
+      mkdirSync(targetDir, { recursive: true });
+    }
+
+    if (existsSync(outputPath)) {
+      console.log(chalk.yellow(`Overwriting existing file: ${outputPath}`));
+    }
+
+    writeFileSync(outputPath, content);
+
+    console.log(chalk.green(`Created subagent: ${outputPath}`));
+    console.log();
+    console.log(chalk.dim(`Invoke with: @${skill.name}`));
+    if (!this.inline) {
+      console.log(chalk.dim(`Skills referenced: ${skill.name}`));
+    } else {
+      console.log(chalk.dim('Skill content embedded inline'));
     }
 
     return 0;

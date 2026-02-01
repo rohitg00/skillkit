@@ -60,3 +60,11 @@ export {
   getAgentTargetDirectory,
   isAgentCompatible,
 } from './translator.js';
+
+// Skill Converter
+export {
+  skillToSubagent,
+  generateSubagentFromSkill,
+  loadAndConvertSkill,
+  type SkillToSubagentOptions,
+} from './skill-converter.js';
