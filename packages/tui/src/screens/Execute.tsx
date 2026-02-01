@@ -1,4 +1,4 @@
-import { createSignal, createEffect, Show, For } from 'solid-js';
+import { createSignal, createEffect, createMemo, Show, For } from 'solid-js';
 import { useKeyboard } from '@opentui/solid';
 import { type Screen, loadSkillsWithDetails, type SkillWithDetails } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
@@ -135,6 +135,28 @@ export function Execute(props: ExecuteProps) {
     return list[selectedAgentIndex()];
   };
 
+  const MAX_VISIBLE = 8;
+
+  const skillsWindow = createMemo(() => {
+    const list = skills();
+    const selected = selectedSkillIndex();
+    const total = list.length;
+    if (total <= MAX_VISIBLE) return { start: 0, items: list };
+    let start = Math.max(0, selected - Math.floor(MAX_VISIBLE / 2));
+    start = Math.min(start, total - MAX_VISIBLE);
+    return { start, items: list.slice(start, start + MAX_VISIBLE) };
+  });
+
+  const agentsWindow = createMemo(() => {
+    const list = agents();
+    const selected = selectedAgentIndex();
+    const total = list.length;
+    if (total <= MAX_VISIBLE) return { start: 0, items: list };
+    let start = Math.max(0, selected - Math.floor(MAX_VISIBLE / 2));
+    start = Math.min(start, total - MAX_VISIBLE);
+    return { start, items: list.slice(start, start + MAX_VISIBLE) };
+  });
+
   return (
     <box flexDirection="column" paddingLeft={1}>
       <Header
@@ -180,24 +202,28 @@ export function Execute(props: ExecuteProps) {
                 />
               }
             >
-              <For each={skills().slice(0, 8)}>
+              <Show when={skillsWindow().start > 0}>
+                <text fg={terminalColors.textMuted}>  ▲ {skillsWindow().start} more</text>
+              </Show>
+              <For each={skillsWindow().items}>
                 {(skill, idx) => {
-                  const selected = () =>
-                    focusedPane() === 'skills' && idx() === selectedSkillIndex();
+                  const originalIndex = () => skillsWindow().start + idx();
+                  const isSelected = () =>
+                    focusedPane() === 'skills' && originalIndex() === selectedSkillIndex();
                   return (
                     <box marginBottom={1}>
                       <text
-                        fg={selected() ? terminalColors.accent : terminalColors.textSecondary}
+                        fg={isSelected() ? terminalColors.accent : terminalColors.textSecondary}
                       >
-                        {selected() ? '▸ ' : '  '}
+                        {isSelected() ? '▸ ' : '  '}
                         {skill.name}
                       </text>
                     </box>
                   );
                 }}
               </For>
-              <Show when={skills().length > 8}>
-                <text fg={terminalColors.textMuted}>+{skills().length - 8} more</text>
+              <Show when={skillsWindow().start + MAX_VISIBLE < skills().length}>
+                <text fg={terminalColors.textMuted}>  ▼ {skills().length - skillsWindow().start - MAX_VISIBLE} more</text>
               </Show>
             </Show>
           </box>
@@ -227,23 +253,27 @@ export function Execute(props: ExecuteProps) {
                 />
               }
             >
-              <For each={agents().slice(0, 8)}>
+              <Show when={agentsWindow().start > 0}>
+                <text fg={terminalColors.textMuted}>  ▲ {agentsWindow().start} more</text>
+              </Show>
+              <For each={agentsWindow().items}>
                 {(agent, idx) => {
-                  const selected = () =>
-                    focusedPane() === 'agents' && idx() === selectedAgentIndex();
+                  const originalIndex = () => agentsWindow().start + idx();
+                  const isSelected = () =>
+                    focusedPane() === 'agents' && originalIndex() === selectedAgentIndex();
                   const available = agent.available;
                   return (
                     <box flexDirection="row" marginBottom={1}>
                       <text
                         fg={
-                          selected()
+                          isSelected()
                             ? terminalColors.accent
                             : available
                               ? terminalColors.textSecondary
                               : terminalColors.textMuted
                         }
                       >
-                        {selected() ? '▸ ' : '  '}
+                        {isSelected() ? '▸ ' : '  '}
                         {agent.agent}
                       </text>
                       <text fg={available ? terminalColors.success : terminalColors.error}>
@@ -254,6 +284,9 @@ export function Execute(props: ExecuteProps) {
                   );
                 }}
               </For>
+              <Show when={agentsWindow().start + MAX_VISIBLE < agents().length}>
+                <text fg={terminalColors.textMuted}>  ▼ {agents().length - agentsWindow().start - MAX_VISIBLE} more</text>
+              </Show>
             </Show>
           </box>
         </box>

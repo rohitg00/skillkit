@@ -90,15 +90,25 @@ export function Marketplace(props: MarketplaceProps) {
   });
 
   const maxVisible = () => Math.max(4, Math.floor((rows() - 14) / 2));
-  const visibleSkills = () => filteredSkills().slice(0, maxVisible());
+
+  const skillsWindow = createMemo(() => {
+    const list = filteredSkills();
+    const selected = selectedIndex();
+    const visible = maxVisible();
+    const total = list.length;
+    if (total <= visible) return { start: 0, items: list };
+    let start = Math.max(0, selected - Math.floor(visible / 2));
+    start = Math.min(start, total - visible);
+    return { start, items: list.slice(start, start + visible) };
+  });
 
   const handleKeyNav = (delta: number) => {
-    const max = visibleSkills().length - 1;
+    const max = filteredSkills().length - 1;
     setSelectedIndex((prev) => Math.max(0, Math.min(prev + delta, max)));
   };
 
   const handleInstall = () => {
-    const skill = visibleSkills()[selectedIndex()];
+    const skill = filteredSkills()[selectedIndex()];
     if (skill) {
       props.onNavigate('installed');
     }
@@ -131,7 +141,7 @@ export function Marketplace(props: MarketplaceProps) {
   });
 
   const selectedSkill = () => {
-    const skills = visibleSkills();
+    const skills = filteredSkills();
     if (skills.length === 0) return null;
     return skills[selectedIndex()];
   };
@@ -227,20 +237,24 @@ export function Marketplace(props: MarketplaceProps) {
           </text>
           <text> </text>
 
-          <For each={visibleSkills()}>
+          <Show when={skillsWindow().start > 0}>
+            <text fg={terminalColors.textMuted}>  ▲ {skillsWindow().start} more</text>
+          </Show>
+          <For each={skillsWindow().items}>
             {(skill, idx) => {
-              const selected = () => idx() === selectedIndex();
+              const originalIndex = () => skillsWindow().start + idx();
+              const isSelected = () => originalIndex() === selectedIndex();
               return (
                 <box flexDirection="column" marginBottom={1}>
                   <box flexDirection="row">
                     <text
-                      fg={selected() ? terminalColors.accent : terminalColors.text}
+                      fg={isSelected() ? terminalColors.accent : terminalColors.text}
                       width={3}
                     >
-                      {selected() ? '▸ ' : '  '}
+                      {isSelected() ? '▸ ' : '  '}
                     </text>
                     <text
-                      fg={selected() ? terminalColors.accent : terminalColors.text}
+                      fg={isSelected() ? terminalColors.accent : terminalColors.text}
                       width={25}
                     >
                       {skill.name}
@@ -260,9 +274,9 @@ export function Marketplace(props: MarketplaceProps) {
             }}
           </For>
 
-          <Show when={filteredSkills().length > maxVisible()}>
+          <Show when={skillsWindow().start + maxVisible() < filteredSkills().length}>
             <text fg={terminalColors.textMuted}>
-              +{filteredSkills().length - maxVisible()} more
+              ▼ {filteredSkills().length - skillsWindow().start - maxVisible()} more
             </text>
           </Show>
         </Show>

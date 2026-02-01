@@ -1,4 +1,4 @@
-import { createSignal, createEffect, Show, For } from 'solid-js';
+import { createSignal, createEffect, createMemo, Show, For } from 'solid-js';
 import { useKeyboard } from '@opentui/solid';
 import { type Screen } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
@@ -122,7 +122,17 @@ export function Recommend(props: RecommendProps) {
   };
 
   const maxVisible = () => Math.max(4, Math.floor((rows() - 12) / 3));
-  const visibleRecs = () => state().recommendations.slice(0, maxVisible());
+
+  const recsWindow = createMemo(() => {
+    const list = state().recommendations;
+    const selected = selectedIndex();
+    const visible = maxVisible();
+    const total = list.length;
+    if (total <= visible) return { start: 0, items: list };
+    let start = Math.max(0, selected - Math.floor(visible / 2));
+    start = Math.min(start, total - visible);
+    return { start, items: list.slice(start, start + visible) };
+  });
 
   return (
     <box flexDirection="column" paddingLeft={1}>
@@ -190,20 +200,24 @@ export function Recommend(props: RecommendProps) {
               </text>
               <text> </text>
 
-              <For each={visibleRecs()}>
+              <Show when={recsWindow().start > 0}>
+                <text fg={terminalColors.textMuted}>  ▲ {recsWindow().start} more</text>
+              </Show>
+              <For each={recsWindow().items}>
                 {(rec, idx) => {
-                  const selected = () => idx() === selectedIndex();
+                  const originalIndex = () => recsWindow().start + idx();
+                  const isSelected = () => originalIndex() === selectedIndex();
                   return (
                     <box flexDirection="column" marginBottom={1}>
                       <box flexDirection="row">
                         <text
-                          fg={selected() ? terminalColors.accent : terminalColors.text}
+                          fg={isSelected() ? terminalColors.accent : terminalColors.text}
                           width={3}
                         >
-                          {selected() ? '▸ ' : '  '}
+                          {isSelected() ? '▸ ' : '  '}
                         </text>
                         <text
-                          fg={selected() ? terminalColors.accent : terminalColors.text}
+                          fg={isSelected() ? terminalColors.accent : terminalColors.text}
                           width={25}
                         >
                           {rec.name}
@@ -231,9 +245,9 @@ export function Recommend(props: RecommendProps) {
                 }}
               </For>
 
-              <Show when={state().recommendations.length > maxVisible()}>
+              <Show when={recsWindow().start + maxVisible() < state().recommendations.length}>
                 <text fg={terminalColors.textMuted}>
-                  +{state().recommendations.length - maxVisible()} more
+                  ▼ {state().recommendations.length - recsWindow().start - maxVisible()} more
                 </text>
               </Show>
             </Show>
