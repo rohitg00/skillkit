@@ -91,7 +91,7 @@ export class WellKnownProvider implements GitProviderAdapter {
 
       const skills: string[] = [];
       const discoveredSkills: Array<{ name: string; dirName: string; path: string }> = [];
-      const baseSkillsUrl = foundUrl.replace('/index.json', '').replace('/skills.json', '/.well-known/skills');
+      const baseSkillsUrl = calculateBaseSkillsUrl(foundUrl);
 
       for (const skill of index.skills) {
         const skillDir = join(tempDir, skill.name);
@@ -150,6 +150,12 @@ export class WellKnownProvider implements GitProviderAdapter {
       return { success: false, error: `Failed to fetch skills: ${message}` };
     }
   }
+}
+
+export function calculateBaseSkillsUrl(foundUrl: string): string {
+  return foundUrl.endsWith('/index.json')
+    ? foundUrl.replace('/index.json', '')
+    : foundUrl.replace('/skills.json', '/skills');
 }
 
 export function generateWellKnownIndex(skills: Array<{ name: string; description?: string; files: string[] }>): WellKnownIndex {

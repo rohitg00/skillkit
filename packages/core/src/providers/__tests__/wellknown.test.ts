@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { WellKnownProvider, generateWellKnownIndex, generateWellKnownStructure } from '../wellknown.js';
+import { WellKnownProvider, generateWellKnownIndex, generateWellKnownStructure, calculateBaseSkillsUrl } from '../wellknown.js';
 import { existsSync, rmSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -63,6 +63,28 @@ describe('WellKnownProvider', () => {
     it('should have correct name', () => {
       expect(provider.name).toBe('Well-Known');
     });
+  });
+});
+
+describe('calculateBaseSkillsUrl', () => {
+  it('should handle index.json URL correctly', () => {
+    const result = calculateBaseSkillsUrl('https://example.com/.well-known/skills/index.json');
+    expect(result).toBe('https://example.com/.well-known/skills');
+  });
+
+  it('should handle skills.json URL correctly without duplicating .well-known', () => {
+    const result = calculateBaseSkillsUrl('https://example.com/.well-known/skills.json');
+    expect(result).toBe('https://example.com/.well-known/skills');
+  });
+
+  it('should handle nested paths with index.json', () => {
+    const result = calculateBaseSkillsUrl('https://cdn.example.com/v1/.well-known/skills/index.json');
+    expect(result).toBe('https://cdn.example.com/v1/.well-known/skills');
+  });
+
+  it('should handle nested paths with skills.json', () => {
+    const result = calculateBaseSkillsUrl('https://cdn.example.com/v1/.well-known/skills.json');
+    expect(result).toBe('https://cdn.example.com/v1/.well-known/skills');
   });
 });
 
