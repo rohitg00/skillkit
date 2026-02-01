@@ -41,8 +41,16 @@ export function Plugins(props: PluginsProps) {
 
   const loadData = async () => {
     setState((s) => ({ ...s, loading: true, error: null }));
-    const result = await loadPluginsList();
-    setState(result);
+    try {
+      const result = await loadPluginsList();
+      setState(result);
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        loading: false,
+        error: err instanceof Error ? err.message : 'Failed to load plugins',
+      }));
+    }
   };
 
   const handleToggle = async () => {
@@ -55,14 +63,22 @@ export function Plugins(props: PluginsProps) {
 
     setToggling(true);
 
-    if (plugin.enabled) {
-      await disablePlugin(plugin.name, manager);
-    } else {
-      await enablePlugin(plugin.name, manager);
-    }
+    try {
+      if (plugin.enabled) {
+        await disablePlugin(plugin.name, manager);
+      } else {
+        await enablePlugin(plugin.name, manager);
+      }
 
-    await loadData();
-    setToggling(false);
+      await loadData();
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        error: err instanceof Error ? err.message : 'Failed to toggle plugin',
+      }));
+    } finally {
+      setToggling(false);
+    }
   };
 
   const handleShowDetail = async () => {
@@ -73,9 +89,16 @@ export function Plugins(props: PluginsProps) {
     const plugin = plugins[selectedIndex()];
     if (!plugin) return;
 
-    const info = await getPluginInfo(plugin.name, manager);
-    setSelectedPlugin(info as Plugin | null);
-    setShowDetail(true);
+    try {
+      const info = await getPluginInfo(plugin.name, manager);
+      setSelectedPlugin(info as Plugin | null);
+      setShowDetail(true);
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        error: err instanceof Error ? err.message : 'Failed to load plugin details',
+      }));
+    }
   };
 
   const handleKeyNav = (delta: number) => {

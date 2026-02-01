@@ -43,8 +43,16 @@ export function Workflow(props: WorkflowProps) {
 
   const loadData = async () => {
     setState((s) => ({ ...s, loading: true, error: null }));
-    const result = await loadWorkflowsList();
-    setState(result);
+    try {
+      const result = await loadWorkflowsList();
+      setState(result);
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        loading: false,
+        error: err instanceof Error ? err.message : 'Failed to load workflows',
+      }));
+    }
   };
 
   const handleExecute = async () => {
@@ -65,6 +73,11 @@ export function Workflow(props: WorkflowProps) {
       if (result) {
         loadData();
       }
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        error: err instanceof Error ? err.message : 'Workflow execution failed',
+      }));
     } finally {
       setExecuting(false);
     }
