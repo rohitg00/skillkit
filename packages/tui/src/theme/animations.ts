@@ -258,6 +258,8 @@ export function springCurve(
   tension: number = 0.5,
   friction: number = 0.5
 ): number {
+  if (progress <= 0) return 0;
+  if (progress >= 1) return 1;
   const p = progress;
   const oscillation = Math.sin(p * Math.PI * (1 + tension * 4));
   const damping = Math.exp(-p * friction * 6);

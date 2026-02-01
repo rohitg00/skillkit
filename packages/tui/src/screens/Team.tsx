@@ -85,6 +85,13 @@ export function Team(props: TeamProps) {
   };
 
   useKeyboard((key: { name?: string }) => {
+    if (showDetail()) {
+      if (key.name === 'escape') {
+        setShowDetail(false);
+      }
+      return;
+    }
+
     if (key.name === 'j' || key.name === 'down') handleKeyNav(1);
     else if (key.name === 'k' || key.name === 'up') handleKeyNav(-1);
     else if (key.name === 'tab' || key.name === 'l' || key.name === 'right') {
@@ -94,10 +101,7 @@ export function Team(props: TeamProps) {
     } else if (key.name === 'return') setShowDetail(true);
     else if (key.name === 'i') handleInitialize();
     else if (key.name === 'r') loadData();
-    else if (key.name === 'escape') {
-      if (showDetail()) setShowDetail(false);
-      else props.onNavigate('home');
-    }
+    else if (key.name === 'escape') props.onNavigate('home');
   });
 
   const getStatusIcon = (status: TeamMemberDisplay['status']): string => {

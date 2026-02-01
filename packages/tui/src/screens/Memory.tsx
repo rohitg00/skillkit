@@ -38,8 +38,16 @@ export function Memory(props: MemoryProps) {
 
   const loadData = async () => {
     setState((s) => ({ ...s, loading: true, error: null }));
-    const result = await loadMemories();
-    setState(result);
+    try {
+      const result = await loadMemories();
+      setState(result);
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        loading: false,
+        error: err instanceof Error ? err.message : 'Failed to load memories',
+      }));
+    }
   };
 
   const handleDelete = async () => {
@@ -49,23 +57,44 @@ export function Memory(props: MemoryProps) {
     const entry = entries[selectedIndex()];
     if (!entry) return;
 
-    const success = await deleteMemoryEntry(entry.key);
-    if (success) {
-      loadData();
+    try {
+      const success = await deleteMemoryEntry(entry.key);
+      if (success) {
+        loadData();
+      }
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        error: err instanceof Error ? err.message : 'Failed to delete entry',
+      }));
     }
   };
 
   const handleClearAll = async () => {
-    const success = await clearMemory(undefined, 'all');
-    if (success) {
-      loadData();
+    try {
+      const success = await clearMemory(undefined, 'all');
+      if (success) {
+        loadData();
+      }
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        error: err instanceof Error ? err.message : 'Failed to clear memory',
+      }));
     }
   };
 
   const handleInitialize = async () => {
-    const success = await initializeMemory();
-    if (success) {
-      loadData();
+    try {
+      const success = await initializeMemory();
+      if (success) {
+        loadData();
+      }
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        error: err instanceof Error ? err.message : 'Failed to initialize memory',
+      }));
     }
   };
 
