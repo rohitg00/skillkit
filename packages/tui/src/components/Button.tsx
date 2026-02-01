@@ -92,9 +92,18 @@ export function Button(props: ButtonProps) {
     return { left: '[', right: ']' };
   };
 
+  const padding = ' '.repeat(paddingX());
+
+  const handleClick = () => {
+    if (!disabled() && props.onClick) {
+      props.onClick();
+    }
+  };
+
   return (
-    <box flexDirection="row">
+    <box flexDirection="row" onClick={handleClick}>
       <text fg={borderColor()}>{brackets().left}</text>
+      <text fg={fg()}>{padding}</text>
       <Show when={props.icon}>
         <text fg={fg()}>{props.icon} </text>
       </Show>
@@ -102,6 +111,7 @@ export function Button(props: ButtonProps) {
       <Show when={props.shortcut}>
         <text fg={terminalColors.textMuted}> ({props.shortcut})</text>
       </Show>
+      <text fg={fg()}>{padding}</text>
       <text fg={borderColor()}>{brackets().right}</text>
     </box>
   );
@@ -115,6 +125,7 @@ interface ButtonGroupProps {
     icon?: string;
     variant?: ButtonVariant;
     disabled?: boolean;
+    onClick?: () => void;
   }>;
   selectedId?: string;
   focusedId?: string;
@@ -129,7 +140,10 @@ export function ButtonGroup(props: ButtonGroupProps) {
   return (
     <box flexDirection={direction() === 'horizontal' ? 'row' : 'column'}>
       {props.buttons.map((btn, index) => (
-        <box marginRight={direction() === 'horizontal' && index < props.buttons.length - 1 ? gap() : 0}>
+        <box
+          marginRight={direction() === 'horizontal' && index < props.buttons.length - 1 ? gap() : 0}
+          marginBottom={direction() === 'vertical' && index < props.buttons.length - 1 ? gap() : 0}
+        >
           <Button
             label={btn.label}
             shortcut={btn.shortcut}
@@ -138,6 +152,7 @@ export function ButtonGroup(props: ButtonGroupProps) {
             disabled={btn.disabled}
             focused={btn.id === props.focusedId}
             hovered={btn.id === props.selectedId}
+            onClick={btn.onClick}
           />
         </box>
       ))}
@@ -151,6 +166,7 @@ interface IconButtonProps {
   disabled?: boolean;
   focused?: boolean;
   hovered?: boolean;
+  onClick?: () => void;
 }
 
 export function IconButton(props: IconButtonProps) {
@@ -164,8 +180,14 @@ export function IconButton(props: IconButtonProps) {
     return terminalColors.textSecondary;
   };
 
+  const handleClick = () => {
+    if (!disabled() && props.onClick) {
+      props.onClick();
+    }
+  };
+
   return (
-    <box flexDirection="row">
+    <box flexDirection="row" onClick={handleClick}>
       <text fg={fg()}>{props.icon}</text>
       <Show when={props.label}>
         <text fg={fg()}> {props.label}</text>

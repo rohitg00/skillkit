@@ -27,25 +27,25 @@ export function SplitPane(props: SplitPaneProps) {
 
   const primaryWidth = () => {
     if (direction() === 'vertical') return undefined;
-    if (typeof props.primarySize === 'number') return props.primarySize;
+    if (props.primarySize !== undefined) return props.primarySize;
     return undefined;
   };
 
   const primaryHeight = () => {
     if (direction() === 'horizontal') return undefined;
-    if (typeof props.primarySize === 'number') return props.primarySize;
+    if (props.primarySize !== undefined) return props.primarySize;
     return undefined;
   };
 
   const secondaryWidth = () => {
     if (direction() === 'vertical') return undefined;
-    if (typeof props.secondarySize === 'number') return props.secondarySize;
+    if (props.secondarySize !== undefined) return props.secondarySize;
     return undefined;
   };
 
   const secondaryHeight = () => {
     if (direction() === 'horizontal') return undefined;
-    if (typeof props.secondarySize === 'number') return props.secondarySize;
+    if (props.secondarySize !== undefined) return props.secondarySize;
     return undefined;
   };
 

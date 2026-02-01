@@ -3,7 +3,7 @@
  * Wrapper to make any element clickable with hover effects
  */
 
-import { type JSX, Show, createSignal } from 'solid-js';
+import { type JSX, Show } from 'solid-js';
 import { terminalColors } from '../theme/colors.js';
 
 interface ClickableProps {
@@ -37,13 +37,45 @@ export function Clickable(props: ClickableProps) {
     return '';
   };
 
+  const handleClick = () => {
+    if (!disabled() && props.onClick) {
+      props.onClick();
+    }
+  };
+
+  const handleDoubleClick = () => {
+    if (!disabled() && props.onDoubleClick) {
+      props.onDoubleClick();
+    }
+  };
+
+  const handleRightClick = () => {
+    if (!disabled() && props.onRightClick) {
+      props.onRightClick();
+    }
+  };
+
+  const renderContent = () => {
+    if (hoverEffect() === 'underline' && showHighlight()) {
+      return <text>{props.children}</text>;
+    }
+    return props.children;
+  };
+
   return (
-    <box flexDirection="row">
+    <box
+      flexDirection="row"
+      onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
+      onContextMenu={handleRightClick}
+    >
       <Show when={hoverEffect() === 'pointer' && showHighlight()}>
         <text fg={terminalColors.accent}>{cursor()} </text>
       </Show>
-      <box>
-        {props.children}
+      <box
+        fg={hoverEffect() === 'highlight' && showHighlight() ? terminalColors.accent : undefined}
+      >
+        {renderContent()}
       </box>
     </box>
   );
@@ -62,6 +94,7 @@ interface ClickableTextProps {
 export function ClickableText(props: ClickableTextProps) {
   const disabled = () => props.disabled ?? false;
   const hovered = () => props.hovered ?? false;
+  const underlineOnHover = () => props.underlineOnHover ?? false;
 
   const color = () => {
     if (disabled()) return terminalColors.textMuted;
@@ -69,9 +102,19 @@ export function ClickableText(props: ClickableTextProps) {
     return props.color ?? terminalColors.text;
   };
 
+  const handleClick = () => {
+    if (!disabled() && props.onClick) {
+      props.onClick();
+    }
+  };
+
   return (
-    <text fg={color()}>
-      {props.children}
+    <text fg={color()} onClick={handleClick}>
+      {underlineOnHover() && hovered() ? (
+        <u>{props.children}</u>
+      ) : (
+        props.children
+      )}
     </text>
   );
 }
@@ -107,8 +150,14 @@ export function ClickableRow(props: ClickableRowProps) {
     return terminalColors.textSecondary;
   };
 
+  const handleClick = () => {
+    if (!disabled() && props.onClick) {
+      props.onClick();
+    }
+  };
+
   return (
-    <box flexDirection="row">
+    <box flexDirection="row" onClick={handleClick}>
       <text fg={fg()}>{indicator()}</text>
       {props.children}
     </box>
@@ -121,9 +170,11 @@ interface InteractiveAreaProps {
   y?: number;
   width?: number;
   height?: number;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
+  onMouseOver?: () => void;
+  onMouseOut?: () => void;
   onClick?: () => void;
+  onMouseDown?: () => void;
+  onMouseUp?: () => void;
 }
 
 export function InteractiveArea(props: InteractiveAreaProps) {
@@ -132,6 +183,12 @@ export function InteractiveArea(props: InteractiveAreaProps) {
       flexDirection="column"
       width={props.width}
       height={props.height}
+      style={{ left: props.x, top: props.y }}
+      onMouseEnter={props.onMouseOver}
+      onMouseLeave={props.onMouseOut}
+      onClick={props.onClick}
+      onMouseDown={props.onMouseDown}
+      onMouseUp={props.onMouseUp}
     >
       {props.children}
     </box>

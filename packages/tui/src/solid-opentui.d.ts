@@ -51,6 +51,15 @@ declare module 'solid-js' {
       bottom?: number;
       left?: number;
       right?: number;
+      fg?: string;
+      style?: Record<string, unknown>;
+      onClick?: () => void;
+      onDoubleClick?: () => void;
+      onContextMenu?: () => void;
+      onMouseEnter?: () => void;
+      onMouseLeave?: () => void;
+      onMouseDown?: () => void;
+      onMouseUp?: () => void;
     }
 
     interface TextProps {
@@ -67,6 +76,7 @@ declare module 'solid-js' {
       inverse?: boolean;
       wrap?: 'wrap' | 'truncate' | 'truncate-start' | 'truncate-middle' | 'truncate-end';
       width?: number;
+      onClick?: () => void;
     }
 
     interface SpanProps extends TextProps {}

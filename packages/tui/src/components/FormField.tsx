@@ -104,6 +104,8 @@ export function TextAreaField(props: TextAreaFieldProps) {
 
   const lines = () => props.value.split('\n').slice(0, rows());
 
+  const hasContent = () => props.value !== '' && props.value !== undefined;
+
   const borderColor = () => {
     if (props.error) return terminalColors.error;
     if (focused()) return terminalColors.accent;
@@ -123,7 +125,7 @@ export function TextAreaField(props: TextAreaFieldProps) {
         paddingX={1}
       >
         <Show
-          when={lines().length > 0}
+          when={hasContent()}
           fallback={<text fg={terminalColors.textMuted}>{props.placeholder ?? ''}</text>}
         >
           {lines().map((line) => (

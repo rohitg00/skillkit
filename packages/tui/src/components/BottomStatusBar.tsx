@@ -5,7 +5,6 @@ import { getVersion } from '../utils/helpers.js';
 
 interface BottomStatusBarProps {
   currentScreen: Screen;
-  width: number;
 }
 
 const SCREEN_LABELS: Record<Screen, string> = {

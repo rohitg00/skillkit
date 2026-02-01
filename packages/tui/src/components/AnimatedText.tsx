@@ -5,7 +5,7 @@
 
 import { Show, createSignal, createEffect, onCleanup } from 'solid-js';
 import { terminalColors } from '../theme/colors.js';
-import { SCRAMBLE_CHARS, scrambleText } from '../theme/animations.js';
+import { scrambleText } from '../theme/animations.js';
 
 interface AnimatedTextProps {
   text: string;
@@ -21,19 +21,26 @@ export function AnimatedText(props: AnimatedTextProps) {
   const [isComplete, setIsComplete] = createSignal(false);
 
   const animation = () => props.animation ?? 'fadeIn';
-  const duration = () => props.duration ?? 500;
-  const delay = () => props.delay ?? 0;
+  const duration = () => Math.max(1, props.duration ?? 500);
+  const delay = () => Math.max(0, props.delay ?? 0);
   const color = () => props.color ?? terminalColors.text;
 
   createEffect(() => {
-    if (animation() === 'none') {
+    const anim = animation();
+    const dur = duration();
+    const dly = delay();
+
+    setProgress(0);
+    setIsComplete(false);
+
+    if (anim === 'none') {
       setProgress(100);
       setIsComplete(true);
       return;
     }
 
-    let delayTimeoutId: ReturnType<typeof setTimeout>;
-    let animationTimeoutId: ReturnType<typeof setTimeout>;
+    let delayTimeoutId: ReturnType<typeof setTimeout> | undefined;
+    let animationTimeoutId: ReturnType<typeof setTimeout> | undefined;
     let startTime: number | undefined;
     let cancelled = false;
 
@@ -43,7 +50,7 @@ export function AnimatedText(props: AnimatedTextProps) {
       const now = Date.now();
       if (!startTime) startTime = now;
       const elapsed = now - startTime;
-      const p = Math.min((elapsed / duration()) * 100, 100);
+      const p = Math.min((elapsed / dur) * 100, 100);
 
       setProgress(p);
 
@@ -55,10 +62,10 @@ export function AnimatedText(props: AnimatedTextProps) {
       }
     };
 
-    if (delay() > 0) {
+    if (dly > 0) {
       delayTimeoutId = setTimeout(() => {
         animationTimeoutId = setTimeout(animate, 16);
-      }, delay());
+      }, dly);
     } else {
       animationTimeoutId = setTimeout(animate, 16);
     }
@@ -115,14 +122,20 @@ interface CountUpTextProps {
 
 export function CountUpText(props: CountUpTextProps) {
   const [displayValue, setDisplayValue] = createSignal(0);
-  const duration = () => props.duration ?? 1000;
-  const delay = () => props.delay ?? 0;
+  const duration = () => Math.max(1, props.duration ?? 1000);
+  const delay = () => Math.max(0, props.delay ?? 0);
   const color = () => props.color ?? terminalColors.text;
   const formatter = () => props.formatter ?? ((v: number) => String(Math.round(v)));
 
   createEffect(() => {
-    let delayTimeoutId: ReturnType<typeof setTimeout>;
-    let animationTimeoutId: ReturnType<typeof setTimeout>;
+    const target = props.value;
+    const dur = duration();
+    const dly = delay();
+
+    setDisplayValue(0);
+
+    let delayTimeoutId: ReturnType<typeof setTimeout> | undefined;
+    let animationTimeoutId: ReturnType<typeof setTimeout> | undefined;
     let startTime: number | undefined;
     let cancelled = false;
 
@@ -132,20 +145,20 @@ export function CountUpText(props: CountUpTextProps) {
       const now = Date.now();
       if (!startTime) startTime = now;
       const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration(), 1);
+      const progress = Math.min(elapsed / dur, 1);
       const eased = 1 - Math.pow(1 - progress, 4);
 
-      setDisplayValue(eased * props.value);
+      setDisplayValue(eased * target);
 
       if (progress < 1) {
         animationTimeoutId = setTimeout(animate, 16);
       }
     };
 
-    if (delay() > 0) {
+    if (dly > 0) {
       delayTimeoutId = setTimeout(() => {
         animationTimeoutId = setTimeout(animate, 16);
-      }, delay());
+      }, dly);
     } else {
       animationTimeoutId = setTimeout(animate, 16);
     }

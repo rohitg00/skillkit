@@ -4,6 +4,7 @@
  */
 
 import { ErrorBoundary as SolidErrorBoundary, type JSX, Show } from 'solid-js';
+import { useKeyboard } from '@opentui/solid';
 import { terminalColors } from '../theme/colors.js';
 
 interface ErrorBoundaryProps {
@@ -27,6 +28,12 @@ function DefaultErrorFallback(props: { error: Error; reset: () => void }) {
     }
     return '';
   };
+
+  useKeyboard((key) => {
+    if (key.name === 'r') {
+      props.reset();
+    }
+  });
 
   return (
     <box flexDirection="column" paddingY={2} paddingX={1}>
@@ -63,18 +70,28 @@ function DefaultErrorFallback(props: { error: Error; reset: () => void }) {
 }
 
 export function ErrorBoundary(props: ErrorBoundaryProps) {
+  let handledErrorRef: Error | null = null;
+
   const fallbackComponent = (error: Error, reset: () => void) => {
-    props.onError?.(error);
+    if (props.onError && handledErrorRef !== error) {
+      handledErrorRef = error;
+      props.onError(error);
+    }
+
+    const wrappedReset = () => {
+      handledErrorRef = null;
+      reset();
+    };
 
     if (typeof props.fallback === 'function') {
-      return props.fallback(error, reset);
+      return props.fallback(error, wrappedReset);
     }
 
     if (props.fallback) {
       return props.fallback;
     }
 
-    return <DefaultErrorFallback error={error} reset={reset} />;
+    return <DefaultErrorFallback error={error} reset={wrappedReset} />;
   };
 
   return (

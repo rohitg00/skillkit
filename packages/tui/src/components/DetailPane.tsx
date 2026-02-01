@@ -69,7 +69,9 @@ export function DetailPane(props: DetailPaneProps) {
             <b>{props.title}</b>
           </text>
           <Show when={props.onClose}>
-            <text fg={terminalColors.textMuted}> [x]</text>
+            <box onClick={() => props.onClose?.()}>
+              <text fg={terminalColors.textMuted}> [x]</text>
+            </box>
           </Show>
         </box>
 

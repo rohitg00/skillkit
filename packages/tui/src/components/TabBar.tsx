@@ -70,8 +70,14 @@ export function TabBar(props: TabBarProps) {
             return { left: '', right: '' };
           };
 
+          const handleClick = () => {
+            if (!isDisabled() && props.onSelect) {
+              props.onSelect(tab.id);
+            }
+          };
+
           return (
-            <box flexDirection="column" marginRight={index() < props.tabs.length - 1 ? gap() : 0}>
+            <box flexDirection="column" marginRight={index() < props.tabs.length - 1 ? gap() : 0} onClick={handleClick}>
               <box flexDirection="row">
                 <text fg={terminalColors.border}>{brackets().left}</text>
                 <Show when={tab.icon}>
@@ -134,10 +140,17 @@ export function VerticalTabBar(props: VerticalTabBarProps) {
             return '  ';
           };
 
+          const handleClick = () => {
+            if (!isDisabled() && props.onSelect) {
+              props.onSelect(tab.id);
+            }
+          };
+
           return (
             <box
               flexDirection="row"
               marginBottom={1}
+              onClick={handleClick}
             >
               <text fg={fg()}>{prefix()}</text>
               <Show when={tab.icon}>

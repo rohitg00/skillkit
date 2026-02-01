@@ -56,6 +56,18 @@ export function SelectList(props: SelectListProps) {
     () => scrollOffset() + maxVisible() < props.items.length
   );
 
+  const handleItemClick = (item: SelectListItem, index: number) => {
+    if (!item.disabled && props.onSelect) {
+      props.onSelect(item, index);
+    }
+  };
+
+  const handleItemHover = (index: number) => {
+    if (props.onHover) {
+      props.onHover(index);
+    }
+  };
+
   return (
     <box flexDirection="column">
       <Show when={props.items.length === 0}>
@@ -86,7 +98,12 @@ export function SelectList(props: SelectListProps) {
           };
 
           return (
-            <box flexDirection={compact() ? 'row' : 'column'} marginBottom={compact() ? 0 : 1}>
+            <box
+              flexDirection={compact() ? 'row' : 'column'}
+              marginBottom={compact() ? 0 : 1}
+              onClick={() => handleItemClick(item, originalIndex)}
+              onMouseEnter={() => handleItemHover(originalIndex)}
+            >
               <box flexDirection="row">
                 <text fg={fg()}>{prefix()}</text>
                 <Show when={showIndex()}>

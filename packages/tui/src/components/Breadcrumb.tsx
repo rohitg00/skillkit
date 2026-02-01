@@ -22,6 +22,10 @@ interface BreadcrumbProps {
 export function Breadcrumb(props: BreadcrumbProps) {
   const separator = () => props.separator ?? ' / ';
 
+  const handleClick = (id: string) => {
+    props.onNavigate?.(id);
+  };
+
   return (
     <box flexDirection="row">
       <For each={props.items}>
@@ -37,7 +41,10 @@ export function Breadcrumb(props: BreadcrumbProps) {
 
           return (
             <>
-              <box flexDirection="row">
+              <box
+                flexDirection="row"
+                onClick={() => handleClick(item.id)}
+              >
                 <Show when={item.icon}>
                   <text fg={fg()}>{item.icon} </text>
                 </Show>
@@ -78,8 +85,22 @@ export function PathBreadcrumb(props: PathBreadcrumbProps) {
 
   const getPathAtIndex = (index: number): string => {
     const parts = props.path.split('/').filter(Boolean);
-    const actualIndex = segments()[0] === '...' ? parts.length - (segments().length - 1) + index : index;
+    const segs = segments();
+    let actualIndex: number;
+
+    if (segs[0] === '...') {
+      const offset = parts.length - (segs.length - 1);
+      actualIndex = offset + index - 1;
+    } else {
+      actualIndex = index;
+    }
+
     return '/' + parts.slice(0, actualIndex + 1).join('/');
+  };
+
+  const handleClick = (segment: string, index: number) => {
+    if (segment === '...') return;
+    props.onNavigate?.(getPathAtIndex(index), index);
   };
 
   return (
@@ -100,7 +121,10 @@ export function PathBreadcrumb(props: PathBreadcrumbProps) {
 
           return (
             <>
-              <text fg={fg()}>
+              <text
+                fg={fg()}
+                onClick={() => handleClick(segment, index())}
+              >
                 {isLast() ? <b>{segment}</b> : segment}
               </text>
               <Show when={!isLast()}>
