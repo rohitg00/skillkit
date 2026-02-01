@@ -1,6 +1,6 @@
 {
   "name": "@skillkit/messaging",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "Inter-agent messaging system for SkillKit",
   "type": "module",
   "main": "./dist/index.js",
