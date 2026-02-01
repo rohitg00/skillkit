@@ -18,9 +18,11 @@ skillkit
 ## Framework
 
 Built on modern technologies:
-- **@opentui/react** - Terminal rendering
-- **React 19.0.0** - Component architecture
+- **@opentui/solid** - Terminal rendering with Solid.js
+- **Solid.js 1.9.0** - Reactive component architecture
 - **Bun 1.2.0+** - Runtime requirement
+
+The TUI was migrated from React to Solid.js in v1.8.0 for improved performance and smaller bundle size.
 
 ## Screens
 
@@ -159,8 +161,10 @@ loadSkills()
 
 ### Performance Optimizations
 
-- `useMemo` for filtered lists
-- `useCallback` for event handlers
+- `createMemo` for filtered lists and computed values
+- `createSignal` for reactive state management
+- `createEffect` for side effects and subscriptions
+- Windowed list rendering for large datasets
 - Pagination limits rendered items
 - Progressive animation with phases
 
@@ -174,18 +178,32 @@ loadSkills()
 
 ## Integration
 
-The TUI integrates with @skillkit/core:
+The TUI integrates with @skillkit/core using Solid.js reactive patterns:
 
 ```typescript
-findAllSkills(searchDirs)      // Returns skill metadata
-evaluateSkillDirectory(path)   // Quality metrics
-getQualityGrade(score)         // 0-100 to A-F
+import { createSignal, createMemo, createEffect } from 'solid-js';
+
+const [skills, setSkills] = createSignal([]);
+
+createEffect(async () => {
+  const result = await findAllSkills(searchDirs);
+  setSkills(result);
+});
+
+const filteredSkills = createMemo(() =>
+  skills().filter(s => s.name.includes(searchTerm()))
+);
 ```
+
+Core functions:
+- `findAllSkills(searchDirs)` - Returns skill metadata
+- `evaluateSkillDirectory(path)` - Quality metrics
+- `getQualityGrade(score)` - 0-100 to A-F
 
 ## Graceful Exit
 
 The TUI handles shutdown gracefully:
-1. Unmounts React components
+1. Runs Solid.js cleanup functions (`onCleanup`)
 2. Restores terminal state
 3. Cleans up signal handlers
 4. Exits process cleanly
