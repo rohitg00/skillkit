@@ -43,16 +43,28 @@ export function Recommend(props: RecommendProps) {
   const loadData = async () => {
     setState((s) => ({ ...s, loading: true, analyzing: true, error: null }));
 
-    const analysis = await analyzeProject();
-    if (analysis) {
-      setProjectInfo({
-        languages: analysis.languages,
-        frameworks: analysis.frameworks,
-      });
-    }
+    try {
+      const analysis = await analyzeProject();
+      if (analysis) {
+        setProjectInfo({
+          languages: analysis.languages,
+          frameworks: analysis.frameworks,
+        });
+      }
 
-    const result = await getRecommendations();
-    setState(result);
+      const result = await getRecommendations();
+      setState(result);
+
+      const maxIndex = Math.max(0, result.recommendations.length - 1);
+      setSelectedIndex((prev) => Math.max(0, Math.min(prev, maxIndex)));
+    } catch (err) {
+      setState((s) => ({
+        ...s,
+        loading: false,
+        analyzing: false,
+        error: err instanceof Error ? err.message : 'Failed to load recommendations',
+      }));
+    }
   };
 
   const handleRefresh = async () => {

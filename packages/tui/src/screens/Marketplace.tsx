@@ -68,6 +68,14 @@ export function Marketplace(props: MarketplaceProps) {
     setAllSkills(skills);
     setLoadedRepos(loaded);
     setFailedRepos(failed);
+
+    const attemptedCount = DEFAULT_REPOS.slice(0, 5).length;
+    if (failed.length === attemptedCount) {
+      setError(`Failed to load all repos: ${failed.join(', ')}`);
+    } else if (failed.length > 0 && skills.length === 0) {
+      setError(`Some repos failed (${failed.join(', ')}) and no skills loaded`);
+    }
+
     setLoading(false);
   };
 
@@ -87,6 +95,12 @@ export function Marketplace(props: MarketplaceProps) {
     }
 
     return skills;
+  });
+
+  createEffect(() => {
+    const list = filteredSkills();
+    const maxIndex = Math.max(0, list.length - 1);
+    setSelectedIndex((prev) => Math.max(0, Math.min(prev, maxIndex)));
   });
 
   const maxVisible = () => Math.max(4, Math.floor((rows() - 14) / 2));
