@@ -40,7 +40,12 @@ export async function startTUI(): Promise<never> {
     enableMouseMovement: true,
   });
 
-  render(() => <App onExit={exitTUI} />, renderer);
+  try {
+    await render(() => <App onExit={exitTUI} />, renderer);
+  } catch (err) {
+    console.error('Render failed:', err);
+    exitTUI(1);
+  }
 
   return new Promise(() => {});
 }

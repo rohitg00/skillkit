@@ -34,6 +34,7 @@ export function Execute(props: ExecuteProps) {
     error?: string;
   } | null>(null);
   const [loading, setLoading] = createSignal(true);
+  const [loadError, setLoadError] = createSignal<string | null>(null);
 
   createEffect(() => {
     loadData();
@@ -41,17 +42,24 @@ export function Execute(props: ExecuteProps) {
 
   const loadData = async () => {
     setLoading(true);
+    setLoadError(null);
 
-    const skillsWithDetails = loadSkillsWithDetails();
-    setSkills(skillsWithDetails);
+    try {
+      const skillsWithDetails = loadSkillsWithDetails();
+      setSkills(skillsWithDetails);
 
-    const agentAvailability = await getAgentAvailability();
-    setAgents(agentAvailability);
-
-    setLoading(false);
+      const agentAvailability = await getAgentAvailability();
+      setAgents(agentAvailability);
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : 'Failed to load');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleExecute = async () => {
+    if (executing()) return;
+
     const skillList = skills();
     const agentList = agents();
 
@@ -83,9 +91,9 @@ export function Execute(props: ExecuteProps) {
         output: '',
         error: err instanceof Error ? err.message : 'Execution failed',
       });
+    } finally {
+      setExecuting(false);
     }
-
-    setExecuting(false);
   };
 
   const handleKeyNav = (delta: number) => {
@@ -139,7 +147,15 @@ export function Execute(props: ExecuteProps) {
         <Spinner label="Loading..." />
       </Show>
 
-      <Show when={!loading()}>
+      <Show when={loadError()}>
+        <ErrorState
+          message={loadError()!}
+          action={{ label: 'Retry', key: 'r' }}
+          compact
+        />
+      </Show>
+
+      <Show when={!loading() && !loadError()}>
         <box flexDirection="row">
           <box flexDirection="column" width={30}>
             <text

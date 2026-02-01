@@ -1,6 +1,6 @@
 import { createSignal, createEffect, onCleanup, Show, Switch, Match } from 'solid-js';
 import { useKeyboard } from '@opentui/solid';
-import { exec } from 'node:child_process';
+import { execFile } from 'node:child_process';
 import { type Screen, NAV_KEYS } from './state/types.js';
 import { Splash } from './components/Splash.js';
 import { Sidebar } from './components/Sidebar.js';
@@ -14,8 +14,12 @@ import {
 const DOCS_URL = 'https://agenstskills.com/docs';
 
 function openUrl(url: string): void {
-  const cmd = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open';
-  exec(`${cmd} ${url}`);
+  if (process.platform === 'win32') {
+    execFile('cmd', ['/c', 'start', '', url]);
+  } else {
+    const cmd = process.platform === 'darwin' ? 'open' : 'xdg-open';
+    execFile(cmd, [url]);
+  }
 }
 
 interface AppProps {
@@ -96,8 +100,8 @@ export function App(props: AppProps) {
 
   const screenProps = () => ({
     onNavigate: handleNavigate,
-    cols: cols() - sidebarWidth() - 2,
-    rows: contentHeight() - 1,
+    cols: Math.max(1, cols() - sidebarWidth() - 2),
+    rows: Math.max(1, contentHeight() - 1),
   });
 
   return (

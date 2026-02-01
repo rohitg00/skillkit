@@ -147,6 +147,8 @@ export function Memory(props: MemoryProps) {
       handleClearAll();
     } else if (key.name === 'i') {
       handleInitialize();
+    } else if (key.name === 'r') {
+      loadData();
     } else if (key.name === 'escape') {
       if (showDetail()) {
         setShowDetail(false);

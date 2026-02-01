@@ -48,6 +48,8 @@ export function Workflow(props: WorkflowProps) {
   };
 
   const handleExecute = async () => {
+    if (executing()) return;
+
     const workflows = state().workflows;
     if (workflows.length === 0) return;
 
@@ -55,13 +57,16 @@ export function Workflow(props: WorkflowProps) {
     if (!workflow) return;
 
     setExecuting(true);
-    const result = await executeWorkflow(workflow.name, undefined, (progress) => {
-      setState((s) => ({ ...s, progress }));
-    });
-    setExecuting(false);
+    try {
+      const result = await executeWorkflow(workflow.name, undefined, (progress) => {
+        setState((s) => ({ ...s, progress }));
+      });
 
-    if (result) {
-      loadData();
+      if (result) {
+        loadData();
+      }
+    } finally {
+      setExecuting(false);
     }
   };
 

@@ -79,25 +79,29 @@ export function Sync(props: SyncProps) {
     const agentList = agents();
     if (agentList.length === 0) return;
 
-    const agent = agentList[selectedIndex()];
+    const idx = selectedIndex();
+    const agent = agentList[idx];
     if (!agent || !agent.available) return;
 
+    const agentName = agent.name;
+    const currentSkillCount = skillCount();
+
     setSyncStatus('syncing');
-    setSyncMessage(`Syncing to ${agent.name}...`);
+    setSyncMessage(`Syncing to ${agentName}...`);
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       setAgents((prev) =>
-        prev.map((a, idx) =>
-          idx === selectedIndex()
-            ? { ...a, synced: true, skillCount: skillCount() }
+        prev.map((a, i) =>
+          i === idx
+            ? { ...a, synced: true, skillCount: currentSkillCount }
             : a
         )
       );
 
       setSyncStatus('done');
-      setSyncMessage(`Synced ${skillCount()} skills to ${agent.name}`);
+      setSyncMessage(`Synced ${currentSkillCount} skills to ${agentName}`);
     } catch {
       setSyncStatus('error');
       setSyncMessage('Sync failed');
