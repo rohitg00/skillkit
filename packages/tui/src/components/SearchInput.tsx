@@ -1,7 +1,4 @@
-/**
- * SearchInput Component
- * Rounded search input with icon
- */
+import { Show } from 'solid-js';
 import { terminalColors } from '../theme/colors.js';
 
 interface SearchInputProps {
@@ -11,19 +8,19 @@ interface SearchInputProps {
   onChange?: (value: string) => void;
 }
 
-export function SearchInput({
-  value,
-  placeholder = 'Search...',
-  focused = false,
-}: SearchInputProps) {
-  const display = value || placeholder;
-  const textColor = value ? terminalColors.text : terminalColors.textMuted;
+export function SearchInput(props: SearchInputProps) {
+  const placeholder = () => props.placeholder ?? 'Search...';
+  const focused = () => props.focused ?? false;
+  const display = () => props.value || placeholder();
+  const textColor = () => (props.value ? terminalColors.text : terminalColors.textMuted);
 
   return (
     <box flexDirection="row" marginBottom={1}>
       <text fg={terminalColors.textMuted}>&#x2315; </text>
-      <text fg={textColor}>{display}</text>
-      {focused && <text fg={terminalColors.accent}>&#x258F;</text>}
+      <text fg={textColor()}>{display()}</text>
+      <Show when={focused()}>
+        <text fg={terminalColors.accent}>&#x258F;</text>
+      </Show>
     </box>
   );
 }

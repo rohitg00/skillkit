@@ -1,12 +1,18 @@
-/**
- * Context Screen
- * Project context analysis
- */
-import { useState, useEffect } from 'react';
+import { createSignal, createEffect, onCleanup, Show, For } from 'solid-js';
 import { type Screen } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
 import { Header } from '../components/Header.js';
 import { Spinner } from '../components/Spinner.js';
+import { EmptyState, ErrorState } from '../components/EmptyState.js';
+import { StatusIndicator } from '../components/StatusIndicator.js';
+import {
+  loadProjectContext,
+  analyzeProjectContext,
+  refreshContext,
+  exportContext,
+  getStackTags,
+  type ContextServiceState,
+} from '../services/context.service.js';
 
 interface ContextProps {
   onNavigate: (screen: Screen) => void;
@@ -14,43 +20,250 @@ interface ContextProps {
   rows?: number;
 }
 
-export function Context({ onNavigate, cols = 80, rows = 24 }: ContextProps) {
-  const [loading, setLoading] = useState(true);
+export function Context(props: ContextProps) {
+  const [state, setState] = createSignal<ContextServiceState>({
+    context: null,
+    stack: null,
+    loading: true,
+    analyzing: false,
+    error: null,
+  });
+  const [tags, setTags] = createSignal<string[]>([]);
+  const [selectedSection, setSelectedSection] = createSignal(0);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+  const sections = ['Overview', 'Languages', 'Frameworks', 'Libraries', 'Patterns'];
 
-  const contextInfo = [
-    { label: 'Working Directory', value: process.cwd() },
-    { label: 'Node Version', value: process.version },
-    { label: 'Platform', value: process.platform },
-    { label: 'Architecture', value: process.arch },
-  ];
+  createEffect(() => {
+    loadData();
+  });
+
+  const loadData = async () => {
+    setState((s) => ({ ...s, loading: true, error: null }));
+
+    const result = await loadProjectContext();
+    setState(result);
+
+    if (!result.context) {
+      const analyzed = await analyzeProjectContext();
+      setState(analyzed);
+    }
+
+    const stackTags = await getStackTags();
+    setTags(stackTags);
+  };
+
+  const handleRefresh = async () => {
+    setState((s) => ({ ...s, analyzing: true }));
+    const result = await refreshContext();
+    setState(result);
+    const stackTags = await getStackTags();
+    setTags(stackTags);
+  };
+
+  const handleExport = async () => {
+    const exported = await exportContext(undefined, 'json');
+    if (exported) {
+      console.log('Context exported');
+    }
+  };
+
+  const currentSection = () => sections[selectedSection()];
+  const ctx = () => state().context;
 
   return (
     <box flexDirection="column" paddingLeft={1}>
       <Header
         title="Project Context"
         subtitle="Analyze your project environment"
-        icon="&#x25C9;"
+        icon="◉"
+        count={tags().length}
       />
 
-      {loading ? (
-        <Spinner label="Analyzing project context..." />
-      ) : (
+      <Show when={state().error}>
+        <ErrorState
+          message={state().error!}
+          action={{ label: 'Retry', key: 'r' }}
+          compact
+        />
+      </Show>
+
+      <Show when={state().loading || state().analyzing}>
+        <Spinner
+          label={state().analyzing ? 'Analyzing project...' : 'Loading context...'}
+        />
+      </Show>
+
+      <Show when={!state().loading && !state().error && ctx()}>
         <box flexDirection="column">
-          {contextInfo.map((info) => (
-            <box key={info.label} flexDirection="row" marginBottom={1}>
-              <text fg={terminalColors.textMuted} width={20}>
-                {info.label}:
-              </text>
-              <text fg={terminalColors.text}>{info.value}</text>
+          <box flexDirection="row" marginBottom={1}>
+            <For each={sections}>
+              {(section, idx) => (
+                <box marginRight={2}>
+                  <text
+                    fg={
+                      idx() === selectedSection()
+                        ? terminalColors.accent
+                        : terminalColors.textMuted
+                    }
+                  >
+                    {idx() === selectedSection() ? '▸ ' : '  '}
+                    {section}
+                  </text>
+                </box>
+              )}
+            </For>
+          </box>
+
+          <text fg={terminalColors.textMuted}>─────────────────────────────</text>
+          <text> </text>
+
+          <Show when={currentSection() === 'Overview'}>
+            <box flexDirection="column">
+              <box flexDirection="row" marginBottom={1}>
+                <text fg={terminalColors.textMuted} width={18}>Project:</text>
+                <text fg={terminalColors.text}>{ctx()!.projectName}</text>
+              </box>
+              <box flexDirection="row" marginBottom={1}>
+                <text fg={terminalColors.textMuted} width={18}>Path:</text>
+                <text fg={terminalColors.textSecondary}>{ctx()!.rootPath}</text>
+              </box>
+              <box flexDirection="row" marginBottom={1}>
+                <text fg={terminalColors.textMuted} width={18}>Languages:</text>
+                <text fg={terminalColors.accent}>{ctx()!.languages.length}</text>
+              </box>
+              <box flexDirection="row" marginBottom={1}>
+                <text fg={terminalColors.textMuted} width={18}>Frameworks:</text>
+                <text fg={terminalColors.accent}>{ctx()!.frameworks.length}</text>
+              </box>
+              <box flexDirection="row" marginBottom={1}>
+                <text fg={terminalColors.textMuted} width={18}>Libraries:</text>
+                <text fg={terminalColors.accent}>{ctx()!.libraries.length}</text>
+              </box>
+              <Show when={ctx()!.lastUpdated}>
+                <box flexDirection="row" marginBottom={1}>
+                  <text fg={terminalColors.textMuted} width={18}>Last Updated:</text>
+                  <text fg={terminalColors.textSecondary}>{ctx()!.lastUpdated}</text>
+                </box>
+              </Show>
             </box>
-          ))}
+          </Show>
+
+          <Show when={currentSection() === 'Languages'}>
+            <box flexDirection="column">
+              <Show
+                when={ctx()!.languages.length > 0}
+                fallback={<EmptyState title="No languages detected" compact />}
+              >
+                <For each={ctx()!.languages}>
+                  {(lang) => (
+                    <box marginBottom={1}>
+                      <text fg={terminalColors.text}>
+                        • {lang}
+                      </text>
+                    </box>
+                  )}
+                </For>
+              </Show>
+            </box>
+          </Show>
+
+          <Show when={currentSection() === 'Frameworks'}>
+            <box flexDirection="column">
+              <Show
+                when={ctx()!.frameworks.length > 0}
+                fallback={<EmptyState title="No frameworks detected" compact />}
+              >
+                <For each={ctx()!.frameworks}>
+                  {(fw) => (
+                    <box marginBottom={1}>
+                      <text fg={terminalColors.text}>
+                        • {fw}
+                      </text>
+                    </box>
+                  )}
+                </For>
+              </Show>
+            </box>
+          </Show>
+
+          <Show when={currentSection() === 'Libraries'}>
+            <box flexDirection="column">
+              <Show
+                when={ctx()!.libraries.length > 0}
+                fallback={<EmptyState title="No libraries detected" compact />}
+              >
+                <For each={ctx()!.libraries.slice(0, 15)}>
+                  {(lib) => (
+                    <box marginBottom={1}>
+                      <text fg={terminalColors.text}>
+                        • {lib}
+                      </text>
+                    </box>
+                  )}
+                </For>
+                <Show when={ctx()!.libraries.length > 15}>
+                  <text fg={terminalColors.textMuted}>
+                    +{ctx()!.libraries.length - 15} more
+                  </text>
+                </Show>
+              </Show>
+            </box>
+          </Show>
+
+          <Show when={currentSection() === 'Patterns'}>
+            <box flexDirection="column">
+              <Show
+                when={Object.keys(ctx()!.patterns).length > 0}
+                fallback={<EmptyState title="No patterns detected" compact />}
+              >
+                <For each={Object.entries(ctx()!.patterns)}>
+                  {([key, value]) => (
+                    <box flexDirection="row" marginBottom={1}>
+                      <text fg={terminalColors.textMuted} width={18}>{key}:</text>
+                      <text fg={terminalColors.text}>{String(value)}</text>
+                    </box>
+                  )}
+                </For>
+              </Show>
+            </box>
+          </Show>
+
+          <text> </text>
+          <text fg={terminalColors.textMuted}>─────────────────────────────</text>
+          <text> </text>
+
+          <Show when={tags().length > 0}>
+            <box flexDirection="row" flexWrap="wrap">
+              <text fg={terminalColors.textMuted}>Tags: </text>
+              <For each={tags().slice(0, 8)}>
+                {(tag, idx) => (
+                  <text fg={terminalColors.textSecondary}>
+                    {tag}
+                    {idx() < Math.min(tags().length, 8) - 1 ? ', ' : ''}
+                  </text>
+                )}
+              </For>
+              <Show when={tags().length > 8}>
+                <text fg={terminalColors.textMuted}> +{tags().length - 8}</text>
+              </Show>
+            </box>
+          </Show>
         </box>
-      )}
+      </Show>
+
+      <Show when={!state().loading && !state().error && !ctx()}>
+        <EmptyState
+          icon="◉"
+          title="No context found"
+          description="Run analysis to detect project context"
+          action={{ label: 'Analyze', key: 'r' }}
+        />
+      </Show>
+
+      <text> </text>
+      <text fg={terminalColors.textMuted}>
+        ←/→ sections  r refresh  e export  Esc back
+      </text>
     </box>
   );
 }

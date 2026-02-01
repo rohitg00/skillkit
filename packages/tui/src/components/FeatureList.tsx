@@ -1,7 +1,4 @@
-/**
- * FeatureList Component
- * Colored feature keywords with descriptions
- */
+import { For } from 'solid-js';
 import { terminalColors } from '../theme/colors.js';
 
 interface Feature {
@@ -24,19 +21,25 @@ interface FeatureListProps {
   features?: Feature[];
 }
 
-export function FeatureList({ features = FEATURES }: FeatureListProps) {
+export function FeatureList(props: FeatureListProps) {
+  const features = () => props.features ?? FEATURES;
+
   return (
     <box flexDirection="column">
-      <text fg={terminalColors.text}><b>Features</b></text>
+      <text fg={terminalColors.text}>
+        <b>Features</b>
+      </text>
       <text> </text>
-      {features.map((feat) => (
-        <box key={feat.key} flexDirection="row">
-          <text fg={terminalColors[feat.color]}>
-            <b>{'  '}{feat.label.padEnd(12)}</b>
-          </text>
-          <text fg={terminalColors.textMuted}>{feat.description}</text>
-        </box>
-      ))}
+      <For each={features()}>
+        {(feat) => (
+          <box flexDirection="row">
+            <text fg={terminalColors[feat.color]}>
+              <b>{'  '}{feat.label.padEnd(12)}</b>
+            </text>
+            <text fg={terminalColors.textMuted}>{feat.description}</text>
+          </box>
+        )}
+      </For>
     </box>
   );
 }

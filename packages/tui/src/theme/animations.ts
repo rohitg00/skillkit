@@ -147,3 +147,152 @@ export function scrambleText(
 export function getStaggerDelay(index: number, stagger: number = 100): number {
   return index * stagger;
 }
+
+/**
+ * New animation presets (Phase 1.4)
+ */
+export const interactionAnimations = {
+  /**
+   * Element appearance animation
+   */
+  fadeIn: {
+    duration: 200,
+    ease: 'easeOutQuad' as EasingFunction,
+  },
+
+  /**
+   * Element disappear animation
+   */
+  fadeOut: {
+    duration: 150,
+    ease: 'easeInQuad' as EasingFunction,
+  },
+
+  /**
+   * Detail pane slide in from right
+   */
+  slideInRight: {
+    duration: 250,
+    ease: 'easeOutCubic' as EasingFunction,
+  },
+
+  /**
+   * Detail pane slide out to right
+   */
+  slideOutRight: {
+    duration: 200,
+    ease: 'easeInCubic' as EasingFunction,
+  },
+
+  /**
+   * Hover state transition
+   */
+  hover: {
+    duration: 100,
+    ease: 'easeOutQuad' as EasingFunction,
+  },
+
+  /**
+   * Button press feedback
+   */
+  press: {
+    duration: 50,
+    ease: 'easeOutQuad' as EasingFunction,
+  },
+
+  /**
+   * Typewriter text reveal (per character)
+   */
+  typewriter: {
+    duration: 30,
+    ease: 'linear' as EasingFunction,
+  },
+} as const;
+
+/**
+ * Animation timing constants
+ */
+export const ANIMATION_DURATIONS = {
+  instant: 0,
+  fast: 100,
+  normal: 200,
+  slow: 400,
+  verySlow: 800,
+} as const;
+
+/**
+ * Frame rate constants
+ */
+export const FRAME_RATE = {
+  fps60: 1000 / 60,
+  fps30: 1000 / 30,
+  fps24: 1000 / 24,
+} as const;
+
+/**
+ * Spinner frame animations
+ */
+export const SPINNER_FRAMES = {
+  braille: ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'],
+  dots: ['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'],
+  line: ['|', '/', '-', '\\'],
+  arrow: ['←', '↖', '↑', '↗', '→', '↘', '↓', '↙'],
+  bounce: ['⠁', '⠂', '⠄', '⠂'],
+  pulse: ['◐', '◓', '◑', '◒'],
+} as const;
+
+/**
+ * Progress bar characters
+ */
+export const PROGRESS_CHARS = {
+  filled: '█',
+  empty: '░',
+  partial: ['▏', '▎', '▍', '▌', '▋', '▊', '▉'],
+} as const;
+
+/**
+ * Create a spring animation curve
+ */
+export function springCurve(
+  progress: number,
+  tension: number = 0.5,
+  friction: number = 0.5
+): number {
+  const p = progress;
+  const oscillation = Math.sin(p * Math.PI * (1 + tension * 4));
+  const damping = Math.exp(-p * friction * 6);
+  return 1 - damping * oscillation * (1 - p);
+}
+
+/**
+ * Create a bounce animation curve
+ */
+export function bounceCurve(progress: number): number {
+  const n1 = 7.5625;
+  const d1 = 2.75;
+  let p = progress;
+
+  if (p < 1 / d1) {
+    return n1 * p * p;
+  } else if (p < 2 / d1) {
+    return n1 * (p -= 1.5 / d1) * p + 0.75;
+  } else if (p < 2.5 / d1) {
+    return n1 * (p -= 2.25 / d1) * p + 0.9375;
+  } else {
+    return n1 * (p -= 2.625 / d1) * p + 0.984375;
+  }
+}
+
+/**
+ * Interpolate between two values
+ */
+export function lerp(start: number, end: number, progress: number): number {
+  return start + (end - start) * progress;
+}
+
+/**
+ * Clamp a value between min and max
+ */
+export function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}

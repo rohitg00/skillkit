@@ -1,8 +1,4 @@
-/**
- * StatsCard Component
- * OpenSync-style stats display with optional animations
- */
-import { useState, useEffect } from 'react';
+import { createSignal, createEffect, onCleanup, For } from 'solid-js';
 import { terminalColors } from '../theme/colors.js';
 import { animations } from '../theme/animations.js';
 
@@ -17,27 +13,26 @@ interface StatsCardProps {
   animated?: boolean;
 }
 
-export function StatsCard({ items, animated = true }: StatsCardProps) {
-  const [displayValues, setDisplayValues] = useState<number[]>(() =>
-    animated ? items.map(() => 0) : items.map((item) => item.value)
+export function StatsCard(props: StatsCardProps) {
+  const animated = () => props.animated ?? true;
+
+  const [displayValues, setDisplayValues] = createSignal<number[]>(
+    animated() ? props.items.map(() => 0) : props.items.map((item) => item.value)
   );
-  const [animComplete, setAnimComplete] = useState(!animated);
-  const [prevItemsLength, setPrevItemsLength] = useState(items.length);
+  const [animComplete, setAnimComplete] = createSignal(!animated());
 
-  useEffect(() => {
-    if (items.length !== prevItemsLength) {
-      setPrevItemsLength(items.length);
-      setDisplayValues(animated ? items.map(() => 0) : items.map((item) => item.value));
-      setAnimComplete(!animated);
-    }
-  }, [items, prevItemsLength, animated]);
+  createEffect(() => {
+    const newValues = animated() ? props.items.map(() => 0) : props.items.map((item) => item.value);
+    setDisplayValues(newValues);
+    setAnimComplete(!animated());
+  });
 
-  useEffect(() => {
-    if (!animated || animComplete) return;
+  createEffect(() => {
+    if (!animated() || animComplete()) return;
 
     const duration = animations.countUp.duration;
     const startTime = Date.now();
-    const targetValues = items.map((item) => item.value);
+    const targetValues = props.items.map((item) => item.value);
     const frameInterval = 16;
 
     const intervalId = setInterval(() => {
@@ -45,10 +40,7 @@ export function StatsCard({ items, animated = true }: StatsCardProps) {
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 4);
 
-      const newValues = targetValues.map((target) =>
-        Math.round(target * eased)
-      );
-
+      const newValues = targetValues.map((target) => Math.round(target * eased));
       setDisplayValues(newValues);
 
       if (progress >= 1) {
@@ -57,32 +49,31 @@ export function StatsCard({ items, animated = true }: StatsCardProps) {
       }
     }, frameInterval);
 
-    return () => clearInterval(intervalId);
-  }, [animated, animComplete, items]);
+    onCleanup(() => clearInterval(intervalId));
+  });
 
   return (
     <box flexDirection="row" gap={2}>
-      {items.map((item, index) => {
-        const fg = item.color
-          ? terminalColors[item.color]
-          : terminalColors.text;
+      <For each={props.items}>
+        {(item, index) => {
+          const fg = () => (item.color ? terminalColors[item.color] : terminalColors.text);
 
-        return (
-          <box
-            key={item.label}
-            flexDirection="column"
-            alignItems="center"
-            padding={2}
-            borderStyle="single"
-            borderColor={terminalColors.border}
-          >
-            <text fg={fg}>
-              <b>{String(displayValues[index])}</b>
-            </text>
-            <text fg={terminalColors.textMuted}>{item.label}</text>
-          </box>
-        );
-      })}
+          return (
+            <box
+              flexDirection="column"
+              alignItems="center"
+              padding={2}
+              borderStyle="single"
+              borderColor={terminalColors.border}
+            >
+              <text fg={fg()}>
+                <b>{String(displayValues()[index()])}</b>
+              </text>
+              <text fg={terminalColors.textMuted}>{item.label}</text>
+            </box>
+          );
+        }}
+      </For>
     </box>
   );
 }

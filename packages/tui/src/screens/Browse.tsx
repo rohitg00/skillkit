@@ -1,7 +1,19 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useKeyboard } from '@opentui/react';
-import { type Screen, DEFAULT_REPOS } from '../state/index.js';
+import { createSignal, createEffect, createMemo, Show, For } from 'solid-js';
+import { useKeyboard } from '@opentui/solid';
+import {
+  type Screen,
+  DEFAULT_REPOS,
+  getMarketplaceRepos,
+  fetchRepoSkills,
+  type FetchedSkill,
+  type RepoInfo,
+} from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
+import { Header } from '../components/Header.js';
+import { Spinner } from '../components/Spinner.js';
+import { EmptyState, ErrorState } from '../components/EmptyState.js';
+import { DetailPane } from '../components/DetailPane.js';
+import { StatusIndicator } from '../components/StatusIndicator.js';
 
 interface BrowseProps {
   onNavigate: (screen: Screen) => void;
@@ -9,55 +21,136 @@ interface BrowseProps {
   rows?: number;
 }
 
-export function Browse({ onNavigate, cols = 80, rows = 24 }: BrowseProps) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchMode, setSearchMode] = useState(false);
-  const [animPhase, setAnimPhase] = useState(0);
+interface RepoWithSkills extends RepoInfo {
+  skills: FetchedSkill[];
+  loading: boolean;
+  error: string | null;
+}
 
-  const isCompact = cols < 60;
-  const contentWidth = Math.max(1, Math.min(cols - 4, 60));
+export function Browse(props: BrowseProps) {
+  const [repos, setRepos] = createSignal<RepoWithSkills[]>([]);
+  const [selectedIndex, setSelectedIndex] = createSignal(0);
+  const [searchQuery, setSearchQuery] = createSignal('');
+  const [searchMode, setSearchMode] = createSignal(false);
+  const [showSkills, setShowSkills] = createSignal(false);
+  const [loading, setLoading] = createSignal(true);
+  const [error, setError] = createSignal<string | null>(null);
 
-  // Entrance animation
-  useEffect(() => {
-    if (animPhase >= 2) return;
-    const timer = setTimeout(() => setAnimPhase(p => p + 1), 100);
-    return () => clearTimeout(timer);
-  }, [animPhase]);
+  const cols = () => props.cols ?? 80;
+  const rows = () => props.rows ?? 24;
+  const contentWidth = () => Math.max(1, Math.min(cols() - 4, 60));
 
-  const repos = useMemo(() =>
-    DEFAULT_REPOS.map((r) => ({
-      name: r.name,
-      source: r.source,
-    })),
-    []
-  );
+  createEffect(() => {
+    loadData();
+  });
 
-  const filteredRepos = useMemo(() =>
-    searchQuery
-      ? repos.filter(
-          (r) =>
-            r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            r.source.toLowerCase().includes(searchQuery.toLowerCase())
+  const loadData = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const marketplaceRepos = getMarketplaceRepos();
+      const reposWithState: RepoWithSkills[] = marketplaceRepos.map((repo) => ({
+        ...repo,
+        skills: [],
+        loading: false,
+        error: null,
+      }));
+      setRepos(reposWithState);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load repos');
+    }
+
+    setLoading(false);
+  };
+
+  const loadRepoSkills = async (index: number) => {
+    const repo = repos()[index];
+    if (!repo || repo.skills.length > 0 || repo.loading) return;
+
+    setRepos((prev) =>
+      prev.map((r, i) => (i === index ? { ...r, loading: true, error: null } : r))
+    );
+
+    try {
+      const result = await fetchRepoSkills(repo.source, DEFAULT_REPOS);
+      setRepos((prev) =>
+        prev.map((r, i) =>
+          i === index
+            ? {
+                ...r,
+                skills: result.skills,
+                loading: false,
+                error: result.error || null,
+              }
+            : r
         )
-      : repos,
-    [repos, searchQuery]
-  );
+      );
+    } catch (err) {
+      setRepos((prev) =>
+        prev.map((r, i) =>
+          i === index
+            ? {
+                ...r,
+                loading: false,
+                error: err instanceof Error ? err.message : 'Failed to fetch',
+              }
+            : r
+        )
+      );
+    }
+  };
 
-  const handleKeyNav = useCallback((delta: number) => {
-    setSelectedIndex(prev => Math.max(0, Math.min(prev + delta, filteredRepos.length - 1)));
-  }, [filteredRepos.length]);
+  const filteredRepos = createMemo(() => {
+    if (!searchQuery()) return repos();
+
+    const query = searchQuery().toLowerCase();
+    return repos().filter(
+      (r) =>
+        r.name.toLowerCase().includes(query) ||
+        r.source.toLowerCase().includes(query)
+    );
+  });
+
+  const maxVisible = () => Math.max(5, rows() - 12);
+  const startIdx = () =>
+    Math.max(
+      0,
+      Math.min(
+        selectedIndex() - Math.floor(maxVisible() / 2),
+        filteredRepos().length - maxVisible()
+      )
+    );
+  const visibleRepos = () =>
+    filteredRepos().slice(startIdx(), startIdx() + maxVisible());
+
+  const handleKeyNav = (delta: number) => {
+    const max = filteredRepos().length - 1;
+    setSelectedIndex((prev) => Math.max(0, Math.min(prev + delta, max)));
+  };
+
+  const handleOpenRepo = () => {
+    const repo = filteredRepos()[selectedIndex()];
+    if (repo) {
+      loadRepoSkills(selectedIndex());
+      setShowSkills(true);
+    }
+  };
 
   useKeyboard((key: { name?: string; sequence?: string }) => {
-    if (searchMode) {
+    if (searchMode()) {
       if (key.name === 'escape') {
         setSearchMode(false);
       } else if (key.name === 'backspace') {
-        setSearchQuery(prev => prev.slice(0, -1));
+        setSearchQuery((prev) => prev.slice(0, -1));
       } else if (key.name === 'return') {
         setSearchMode(false);
-      } else if (key.sequence && key.sequence.length === 1 && /[a-zA-Z0-9\-_.]/.test(key.sequence)) {
-        setSearchQuery(prev => prev + key.sequence);
+      } else if (
+        key.sequence &&
+        key.sequence.length === 1 &&
+        /[a-zA-Z0-9\-_.]/.test(key.sequence)
+      ) {
+        setSearchQuery((prev) => prev + key.sequence);
         setSelectedIndex(0);
       }
       return;
@@ -66,114 +159,189 @@ export function Browse({ onNavigate, cols = 80, rows = 24 }: BrowseProps) {
     if (key.name === 'j' || key.name === 'down') handleKeyNav(1);
     else if (key.name === 'k' || key.name === 'up') handleKeyNav(-1);
     else if (key.sequence === '/') setSearchMode(true);
-    else if (key.name === 'return') {
-      const repo = filteredRepos[selectedIndex];
-      if (repo) {
-        // Open/view the selected repo (navigate to installed to see skills from this repo)
-        onNavigate('installed');
-      }
+    else if (key.name === 'return') handleOpenRepo();
+    else if (key.name === 'r') loadData();
+    else if (key.name === 'escape') {
+      if (showSkills()) setShowSkills(false);
+      else if (searchQuery()) setSearchQuery('');
+      else props.onNavigate('home');
     }
-    else if (key.name === 'escape') onNavigate('home');
   });
 
-  useEffect(() => {
-    if (selectedIndex >= filteredRepos.length && filteredRepos.length > 0) {
-      setSelectedIndex(filteredRepos.length - 1);
+  createEffect(() => {
+    if (selectedIndex() >= filteredRepos().length && filteredRepos().length > 0) {
+      setSelectedIndex(filteredRepos().length - 1);
     }
-  }, [filteredRepos.length, selectedIndex]);
+  });
 
-  // Calculate visible repos
-  const maxVisible = Math.max(5, rows - 10);
-  const startIdx = Math.max(0, Math.min(selectedIndex - Math.floor(maxVisible / 2), filteredRepos.length - maxVisible));
-  const visibleRepos = filteredRepos.slice(startIdx, startIdx + maxVisible);
+  const selectedRepo = () => {
+    const repoList = filteredRepos();
+    if (repoList.length === 0) return null;
+    return repoList[selectedIndex()];
+  };
 
-  const divider = useMemo(() =>
-    <text fg={terminalColors.textMuted}>{'─'.repeat(contentWidth)}</text>,
-    [contentWidth]
-  );
+  const repoDetailFields = () => {
+    const repo = selectedRepo();
+    if (!repo) return [];
 
-  const shortcuts = isCompact
-    ? 'j/k nav   enter open   / search   esc back'
-    : 'j/k navigate   enter open   / search   esc back';
+    return [
+      { label: 'Name', value: repo.name },
+      { label: 'Source', value: repo.source },
+      { label: 'Skills', value: String(repo.skills.length) },
+      {
+        label: 'Status',
+        value: repo.loading ? 'Loading...' : repo.error ? 'Error' : 'Ready',
+      },
+    ];
+  };
 
   return (
-    <box flexDirection="column" padding={1}>
-      {/* Header */}
-      {animPhase >= 1 && (
-        <box flexDirection="column">
-          <box flexDirection="row" justifyContent="space-between" width={contentWidth}>
-            <text fg={terminalColors.browse}>⌕ Browse</text>
-            <text fg={terminalColors.textMuted}>{filteredRepos.length} repos</text>
-          </box>
-          <text fg={terminalColors.textMuted}>explore skill repositories</text>
-          <text> </text>
+    <box flexDirection="column" paddingLeft={1}>
+      <Header
+        title="Browse"
+        subtitle="Explore skill repositories"
+        icon="⌕"
+        count={repos().length}
+      />
+
+      <Show when={error()}>
+        <ErrorState
+          message={error()!}
+          action={{ label: 'Retry', key: 'r' }}
+          compact
+        />
+      </Show>
+
+      <Show when={loading()}>
+        <Spinner label="Loading repositories..." />
+      </Show>
+
+      <Show when={!loading() && !error()}>
+        <box flexDirection="row" marginBottom={1}>
+          <text fg={terminalColors.textMuted}>/ </text>
+          <text
+            fg={
+              searchQuery() || searchMode()
+                ? terminalColors.text
+                : terminalColors.textMuted
+            }
+          >
+            {searchQuery() || (searchMode() ? '|' : 'type to filter...')}
+          </text>
         </box>
-      )}
 
-      {/* Search */}
-      {animPhase >= 2 && (
-        <box flexDirection="column">
-          {divider}
-          <text> </text>
-          <box flexDirection="row">
-            <text fg={terminalColors.textMuted}>/ </text>
-            <text fg={searchQuery ? terminalColors.text : terminalColors.textMuted}>
-              {searchQuery || 'type to filter...'}
-            </text>
+        <text fg={terminalColors.textMuted}>─────────────────────────────────────────────</text>
+        <text> </text>
+
+        <box flexDirection="row">
+          <box flexDirection="column" flexGrow={1}>
+            <Show
+              when={filteredRepos().length > 0}
+              fallback={
+                <EmptyState
+                  icon="⌕"
+                  title="No repositories found"
+                  description={
+                    searchQuery()
+                      ? 'Try a different search term'
+                      : 'No repositories configured'
+                  }
+                />
+              }
+            >
+              <text fg={terminalColors.text}>
+                <b>Repositories</b>{' '}
+                <text fg={terminalColors.textMuted}>
+                  ({filteredRepos().length})
+                </text>
+              </text>
+              <text> </text>
+
+              <For each={visibleRepos()}>
+                {(repo, idx) => {
+                  const actualIdx = () => startIdx() + idx();
+                  const selected = () => actualIdx() === selectedIndex();
+                  return (
+                    <box flexDirection="row" marginBottom={1}>
+                      <text
+                        fg={selected() ? terminalColors.accent : terminalColors.text}
+                        width={3}
+                      >
+                        {selected() ? '▸ ' : '  '}
+                      </text>
+                      <text
+                        fg={selected() ? terminalColors.accent : terminalColors.text}
+                        width={25}
+                      >
+                        {repo.name}
+                      </text>
+                      <text fg={terminalColors.textMuted} width={10}>
+                        {repo.skills.length > 0
+                          ? `${repo.skills.length} skills`
+                          : repo.loading
+                            ? 'loading...'
+                            : ''}
+                      </text>
+                      <Show when={repo.error}>
+                        <text fg={terminalColors.error}>✗</text>
+                      </Show>
+                    </box>
+                  );
+                }}
+              </For>
+
+              <Show when={filteredRepos().length > maxVisible()}>
+                <text fg={terminalColors.textMuted}>
+                  showing {startIdx() + 1}-
+                  {Math.min(startIdx() + maxVisible(), filteredRepos().length)} of{' '}
+                  {filteredRepos().length}
+                </text>
+              </Show>
+            </Show>
           </box>
-          <text> </text>
-          {divider}
-          <text> </text>
-        </box>
-      )}
 
-      {/* Repository list */}
-      {animPhase >= 2 && (
-        <box flexDirection="column">
-          <text fg={terminalColors.text}>Repositories</text>
-          <text> </text>
-
-          {filteredRepos.length === 0 ? (
-            <text fg={terminalColors.textMuted}>No repositories match your search</text>
-          ) : (
-            <box flexDirection="column">
-              {visibleRepos.map((repo, idx) => {
-                const actualIdx = startIdx + idx;
-                const selected = actualIdx === selectedIndex;
-                const indicator = selected ? '▸' : ' ';
-                // Truncate source if needed - clamp to avoid negative slicing
-                const maxSourceLen = Math.max(0, contentWidth - repo.name.length - 6);
-                const displaySource = maxSourceLen > 3 && repo.source.length > maxSourceLen
-                  ? repo.source.slice(0, maxSourceLen - 3) + '...'
-                  : repo.source;
-                // Use single text element to avoid rendering overlap issues
-                const line = `${indicator}${repo.name} · ${displaySource}`;
-                return (
-                  <text key={repo.source} fg={selected ? terminalColors.accent : terminalColors.text}>
-                    {line}
+          <Show when={showSkills() && selectedRepo()}>
+            <DetailPane
+              title={selectedRepo()!.name}
+              subtitle={`${selectedRepo()!.skills.length} skills`}
+              icon="⌕"
+              fields={repoDetailFields()}
+              actions={[
+                { key: 'Enter', label: 'Install' },
+                { key: 'Esc', label: 'Close' },
+              ]}
+              width={35}
+              visible={showSkills()}
+              onClose={() => setShowSkills(false)}
+            >
+              <Show when={selectedRepo()!.loading}>
+                <StatusIndicator status="loading" label="Loading skills..." />
+              </Show>
+              <Show when={selectedRepo()!.skills.length > 0}>
+                <text fg={terminalColors.text}>
+                  <b>Skills:</b>
+                </text>
+                <For each={selectedRepo()!.skills.slice(0, 5)}>
+                  {(skill) => (
+                    <text fg={terminalColors.textSecondary}>• {skill.name}</text>
+                  )}
+                </For>
+                <Show when={selectedRepo()!.skills.length > 5}>
+                  <text fg={terminalColors.textMuted}>
+                    +{selectedRepo()!.skills.length - 5} more
                   </text>
-                );
-              })}
-            </box>
-          )}
-
-          {/* Scroll indicator */}
-          {filteredRepos.length > maxVisible && (
-            <text fg={terminalColors.textMuted}>
-              {'\n'}showing {startIdx + 1}-{Math.min(startIdx + maxVisible, filteredRepos.length)} of {filteredRepos.length}
-            </text>
-          )}
-          <text> </text>
+                </Show>
+              </Show>
+            </DetailPane>
+          </Show>
         </box>
-      )}
 
-      {/* Footer */}
-      {animPhase >= 2 && (
-        <box flexDirection="column">
-          {divider}
-          <text fg={terminalColors.textMuted}>{shortcuts}</text>
-        </box>
-      )}
+        <text> </text>
+        <text fg={terminalColors.textMuted}>─────────────────────────────────────────────</text>
+        <text fg={terminalColors.textMuted}>
+          j/k navigate  Enter open  / search  r refresh  Esc back
+        </text>
+      </Show>
     </box>
   );
 }

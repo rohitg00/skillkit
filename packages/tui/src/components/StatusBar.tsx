@@ -1,7 +1,4 @@
-/**
- * StatusBar Component
- * Bottom status bar with keyboard shortcuts
- */
+import { Show } from 'solid-js';
 import { terminalColors } from '../theme/colors.js';
 import { STATUS_BAR_SHORTCUTS } from '../state/types.js';
 
@@ -11,11 +8,10 @@ interface StatusBarProps {
   shortcuts?: string;
 }
 
-export function StatusBar({
-  message,
-  messageType = 'info',
-  shortcuts = STATUS_BAR_SHORTCUTS,
-}: StatusBarProps) {
+export function StatusBar(props: StatusBarProps) {
+  const messageType = () => props.messageType ?? 'info';
+  const shortcuts = () => props.shortcuts ?? STATUS_BAR_SHORTCUTS;
+
   const messageColors = {
     info: terminalColors.info,
     success: terminalColors.success,
@@ -25,14 +21,10 @@ export function StatusBar({
 
   return (
     <box flexDirection="column">
-      <text fg={terminalColors.textMuted}>
-        {'\u2500'.repeat(70)}
-      </text>
-      {message ? (
-        <text fg={messageColors[messageType]}>{message}</text>
-      ) : (
-        <text fg={terminalColors.textMuted}>{shortcuts}</text>
-      )}
+      <text fg={terminalColors.textMuted}>{'\u2500'.repeat(70)}</text>
+      <Show when={props.message} fallback={<text fg={terminalColors.textMuted}>{shortcuts()}</text>}>
+        <text fg={messageColors[messageType()]}>{props.message}</text>
+      </Show>
     </box>
   );
 }

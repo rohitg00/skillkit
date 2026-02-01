@@ -1,40 +1,47 @@
 import { createCliRenderer } from '@opentui/core';
-import { createRoot } from '@opentui/react';
+import { render } from '@opentui/solid';
 import { App } from './App.js';
 
-let rootInstance: ReturnType<typeof createRoot> | null = null;
+let isRunning = true;
+let renderer: Awaited<ReturnType<typeof createCliRenderer>> | null = null;
 
 export function exitTUI(code = 0): void {
+  if (!isRunning) return;
+  isRunning = false;
+
   try {
-    // Unmount React tree first
-    if (rootInstance) {
-      try {
-        rootInstance.unmount();
-      } catch {
-        // Ignore unmount errors
-      }
-      rootInstance = null;
+    if (renderer && 'dispose' in renderer) {
+      (renderer as { dispose?: () => void }).dispose?.();
     }
+  } catch {}
 
-    // Restore terminal state: exit alt screen, show cursor, reset attributes, clear
+  try {
     process.stdout.write('\x1b[?1049l\x1b[?25h\x1b[0m\x1b[H\x1b[2J');
-  } catch {
-    // Ignore write errors
-  }
+  } catch {}
 
-  // Use setImmediate to allow any pending operations to complete
   setImmediate(() => process.exit(code));
 }
 
 export async function startTUI(): Promise<never> {
-  // Setup signal handlers for clean exit
-  const handleSignal = () => exitTUI(0);
-  process.on('SIGINT', handleSignal);
-  process.on('SIGTERM', handleSignal);
+  process.on('SIGINT', () => exitTUI(0));
+  process.on('SIGTERM', () => exitTUI(0));
+  process.on('uncaughtException', (err) => {
+    console.error('TUI Error:', err.message);
+    exitTUI(1);
+  });
+  process.on('unhandledRejection', (err) => {
+    console.error('TUI Error:', err);
+    exitTUI(1);
+  });
 
-  const renderer = await createCliRenderer({ exitOnCtrlC: false });
-  rootInstance = createRoot(renderer);
-  rootInstance.render(<App onExit={exitTUI} />);
+  renderer = await createCliRenderer({
+    exitOnCtrlC: false,
+    useMouse: true,
+    enableMouseMovement: true,
+  });
+
+  render(() => <App onExit={exitTUI} />, renderer);
+
   return new Promise(() => {});
 }
 
@@ -45,3 +52,8 @@ export * from './state/index.js';
 export * from './utils/index.js';
 export * from './components/index.js';
 export * from './screens/index.js';
+export * from './context/index.js';
+export * from './themes/index.js';
+export * from './ui/index.js';
+export * from './hooks/index.js';
+export * from './services/index.js';

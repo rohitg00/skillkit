@@ -1,39 +1,28 @@
-/**
- * Splash Component
- * Cinematic ASCII art intro with elegant animations
- * Premium terminal experience
- */
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { createSignal, createEffect, onCleanup, createMemo, Show, For } from 'solid-js';
 import { terminalColors } from '../theme/colors.js';
 import { getVersion } from '../utils/helpers.js';
 
-// Premium ASCII art logo - clean geometric design
 const LOGO_FRAMES = [
-  // Frame 1 - Dots appear
   [
     '                                          ',
     '   ·  · ·  · · ·  · ·  · ·  · ·  · · ·   ',
     '                                          ',
   ],
-  // Frame 2 - Lines form
   [
     '                                          ',
     '   ━━━  ━  ━  ━  ━     ━     ━  ━  ━━━   ',
     '                                          ',
   ],
-  // Frame 3 - Structure emerges
   [
     '   ┌──┐ ┬ ┌─ ┬ ┬   ┬   ┬ ┌─ ┬ ┌─┐       ',
     '   └──┐ │ │  │ │   │   │ │  │  │        ',
     '   └──┘ ┴ └─ ┴ ┴─┘ ┴─┘ ┴ └─ ┴  ┴        ',
   ],
-  // Frame 4 - Bold letters
   [
     '   ╔═╗ ╦╔═ ╦ ╦   ╦   ╦╔═ ╦╔╦╗            ',
     '   ╚═╗ ╠╩╗ ║ ║   ║   ╠╩╗ ║ ║             ',
     '   ╚═╝ ╩ ╩ ╩ ╩═╝ ╩═╝ ╩ ╩ ╩ ╩             ',
   ],
-  // Frame 5 - Final premium logo
   [
     '   ███████╗██╗  ██╗██╗██╗     ██╗     ██╗  ██╗██╗████████╗',
     '   ██╔════╝██║ ██╔╝██║██║     ██║     ██║ ██╔╝██║╚══██╔══╝',
@@ -44,24 +33,20 @@ const LOGO_FRAMES = [
   ],
 ];
 
-// Compact logo for smaller terminals
 const LOGO_SMALL = [
   ' ╔═╗╦╔═╦╦  ╦  ╦╔═╦╔╦╗ ',
   ' ╚═╗╠╩╗║║  ║  ╠╩╗║ ║  ',
   ' ╚═╝╩ ╩╩╩═╝╩═╝╩ ╩╩ ╩  ',
 ];
 
-// Elegant spinner frames
 const SPINNER = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
-// Progress bar characters
 const PROGRESS = {
   empty: '░',
   filled: '█',
   head: '▓',
 };
 
-// Loading phases with elegant messaging
 const PHASES = [
   { message: 'Initializing', detail: 'skill engine' },
   { message: 'Connecting', detail: 'agent network' },
@@ -75,48 +60,48 @@ interface SplashProps {
   duration?: number;
 }
 
-export function Splash({ onComplete, duration = 3500 }: SplashProps) {
-  const [frame, setFrame] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [spinnerFrame, setSpinnerFrame] = useState(0);
-  const [phase, setPhase] = useState(0);
-  const [fadeIn, setFadeIn] = useState(0);
-  const [particles, setParticles] = useState<string[]>([]);
+export function Splash(props: SplashProps) {
+  const [frame, setFrame] = createSignal(0);
+  const [progress, setProgress] = createSignal(0);
+  const [spinnerFrame, setSpinnerFrame] = createSignal(0);
+  const [phase, setPhase] = createSignal(0);
+  const [fadeIn, setFadeIn] = createSignal(0);
+  const [particles, setParticles] = createSignal<string[]>([]);
 
-  // Cache version to avoid repeated sync file I/O on every render
-  const version = useMemo(() => getVersion(), []);
+  const version = createMemo(() => getVersion());
   const cols = process.stdout.columns || 80;
   const rows = process.stdout.rows || 24;
   const useSmallLogo = cols < 70;
-  const currentLogo = useSmallLogo ? LOGO_SMALL : (LOGO_FRAMES[Math.min(frame, 4)] || LOGO_FRAMES[4]);
-  const maxWidth = Math.max(...currentLogo.map(l => l.length));
 
-  // Generate ambient particles - returns fresh randomized string each call
-  const generateParticles = useCallback(() => {
+  const currentLogo = () => {
+    return useSmallLogo ? LOGO_SMALL : (LOGO_FRAMES[Math.min(frame(), 4)] || LOGO_FRAMES[4]);
+  };
+
+  const maxWidth = () => Math.max(...currentLogo().map((l) => l.length));
+
+  const generateParticles = () => {
     const chars = ['·', '∙', '•', '○', '◦', '◌', '◍', '◎'];
-    return Array(cols).fill(0).map(() =>
-      Math.random() > 0.97 ? chars[Math.floor(Math.random() * chars.length)] : ' '
-    ).join('');
-  }, [cols]);
+    return Array(cols)
+      .fill(0)
+      .map(() => (Math.random() > 0.97 ? chars[Math.floor(Math.random() * chars.length)] : ' '))
+      .join('');
+  };
 
-  // Logo reveal animation
-  useEffect(() => {
-    if (frame >= 4) return;
-    const timer = setTimeout(() => setFrame(f => f + 1), 200);
-    return () => clearTimeout(timer);
-  }, [frame]);
+  createEffect(() => {
+    if (frame() >= 4) return;
+    const timer = setTimeout(() => setFrame((f) => f + 1), 200);
+    onCleanup(() => clearTimeout(timer));
+  });
 
-  // Fade in effect
-  useEffect(() => {
-    if (fadeIn >= 10) return;
-    const timer = setTimeout(() => setFadeIn(f => f + 1), 50);
-    return () => clearTimeout(timer);
-  }, [fadeIn]);
+  createEffect(() => {
+    if (fadeIn() >= 10) return;
+    const timer = setTimeout(() => setFadeIn((f) => f + 1), 50);
+    onCleanup(() => clearTimeout(timer));
+  });
 
-  // Progress animation
-  useEffect(() => {
+  createEffect(() => {
     const interval = setInterval(() => {
-      setProgress(p => {
+      setProgress((p) => {
         const newProgress = p + (Math.random() * 3 + 1);
         if (newProgress >= 100) {
           clearInterval(interval);
@@ -125,137 +110,130 @@ export function Splash({ onComplete, duration = 3500 }: SplashProps) {
         return newProgress;
       });
     }, 50);
-    return () => clearInterval(interval);
-  }, []);
+    onCleanup(() => clearInterval(interval));
+  });
 
-  // Phase progression
-  useEffect(() => {
-    const phaseProgress = progress / 20;
+  createEffect(() => {
+    const phaseProgress = progress() / 20;
     setPhase(Math.min(Math.floor(phaseProgress), PHASES.length - 1));
-  }, [progress]);
+  });
 
-  // Spinner animation
-  useEffect(() => {
+  createEffect(() => {
     const interval = setInterval(() => {
-      setSpinnerFrame(f => (f + 1) % SPINNER.length);
+      setSpinnerFrame((f) => (f + 1) % SPINNER.length);
     }, 80);
-    return () => clearInterval(interval);
-  }, []);
+    onCleanup(() => clearInterval(interval));
+  });
 
-  // Particle animation
-  useEffect(() => {
+  createEffect(() => {
     const interval = setInterval(() => {
-      setParticles(prev => {
+      setParticles((prev) => {
         const newParticles = [...prev];
         if (newParticles.length > 3) newParticles.shift();
         newParticles.push(generateParticles());
         return newParticles;
       });
     }, 150);
-    return () => clearInterval(interval);
-  }, [generateParticles]);
+    onCleanup(() => clearInterval(interval));
+  });
 
-  // Auto-complete
-  useEffect(() => {
-    const timer = setTimeout(onComplete, duration);
-    return () => clearTimeout(timer);
-  }, [onComplete, duration]);
+  createEffect(() => {
+    const timer = setTimeout(props.onComplete, props.duration ?? 3500);
+    onCleanup(() => clearTimeout(timer));
+  });
 
-  const pad = ' '.repeat(Math.max(0, Math.floor((cols - maxWidth) / 2)));
+  const pad = () => ' '.repeat(Math.max(0, Math.floor((cols - maxWidth()) / 2)));
   const progressWidth = Math.max(1, Math.min(40, cols - 20));
   const progressPad = ' '.repeat(Math.max(0, Math.floor((cols - progressWidth) / 2)));
 
-  const filledWidth = Math.min(Math.floor((progress / 100) * progressWidth), progressWidth);
-  const emptyWidth = Math.max(0, progressWidth - filledWidth - 1);
-  const progressBar = PROGRESS.filled.repeat(filledWidth) +
-    (filledWidth < progressWidth ? PROGRESS.head : '') +
-    PROGRESS.empty.repeat(emptyWidth);
+  const filledWidth = () => Math.min(Math.floor((progress() / 100) * progressWidth), progressWidth);
+  const emptyWidth = () => Math.max(0, progressWidth - filledWidth() - 1);
+  const progressBar = () =>
+    PROGRESS.filled.repeat(filledWidth()) +
+    (filledWidth() < progressWidth ? PROGRESS.head : '') +
+    PROGRESS.empty.repeat(emptyWidth());
 
-  const currentPhase = PHASES[phase];
+  const currentPhase = () => PHASES[phase()];
 
   return (
     <box flexDirection="column" height={rows}>
-      {/* Top ambient particles */}
-      <text fg={terminalColors.textMuted}>
-        {particles[0] || ''}
-      </text>
+      <text fg={terminalColors.textMuted}>{particles()[0] || ''}</text>
 
-      {/* Spacer */}
       <box flexGrow={1} />
 
-      {/* Logo */}
       <box flexDirection="column" alignItems="center">
-        {currentLogo.map((line, idx) => (
-          <text key={idx} fg={frame >= 4 ? terminalColors.accent : terminalColors.textMuted}>
-            {frame >= 4 ? <b>{pad}{line}</b> : <>{pad}{line}</>}
-          </text>
-        ))}
+        <For each={currentLogo()}>
+          {(line, idx) => (
+            <text fg={frame() >= 4 ? terminalColors.accent : terminalColors.textMuted}>
+              {frame() >= 4 ? (
+                <b>
+                  {pad()}
+                  {line}
+                </b>
+              ) : (
+                <>
+                  {pad()}
+                  {line}
+                </>
+              )}
+            </text>
+          )}
+        </For>
       </box>
 
-      {/* Tagline with fade-in */}
       <text> </text>
-      {fadeIn > 3 && (
+      <Show when={fadeIn() > 3}>
         <text fg={terminalColors.textSecondary}>
-          {pad}{'  '}universal skills for ai coding agents
+          {pad()}
+          {'  '}universal skills for ai coding agents
         </text>
-      )}
+      </Show>
 
-      {/* Version badge */}
-      {fadeIn > 5 && (
-        <>
-          <text> </text>
-          <text fg={terminalColors.textMuted}>
-            {pad}{'          '}v{version}
-          </text>
-        </>
-      )}
+      <Show when={fadeIn() > 5}>
+        <text> </text>
+        <text fg={terminalColors.textMuted}>
+          {pad()}
+          {'          '}v{version()}
+        </text>
+      </Show>
 
-      {/* Spacer */}
       <text> </text>
       <text> </text>
 
-      {/* Progress section */}
-      {fadeIn > 7 && (
+      <Show when={fadeIn() > 7}>
         <box flexDirection="column" alignItems="center">
-          {/* Status line */}
           <box flexDirection="row">
             <text fg={terminalColors.accent}>
-              {progressPad}{SPINNER[spinnerFrame]}{' '}
+              {progressPad}
+              {SPINNER[spinnerFrame()]}{' '}
             </text>
             <text fg={terminalColors.text}>
-              <b>{currentPhase.message}</b>
+              <b>{currentPhase().message}</b>
             </text>
-            {currentPhase.detail && (
-              <text fg={terminalColors.textMuted}>
-                {' '}{currentPhase.detail}
-              </text>
-            )}
+            <Show when={currentPhase().detail}>
+              <text fg={terminalColors.textMuted}> {currentPhase().detail}</text>
+            </Show>
           </box>
 
-          {/* Progress bar */}
           <text> </text>
           <box flexDirection="row">
             <text fg={terminalColors.textMuted}>{progressPad}[</text>
-            <text fg={terminalColors.accent}>{progressBar}</text>
+            <text fg={terminalColors.accent}>{progressBar()}</text>
             <text fg={terminalColors.textMuted}>]</text>
-            <text fg={terminalColors.textSecondary}>{' '}{Math.floor(progress)}%</text>
+            <text fg={terminalColors.textSecondary}> {Math.floor(progress())}%</text>
           </box>
         </box>
-      )}
+      </Show>
 
-      {/* Spacer */}
       <box flexGrow={1} />
 
-      {/* Bottom hint */}
       <box flexDirection="column" alignItems="center">
         <text fg={terminalColors.textMuted}>
-          {progressPad}{'      '}press any key to skip
+          {progressPad}
+          {'      '}press any key to skip
         </text>
         <text> </text>
-        {/* Bottom particles */}
-        <text fg={terminalColors.textMuted}>
-          {particles[1] || ''}
-        </text>
+        <text fg={terminalColors.textMuted}>{particles()[1] || ''}</text>
       </box>
     </box>
   );

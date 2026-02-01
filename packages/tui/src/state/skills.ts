@@ -9,6 +9,17 @@ import type { SkillItem } from './types.js';
 import type { AgentType } from '@skillkit/core';
 
 /**
+ * Detailed skill info including path for translation
+ */
+export interface SkillWithDetails {
+  name: string;
+  description?: string;
+  path: string;
+  source?: string;
+  enabled: boolean;
+}
+
+/**
  * Skills store state
  */
 export interface SkillsState {
@@ -110,4 +121,26 @@ export function filterSkills(skills: SkillItem[], query: string): SkillItem[] {
       s.description?.toLowerCase().includes(lowerQuery) ||
       s.source?.toLowerCase().includes(lowerQuery)
   );
+}
+
+/**
+ * Load skills with full details including path for translation
+ * @param agentType - Optional agent type to load skills for
+ * @returns Array of skills with path details
+ */
+export function loadSkillsWithDetails(agentType?: AgentType): SkillWithDetails[] {
+  try {
+    const searchDirs = getSearchDirs(agentType);
+    const foundSkills = findAllSkills(searchDirs);
+
+    return foundSkills.map((s) => ({
+      name: s.name,
+      description: s.description,
+      path: s.path,
+      source: s.metadata?.source,
+      enabled: s.enabled,
+    }));
+  } catch {
+    return [];
+  }
 }
