@@ -93,20 +93,10 @@ interface InlineStatusProps {
 
 export function InlineStatus(props: InlineStatusProps) {
   const icon = () => {
-    switch (props.status) {
-      case 'success':
-        return '●';
-      case 'error':
-        return '●';
-      case 'warning':
-        return '●';
-      case 'loading':
-        return '○';
-      case 'pending':
-        return '○';
-      default:
-        return '●';
+    if (props.status === 'loading' || props.status === 'pending') {
+      return '○';
     }
+    return '●';
   };
 
   return <text fg={STATUS_COLORS[props.status]}>{icon()}</text>;

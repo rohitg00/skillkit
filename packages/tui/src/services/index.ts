@@ -42,12 +42,3 @@ export {
   getAgentFormatInfo,
   translatorService,
 } from './translator.service.js';
-
-export { memoryService } from './memory.service.js';
-export { workflowService } from './workflow.service.js';
-export { planService } from './plan.service.js';
-export { pluginService } from './plugin.service.js';
-export { teamService } from './team.service.js';
-export { methodologyService } from './methodology.service.js';
-export { recommendService } from './recommend.service.js';
-export { contextService } from './context.service.js';

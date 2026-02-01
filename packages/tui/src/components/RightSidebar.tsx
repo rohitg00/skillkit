@@ -10,15 +10,11 @@ interface RightSidebarProps {
 const TOP_AGENTS = ['claude-code', 'cursor', 'codex'] as const;
 
 export function RightSidebar(props: RightSidebarProps) {
-  const [sections, setSections] = createSignal({
+  const [sections] = createSignal({
     context: true,
     agents: true,
     tasks: false,
   });
-
-  const toggleSection = (key: keyof ReturnType<typeof sections>) => {
-    setSections((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
 
   return (
     <box
