@@ -232,9 +232,25 @@ function formatAgentName(name: string): string {
 
 /**
  * Escape special characters in YAML strings
+ * Only escapes when necessary for valid YAML parsing
  */
 function escapeYamlString(str: string): string {
-  if (/[:\{\}\[\],&*#?|\-<>=!%@`]/.test(str) || str.includes('\n')) {
+  if (
+    str.includes('\n') ||
+    str.includes(':') ||
+    str.includes('#') ||
+    str.startsWith('-') ||
+    str.startsWith('*') ||
+    str.startsWith('&') ||
+    str.startsWith('!') ||
+    str.startsWith('{') ||
+    str.startsWith('[') ||
+    str.startsWith('>') ||
+    str.startsWith('|') ||
+    str.startsWith('@') ||
+    str.startsWith('`') ||
+    /^['"]/.test(str)
+  ) {
     return `"${str.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`;
   }
   return str;
