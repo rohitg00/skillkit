@@ -209,6 +209,7 @@ function appendYamlList(lines: string[], key: string, items?: string[]): void {
 
 /**
  * Extract body content from skill markdown (without frontmatter)
+ * Handles both Unix (LF) and Windows (CRLF) line endings
  */
 function extractBodyContent(content: string): string {
   const normalized = content.replace(/\r\n/g, '\n');

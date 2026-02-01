@@ -1,10 +1,22 @@
 import { existsSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
-import { join, basename } from 'node:path';
+import { join, basename, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import type { GitProviderAdapter, CloneOptions } from './base.js';
 import { isGitUrl, isLocalPath } from './base.js';
 import type { GitProvider, CloneResult } from '../types.js';
+
+function sanitizeSkillName(name: string): string | null {
+  if (!name || typeof name !== 'string') return null;
+  const base = basename(name);
+  if (base !== name || name.includes('..') || name.includes('/') || name.includes('\\')) {
+    return null;
+  }
+  if (!/^[a-zA-Z0-9._-]+$/.test(name)) {
+    return null;
+  }
+  return name;
+}
 
 export interface WellKnownSkill {
   name: string;
@@ -94,18 +106,31 @@ export class WellKnownProvider implements GitProviderAdapter {
       const baseSkillsUrl = calculateBaseSkillsUrl(foundUrl);
 
       for (const skill of index.skills) {
-        const skillDir = join(tempDir, skill.name);
+        const safeName = sanitizeSkillName(skill.name);
+        if (!safeName) {
+          continue;
+        }
+
+        const skillDir = join(tempDir, safeName);
+        const resolvedSkillDir = resolve(skillDir);
+        const resolvedTempDir = resolve(tempDir);
+
+        if (!resolvedSkillDir.startsWith(resolvedTempDir + '/') && resolvedSkillDir !== resolvedTempDir) {
+          continue;
+        }
+
         mkdirSync(skillDir, { recursive: true });
 
         let hasSkillMd = false;
 
         for (const file of skill.files) {
-          const fileUrl = `${baseSkillsUrl}/${skill.name}/${file}`;
+          const fileUrl = `${baseSkillsUrl}/${encodeURIComponent(skill.name)}/${encodeURIComponent(file)}`;
           try {
             const response = await fetch(fileUrl);
             if (response.ok) {
               const content = await response.text();
-              writeFileSync(join(skillDir, basename(file)), content);
+              const safeFileName = basename(file);
+              writeFileSync(join(skillDir, safeFileName), content);
 
               if (file === 'SKILL.md' || file.endsWith('/SKILL.md')) {
                 hasSkillMd = true;
@@ -117,10 +142,10 @@ export class WellKnownProvider implements GitProviderAdapter {
         }
 
         if (hasSkillMd) {
-          skills.push(skill.name);
+          skills.push(safeName);
           discoveredSkills.push({
-            name: skill.name,
-            dirName: skill.name,
+            name: safeName,
+            dirName: safeName,
             path: skillDir,
           });
         }

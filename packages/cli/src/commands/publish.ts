@@ -1,8 +1,20 @@
 import { existsSync, readFileSync, mkdirSync, writeFileSync, readdirSync, statSync } from 'node:fs';
-import { join, basename, dirname } from 'node:path';
+import { join, basename, dirname, resolve } from 'node:path';
 import chalk from 'chalk';
 import { Command, Option } from 'clipanion';
 import { generateWellKnownIndex, type WellKnownSkill } from '@skillkit/core';
+
+function sanitizeSkillName(name: string): string | null {
+  if (!name || typeof name !== 'string') return null;
+  const base = basename(name);
+  if (base !== name || name.includes('..') || name.includes('/') || name.includes('\\')) {
+    return null;
+  }
+  if (!/^[a-zA-Z0-9._-]+$/.test(name)) {
+    return null;
+  }
+  return name;
+}
 
 interface SkillFrontmatter {
   name?: string;
@@ -61,17 +73,31 @@ export class PublishCommand extends Command {
 
     const wellKnownSkills: WellKnownSkill[] = [];
 
+    const validSkills: Array<{ name: string; safeName: string; description?: string; path: string }> = [];
+
     for (const skill of discoveredSkills) {
+      const safeName = sanitizeSkillName(skill.name);
+      if (!safeName) {
+        console.log(chalk.yellow(`  ${chalk.yellow('⚠')} Skipping "${skill.name}" (invalid name - must be alphanumeric with hyphens/underscores)`));
+        continue;
+      }
+
       const files = this.getSkillFiles(skill.path);
-      console.log(chalk.dim(`  ${chalk.green('●')} ${skill.name}`));
+      console.log(chalk.dim(`  ${chalk.green('●')} ${safeName}`));
       console.log(chalk.dim(`    Description: ${skill.description || 'No description'}`));
       console.log(chalk.dim(`    Files: ${files.join(', ')}`));
 
+      validSkills.push({ name: skill.name, safeName, description: skill.description, path: skill.path });
       wellKnownSkills.push({
-        name: skill.name,
+        name: safeName,
         description: skill.description,
         files,
       });
+    }
+
+    if (validSkills.length === 0) {
+      console.error(chalk.red('\nNo valid skills to publish'));
+      return 1;
     }
 
     console.log('');
@@ -94,14 +120,23 @@ export class PublishCommand extends Command {
     const wellKnownDir = join(outputDir, '.well-known', 'skills');
     mkdirSync(wellKnownDir, { recursive: true });
 
-    for (const skill of discoveredSkills) {
-      const skillDir = join(wellKnownDir, skill.name);
+    for (const skill of validSkills) {
+      const skillDir = join(wellKnownDir, skill.safeName);
+      const resolvedSkillDir = resolve(skillDir);
+      const resolvedWellKnownDir = resolve(wellKnownDir);
+
+      if (!resolvedSkillDir.startsWith(resolvedWellKnownDir)) {
+        console.log(chalk.yellow(`  Skipping "${skill.name}" (path traversal detected)`));
+        continue;
+      }
+
       mkdirSync(skillDir, { recursive: true });
 
       const files = this.getSkillFiles(skill.path);
       for (const file of files) {
+        const safeFile = basename(file);
         const sourcePath = join(skill.path, file);
-        const destPath = join(skillDir, file);
+        const destPath = join(skillDir, safeFile);
         const content = readFileSync(sourcePath, 'utf-8');
         writeFileSync(destPath, content);
       }
