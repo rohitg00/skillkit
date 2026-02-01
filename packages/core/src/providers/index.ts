@@ -4,17 +4,20 @@ import { GitHubProvider } from './github.js';
 import { GitLabProvider } from './gitlab.js';
 import { BitbucketProvider } from './bitbucket.js';
 import { LocalProvider } from './local.js';
+import { WellKnownProvider } from './wellknown.js';
 
 export * from './base.js';
 export * from './github.js';
 export * from './gitlab.js';
 export * from './bitbucket.js';
 export * from './local.js';
+export * from './wellknown.js';
 
 const providers: GitProviderAdapter[] = [
   new LocalProvider(),
   new GitLabProvider(),
   new BitbucketProvider(),
+  new WellKnownProvider(),
   new GitHubProvider(),
 ];
 

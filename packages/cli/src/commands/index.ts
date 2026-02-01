@@ -43,7 +43,7 @@ export { PlanCommand } from './plan.js';
 export { CommandCmd, CommandAvailableCommand, CommandInstallCommand } from './command.js';
 export { AICommand } from './ai.js';
 export { AuditCommand } from './audit.js';
-export { PublishCommand } from './publish.js';
+export { PublishCommand, PublishSubmitCommand } from './publish.js';
 export {
   AgentCommand,
   AgentListCommand,

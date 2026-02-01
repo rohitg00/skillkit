@@ -36,7 +36,7 @@ export const AgentType = z.enum([
 ]);
 export type AgentType = z.infer<typeof AgentType>;
 
-export const GitProvider = z.enum(['github', 'gitlab', 'bitbucket', 'local']);
+export const GitProvider = z.enum(['github', 'gitlab', 'bitbucket', 'local', 'wellknown']);
 export type GitProvider = z.infer<typeof GitProvider>;
 
 export const SkillFrontmatter = z.object({
