@@ -36,9 +36,7 @@ export function Browse(props: BrowseProps) {
   const [loading, setLoading] = createSignal(true);
   const [error, setError] = createSignal<string | null>(null);
 
-  const cols = () => props.cols ?? 80;
   const rows = () => props.rows ?? 24;
-  const contentWidth = () => Math.max(1, Math.min(cols() - 4, 60));
 
   createEffect(() => {
     loadData();

@@ -1,4 +1,4 @@
-import { createSignal, createEffect, onCleanup, createMemo, Show, For } from 'solid-js';
+import { createSignal, createEffect, createMemo, Show, For } from 'solid-js';
 import { useKeyboard } from '@opentui/solid';
 import { type Screen } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';

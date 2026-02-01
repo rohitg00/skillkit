@@ -3,7 +3,7 @@
  * Consistent "no data" display
  */
 
-import { Show, type JSX } from 'solid-js';
+import { Show } from 'solid-js';
 import { terminalColors } from '../theme/colors.js';
 
 interface EmptyStateProps {

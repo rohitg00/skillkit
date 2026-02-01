@@ -37,9 +37,7 @@ export function Marketplace(props: MarketplaceProps) {
   const [loadedRepos, setLoadedRepos] = createSignal<string[]>([]);
   const [failedRepos, setFailedRepos] = createSignal<string[]>([]);
 
-  const cols = () => props.cols ?? 80;
   const rows = () => props.rows ?? 24;
-  const contentWidth = () => Math.max(1, Math.min(cols() - 4, 60));
 
   createEffect(() => {
     loadData();

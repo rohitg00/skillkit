@@ -1,4 +1,4 @@
-import { createSignal, createEffect, onCleanup, Show, For } from 'solid-js';
+import { createSignal, createEffect, Show, For } from 'solid-js';
 import { useKeyboard } from '@opentui/solid';
 import { type Screen } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
@@ -34,9 +34,7 @@ export function Recommend(props: RecommendProps) {
     frameworks: string[];
   } | null>(null);
 
-  const cols = () => props.cols ?? 80;
   const rows = () => props.rows ?? 24;
-  const contentWidth = () => Math.max(1, Math.min(cols() - 4, 60));
 
   createEffect(() => {
     loadData();

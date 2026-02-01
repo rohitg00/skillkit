@@ -4,7 +4,6 @@ import { terminalColors } from '../theme/colors.js';
 import { Header } from '../components/Header.js';
 import { Spinner } from '../components/Spinner.js';
 import { EmptyState, ErrorState } from '../components/EmptyState.js';
-import { SelectList, type SelectListItem } from '../components/SelectList.js';
 import { DetailPane } from '../components/DetailPane.js';
 import {
   loadMemories,
@@ -96,16 +95,6 @@ export function Memory(props: MemoryProps) {
         error: err instanceof Error ? err.message : 'Failed to initialize memory',
       }));
     }
-  };
-
-  const listItems = (): SelectListItem[] => {
-    return state().entries.map((entry) => ({
-      id: entry.key,
-      label: entry.key,
-      description: `${entry.size} • ${entry.updated}`,
-      icon: getTypeIcon(entry.type),
-      meta: entry.type,
-    }));
   };
 
   const getTypeIcon = (type: MemoryEntry['type']): string => {

@@ -1,4 +1,4 @@
-import { createSignal, createEffect, onCleanup, createMemo, Show, For } from 'solid-js';
+import { createSignal, createEffect, createMemo, Show, For } from 'solid-js';
 import { useKeyboard } from '@opentui/solid';
 import { type Screen, loadSkills } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
@@ -7,7 +7,7 @@ import { Header } from '../components/Header.js';
 import { Spinner } from '../components/Spinner.js';
 import { EmptyState, ErrorState } from '../components/EmptyState.js';
 import { StatusIndicator } from '../components/StatusIndicator.js';
-import { getSupportedAgents, translate } from '../services/translator.service.js';
+import { getSupportedAgents } from '../services/translator.service.js';
 import { getAgentAvailability } from '../services/executor.service.js';
 import type { AgentType } from '@skillkit/core';
 
@@ -37,7 +37,6 @@ export function Sync(props: SyncProps) {
 
   const cols = () => props.cols ?? 80;
   const isCompact = () => cols() < 60;
-  const contentWidth = () => Math.max(1, Math.min(cols() - 4, 60));
 
   createEffect(() => {
     loadData();
