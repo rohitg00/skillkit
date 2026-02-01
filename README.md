@@ -428,9 +428,29 @@ skillkit methodology load     # Load a methodology
 ### Publishing & Sharing
 
 ```bash
-skillkit publish              # Publish skill to marketplace
+skillkit publish              # Generate well-known hosting structure
+skillkit publish submit       # Submit to SkillKit marketplace
 skillkit create               # Create new skill
 skillkit init                 # Initialize in project
+```
+
+#### Self-Hosting Skills (RFC 8615)
+
+Generate a well-known URI structure to host skills on your own domain:
+
+```bash
+# Generate hosting structure
+skillkit publish ./my-skills --output ./public
+
+# Users install from your domain
+skillkit add https://your-domain.com
+```
+
+This creates:
+```
+.well-known/skills/
+  index.json              # Skill manifest
+  my-skill/SKILL.md       # Skill files
 ```
 
 ### Configuration

@@ -94,6 +94,22 @@ Or manually create a `SKILL.md` file following the format above.
 # Test locally
 skillkit validate ./my-skill
 
-# Publish to marketplace
-skillkit publish
+# Generate well-known hosting structure for self-hosting
+skillkit publish ./my-skill --output ./public
+
+# Or submit to SkillKit marketplace
+skillkit publish submit
 ```
+
+### Self-Hosting
+
+The `skillkit publish` command generates an RFC 8615 well-known URI structure:
+
+```
+.well-known/skills/
+  index.json        # Manifest for auto-discovery
+  my-skill/
+    SKILL.md        # Skill content
+```
+
+Deploy to your domain and users can install via `skillkit add https://your-domain.com`.

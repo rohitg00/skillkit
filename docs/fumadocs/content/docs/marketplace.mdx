@@ -48,8 +48,39 @@ skillkit install anthropics/skills --agent claude-code,cursor
 
 ## Publish Skills
 
+### Self-Host on Your Domain (Recommended)
+
+Generate a well-known URI structure (RFC 8615) to host skills on your own domain:
+
 ```bash
+# Create and validate your skill
 skillkit create my-skill
 skillkit validate my-skill
-skillkit publish
+
+# Generate hosting structure
+skillkit publish ./my-skill --output ./public
 ```
+
+This creates:
+```
+.well-known/skills/
+  index.json              # Skill manifest for auto-discovery
+  my-skill/
+    SKILL.md              # Your skill content
+```
+
+Deploy the `.well-known` folder to your web server. Users can then install via:
+
+```bash
+skillkit add https://your-domain.com
+```
+
+### Submit to SkillKit Marketplace
+
+To submit your skill for inclusion in the central marketplace:
+
+```bash
+skillkit publish submit
+```
+
+This opens a GitHub issue for review by maintainers.

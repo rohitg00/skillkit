@@ -233,8 +233,16 @@ skillkit init                  # Initialize project
 skillkit create <name>         # Create new skill
 skillkit validate [path]       # Validate skill format
 skillkit read <skills>         # Read skill content
-skillkit publish               # Publish to marketplace
 skillkit settings --set key=value  # Configure settings
+```
+
+## Publishing Commands
+
+```bash
+skillkit publish [path]        # Generate well-known hosting structure
+skillkit publish --output dir  # Output to specific directory
+skillkit publish --dry-run     # Preview without writing
+skillkit publish submit        # Submit to SkillKit marketplace
 ```
 
 ## Interactive TUI
