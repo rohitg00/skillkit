@@ -74,7 +74,7 @@ export function Plugins(props: PluginsProps) {
     if (!plugin) return;
 
     const info = await getPluginInfo(plugin.name, manager);
-    setSelectedPlugin(info);
+    setSelectedPlugin(info as Plugin | null);
     setShowDetail(true);
   };
 

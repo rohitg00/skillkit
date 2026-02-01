@@ -250,8 +250,8 @@ export function Plan(props: PlanProps) {
           >
             {state().validation!.valid ? '✓ Valid' : '✗ Invalid'}
           </text>
-          <Show when={state().validation!.issues && state().validation!.issues.length > 0}>
-            <For each={state().validation!.issues.slice(0, 3)}>
+          <Show when={state().validation!.issues && state().validation!.issues!.length > 0}>
+            <For each={state().validation!.issues!.slice(0, 3)}>
               {(issue) => (
                 <text fg={terminalColors.warning}>• {issue.message}</text>
               )}

@@ -106,9 +106,8 @@ export function App(props: AppProps) {
         <box flexDirection="row" height={contentHeight()}>
           <Show when={sidebarVisible()}>
             <Sidebar
-              currentScreen={currentScreen()}
+              screen={currentScreen()}
               onNavigate={handleNavigate}
-              width={sidebarWidth()}
             />
           </Show>
 
@@ -138,7 +137,7 @@ export function App(props: AppProps) {
           </box>
         </box>
 
-        <StatusBar currentScreen={currentScreen()} width={cols()} />
+        <StatusBar />
       </box>
     </Show>
   );
