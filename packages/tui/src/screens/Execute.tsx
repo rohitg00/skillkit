@@ -14,16 +14,6 @@ import {
   type AgentAvailability,
 } from '../services/executor.service.js';
 import type { AgentType } from '@skillkit/core';
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-
-function readSkillContent(skillPath: string): string | undefined {
-  const skillMdPath = join(skillPath, 'SKILL.md');
-  if (existsSync(skillMdPath)) {
-    return readFileSync(skillMdPath, 'utf-8');
-  }
-  return undefined;
-}
 
 interface ExecuteProps {
   onNavigate: (screen: Screen) => void;
@@ -72,15 +62,12 @@ export function Execute(props: ExecuteProps) {
 
     if (!skill || !agent || !agent.available) return;
 
-    const content = readSkillContent(skill.path);
-    if (!content) return;
-
     setExecuting(true);
     setExecutionResult(null);
 
     try {
       const result = await executeSkillWithAgent(
-        content,
+        skill.path,
         agent.agent,
         { timeout: 60000 }
       );

@@ -70,7 +70,7 @@ export function App(props: AppProps) {
     }
 
     if (key.name === 'q' || (key.ctrl && key.name === 'c')) {
-      props.onExit?.(0);
+      props.onExit ? props.onExit(0) : process.exit(0);
       return;
     }
 

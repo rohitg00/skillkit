@@ -1,4 +1,5 @@
 import { createSignal, createEffect, Show, For } from 'solid-js';
+import { useKeyboard } from '@opentui/solid';
 import { type Screen } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
 import { Header } from '../components/Header.js';
@@ -127,6 +128,33 @@ export function Memory(props: MemoryProps) {
       { label: 'Updated', value: entry.updated },
     ];
   };
+
+  useKeyboard((key: { name?: string }) => {
+    const entries = state().entries;
+    const maxIndex = Math.max(0, entries.length - 1);
+
+    if (key.name === 'j' || key.name === 'down') {
+      setSelectedIndex((prev) => Math.min(prev + 1, maxIndex));
+    } else if (key.name === 'k' || key.name === 'up') {
+      setSelectedIndex((prev) => Math.max(prev - 1, 0));
+    } else if (key.name === 'return') {
+      if (entries.length > 0) {
+        setShowDetail(true);
+      }
+    } else if (key.name === 'd') {
+      handleDelete();
+    } else if (key.name === 'c') {
+      handleClearAll();
+    } else if (key.name === 'i') {
+      handleInitialize();
+    } else if (key.name === 'escape') {
+      if (showDetail()) {
+        setShowDetail(false);
+      } else {
+        props.onNavigate('home');
+      }
+    }
+  });
 
   return (
     <box flexDirection="column" paddingLeft={1}>
