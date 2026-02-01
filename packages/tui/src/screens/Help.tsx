@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { createSignal, createEffect, onCleanup, createMemo, Show, For } from 'solid-js';
 import { type Screen } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
 import { getVersion } from '../utils/helpers.js';
@@ -44,84 +44,100 @@ const SHORTCUTS = [
   ]},
 ];
 
-function ShortcutSection({ section, items, isLast }: { section: string; items: { key: string; desc: string }[]; isLast: boolean }) {
+interface ShortcutSectionProps {
+  section: string;
+  items: { key: string; desc: string }[];
+  isLast: boolean;
+}
+
+function ShortcutSection(props: ShortcutSectionProps) {
   return (
     <box flexDirection="column">
-      <text fg={terminalColors.text}>{section}</text>
-      {items.map((item) => (
-        <box key={item.key} flexDirection="row">
-          <text fg={terminalColors.accent} width={8}>  {item.key}</text>
-          <text fg={terminalColors.textMuted}>{item.desc}</text>
-        </box>
-      ))}
-      {!isLast && <text> </text>}
+      <text fg={terminalColors.text}>{props.section}</text>
+      <For each={props.items}>
+        {(item) => (
+          <box flexDirection="row">
+            <text fg={terminalColors.accent} width={8}>  {item.key}</text>
+            <text fg={terminalColors.textMuted}>{item.desc}</text>
+          </box>
+        )}
+      </For>
+      <Show when={!props.isLast}>
+        <text> </text>
+      </Show>
     </box>
   );
 }
 
-export function Help({ cols = 80 }: HelpProps) {
-  const [animPhase, setAnimPhase] = useState(0);
-  const isCompact = cols < 60;
-  const rawWidth = cols - 4;
-  const contentWidth = Math.max(1, Math.min(rawWidth, 60));
+export function Help(props: HelpProps) {
+  const [animPhase, setAnimPhase] = createSignal(0);
+  const cols = () => props.cols ?? 80;
+  const isCompact = () => cols() < 60;
+  const rawWidth = () => cols() - 4;
+  const contentWidth = () => Math.max(1, Math.min(rawWidth(), 60));
   const version = getVersion();
 
-  useEffect(() => {
-    if (animPhase >= 2) return;
+  createEffect(() => {
+    if (animPhase() >= 2) return;
     const timer = setTimeout(() => setAnimPhase(p => p + 1), 100);
-    return () => clearTimeout(timer);
-  }, [animPhase]);
+    onCleanup(() => clearTimeout(timer));
+  });
 
-  const divider = useMemo(() =>
-    <text fg={terminalColors.textMuted}>{'─'.repeat(contentWidth)}</text>,
-    [contentWidth]
+  const divider = createMemo(() =>
+    <text fg={terminalColors.textMuted}>{'─'.repeat(contentWidth())}</text>
   );
 
   return (
     <box flexDirection="column" padding={1}>
-      {animPhase >= 1 && (
+      <Show when={animPhase() >= 1}>
         <box flexDirection="column">
-          <box flexDirection="row" justifyContent="space-between" width={contentWidth}>
+          <box flexDirection="row" justifyContent="space-between" width={contentWidth()}>
             <text fg={terminalColors.text}>/ Help</text>
             <text fg={terminalColors.textMuted}>skillkit v{version}</text>
           </box>
           <text fg={terminalColors.textMuted}>keyboard shortcuts and navigation</text>
           <text> </text>
         </box>
-      )}
+      </Show>
 
-      {animPhase >= 2 && (
+      <Show when={animPhase() >= 2}>
         <box flexDirection="column">
-          {divider}
+          {divider()}
           <text> </text>
-          {isCompact ? (
-            SHORTCUTS.map((s, idx) => (
-              <ShortcutSection key={s.section} section={s.section} items={s.items} isLast={idx === SHORTCUTS.length - 1} />
-            ))
-          ) : (
+          <Show when={isCompact()} fallback={
             <box flexDirection="row">
-              <box flexDirection="column" width={Math.floor(contentWidth / 2)}>
-                {SHORTCUTS.slice(0, 2).map((s, idx) => (
-                  <ShortcutSection key={s.section} section={s.section} items={s.items} isLast={idx === 1} />
-                ))}
+              <box flexDirection="column" width={Math.floor(contentWidth() / 2)}>
+                <For each={SHORTCUTS.slice(0, 2)}>
+                  {(s, idx) => (
+                    <ShortcutSection section={s.section} items={s.items} isLast={idx() === 1} />
+                  )}
+                </For>
               </box>
-              <box flexDirection="column" width={Math.floor(contentWidth / 2)}>
-                {SHORTCUTS.slice(2).map((s, idx) => (
-                  <ShortcutSection key={s.section} section={s.section} items={s.items} isLast={idx === 1} />
-                ))}
+              <box flexDirection="column" width={Math.floor(contentWidth() / 2)}>
+                <For each={SHORTCUTS.slice(2)}>
+                  {(s, idx) => (
+                    <ShortcutSection section={s.section} items={s.items} isLast={idx() === 1} />
+                  )}
+                </For>
               </box>
             </box>
-          )}
+          }>
+            <For each={SHORTCUTS}>
+              {(s, idx) => (
+                <ShortcutSection section={s.section} items={s.items} isLast={idx() === SHORTCUTS.length - 1} />
+              )}
+            </For>
+          </Show>
           <text> </text>
         </box>
-      )}
+      </Show>
 
-      {animPhase >= 2 && (
+      <Show when={animPhase() >= 2}>
         <box flexDirection="column">
-          {divider}
+          {divider()}
           <text fg={terminalColors.textMuted}>esc back  h home  q quit</text>
         </box>
-      )}
+      </Show>
     </box>
   );
 }

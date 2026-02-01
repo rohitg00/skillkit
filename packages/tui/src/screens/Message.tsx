@@ -1,7 +1,4 @@
-/**
- * Message Screen
- * Inter-agent messaging
- */
+import { For } from 'solid-js';
 import { type Screen } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
 import { Header } from '../components/Header.js';
@@ -12,7 +9,7 @@ interface MessageProps {
   rows?: number;
 }
 
-export function Message({ onNavigate, cols = 80, rows = 24 }: MessageProps) {
+export function Message(props: MessageProps) {
   const messages = [
     { id: '1', from: 'claude@laptop', subject: 'Code review completed', time: '2 min ago', unread: true },
     { id: '2', from: 'cursor@workstation', subject: 'Build artifacts ready', time: '15 min ago', unread: true },
@@ -37,20 +34,22 @@ export function Message({ onNavigate, cols = 80, rows = 24 }: MessageProps) {
 
       <text> </text>
 
-      {messages.map((msg, idx) => (
-        <box key={msg.id} flexDirection="row" marginBottom={1}>
-          <text fg={msg.unread ? terminalColors.accent : terminalColors.textMuted} width={3}>
-            {msg.unread ? '●' : '○'}
-          </text>
-          <text fg={idx === 0 ? terminalColors.accent : terminalColors.text} width={22}>
-            {idx === 0 ? '\u25B8 ' : '  '}{msg.from}
-          </text>
-          <text fg={msg.unread ? terminalColors.text : terminalColors.textMuted} width={30}>
-            {msg.subject.slice(0, 28)}
-          </text>
-          <text fg={terminalColors.textMuted}>{msg.time}</text>
-        </box>
-      ))}
+      <For each={messages}>
+        {(msg, idx) => (
+          <box flexDirection="row" marginBottom={1}>
+            <text fg={msg.unread ? terminalColors.accent : terminalColors.textMuted} width={3}>
+              {msg.unread ? '*' : 'o'}
+            </text>
+            <text fg={idx() === 0 ? terminalColors.accent : terminalColors.text} width={22}>
+              {idx() === 0 ? '\u25B8 ' : '  '}{msg.from}
+            </text>
+            <text fg={msg.unread ? terminalColors.text : terminalColors.textMuted} width={30}>
+              {msg.subject.slice(0, 28)}
+            </text>
+            <text fg={terminalColors.textMuted}>{msg.time}</text>
+          </box>
+        )}
+      </For>
 
       <text> </text>
       <text fg={terminalColors.textMuted}>

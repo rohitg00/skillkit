@@ -21,15 +21,15 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@skillkit/core": "workspace:*",
-    "@skillkit/agents": "workspace:*",
     "@opentui/core": "^0.1.75",
-    "@opentui/react": "^0.1.75",
-    "react": "^19.0.0"
+    "@opentui/solid": "^0.1.75",
+    "@skillkit/agents": "workspace:*",
+    "@skillkit/core": "workspace:*",
+    "solid-js": "^1.9.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
-    "@types/react": "^19.0.0",
+    "esbuild-plugin-solid": "^0.6.0",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"

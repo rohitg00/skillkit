@@ -28,8 +28,10 @@ export {
 // Skills
 export {
   type SkillsState,
+  type SkillWithDetails,
   createSkillsState,
   loadSkills,
+  loadSkillsWithDetails,
   removeSkill,
   filterSkills,
 } from './skills.js';

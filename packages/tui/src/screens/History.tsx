@@ -1,7 +1,4 @@
-/**
- * History Screen
- * Execution history
- */
+import { For } from 'solid-js';
 import { type Screen } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
 import { Header } from '../components/Header.js';
@@ -12,7 +9,7 @@ interface HistoryProps {
   rows?: number;
 }
 
-export function History({ onNavigate, cols = 80, rows = 24 }: HistoryProps) {
+export function History(props: HistoryProps) {
   const history = [
     { skill: 'tdd-workflow', time: '10:32 AM', duration: '2.3s', status: 'success' },
     { skill: 'code-review', time: '10:15 AM', duration: '5.1s', status: 'success' },
@@ -32,23 +29,25 @@ export function History({ onNavigate, cols = 80, rows = 24 }: HistoryProps) {
       <text fg={terminalColors.text}><b>Recent Executions</b></text>
       <text> </text>
 
-      {history.map((item, idx) => (
-        <box key={`${item.skill}-${item.time}`} flexDirection="row" marginBottom={1}>
-          <text
-            fg={idx === 0 ? terminalColors.accent : terminalColors.text}
-            width={18}
-          >
-            {idx === 0 ? '\u25B8 ' : '  '}{item.skill}
-          </text>
-          <text fg={terminalColors.textMuted} width={12}>{item.time}</text>
-          <text fg={terminalColors.textMuted} width={10}>{item.duration}</text>
-          <text
-            fg={item.status === 'success' ? terminalColors.success : terminalColors.error}
-          >
-            {item.status === 'success' ? '\u2713 success' : '\u2717 failed'}
-          </text>
-        </box>
-      ))}
+      <For each={history}>
+        {(item, idx) => (
+          <box flexDirection="row" marginBottom={1}>
+            <text
+              fg={idx() === 0 ? terminalColors.accent : terminalColors.text}
+              width={18}
+            >
+              {idx() === 0 ? '\u25B8 ' : '  '}{item.skill}
+            </text>
+            <text fg={terminalColors.textMuted} width={12}>{item.time}</text>
+            <text fg={terminalColors.textMuted} width={10}>{item.duration}</text>
+            <text
+              fg={item.status === 'success' ? terminalColors.success : terminalColors.error}
+            >
+              {item.status === 'success' ? '\u2713 success' : '\u2717 failed'}
+            </text>
+          </box>
+        )}
+      </For>
 
       <text> </text>
       <text fg={terminalColors.textMuted}>

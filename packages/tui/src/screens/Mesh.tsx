@@ -1,7 +1,4 @@
-/**
- * Mesh Screen
- * Mesh network and peer management
- */
+import { For } from 'solid-js';
 import { type Screen } from '../state/index.js';
 import { terminalColors } from '../theme/colors.js';
 import { Header } from '../components/Header.js';
@@ -12,7 +9,7 @@ interface MeshProps {
   rows?: number;
 }
 
-export function Mesh({ onNavigate, cols = 80, rows = 24 }: MeshProps) {
+export function Mesh(props: MeshProps) {
   const hosts = [
     { name: 'workstation-1', address: '192.168.1.10', status: 'online', peers: 3 },
     { name: 'laptop-dev', address: '192.168.1.15', status: 'online', peers: 2 },
@@ -37,7 +34,7 @@ export function Mesh({ onNavigate, cols = 80, rows = 24 }: MeshProps) {
       <box flexDirection="row" marginBottom={1}>
         <text fg={terminalColors.text}><b>Security: </b></text>
         <text fg={securityStatus.initialized ? terminalColors.success : terminalColors.warning}>
-          {securityStatus.initialized ? '● Initialized' : '○ Not initialized'}
+          {securityStatus.initialized ? '* Initialized' : 'o Not initialized'}
         </text>
         <text fg={terminalColors.textMuted}>  Fingerprint: {securityStatus.fingerprint}</text>
       </box>
@@ -45,18 +42,20 @@ export function Mesh({ onNavigate, cols = 80, rows = 24 }: MeshProps) {
       <text fg={terminalColors.text}><b>Known Hosts</b></text>
       <text> </text>
 
-      {hosts.map((host, idx) => (
-        <box key={host.name} flexDirection="row" marginBottom={1}>
-          <text fg={host.status === 'online' ? terminalColors.success : terminalColors.textMuted} width={3}>
-            {host.status === 'online' ? '●' : '○'}
-          </text>
-          <text fg={idx === 0 ? terminalColors.accent : terminalColors.text} width={20}>
-            {idx === 0 ? '\u25B8 ' : '  '}{host.name}
-          </text>
-          <text fg={terminalColors.textMuted} width={18}>{host.address}</text>
-          <text fg={terminalColors.textMuted}>{host.peers} peers</text>
-        </box>
-      ))}
+      <For each={hosts}>
+        {(host, idx) => (
+          <box flexDirection="row" marginBottom={1}>
+            <text fg={host.status === 'online' ? terminalColors.success : terminalColors.textMuted} width={3}>
+              {host.status === 'online' ? '*' : 'o'}
+            </text>
+            <text fg={idx() === 0 ? terminalColors.accent : terminalColors.text} width={20}>
+              {idx() === 0 ? '\u25B8 ' : '  '}{host.name}
+            </text>
+            <text fg={terminalColors.textMuted} width={18}>{host.address}</text>
+            <text fg={terminalColors.textMuted}>{host.peers} peers</text>
+          </box>
+        )}
+      </For>
 
       <text> </text>
       <text fg={terminalColors.textMuted}>
