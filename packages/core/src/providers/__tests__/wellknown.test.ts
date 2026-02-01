@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { WellKnownProvider, generateWellKnownIndex, generateWellKnownStructure, calculateBaseSkillsUrl } from '../wellknown.js';
 import { existsSync, rmSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';

@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
-import { join, basename, resolve } from 'node:path';
+import { join, basename, resolve, sep } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import type { GitProviderAdapter, CloneOptions } from './base.js';
@@ -115,7 +115,7 @@ export class WellKnownProvider implements GitProviderAdapter {
         const resolvedSkillDir = resolve(skillDir);
         const resolvedTempDir = resolve(tempDir);
 
-        if (!resolvedSkillDir.startsWith(resolvedTempDir + '/') && resolvedSkillDir !== resolvedTempDir) {
+        if (!resolvedSkillDir.startsWith(resolvedTempDir + sep) && resolvedSkillDir !== resolvedTempDir) {
           continue;
         }
 
@@ -199,13 +199,25 @@ export function generateWellKnownStructure(
   skills: Array<{ name: string; description?: string; content: string; additionalFiles?: Record<string, string> }>
 ): { indexPath: string; skillPaths: string[] } {
   const wellKnownDir = join(outputDir, '.well-known', 'skills');
+  const resolvedWellKnownDir = resolve(wellKnownDir);
   mkdirSync(wellKnownDir, { recursive: true });
 
   const indexSkills: WellKnownSkill[] = [];
   const skillPaths: string[] = [];
 
   for (const skill of skills) {
-    const skillDir = join(wellKnownDir, skill.name);
+    const safeName = sanitizeSkillName(skill.name);
+    if (!safeName) {
+      continue;
+    }
+
+    const skillDir = join(wellKnownDir, safeName);
+    const resolvedSkillDir = resolve(skillDir);
+
+    if (!resolvedSkillDir.startsWith(resolvedWellKnownDir + sep) && resolvedSkillDir !== resolvedWellKnownDir) {
+      continue;
+    }
+
     mkdirSync(skillDir, { recursive: true });
 
     writeFileSync(join(skillDir, 'SKILL.md'), skill.content);
