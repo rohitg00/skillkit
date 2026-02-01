@@ -34,7 +34,6 @@ import {
   isAgentInstalled,
   type BundledAgent,
 } from '@skillkit/resources';
-// Agent discovery uses root directories, not skill directories
 
 export class AgentCommand extends Command {
   static override paths = [['agent']];
@@ -263,7 +262,6 @@ export class AgentCreateCommand extends Command {
   });
 
   async execute(): Promise<number> {
-    // Validate agent name format
     const namePattern = /^[a-z0-9]+(-[a-z0-9]+)*$/;
     if (!namePattern.test(this.name)) {
       console.log(chalk.red('Invalid agent name: must be lowercase alphanumeric with hyphens'));
@@ -271,7 +269,6 @@ export class AgentCreateCommand extends Command {
       return 1;
     }
 
-    // Determine target directory
     let targetDir: string;
     if (this.global) {
       targetDir = join(homedir(), '.claude', 'agents');
@@ -279,23 +276,19 @@ export class AgentCreateCommand extends Command {
       targetDir = join(process.cwd(), '.claude', 'agents');
     }
 
-    // Create directory if needed
     if (!existsSync(targetDir)) {
       mkdirSync(targetDir, { recursive: true });
     }
 
-    // Check if agent already exists
     const agentPath = join(targetDir, `${this.name}.md`);
     if (existsSync(agentPath)) {
       console.log(chalk.red(`Agent already exists: ${agentPath}`));
       return 1;
     }
 
-    // Generate content
     const description = this.description || `${this.name} agent`;
     const content = generateAgentTemplate(this.name, description, this.model);
 
-    // Write file
     writeFileSync(agentPath, content);
 
     console.log(chalk.green(`Created agent: ${agentPath}`));
@@ -359,11 +352,9 @@ export class AgentTranslateCommand extends Command {
     const searchDirs = [process.cwd()];
     const targetAgent = this.to as AgentType;
 
-    // Get agents to translate
     let agents: CustomAgent[];
 
     if (this.source) {
-      // Translate from custom source path
       const sourcePath = this.source.startsWith('/')
         ? this.source
         : join(process.cwd(), this.source);
@@ -400,7 +391,6 @@ export class AgentTranslateCommand extends Command {
       return 0;
     }
 
-    // Determine output directory
     const outputDir = this.output || getAgentTargetDirectory(process.cwd(), targetAgent);
 
     console.log(chalk.cyan(`Translating ${agents.length} agent(s) to ${targetAgent} format...\n`));
@@ -433,7 +423,6 @@ export class AgentTranslateCommand extends Command {
             }
           }
         } else {
-          // Create directory if needed
           if (!existsSync(outputDir)) {
             mkdirSync(outputDir, { recursive: true });
           }
@@ -538,12 +527,10 @@ export class AgentValidateCommand extends Command {
     let hasErrors = false;
 
     if (this.agentPath) {
-      // Validate specific path
       const result = validateAgent(this.agentPath);
       printValidationResult(this.agentPath, result);
       hasErrors = !result.valid;
     } else if (this.all) {
-      // Validate all agents
       const searchDirs = [process.cwd()];
       const agents = findAllAgents(searchDirs);
 
@@ -567,8 +554,6 @@ export class AgentValidateCommand extends Command {
     return hasErrors ? 1 : 0;
   }
 }
-
-// Helper functions
 
 function printAgent(agent: CustomAgent): void {
   const status = agent.enabled ? chalk.green('✓') : chalk.red('○');
@@ -949,7 +934,13 @@ export class AgentFromSkillCommand extends Command {
       }
       filename = `${sanitized}.md`;
     } else {
-      filename = `${skill.name}.md`;
+      const sanitized = sanitizeFilename(skill.name);
+      if (!sanitized) {
+        console.log(chalk.red(`Invalid skill name for filename: ${skill.name}`));
+        console.log(chalk.dim('Skill name must contain only alphanumeric characters, hyphens, and underscores'));
+        return 1;
+      }
+      filename = `${sanitized}.md`;
     }
 
     const outputPath = join(targetDir, filename);

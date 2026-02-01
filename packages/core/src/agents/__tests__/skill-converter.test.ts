@@ -311,5 +311,22 @@ Content here.
 
       expect(result.allowedTools).toEqual(['Read', 'Write', 'Bash(npm:*)']);
     });
+
+    it('should handle CRLF line endings', () => {
+      const crlfContent = `---\r\nname: test-skill\r\ndescription: Test\r\n---\r\n\r\n# Content\r\n\r\nWith CRLF endings.\r\n`;
+
+      const skill: Skill = {
+        name: 'test-skill',
+        description: 'Test',
+        path: '/path/to/test-skill',
+        location: 'project',
+        enabled: true,
+      };
+
+      const result = skillToSubagent(skill, crlfContent, { inline: true });
+
+      expect(result.content).toContain('# Content');
+      expect(result.content).toContain('With CRLF endings.');
+    });
   });
 });

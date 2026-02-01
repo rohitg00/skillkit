@@ -164,7 +164,7 @@ function generateSubagentMarkdown(
 ): string {
   const lines: string[] = ['---'];
 
-  lines.push(`name: ${canonical.name}`);
+  lines.push(`name: ${escapeYamlString(canonical.name)}`);
   lines.push(`description: ${escapeYamlString(canonical.description)}`);
 
   if (canonical.model) {
@@ -185,10 +185,10 @@ function generateSubagentMarkdown(
     lines.push(`version: "${canonical.version}"`);
   }
   if (canonical.author) {
-    lines.push(`author: ${canonical.author}`);
+    lines.push(`author: ${escapeYamlString(canonical.author)}`);
   }
   if (canonical.tags && canonical.tags.length > 0) {
-    lines.push(`tags: [${canonical.tags.join(', ')}]`);
+    lines.push(`tags: [${canonical.tags.map(t => escapeYamlString(t)).join(', ')}]`);
   }
   if (canonical.userInvocable !== undefined) {
     lines.push(`user-invocable: ${canonical.userInvocable}`);
@@ -203,7 +203,7 @@ function appendYamlList(lines: string[], key: string, items?: string[]): void {
   if (!items || items.length === 0) return;
   lines.push(`${key}:`);
   for (const item of items) {
-    lines.push(`  - ${item}`);
+    lines.push(`  - ${escapeYamlString(item)}`);
   }
 }
 
@@ -211,7 +211,8 @@ function appendYamlList(lines: string[], key: string, items?: string[]): void {
  * Extract body content from skill markdown (without frontmatter)
  */
 function extractBodyContent(content: string): string {
-  const match = content.match(/^---\s*\n[\s\S]*?\n---\s*\n([\s\S]*)$/);
+  const normalized = content.replace(/\r\n/g, '\n');
+  const match = normalized.match(/^---\s*\n[\s\S]*?\n---\s*\n([\s\S]*)$/);
   if (match) {
     return match[1];
   }
