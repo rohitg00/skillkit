@@ -12,9 +12,8 @@ export * from './methodology.service.js';
 export * from './recommend.service.js';
 export * from './context.service.js';
 
+export type { ExecutorServiceState, AgentAvailability } from './executor.service.js';
 export {
-  ExecutorServiceState,
-  AgentAvailability,
   getAgentAvailability,
   listAvailableAgents,
   executeSkill,
@@ -26,11 +25,13 @@ export {
 
 export type { AgentType } from './executor.service.js';
 
-export {
+export type {
   TranslationDisplay,
   TranslationOptions,
   CanonicalSkill,
   TranslatorServiceState,
+} from './translator.service.js';
+export {
   getSupportedAgents,
   checkCanTranslate,
   translate,
