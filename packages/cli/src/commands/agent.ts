@@ -7,7 +7,7 @@
 import chalk from 'chalk';
 import { Command, Option } from 'clipanion';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, basename } from 'node:path';
 import { homedir } from 'node:os';
 import {
   findAllAgents,
@@ -868,11 +868,11 @@ export class AgentFromSkillCommand extends Command {
   });
 
   model = Option.String('--model,-m', {
-    description: 'Model to use (sonnet, opus, haiku)',
+    description: 'Model to use (sonnet, opus, haiku, inherit)',
   });
 
   permission = Option.String('--permission,-p', {
-    description: 'Permission mode (default, plan, auto-edit, full-auto)',
+    description: 'Permission mode (default, plan, auto-edit, full-auto, bypassPermissions)',
   });
 
   global = Option.Boolean('--global,-g', false, {
@@ -935,10 +935,23 @@ export class AgentFromSkillCommand extends Command {
 
     const content = generateSubagentFromSkill(skill, skillContent, options);
 
-    const filename = this.output ? `${this.output}.md` : `${skill.name}.md`;
     const targetDir = this.global
       ? join(homedir(), '.claude', 'agents')
       : join(process.cwd(), '.claude', 'agents');
+
+    let filename: string;
+    if (this.output) {
+      const sanitized = sanitizeFilename(this.output);
+      if (!sanitized) {
+        console.log(chalk.red(`Invalid output filename: ${this.output}`));
+        console.log(chalk.dim('Filename must contain only alphanumeric characters, hyphens, and underscores'));
+        return 1;
+      }
+      filename = `${sanitized}.md`;
+    } else {
+      filename = `${skill.name}.md`;
+    }
+
     const outputPath = join(targetDir, filename);
 
     if (this.dryRun) {
@@ -978,4 +991,23 @@ function formatCategoryName(category: string): string {
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+}
+
+function sanitizeFilename(input: string): string | null {
+  const base = basename(input);
+  const stem = base.replace(/\.md$/i, '');
+
+  if (!stem || stem.startsWith('.') || stem.startsWith('-')) {
+    return null;
+  }
+
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/.test(stem)) {
+    return null;
+  }
+
+  if (stem.length > 64) {
+    return null;
+  }
+
+  return stem;
 }

@@ -73,6 +73,7 @@ export function generateSubagentFromSkill(
 
 /**
  * Parse allowed-tools from skill frontmatter
+ * Handles both string (comma or space-separated) and array formats
  */
 function parseAllowedTools(
   frontmatter: Partial<SkillFrontmatter> | null,
@@ -82,15 +83,27 @@ function parseAllowedTools(
     return optionTools;
   }
 
-  const allowedToolsStr = frontmatter?.['allowed-tools'];
-  if (!allowedToolsStr) {
+  const allowedTools = frontmatter?.['allowed-tools'];
+  if (!allowedTools) {
     return undefined;
   }
 
-  return allowedToolsStr
-    .split(',')
-    .map(t => t.trim())
-    .filter(Boolean);
+  if (Array.isArray(allowedTools)) {
+    const result = allowedTools
+      .map(t => (typeof t === 'string' ? t.trim() : ''))
+      .filter(Boolean);
+    return result.length > 0 ? result : undefined;
+  }
+
+  if (typeof allowedTools === 'string') {
+    const result = allowedTools
+      .split(/[,\s]+/)
+      .map(t => t.trim())
+      .filter(Boolean);
+    return result.length > 0 ? result : undefined;
+  }
+
+  return undefined;
 }
 
 /**

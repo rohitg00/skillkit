@@ -262,5 +262,54 @@ Content.
 
       expect(content).toContain('# My Complex Skill Name');
     });
+
+    it('should handle space-separated allowed-tools format', () => {
+      const contentWithSpaceSeparated = `---
+name: test-skill
+description: Test
+allowed-tools: Bash(git:*) Read Write Edit
+---
+
+Content here.
+`;
+
+      const skill: Skill = {
+        name: 'test-skill',
+        description: 'Test',
+        path: '/path/to/test-skill',
+        location: 'project',
+        enabled: true,
+      };
+
+      const result = skillToSubagent(skill, contentWithSpaceSeparated);
+
+      expect(result.allowedTools).toEqual(['Bash(git:*)', 'Read', 'Write', 'Edit']);
+    });
+
+    it('should handle YAML array format for allowed-tools', () => {
+      const contentWithArrayTools = `---
+name: test-skill
+description: Test
+allowed-tools:
+  - Read
+  - Write
+  - Bash(npm:*)
+---
+
+Content here.
+`;
+
+      const skill: Skill = {
+        name: 'test-skill',
+        description: 'Test',
+        path: '/path/to/test-skill',
+        location: 'project',
+        enabled: true,
+      };
+
+      const result = skillToSubagent(skill, contentWithArrayTools);
+
+      expect(result.allowedTools).toEqual(['Read', 'Write', 'Bash(npm:*)']);
+    });
   });
 });
