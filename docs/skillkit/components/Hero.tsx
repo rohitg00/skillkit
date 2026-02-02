@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './Button';
-import { useStats } from '../hooks/useStats';
+
+interface HeroProps {
+  version: string;
+}
 
 const ASCII_LOGO = `
 ███████╗██╗  ██╗██╗██╗     ██╗     ██╗  ██╗██╗████████╗
@@ -56,12 +59,11 @@ const COPY_ICON = (
   </svg>
 );
 
-export function Hero(): React.ReactElement {
+export function Hero({ version }: HeroProps): React.ReactElement {
   const [copied, setCopied] = useState(false);
   const [visibleLines, setVisibleLines] = useState(0);
   const [typingIndex, setTypingIndex] = useState(0);
   const [currentText, setCurrentText] = useState('');
-  const stats = useStats();
 
   useEffect(() => {
     if (visibleLines >= TERMINAL_LINES.length) {
@@ -128,7 +130,7 @@ export function Hero(): React.ReactElement {
           <div className="animate-fade-in">
             <div className="inline-flex items-center space-x-2 border border-zinc-800 bg-zinc-900/50 px-2 py-0.5 mb-3 backdrop-blur-sm">
               <span className="flex h-1.5 w-1.5 bg-white rounded-full"></span>
-              <span className="text-xs font-mono text-zinc-400">v{stats.version}</span>
+              <span className="text-xs font-mono text-zinc-400">v{version}</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white mb-3 font-mono">

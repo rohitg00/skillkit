@@ -105,7 +105,7 @@ export default function App(): React.ReactElement {
       </nav>
 
       <main className="pt-14">
-        <Hero />
+        <Hero version={stats.version} />
 
         <div className="border-b border-zinc-800/50 py-2.5" style={{ background: 'linear-gradient(to bottom, rgba(9,9,11,0.95), rgba(0,0,0,1))' }}>
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">

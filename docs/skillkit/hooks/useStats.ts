@@ -80,14 +80,14 @@ export function useStats(): Stats {
 
         if (npmResponse.status === 'fulfilled' && npmResponse.value.ok) {
           const npmData = await npmResponse.value.json();
-          if (npmData.downloads) {
+          if (typeof npmData.downloads === 'number' && Number.isFinite(npmData.downloads)) {
             downloads = formatDownloads(npmData.downloads);
           }
         }
 
         if (githubResponse.status === 'fulfilled' && githubResponse.value.ok) {
           const githubData = await githubResponse.value.json();
-          if (githubData.stargazers_count) {
+          if (typeof githubData.stargazers_count === 'number' && Number.isFinite(githubData.stargazers_count)) {
             stars = githubData.stargazers_count;
           }
         }
