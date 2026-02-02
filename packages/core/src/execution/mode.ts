@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { homedir } from 'node:os';
 import type { ConnectorMapping } from '../connectors/types.js';
 import { suggestMappingsFromMcp } from '../connectors/utils.js';
 
@@ -36,8 +37,8 @@ export interface ExecutionModeConfig {
 }
 
 const DEFAULT_MCP_CONFIG_PATHS = [
-  join(process.env.HOME || '~', '.mcp.json'),
-  join(process.env.HOME || '~', '.config', 'claude', 'mcp.json'),
+  join(homedir(), '.mcp.json'),
+  join(homedir(), '.config', 'claude', 'mcp.json'),
   '.mcp.json',
   'mcp.json',
 ];

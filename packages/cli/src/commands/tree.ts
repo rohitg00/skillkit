@@ -1,5 +1,6 @@
 import { Command, Option } from 'clipanion';
 import { join } from 'node:path';
+import { homedir } from 'node:os';
 import {
   loadIndex as loadIndexFromCache,
   generateSkillTree,
@@ -16,7 +17,7 @@ import {
   warn,
 } from '../onboarding/index.js';
 
-const TREE_PATH = join(process.env.HOME || '~', '.skillkit', 'skill-tree.json');
+const TREE_PATH = join(homedir(), '.skillkit', 'skill-tree.json');
 
 export class TreeCommand extends Command {
   static override paths = [['tree']];
@@ -164,7 +165,9 @@ export class TreeCommand extends Command {
 
     console.log(colors.bold('Top-Level Categories:'));
     for (const child of tree.rootNode.children) {
-      const percentage = ((child.skillCount / tree.totalSkills) * 100).toFixed(1);
+      const percentage = tree.totalSkills > 0
+        ? ((child.skillCount / tree.totalSkills) * 100).toFixed(1)
+        : '0.0';
       console.log(
         `  ${colors.accent(child.name.padEnd(15))} ${String(child.skillCount).padStart(6)} skills (${percentage}%)`
       );
@@ -210,7 +213,11 @@ export class TreeCommand extends Command {
       targetNode = current;
     }
 
-    const maxDepth = this.depth ? parseInt(this.depth, 10) : 3;
+    let maxDepth = this.depth ? parseInt(this.depth, 10) : 3;
+    if (Number.isNaN(maxDepth) || maxDepth < 0) {
+      warn('Invalid depth value. Using default depth of 3.');
+      maxDepth = 3;
+    }
     this.renderNode(targetNode, '', true, 0, maxDepth);
 
     console.log('');

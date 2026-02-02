@@ -15,18 +15,12 @@ const DEFAULT_OPTIONS: Required<TreeGeneratorOptions> = {
 
 export class TreeGenerator {
   private options: Required<TreeGeneratorOptions>;
-  private skillMap: Map<string, SkillSummary> = new Map();
 
   constructor(options?: TreeGeneratorOptions) {
     this.options = { ...DEFAULT_OPTIONS, ...options };
   }
 
   generateTree(skills: SkillSummary[]): SkillTree {
-    this.skillMap.clear();
-    for (const skill of skills) {
-      this.skillMap.set(skill.name, skill);
-    }
-
     const rootNode = this.buildTreeFromTaxonomy(skills);
     const { totalCategories, maxDepth } = this.countTreeStats(rootNode);
 

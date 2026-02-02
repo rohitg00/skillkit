@@ -585,13 +585,17 @@ export class ReasoningEngine {
   }
 
   private updateStats(processingTimeMs: number, resultCount: number): void {
-    const totalQueries = this.stats.totalQueries;
+    const cacheMisses = this.stats.cacheMisses;
 
-    this.stats.averageProcessingTimeMs =
-      (this.stats.averageProcessingTimeMs * (totalQueries - 1) + processingTimeMs) / totalQueries;
-
-    this.stats.averageResultsPerQuery =
-      (this.stats.averageResultsPerQuery * (totalQueries - 1) + resultCount) / totalQueries;
+    if (cacheMisses === 1) {
+      this.stats.averageProcessingTimeMs = processingTimeMs;
+      this.stats.averageResultsPerQuery = resultCount;
+    } else {
+      this.stats.averageProcessingTimeMs =
+        (this.stats.averageProcessingTimeMs * (cacheMisses - 1) + processingTimeMs) / cacheMisses;
+      this.stats.averageResultsPerQuery =
+        (this.stats.averageResultsPerQuery * (cacheMisses - 1) + resultCount) / cacheMisses;
+    }
   }
 
   getStats(): ReasoningEngineStats {

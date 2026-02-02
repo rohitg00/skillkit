@@ -91,10 +91,14 @@ export function Marketplace(props: MarketplaceProps) {
       setError(`Some repos failed (${failed.join(', ')}) and no skills loaded`);
     }
 
-    const tree = await loadOrGenerateTree();
-    setTreeState(tree);
-    if (tree.tree && tree.currentNode) {
-      updateTreeItems(tree.currentNode);
+    try {
+      const tree = await loadOrGenerateTree();
+      setTreeState(tree);
+      if (tree.tree && tree.currentNode) {
+        updateTreeItems(tree.currentNode);
+      }
+    } catch (e) {
+      console.error('Failed to load skill tree:', e);
     }
 
     setLoading(false);
@@ -202,6 +206,10 @@ export function Marketplace(props: MarketplaceProps) {
           const child = node.children.find(c => c.name === segment);
           if (child) {
             node = child;
+          } else {
+            setCurrentPath([]);
+            updateTreeItems(state.tree.rootNode);
+            return;
           }
         }
         updateTreeItems(node);

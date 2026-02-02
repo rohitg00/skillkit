@@ -213,11 +213,14 @@ export function validateSearchPlan(data: unknown): SearchPlan {
   };
 }
 
-export function validateCategoryScore(data: unknown): CategoryScore {
+export function validateCategoryScore(
+  data: unknown,
+  fallbackCategory = ''
+): CategoryScore {
   const score = data as Record<string, unknown>;
 
   return {
-    category: '',
+    category: typeof score.category === 'string' ? score.category : fallbackCategory,
     score: typeof score.score === 'number' ? Math.min(100, Math.max(0, score.score)) : 0,
     reasoning: typeof score.reasoning === 'string' ? score.reasoning : '',
   };

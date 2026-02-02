@@ -671,10 +671,19 @@ export function createRecommendationEngine(
  */
 export class ReasoningRecommendationEngine extends RecommendationEngine {
   private reasoningEngine: import('../reasoning/engine.js').ReasoningEngine | null = null;
+  private reasoningConfig?: import('../reasoning/types.js').ReasoningConfig;
+
+  constructor(
+    weights?: Partial<ScoringWeights>,
+    reasoningConfig?: Partial<import('../reasoning/types.js').ReasoningConfig>
+  ) {
+    super(weights);
+    this.reasoningConfig = reasoningConfig as import('../reasoning/types.js').ReasoningConfig;
+  }
 
   async initReasoning(): Promise<void> {
-    const { ReasoningEngine } = await import('../reasoning/engine.js');
-    this.reasoningEngine = new ReasoningEngine({ provider: 'mock' });
+    const { createReasoningEngine } = await import('../reasoning/engine.js');
+    this.reasoningEngine = createReasoningEngine(this.reasoningConfig);
 
     const index = this.getIndex();
     if (index) {

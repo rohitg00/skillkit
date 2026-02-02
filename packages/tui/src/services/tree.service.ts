@@ -1,4 +1,5 @@
 import { join } from 'node:path';
+import { homedir } from 'node:os';
 import {
   generateSkillTree,
   loadTree,
@@ -9,7 +10,7 @@ import {
   type TreeNode,
 } from '@skillkit/core';
 
-const TREE_PATH = join(process.env.HOME || '~', '.skillkit', 'skill-tree.json');
+const TREE_PATH = join(homedir(), '.skillkit', 'skill-tree.json');
 
 export interface TreeServiceState {
   tree: SkillTree | null;
