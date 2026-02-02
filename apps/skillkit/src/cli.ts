@@ -97,6 +97,7 @@ import {
   GuidelineDisableCommand,
   GuidelineCreateCommand,
   GuidelineRemoveCommand,
+  TreeCommand,
 } from '@skillkit/cli';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -216,5 +217,7 @@ cli.register(GuidelineEnableCommand);
 cli.register(GuidelineDisableCommand);
 cli.register(GuidelineCreateCommand);
 cli.register(GuidelineRemoveCommand);
+
+cli.register(TreeCommand);
 
 cli.runExit(process.argv.slice(2));

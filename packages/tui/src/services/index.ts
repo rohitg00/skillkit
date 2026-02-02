@@ -42,3 +42,14 @@ export {
   getAgentFormatInfo,
   translatorService,
 } from './translator.service.js';
+
+export type { TreeServiceState, TreeNodeDisplay } from './tree.service.js';
+export {
+  loadOrGenerateTree,
+  navigateToPath,
+  getNodeChildren,
+  getNodeSkills,
+  getTreeStats,
+  searchInTree,
+  formatTreePath,
+} from './tree.service.js';

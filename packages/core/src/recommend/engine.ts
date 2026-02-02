@@ -665,3 +665,136 @@ export function createRecommendationEngine(
 ): RecommendationEngine {
   return new RecommendationEngine(weights);
 }
+
+/**
+ * Enhanced Recommendation Engine with reasoning support
+ */
+export class ReasoningRecommendationEngine extends RecommendationEngine {
+  private reasoningEngine: import('../reasoning/engine.js').ReasoningEngine | null = null;
+
+  async initReasoning(): Promise<void> {
+    const { ReasoningEngine } = await import('../reasoning/engine.js');
+    this.reasoningEngine = new ReasoningEngine({ provider: 'mock' });
+
+    const index = this.getIndex();
+    if (index) {
+      this.reasoningEngine.loadSkills(index.skills);
+      this.reasoningEngine.generateTree(index.skills);
+    }
+  }
+
+  async recommendWithReasoning(
+    profile: ProjectProfile,
+    options: import('./types.js').ReasoningRecommendOptions = {}
+  ): Promise<import('./types.js').ReasoningRecommendationResult> {
+    const baseResult = this.recommend(profile, options);
+
+    if (!options.reasoning || !this.reasoningEngine) {
+      return {
+        ...baseResult,
+        recommendations: baseResult.recommendations.map((r) => ({
+          ...r,
+          treePath: [],
+        })),
+      };
+    }
+
+    const searchResult = await this.reasoningEngine.search({
+      query: this.buildQueryFromProfile(profile),
+      context: profile,
+      maxResults: options.limit ?? 10,
+      minConfidence: options.minScore ?? 30,
+    });
+
+    const enhancedRecommendations: import('./types.js').ExplainedScoredSkill[] = [];
+
+    for (const rec of baseResult.recommendations) {
+      const treeResult = searchResult.results.find(
+        (r) => r.skill.name === rec.skill.name
+      );
+
+      let explanation: import('./types.js').ExplainedMatchDetails | undefined;
+
+      if (options.explainResults) {
+        const explainedRec = await this.reasoningEngine.explain(
+          rec.skill,
+          rec.score,
+          profile
+        );
+        explanation = explainedRec.reasoning;
+      }
+
+      enhancedRecommendations.push({
+        ...rec,
+        explanation,
+        treePath: treeResult?.path ?? [],
+        reasoningDetails: treeResult?.reasoning,
+      });
+    }
+
+    return {
+      ...baseResult,
+      recommendations: enhancedRecommendations,
+      reasoningSummary: searchResult.reasoning,
+      searchPlan: {
+        primaryCategories: [],
+        secondaryCategories: [],
+        keywords: this.extractKeywords(profile),
+        strategy: 'breadth-first',
+      },
+    };
+  }
+
+  private buildQueryFromProfile(profile: ProjectProfile): string {
+    const parts: string[] = [];
+
+    if (profile.type) {
+      parts.push(profile.type);
+    }
+
+    for (const framework of profile.stack.frameworks.slice(0, 3)) {
+      parts.push(framework.name);
+    }
+
+    for (const language of profile.stack.languages.slice(0, 2)) {
+      parts.push(language.name);
+    }
+
+    return parts.join(' ');
+  }
+
+  private extractKeywords(profile: ProjectProfile): string[] {
+    const keywords: string[] = [];
+
+    if (profile.type) {
+      keywords.push(profile.type);
+    }
+
+    for (const framework of profile.stack.frameworks) {
+      keywords.push(framework.name.toLowerCase());
+    }
+
+    for (const language of profile.stack.languages) {
+      keywords.push(language.name.toLowerCase());
+    }
+
+    return [...new Set(keywords)];
+  }
+
+  getReasoningStats(): import('../reasoning/types.js').ReasoningEngineStats | null {
+    return this.reasoningEngine?.getStats() ?? null;
+  }
+
+  getSkillTree(): import('../tree/types.js').SkillTree | null {
+    return this.reasoningEngine?.getTree() ?? null;
+  }
+}
+
+/**
+ * Create an enhanced recommendation engine with reasoning support
+ */
+export function createReasoningRecommendationEngine(
+  weights?: Partial<ScoringWeights>
+): ReasoningRecommendationEngine {
+  return new ReasoningRecommendationEngine(weights);
+}

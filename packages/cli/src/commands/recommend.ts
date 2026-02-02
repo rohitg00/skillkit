@@ -3,8 +3,10 @@ import { resolve } from 'node:path';
 import {
   type ProjectProfile,
   type ScoredSkill,
+  type ExplainedScoredSkill,
   ContextManager,
   RecommendationEngine,
+  ReasoningRecommendationEngine,
   buildSkillIndex,
   saveIndex,
   loadIndex as loadIndexFromCache,
@@ -108,6 +110,21 @@ export class RecommendCommand extends Command {
     description: 'Minimal output',
   });
 
+  // Explain mode (reasoning-based recommendations)
+  explain = Option.Boolean('--explain,-e', false, {
+    description: 'Show detailed explanations for recommendations (uses reasoning engine)',
+  });
+
+  // Reasoning mode
+  reasoning = Option.Boolean('--reasoning,-r', false, {
+    description: 'Use LLM-based reasoning for recommendations',
+  });
+
+  // Show tree path
+  showPath = Option.Boolean('--show-path', false, {
+    description: 'Show category path for each recommendation',
+  });
+
   async execute(): Promise<number> {
     const targetPath = resolve(this.projectPath || process.cwd());
 
@@ -139,6 +156,11 @@ export class RecommendCommand extends Command {
       return 0;
     }
 
+    // Use reasoning engine if explain/reasoning flags are set
+    if (this.explain || this.reasoning || this.showPath) {
+      return await this.handleReasoningRecommendations(profile, index);
+    }
+
     // Create recommendation engine
     const engine = new RecommendationEngine();
     engine.loadIndex(index);
@@ -166,6 +188,63 @@ export class RecommendCommand extends Command {
 
     this.displayRecommendations(result.recommendations, profile, result.totalSkillsScanned);
     return 0;
+  }
+
+  private async handleReasoningRecommendations(
+    profile: ProjectProfile,
+    index: { skills: ScoredSkill['skill'][]; sources: { name: string; url: string; lastFetched: string; skillCount: number }[]; version: number; lastUpdated: string }
+  ): Promise<number> {
+    const s = !this.quiet && !this.json ? spinner() : null;
+    s?.start('Analyzing with reasoning engine...');
+
+    try {
+      const engine = new ReasoningRecommendationEngine();
+      engine.loadIndex(index);
+      await engine.initReasoning();
+
+      const result = await engine.recommendWithReasoning(profile, {
+        limit: this.limit ? parseInt(this.limit, 10) : 10,
+        minScore: this.minScore ? parseInt(this.minScore, 10) : 30,
+        categories: this.category,
+        excludeInstalled: !this.includeInstalled,
+        includeReasons: this.verbose,
+        reasoning: this.reasoning,
+        explainResults: this.explain,
+        useTree: true,
+      });
+
+      s?.stop('Analysis complete');
+
+      if (this.json) {
+        console.log(JSON.stringify(result, null, 2));
+        return 0;
+      }
+
+      this.displayExplainedRecommendations(
+        result.recommendations,
+        profile,
+        result.totalSkillsScanned,
+        result.reasoningSummary
+      );
+      return 0;
+    } catch (err) {
+      s?.stop(colors.error('Reasoning analysis failed'));
+      console.log(colors.muted(err instanceof Error ? err.message : String(err)));
+      console.log(colors.muted('Falling back to standard recommendations...'));
+      console.log('');
+
+      const engine = new RecommendationEngine();
+      engine.loadIndex(index);
+      const result = engine.recommend(profile, {
+        limit: this.limit ? parseInt(this.limit, 10) : 10,
+        minScore: this.minScore ? parseInt(this.minScore, 10) : 30,
+        categories: this.category,
+        excludeInstalled: !this.includeInstalled,
+        includeReasons: this.verbose,
+      });
+      this.displayRecommendations(result.recommendations, profile, result.totalSkillsScanned);
+      return 0;
+    }
   }
 
   private async getProjectProfile(projectPath: string): Promise<ProjectProfile | null> {
@@ -274,6 +353,97 @@ export class RecommendCommand extends Command {
     }
 
     console.log(colors.muted('Install with: skillkit install <source>'));
+  }
+
+  private displayExplainedRecommendations(
+    recommendations: ExplainedScoredSkill[],
+    profile: ProjectProfile,
+    totalScanned: number,
+    reasoningSummary?: string
+  ): void {
+    this.showProjectProfile(profile);
+
+    if (reasoningSummary && !this.quiet) {
+      console.log(colors.dim('Reasoning: ') + colors.muted(reasoningSummary));
+      console.log('');
+    }
+
+    if (recommendations.length === 0) {
+      warn('No matching skills found.');
+      console.log(colors.muted('Try lowering the minimum score with --min-score'));
+      return;
+    }
+
+    console.log(colors.bold(`Explained Recommendations (${recommendations.length} of ${totalScanned} scanned):`));
+    console.log('');
+
+    for (const rec of recommendations) {
+      let scoreColor: (text: string) => string;
+      if (rec.score >= 70) {
+        scoreColor = colors.success;
+      } else if (rec.score >= 50) {
+        scoreColor = colors.warning;
+      } else {
+        scoreColor = colors.muted;
+      }
+      const scoreBar = progressBar(rec.score, 100, 10);
+      const qualityScore = rec.skill.quality ?? null;
+      const qualityDisplay = qualityScore !== null && qualityScore !== undefined
+        ? ` ${formatQualityBadge(qualityScore)}`
+        : '';
+
+      console.log(`  ${scoreColor(`${rec.score}%`)} ${colors.dim(scoreBar)} ${colors.bold(rec.skill.name)}${qualityDisplay}`);
+
+      if (this.showPath && rec.treePath && rec.treePath.length > 0) {
+        console.log(`      ${colors.accent('Path:')} ${rec.treePath.join(' > ')}`);
+      }
+
+      if (rec.skill.description) {
+        console.log(`      ${colors.muted(truncate(rec.skill.description, 70))}`);
+      }
+
+      if (rec.skill.source) {
+        console.log(`      ${colors.dim('Source:')} ${rec.skill.source}`);
+      }
+
+      if (this.explain && rec.explanation) {
+        console.log(colors.dim('      Why this skill:'));
+        if (rec.explanation.matchedBecause.length > 0) {
+          console.log(`        ${colors.success('├─')} Matched: ${rec.explanation.matchedBecause.join(', ')}`);
+        }
+        if (rec.explanation.relevantFor.length > 0) {
+          console.log(`        ${colors.accent('├─')} Relevant for: ${rec.explanation.relevantFor.join(', ')}`);
+        }
+        if (rec.explanation.confidence) {
+          const confidenceColor = rec.explanation.confidence === 'high' ? colors.success :
+                                  rec.explanation.confidence === 'medium' ? colors.warning :
+                                  colors.muted;
+          console.log(`        ${colors.dim('└─')} Confidence: ${confidenceColor(rec.explanation.confidence)}`);
+        }
+      }
+
+      if (this.verbose && rec.reasons.length > 0) {
+        console.log(colors.dim('      Score breakdown:'));
+        for (const reason of rec.reasons.filter(r => r.weight > 0)) {
+          console.log(`        ${colors.muted(symbols.stepActive)} ${reason.description} (+${reason.weight})`);
+        }
+        if (qualityScore !== null && qualityScore !== undefined) {
+          const grade = getQualityGradeFromScore(qualityScore);
+          console.log(`        ${colors.muted(symbols.stepActive)} Quality: ${qualityScore}/100 (${grade})`);
+        }
+      }
+
+      if (rec.warnings.length > 0) {
+        for (const warning of rec.warnings) {
+          console.log(`      ${colors.warning(symbols.warning)} ${warning}`);
+        }
+      }
+
+      console.log('');
+    }
+
+    console.log(colors.muted('Install with: skillkit install <source>'));
+    console.log(colors.muted('More details: skillkit recommend --explain --verbose'));
   }
 
   private handleSearch(engine: RecommendationEngine, query: string): number {

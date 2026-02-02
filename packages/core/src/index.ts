@@ -89,3 +89,15 @@ export * from './profiles/index.js';
 
 // Coding Guidelines System
 export * from './guidelines/index.js';
+
+// Skill Tree (Hierarchical Taxonomy - Phase 21)
+export * from './tree/index.js';
+
+// Reasoning Engine (LLM-based Tree Search - Phase 21)
+export * from './reasoning/index.js';
+
+// Connectors (Tool-Agnostic Placeholders - Phase 21)
+export * from './connectors/index.js';
+
+// Execution Flow (Step Tracking & Metrics - Phase 21)
+export * from './execution/index.js';

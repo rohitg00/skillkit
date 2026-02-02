@@ -284,3 +284,45 @@ export function getTechTags(techName: string): string[] {
   }
   return tags;
 }
+
+/**
+ * Enhanced recommendation options with reasoning support
+ */
+export interface ReasoningRecommendOptions extends RecommendOptions {
+  reasoning?: boolean;
+  explainResults?: boolean;
+  useTree?: boolean;
+}
+
+/**
+ * Explained match details
+ */
+export interface ExplainedMatchDetails {
+  matchedBecause: string[];
+  relevantFor: string[];
+  differentFrom: string[];
+  confidence: 'high' | 'medium' | 'low';
+}
+
+/**
+ * Enhanced scored skill with reasoning
+ */
+export interface ExplainedScoredSkill extends ScoredSkill {
+  explanation?: ExplainedMatchDetails;
+  treePath?: string[];
+  reasoningDetails?: string;
+}
+
+/**
+ * Enhanced recommendation result with reasoning
+ */
+export interface ReasoningRecommendationResult extends RecommendationResult {
+  recommendations: ExplainedScoredSkill[];
+  reasoningSummary?: string;
+  searchPlan?: {
+    primaryCategories: string[];
+    secondaryCategories: string[];
+    keywords: string[];
+    strategy: string;
+  };
+}

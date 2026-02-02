@@ -14,7 +14,12 @@
 export * from './types.js';
 export * from './engine.js';
 export * from './fetcher.js';
-export { createRecommendationEngine, RecommendationEngine } from './engine.js';
+export {
+  createRecommendationEngine,
+  RecommendationEngine,
+  ReasoningRecommendationEngine,
+  createReasoningRecommendationEngine,
+} from './engine.js';
 export {
   fetchSkillsFromRepo,
   buildSkillIndex,

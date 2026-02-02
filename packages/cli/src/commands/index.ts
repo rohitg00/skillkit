@@ -105,3 +105,6 @@ export {
   GuidelineCreateCommand,
   GuidelineRemoveCommand,
 } from './guideline.js';
+
+// Tree command for hierarchical skill browsing (Phase 21)
+export { TreeCommand } from './tree.js';

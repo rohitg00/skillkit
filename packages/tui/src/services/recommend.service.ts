@@ -6,6 +6,12 @@ export interface RecommendationDisplay {
   source: string;
   tags: string[];
   installCommand?: string;
+  treePath?: string[];
+  explanation?: {
+    matchedBecause: string[];
+    relevantFor: string[];
+    confidence: 'high' | 'medium' | 'low';
+  };
 }
 
 export interface RecommendationOptions {
