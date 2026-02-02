@@ -114,7 +114,7 @@ export default function App(): React.ReactElement {
                 className="flex items-center gap-1.5 text-zinc-500 hover:text-white transition-colors group"
               >
                 <span className="text-zinc-600 group-hover:text-zinc-400">v</span>
-                <span className="text-white font-medium">1.8.0</span>
+                <span className="text-white font-medium">1.9.0</span>
               </a>
               <span className="text-zinc-800">·</span>
               <a
