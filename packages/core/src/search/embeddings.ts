@@ -30,6 +30,7 @@ export class EmbeddingService {
     const modelPath = await this.modelManager.ensureEmbedModel(onProgress);
 
     try {
+      // @ts-ignore - node-llama-cpp is an optional dependency
       const llama = await import('node-llama-cpp');
       const { getLlama } = llama;
 

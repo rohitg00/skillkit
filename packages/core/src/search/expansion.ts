@@ -34,6 +34,7 @@ export class QueryExpander {
     const modelPath = await this.modelManager.ensureLlmModel(onProgress);
 
     try {
+      // @ts-ignore - node-llama-cpp is an optional dependency
       const llamaModule = await import('node-llama-cpp');
       const { getLlama, LlamaChatSession } = llamaModule;
 
