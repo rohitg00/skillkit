@@ -111,7 +111,10 @@ export class LocalModelManager {
         const { done, value } = await reader.read();
         if (done) break;
 
-        fileStream.write(Buffer.from(value));
+        const canContinue = fileStream.write(Buffer.from(value));
+        if (!canContinue) {
+          await new Promise<void>((resolve) => fileStream.once('drain', resolve));
+        }
         downloaded += value.length;
 
         onProgress?.({

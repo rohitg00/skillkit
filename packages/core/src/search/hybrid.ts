@@ -371,14 +371,14 @@ export async function hybridSearch(
 ): Promise<HybridSearchResponse> {
   const pipeline = createHybridSearchPipeline();
 
-  await pipeline.buildIndex(skills);
+  try {
+    await pipeline.buildIndex(skills);
 
-  const response = await pipeline.search({
-    query,
-    ...options,
-  });
-
-  await pipeline.dispose();
-
-  return response;
+    return await pipeline.search({
+      query,
+      ...options,
+    });
+  } finally {
+    await pipeline.dispose();
+  }
 }

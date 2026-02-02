@@ -30,13 +30,12 @@ export class EmbeddingService {
     const modelPath = await this.modelManager.ensureEmbedModel(onProgress);
 
     try {
-      // @ts-expect-error - node-llama-cpp is an optional dependency
       const llama = await import('node-llama-cpp');
-      const { getLlama, LlamaEmbeddingContext } = llama;
+      const { getLlama } = llama;
 
       const llamaInstance = await getLlama();
       this.model = await llamaInstance.loadModel({ modelPath });
-      this.context = new LlamaEmbeddingContext({ model: this.model as never });
+      this.context = await (this.model as { createEmbeddingContext: () => Promise<unknown> }).createEmbeddingContext();
 
       const modelInfo = MODEL_REGISTRY.embeddings[
         this.modelManager.getConfig().embedModel as keyof typeof MODEL_REGISTRY.embeddings
@@ -226,7 +225,7 @@ export class EmbeddingService {
 
         currentChunk = overlapLines;
         currentChars = overlapCharsCount;
-        startLine = i - overlapLines.length;
+        startLine = Math.max(0, i - overlapLines.length);
       }
 
       currentChunk.push(line);

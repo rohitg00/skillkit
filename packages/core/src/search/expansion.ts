@@ -34,18 +34,13 @@ export class QueryExpander {
     const modelPath = await this.modelManager.ensureLlmModel(onProgress);
 
     try {
-      // @ts-expect-error - node-llama-cpp is an optional dependency
       const llamaModule = await import('node-llama-cpp');
       const { getLlama, LlamaChatSession } = llamaModule;
 
       const llama = await getLlama();
       this.model = await llama.loadModel({ modelPath });
-      const contextOptions = {
-        model: this.model as never,
-        contextSize: 2048,
-      };
-      const ctx = await llama.createContext(contextOptions);
-      this.context = new LlamaChatSession({ contextSequence: ctx.getSequence() });
+      const ctx = await (this.model as { createContext: (opts?: { contextSize?: number }) => Promise<{ getSequence: () => unknown }> }).createContext({ contextSize: 2048 });
+      this.context = new LlamaChatSession({ contextSequence: ctx.getSequence() as never });
 
       this.initialized = true;
 

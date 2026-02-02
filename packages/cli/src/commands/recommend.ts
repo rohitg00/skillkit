@@ -161,6 +161,11 @@ export class RecommendCommand extends Command {
       return await this.buildHybridIndex();
     }
 
+    // Validate hybrid-dependent options
+    if ((this.expand || this.rerank) && !this.hybrid) {
+      warn('--expand and --rerank require --hybrid flag. These options will be ignored.');
+    }
+
     if (!this.quiet && !this.json) {
       header('Skill Recommendations');
     }

@@ -137,9 +137,9 @@ export const MODEL_REGISTRY = {
   },
   llm: {
     'gemma-2b-it-Q4_K_M.gguf': {
-      url: 'https://huggingface.co/google/gemma-2b-it-GGUF/resolve/main/gemma-2b-it-q4_k_m.gguf',
+      url: 'https://huggingface.co/bartowski/gemma-2-2b-it-GGUF/resolve/main/gemma-2-2b-it-Q4_K_M.gguf',
       size: 1500000000,
-      description: 'Gemma 2B Instruct - Fast query expansion and reranking',
+      description: 'Gemma 2 2B Instruct - Fast query expansion and reranking',
     },
   },
 } as const;

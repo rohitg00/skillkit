@@ -23,9 +23,13 @@ export class VectorStore {
   private embeddingService: EmbeddingService;
 
   constructor(config: Partial<VectorStoreConfig> = {}, embeddingService?: EmbeddingService) {
+    const tableName = config.tableName ?? DEFAULT_TABLE_NAME;
+    if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(tableName)) {
+      throw new Error(`Invalid table name: ${tableName}. Must be a valid SQL identifier.`);
+    }
     this.config = {
       dbPath: config.dbPath ?? DEFAULT_DB_PATH,
-      tableName: config.tableName ?? DEFAULT_TABLE_NAME,
+      tableName,
       dimensions: config.dimensions ?? DEFAULT_DIMENSIONS,
     };
     this.embeddingService = embeddingService ?? new EmbeddingService();
@@ -40,15 +44,13 @@ export class VectorStore {
     }
 
     try {
-      // @ts-expect-error - better-sqlite3 is an optional dependency
       const BetterSqlite3Module = await import('better-sqlite3');
       const BetterSqlite3 = BetterSqlite3Module.default || BetterSqlite3Module;
       this.db = new BetterSqlite3(this.config.dbPath);
 
       try {
-        // @ts-expect-error - sqlite-vec is an optional dependency
         const sqliteVec = await import('sqlite-vec');
-        sqliteVec.load(this.db);
+        sqliteVec.load(this.db as Parameters<typeof sqliteVec.load>[0]);
         this.usingSqliteVec = true;
         await this.initializeSqliteVecTables();
       } catch {
