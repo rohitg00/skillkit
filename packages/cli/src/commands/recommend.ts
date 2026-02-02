@@ -52,6 +52,9 @@ export class RecommendCommand extends Command {
       ['Update skill index', '$0 recommend --update'],
       ['Search for skills by task', '$0 recommend --task "authentication"'],
       ['Search for skills (alias)', '$0 recommend --search "testing"'],
+      ['Hybrid search (vector + keyword)', '$0 recommend --search "auth" --hybrid'],
+      ['Hybrid search with query expansion', '$0 recommend --search "auth" --hybrid --expand'],
+      ['Build hybrid search index', '$0 recommend --build-index'],
     ],
   });
 
@@ -125,12 +128,37 @@ export class RecommendCommand extends Command {
     description: 'Show category path for each recommendation',
   });
 
+  // Hybrid search mode
+  hybrid = Option.Boolean('--hybrid,-H', false, {
+    description: 'Use hybrid search (vector + keyword)',
+  });
+
+  // Query expansion
+  expand = Option.Boolean('--expand,-x', false, {
+    description: 'Enable query expansion (requires --hybrid)',
+  });
+
+  // Reranking
+  rerank = Option.Boolean('--rerank', false, {
+    description: 'Enable LLM reranking (requires --hybrid)',
+  });
+
+  // Build index
+  buildIndex = Option.Boolean('--build-index', false, {
+    description: 'Build/rebuild the hybrid search embedding index',
+  });
+
   async execute(): Promise<number> {
     const targetPath = resolve(this.projectPath || process.cwd());
 
     // Handle index update
     if (this.update) {
       return await this.updateIndex();
+    }
+
+    // Handle hybrid index building
+    if (this.buildIndex) {
+      return await this.buildHybridIndex();
     }
 
     if (!this.quiet && !this.json) {
@@ -168,6 +196,9 @@ export class RecommendCommand extends Command {
     // Handle search mode (--search or --task)
     const searchQuery = this.search || this.task;
     if (searchQuery) {
+      if (this.hybrid) {
+        return await this.handleHybridSearch(engine, searchQuery);
+      }
       return this.handleSearch(engine, searchQuery);
     }
 
@@ -444,6 +475,132 @@ export class RecommendCommand extends Command {
 
     console.log(colors.muted('Install with: skillkit install <source>'));
     console.log(colors.muted('More details: skillkit recommend --explain --verbose'));
+  }
+
+  private async handleHybridSearch(engine: RecommendationEngine, query: string): Promise<number> {
+    if (!this.quiet && !this.json) {
+      header(`Hybrid Search: "${query}"`);
+    }
+
+    const s = !this.quiet && !this.json ? spinner() : null;
+    s?.start('Initializing hybrid search...');
+
+    try {
+      await engine.initHybridSearch();
+      s?.message('Searching...');
+
+      const results = await engine.hybridSearch({
+        query,
+        limit: this.limit ? parseInt(this.limit, 10) : 10,
+        hybrid: true,
+        enableExpansion: this.expand,
+        enableReranking: this.rerank,
+        filters: {
+          minScore: this.minScore ? parseInt(this.minScore, 10) : undefined,
+        },
+      });
+
+      s?.stop(`Found ${results.length} results`);
+
+      if (this.json) {
+        console.log(JSON.stringify(results, null, 2));
+        return 0;
+      }
+
+      if (results.length === 0) {
+        warn(`No skills found matching "${query}"`);
+        return 0;
+      }
+
+      console.log('');
+      console.log(colors.bold(`Hybrid search results for "${query}" (${results.length} found):`));
+      if (this.expand && results[0]?.expandedTerms?.length) {
+        console.log(colors.muted(`  Expanded: ${results[0].expandedTerms.join(', ')}`));
+      }
+      console.log('');
+
+      for (const result of results) {
+        let relevanceColor: (text: string) => string;
+        if (result.relevance >= 70) {
+          relevanceColor = colors.success;
+        } else if (result.relevance >= 50) {
+          relevanceColor = colors.warning;
+        } else {
+          relevanceColor = colors.muted;
+        }
+        const relevanceBar = progressBar(result.relevance, 100, 10);
+
+        console.log(`  ${relevanceColor(`${result.relevance}%`)} ${colors.dim(relevanceBar)} ${colors.bold(result.skill.name)}`);
+
+        if (result.skill.description) {
+          console.log(`      ${colors.muted(truncate(result.skill.description, 70))}`);
+        }
+
+        if (this.verbose) {
+          const scores: string[] = [];
+          if (typeof result.vectorSimilarity === 'number') {
+            scores.push(`vector: ${(result.vectorSimilarity * 100).toFixed(0)}%`);
+          }
+          if (typeof result.keywordScore === 'number') {
+            scores.push(`keyword: ${result.keywordScore.toFixed(0)}%`);
+          }
+          if (typeof result.rrfScore === 'number') {
+            scores.push(`rrf: ${result.rrfScore.toFixed(3)}`);
+          }
+          if (scores.length > 0) {
+            console.log(`      ${colors.dim('Scores:')} ${scores.join(' | ')}`);
+          }
+        }
+
+        if (result.matchedTerms.length > 0) {
+          console.log(`      ${colors.dim('Matched:')} ${result.matchedTerms.join(', ')}`);
+        }
+
+        console.log('');
+      }
+
+      return 0;
+    } catch (err) {
+      s?.stop(colors.error('Hybrid search failed'));
+      console.log(colors.muted(err instanceof Error ? err.message : String(err)));
+      console.log(colors.muted('Falling back to standard search...'));
+      return this.handleSearch(engine, query);
+    }
+  }
+
+  private async buildHybridIndex(): Promise<number> {
+    if (!this.quiet) {
+      header('Build Hybrid Search Index');
+    }
+
+    const index = this.loadIndex();
+    if (!index || index.skills.length === 0) {
+      warn('No skill index found. Run --update first.');
+      return 1;
+    }
+
+    const s = spinner();
+    s.start('Initializing...');
+
+    try {
+      const engine = new RecommendationEngine();
+      engine.loadIndex(index);
+
+      await engine.buildHybridIndex((progress) => {
+        const percentage = Math.round((progress.current / progress.total) * 100);
+        s.message(`${progress.phase}: ${progress.message || ''} (${percentage}%)`);
+      });
+
+      s.stop(colors.success(`${symbols.success} Built hybrid index for ${index.skills.length} skills`));
+      console.log(colors.muted('  Index stored in: ~/.skillkit/search.db'));
+      console.log(colors.muted('  Use --hybrid flag for vector+keyword search\n'));
+
+      return 0;
+    } catch (err) {
+      s.stop(colors.error('Failed to build hybrid index'));
+      console.log(colors.muted(err instanceof Error ? err.message : String(err)));
+      return 1;
+    }
   }
 
   private handleSearch(engine: RecommendationEngine, query: string): number {

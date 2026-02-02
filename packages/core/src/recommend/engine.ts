@@ -11,8 +11,11 @@ import type {
   SearchOptions,
   SearchResult,
   FreshnessResult,
+  RecommendHybridSearchOptions,
+  RecommendHybridSearchResult,
 } from './types.js';
 import { DEFAULT_SCORING_WEIGHTS, TAG_TO_TECH, getTechTags } from './types.js';
+import type { HybridSearchPipeline } from '../search/hybrid.js';
 
 /**
  * Recommendation engine for matching skills to project profiles
@@ -20,9 +23,29 @@ import { DEFAULT_SCORING_WEIGHTS, TAG_TO_TECH, getTechTags } from './types.js';
 export class RecommendationEngine {
   private weights: ScoringWeights;
   private index: SkillIndex | null = null;
+  private hybridPipeline: HybridSearchPipeline | null = null;
 
   constructor(weights?: Partial<ScoringWeights>) {
     this.weights = { ...DEFAULT_SCORING_WEIGHTS, ...weights };
+  }
+
+  /**
+   * Initialize hybrid search pipeline for vector + keyword search
+   */
+  async initHybridSearch(): Promise<void> {
+    const { createHybridSearchPipeline } = await import('../search/hybrid.js');
+    this.hybridPipeline = createHybridSearchPipeline();
+    if (this.index) {
+      this.hybridPipeline.loadSkillsIndex(this.index);
+    }
+    await this.hybridPipeline.initialize();
+  }
+
+  /**
+   * Check if hybrid search is available
+   */
+  isHybridSearchAvailable(): boolean {
+    return this.hybridPipeline !== null && this.hybridPipeline.isInitialized();
   }
 
   /**
@@ -30,6 +53,9 @@ export class RecommendationEngine {
    */
   loadIndex(index: SkillIndex): void {
     this.index = index;
+    if (this.hybridPipeline) {
+      this.hybridPipeline.loadSkillsIndex(index);
+    }
   }
 
   /**
@@ -601,6 +627,71 @@ export class RecommendationEngine {
     relevance = Math.min(100, relevance);
 
     return { relevance, matchedTerms, snippet };
+  }
+
+  /**
+   * Hybrid search combining vector embeddings and keyword matching
+   */
+  async hybridSearch(options: RecommendHybridSearchOptions): Promise<RecommendHybridSearchResult[]> {
+    const { query, limit = 10, hybrid = true, enableExpansion = false, enableReranking = false, filters } = options;
+
+    if (!hybrid || !this.hybridPipeline) {
+      const basicResults = this.search({ query, limit, semantic: true, filters });
+      return basicResults.map((r) => ({
+        ...r,
+        hybridScore: r.relevance / 100,
+      }));
+    }
+
+    const response = await this.hybridPipeline.search({
+      query,
+      limit,
+      enableExpansion,
+      enableReranking,
+    });
+
+    let results = response.results.map((r) => ({
+      skill: r.skill,
+      relevance: r.relevance,
+      matchedTerms: r.matchedTerms,
+      snippet: r.snippet,
+      hybridScore: r.hybridScore,
+      vectorSimilarity: r.vectorSimilarity,
+      keywordScore: r.keywordScore,
+      rrfScore: r.rrfScore,
+      expandedTerms: r.expandedTerms,
+    }));
+
+    if (filters?.tags && filters.tags.length > 0) {
+      results = results.filter((r) =>
+        r.skill.tags?.some((t) => filters.tags!.includes(t))
+      );
+    }
+    if (filters?.verified) {
+      results = results.filter((r) => r.skill.verified);
+    }
+    if (filters?.minScore) {
+      results = results.filter((r) => r.relevance >= filters.minScore!);
+    }
+
+    return results.slice(0, limit);
+  }
+
+  /**
+   * Build hybrid search index from skills
+   */
+  async buildHybridIndex(
+    onProgress?: (progress: { phase: string; current: number; total: number; message?: string }) => void
+  ): Promise<void> {
+    if (!this.index) {
+      throw new Error('No skill index loaded. Call loadIndex() first.');
+    }
+
+    if (!this.hybridPipeline) {
+      await this.initHybridSearch();
+    }
+
+    await this.hybridPipeline!.buildIndex(this.index.skills, onProgress);
   }
 
   /**

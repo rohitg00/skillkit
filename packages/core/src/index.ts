@@ -101,3 +101,6 @@ export * from './connectors/index.js';
 
 // Execution Flow (Step Tracking & Metrics - Phase 21)
 export * from './execution/index.js';
+
+// Hybrid Search (QMD-Inspired Vector + Keyword Search)
+export * from './search/index.js';

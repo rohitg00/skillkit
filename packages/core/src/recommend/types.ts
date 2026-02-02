@@ -326,3 +326,25 @@ export interface ReasoningRecommendationResult extends RecommendationResult {
     strategy: string;
   };
 }
+
+/**
+ * Hybrid search options for RecommendationEngine
+ */
+export interface RecommendHybridSearchOptions extends SearchOptions {
+  hybrid?: boolean;
+  enableExpansion?: boolean;
+  enableReranking?: boolean;
+  semanticWeight?: number;
+  keywordWeight?: number;
+}
+
+/**
+ * Hybrid search result with additional metadata for RecommendationEngine
+ */
+export interface RecommendHybridSearchResult extends SearchResult {
+  hybridScore?: number;
+  vectorSimilarity?: number;
+  keywordScore?: number;
+  rrfScore?: number;
+  expandedTerms?: string[];
+}
