@@ -13,7 +13,7 @@ const COMMAND_GROUPS: CommandGroup[] = [
       { cmd: 'install <repo>', desc: 'Install from GitHub' },
       { cmd: 'add <repo>', desc: 'Alias for install' },
       { cmd: 'recommend', desc: 'Smart suggestions' },
-      { cmd: 'find <query>', desc: 'Search 15K+ skills' },
+      { cmd: 'tree', desc: 'Browse skill taxonomy' },
       { cmd: 'marketplace', desc: 'Browse skills' },
     ],
   },

@@ -142,7 +142,24 @@ Filter by task, category, or minimum score:
 skillkit recommend --search "auth"        # Task-based search
 skillkit recommend --category security    # Category filter
 skillkit recommend --min-score 80         # Quality threshold
+skillkit recommend --explain              # Show WHY skills match
+skillkit recommend --reasoning            # Use LLM-based search
 ```
+
+### Hierarchical Skill Tree
+
+Browse skills organized in a navigable taxonomy:
+
+```bash
+skillkit tree                             # Show full tree
+skillkit tree Frontend                    # Show Frontend subtree
+skillkit tree "Frontend > React"          # Navigate to subcategory
+skillkit tree --generate                  # Generate tree from index
+skillkit tree --stats                     # Show tree statistics
+skillkit tree --depth 2                   # Limit display depth
+```
+
+**Categories:** Development, Frontend, Backend, Mobile, DevOps, Testing, Security, AI/ML, Database, Tooling, Documentation, Performance
 
 ### Session Memory System
 
@@ -190,7 +207,7 @@ skillkit ui
 skillkit
 ```
 
-**Navigation:** `h` Home | `b` Browse | `r` Recommend | `t` Translate | `c` Context | `l` List | `s` Sync | `q` Quit
+**Navigation:** `h` Home | `m` Marketplace | `b` Browse | `v` Tree View | `r` Recommend | `t` Translate | `c` Context | `l` List | `s` Sync | `q` Quit
 
 ### Skill Testing Framework
 
@@ -298,6 +315,10 @@ skillkit status               # Show skill and agent status
 
 ```bash
 skillkit recommend            # Get smart recommendations
+skillkit recommend --explain  # Show reasoning for matches
+skillkit recommend --reasoning # Use LLM-based discovery
+skillkit tree                 # Browse hierarchical taxonomy
+skillkit tree --generate      # Generate tree from index
 skillkit marketplace          # Browse skill marketplace
 skillkit marketplace search   # Search marketplace
 skillkit find <query>         # Quick skill search
@@ -511,7 +532,28 @@ import {
 
   // Recommendations
   RecommendationEngine,
+  ReasoningRecommendationEngine,
   analyzeProject,
+
+  // Tree & Taxonomy
+  TreeGenerator,
+  generateSkillTree,
+  loadTree,
+  buildSkillGraph,
+  getRelatedSkills,
+
+  // Reasoning Engine
+  ReasoningEngine,
+  createReasoningEngine,
+
+  // Connectors (Tool-Agnostic Placeholders)
+  detectPlaceholders,
+  replacePlaceholders,
+  suggestMappingsFromMcp,
+
+  // Execution Flow
+  ExecutionManager,
+  detectExecutionMode,
 
   // Context
   ContextManager,
@@ -536,10 +578,20 @@ import {
 const skill = await translateSkill(skillContent, 'cursor');
 console.log(skill.content);
 
-// Example: Get recommendations
-const engine = new RecommendationEngine();
+// Example: Get recommendations with reasoning
+const engine = new ReasoningRecommendationEngine();
+await engine.initReasoning();
 const profile = await analyzeProject('./my-project');
-const recs = engine.recommend(profile);
+const recs = await engine.recommendWithReasoning(profile, { reasoning: true });
+
+// Example: Browse skill tree
+const tree = generateSkillTree(skills);
+console.log(tree.rootNode.children); // Categories
+
+// Example: Detect execution mode
+const mode = detectExecutionMode();
+console.log(mode.mode); // 'standalone' or 'enhanced'
+console.log(mode.capabilities); // Available MCP capabilities
 ```
 
 ## Skill Sources & Attribution

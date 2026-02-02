@@ -32,6 +32,33 @@ skillkit recommend --category security
 skillkit recommend --min-score 80
 ```
 
+## Explainable Recommendations
+
+See WHY skills match your project:
+
+```bash
+skillkit recommend --explain
+```
+
+Output:
+
+```
+vercel-react-best-practices (Score: 92)
+├── Matched: React, TypeScript, Next.js
+├── Your stack: Next.js 14, React 18
+└── Path: Frontend > React > Best Practices
+```
+
+## LLM-Based Reasoning
+
+Use reasoning-based discovery for complex queries:
+
+```bash
+skillkit recommend --reasoning
+```
+
+This uses an LLM to traverse the skill taxonomy and find the most relevant skills based on semantic understanding.
+
 ## How It Works
 
 The engine analyzes:
@@ -50,9 +77,22 @@ Scores based on:
 ## Programmatic API
 
 ```typescript
-import { RecommendationEngine, analyzeProject } from '@skillkit/core'
+import {
+  RecommendationEngine,
+  ReasoningRecommendationEngine,
+  analyzeProject
+} from '@skillkit/core'
 
+// Basic recommendations
 const engine = new RecommendationEngine()
 const profile = await analyzeProject('./my-project')
 const recs = engine.recommend(profile)
+
+// With reasoning and explanations
+const reasoningEngine = new ReasoningRecommendationEngine()
+await reasoningEngine.initReasoning()
+const explained = await reasoningEngine.recommendWithReasoning(profile, {
+  reasoning: true,
+  explain: true
+})
 ```

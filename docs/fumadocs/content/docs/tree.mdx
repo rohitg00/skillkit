@@ -1,0 +1,144 @@
+---
+title: Skill Tree
+description: Browse skills in a hierarchical taxonomy
+---
+
+# Skill Tree
+
+Browse and navigate skills organized in a hierarchical taxonomy structure.
+
+## Quick Start
+
+```bash
+# Show full skill tree
+skillkit tree
+
+# Navigate to a category
+skillkit tree Frontend
+
+# Navigate to subcategory
+skillkit tree "Frontend > React"
+```
+
+## Commands
+
+### Display Tree
+
+```bash
+skillkit tree                    # Full tree
+skillkit tree Development        # Specific category
+skillkit tree --depth 2          # Limit display depth
+```
+
+### Generate Tree
+
+```bash
+skillkit tree --generate         # Generate from skill index
+```
+
+This builds a hierarchical tree from the skill index based on tags and metadata.
+
+### Export Formats
+
+```bash
+skillkit tree --json             # JSON output
+skillkit tree --markdown         # Markdown output
+```
+
+### Statistics
+
+```bash
+skillkit tree --stats
+```
+
+Output:
+
+```
+Overview:
+  Total Skills: 15,064
+  Categories: 156
+  Max Depth: 4
+
+Top-Level Categories:
+  Development        4,521 skills (30.0%)
+    Frontend (1,245), Backend (1,102), Mobile (456)
+  DevOps             2,340 skills (15.5%)
+    CI/CD (890), Kubernetes (567), Docker (445)
+  AI/ML              1,890 skills (12.5%)
+    LLM Integration (756), Agents (445), RAG (312)
+```
+
+## Categories
+
+The tree organizes skills into 12 top-level categories:
+
+| Category | Description |
+|----------|-------------|
+| Development | General coding, programming patterns |
+| Frontend | React, Vue, Angular, Svelte, UI/UX |
+| Backend | Node.js, Python, Go, APIs, servers |
+| Mobile | React Native, Flutter, iOS, Android |
+| DevOps | CI/CD, Kubernetes, Docker, cloud |
+| Testing | Unit, E2E, integration, TDD |
+| Security | Auth, encryption, vulnerabilities |
+| AI/ML | LLM, agents, RAG, embeddings |
+| Database | SQL, NoSQL, ORM, migrations |
+| Tooling | Linting, formatting, bundling |
+| Documentation | API docs, guides, READMEs |
+| Performance | Optimization, caching, profiling |
+
+## TUI Tree View
+
+In the TUI, press `v` to toggle tree view in the Marketplace:
+
+- **Arrow keys** - Navigate tree
+- **Enter** - Expand category / select skill
+- **←** - Go back / collapse
+- **v** - Toggle list/tree view
+
+## Related Skills Graph
+
+Find skills related to each other:
+
+```typescript
+import { buildSkillGraph, getRelatedSkills } from '@skillkit/core'
+
+const graph = buildSkillGraph(skills)
+const related = getRelatedSkills('react-patterns', graph, skills, {
+  limit: 5,
+  types: ['similar', 'complementary']
+})
+```
+
+### Relation Types
+
+- **similar** - Shares tags and functionality
+- **complementary** - Works well together
+- **dependency** - Required by other skills
+- **alternative** - Different approach to same problem
+
+## Programmatic API
+
+```typescript
+import {
+  TreeGenerator,
+  generateSkillTree,
+  loadTree,
+  saveTree,
+  treeToMarkdown
+} from '@skillkit/core'
+
+// Generate tree from skills
+const generator = new TreeGenerator({ maxDepth: 3 })
+const tree = generator.generateTree(skills)
+
+// Or use the helper function
+const tree = generateSkillTree(skills)
+
+// Save and load
+saveTree(tree, './skill-tree.json')
+const loaded = loadTree('./skill-tree.json')
+
+// Export to markdown
+const markdown = treeToMarkdown(tree)
+```
