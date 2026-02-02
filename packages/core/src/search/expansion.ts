@@ -168,11 +168,12 @@ Alternatives:`;
       }
     }
 
-    const weights = [2.0, ...variations.map(() => 1.0)];
+    const limitedVariations = variations.slice(0, 3);
+    const weights = [2.0, ...limitedVariations.map(() => 1.0)];
 
     return {
       original: query,
-      variations: variations.slice(0, 3),
+      variations: limitedVariations,
       weights,
     };
   }

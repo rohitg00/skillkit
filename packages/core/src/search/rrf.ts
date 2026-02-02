@@ -146,7 +146,7 @@ export function mergeRankings(
   for (const ranking of primaryRankings) {
     mergedScores.set(ranking.skillName, {
       score: ranking.rrfScore * primaryWeight,
-      ranks: ranking.ranks,
+      ranks: [...ranking.ranks],
     });
   }
 
@@ -154,11 +154,11 @@ export function mergeRankings(
     const existing = mergedScores.get(ranking.skillName);
     if (existing) {
       existing.score += ranking.rrfScore * secondaryWeight;
-      existing.ranks.push(...ranking.ranks);
+      existing.ranks = [...existing.ranks, ...ranking.ranks];
     } else {
       mergedScores.set(ranking.skillName, {
         score: ranking.rrfScore * secondaryWeight,
-        ranks: ranking.ranks,
+        ranks: [...ranking.ranks],
       });
     }
   }

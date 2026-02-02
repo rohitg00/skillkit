@@ -187,6 +187,7 @@ export class VectorStore {
         }
       }
     } catch {
+      // Failed to load embeddings from DB - will start with empty in-memory store
     }
   }
 
@@ -420,6 +421,12 @@ export class VectorStore {
     if (this.usingSqliteVec) {
       db.prepare(`DELETE FROM ${this.config.tableName}_meta WHERE skill_name = ?`).run(skillName);
       db.prepare(`DELETE FROM ${this.config.tableName}_vec WHERE skill_name = ?`).run(skillName);
+      db.prepare(`
+        DELETE FROM ${this.config.tableName}_chunks_vec
+        WHERE chunk_id IN (
+          SELECT id FROM ${this.config.tableName}_chunks WHERE skill_name = ?
+        )
+      `).run(skillName);
     } else {
       db.prepare(`DELETE FROM ${this.config.tableName} WHERE skill_name = ?`).run(skillName);
     }
@@ -438,6 +445,7 @@ export class VectorStore {
     if (this.usingSqliteVec) {
       db.exec(`DELETE FROM ${this.config.tableName}_meta`);
       db.exec(`DELETE FROM ${this.config.tableName}_vec`);
+      db.exec(`DELETE FROM ${this.config.tableName}_chunks_vec`);
     } else {
       db.exec(`DELETE FROM ${this.config.tableName}`);
     }

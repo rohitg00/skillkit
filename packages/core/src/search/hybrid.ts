@@ -72,18 +72,26 @@ export class HybridSearchPipeline {
     };
     this.recommendationEngine.loadIndex(index);
 
-    await this.embeddingService.initialize(onProgress);
+    try {
+      await this.embeddingService.initialize(onProgress);
+      const embeddings = await this.embeddingService.embedSkills(skills, onProgress);
+      await this.vectorStore.storeBatch(embeddings, onProgress);
 
-    const embeddings = await this.embeddingService.embedSkills(skills, onProgress);
-
-    await this.vectorStore.storeBatch(embeddings, onProgress);
-
-    onProgress?.({
-      phase: 'complete',
-      current: skills.length,
-      total: skills.length,
-      message: `Indexed ${skills.length} skills with embeddings`,
-    });
+      onProgress?.({
+        phase: 'complete',
+        current: skills.length,
+        total: skills.length,
+        message: `Indexed ${skills.length} skills with embeddings`,
+      });
+    } catch {
+      // Embeddings not available - will use keyword-only search
+      onProgress?.({
+        phase: 'complete',
+        current: skills.length,
+        total: skills.length,
+        message: `Indexed ${skills.length} skills (keyword-only, embeddings unavailable)`,
+      });
+    }
   }
 
   async search(options: HybridSearchOptions): Promise<HybridSearchResponse> {
@@ -363,15 +371,7 @@ export async function hybridSearch(
 ): Promise<HybridSearchResponse> {
   const pipeline = createHybridSearchPipeline();
 
-  const index: SkillIndex = {
-    version: 1,
-    lastUpdated: new Date().toISOString(),
-    skills,
-    sources: [],
-  };
-
-  pipeline.loadSkillsIndex(index);
-  await pipeline.initialize();
+  await pipeline.buildIndex(skills);
 
   const response = await pipeline.search({
     query,

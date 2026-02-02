@@ -77,6 +77,14 @@ vi.mock('sqlite-vec', () => {
   };
 });
 
+vi.mock('node-llama-cpp', () => {
+  return {
+    getLlama: vi.fn().mockImplementation(() => {
+      throw new Error("Cannot find package 'node-llama-cpp'");
+    }),
+  };
+});
+
 describe('HybridSearchPipeline', () => {
   let HybridSearchPipeline: typeof import('../hybrid.js').HybridSearchPipeline;
   let createHybridSearchPipeline: typeof import('../hybrid.js').createHybridSearchPipeline;
