@@ -157,14 +157,22 @@ export class ExecutionManager {
     let lastError: Error | null = null;
 
     while (step.retryCount <= maxRetries) {
+      let timeoutId: ReturnType<typeof setTimeout> | undefined;
       try {
         if (stepDef) {
           const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error(`Step ${step.name} timed out`)), timeout);
+            timeoutId = setTimeout(
+              () => reject(new Error(`Step ${step.name} timed out`)),
+              timeout
+            );
           });
 
           const executePromise = stepDef.execute(step.input || {}, context);
-          step.output = await Promise.race([executePromise, timeoutPromise]);
+          try {
+            step.output = await Promise.race([executePromise, timeoutPromise]);
+          } finally {
+            if (timeoutId) clearTimeout(timeoutId);
+          }
         }
 
         step.status = 'completed';
