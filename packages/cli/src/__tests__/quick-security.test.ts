@@ -1,9 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { join, normalize } from 'node:path';
+import { join, normalize, resolve, sep } from 'node:path';
 
 function isPathInside(child: string, parent: string): boolean {
-  const relative = child.replace(parent, '');
-  return !relative.startsWith('..') && !relative.includes('/..');
+  const resolved = resolve(child);
+  const resolvedParent = resolve(parent);
+  return resolved === resolvedParent || resolved.startsWith(resolvedParent + sep);
 }
 
 function sanitizeName(name: string): string {

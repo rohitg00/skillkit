@@ -130,6 +130,8 @@ export class FederatedSearch {
       if (result.status === 'fulfilled' && result.value.length > 0) {
         allSkills.push(...result.value);
         activeRegistries.push(this.registries[i].name);
+      } else if (result.status === 'rejected' && result.reason instanceof RateLimitError) {
+        throw result.reason;
       }
     }
 

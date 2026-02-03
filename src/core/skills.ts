@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join, basename } from 'node:path';
+import { join, basename, resolve, sep } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { SkillFrontmatter, SkillMetadata, type Skill, type SkillLocation } from './types.js';
 
@@ -328,6 +328,7 @@ export function validateSkill(skillPath: string): { valid: boolean; errors: stri
 }
 
 export function isPathInside(child: string, parent: string): boolean {
-  const relative = child.replace(parent, '');
-  return !relative.startsWith('..') && !relative.includes('/..');
+  const resolved = resolve(child);
+  const resolvedParent = resolve(parent);
+  return resolved === resolvedParent || resolved.startsWith(resolvedParent + sep);
 }
