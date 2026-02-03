@@ -40,13 +40,19 @@ export class GitHubSkillRegistry implements ExternalRegistry {
     const timer = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
+      const headers: Record<string, string> = {
+        Accept: 'application/vnd.github.v3+json',
+        'User-Agent': 'skillkit-cli',
+      };
+      const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await fetch(
         `${this.baseUrl}/search/code?q=${encodeURIComponent(searchQuery)}&per_page=${limit}`,
         {
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-            'User-Agent': 'skillkit-cli',
-          },
+          headers,
           signal: controller.signal,
         },
       );
