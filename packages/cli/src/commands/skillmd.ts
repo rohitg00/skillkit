@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
-import { join, resolve, basename } from 'node:path';
+import { join, resolve, basename, relative } from 'node:path';
 import { Command, Option } from 'clipanion';
 import {
   colors,
@@ -352,7 +352,7 @@ export class SkillMdCheckCommand extends Command {
     console.log('');
 
     for (const validation of validations) {
-      const relativePath = validation.path.replace(targetPath + '/', '');
+      const relativePath = relative(targetPath, validation.path);
       const scoreColor = validation.score >= 80 ? colors.success : validation.score >= 60 ? colors.warning : colors.error;
       console.log(`${scoreColor(symbols.bullet)} ${colors.primary(relativePath)} ${colors.muted(`(${validation.score}/100)`)}`);
       if (this.verbose) {

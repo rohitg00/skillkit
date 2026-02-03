@@ -8,7 +8,7 @@ import {
   select,
   header,
 } from '../onboarding/index.js';
-import { FederatedSearch, GitHubSkillRegistry } from '@skillkit/core';
+import { FederatedSearch, GitHubSkillRegistry, RateLimitError } from '@skillkit/core';
 
 interface SkillResult {
   name: string;
@@ -137,23 +137,32 @@ export class FindCommand extends Command {
       s.start('Searching external registries...');
       const fedSearch = new FederatedSearch();
       fedSearch.addRegistry(new GitHubSkillRegistry());
-      const fedResult = await fedSearch.search(this.query, { limit: parseInt(this.limit, 10) || 10 });
-      s.stop(`Found ${fedResult.total} external skill(s) from ${fedResult.registries.join(', ') || 'none'}`);
+      try {
+        const fedResult = await fedSearch.search(this.query, { limit: parseInt(this.limit, 10) || 10 });
+        s.stop(`Found ${fedResult.total} external skill(s) from ${fedResult.registries.join(', ') || 'none'}`);
 
-      if (fedResult.skills.length > 0) {
-        console.log('');
-        console.log(colors.bold('External Skills (SKILL.md):'));
-        for (const skill of fedResult.skills) {
-          const stars = typeof skill.stars === 'number' ? colors.muted(` ★${skill.stars}`) : '';
-          const desc = skill.description
-            ? colors.muted(` - ${skill.description.slice(0, 50)}${skill.description.length > 50 ? '...' : ''}`)
-            : '';
-          console.log(`  ${colors.cyan(symbols.bullet)} ${colors.primary(skill.name)}${stars}${desc}`);
-          if (!this.quiet) {
-            console.log(`    ${colors.muted(skill.source)}`);
+        if (fedResult.skills.length > 0) {
+          console.log('');
+          console.log(colors.bold('External Skills (SKILL.md):'));
+          for (const skill of fedResult.skills) {
+            const stars = typeof skill.stars === 'number' ? colors.muted(` ★${skill.stars}`) : '';
+            const desc = skill.description
+              ? colors.muted(` - ${skill.description.slice(0, 50)}${skill.description.length > 50 ? '...' : ''}`)
+              : '';
+            console.log(`  ${colors.cyan(symbols.bullet)} ${colors.primary(skill.name)}${stars}${desc}`);
+            if (!this.quiet) {
+              console.log(`    ${colors.muted(skill.source)}`);
+            }
           }
+          console.log('');
         }
-        console.log('');
+      } catch (err) {
+        if (err instanceof RateLimitError) {
+          s.stop(colors.warning('Rate limited by GitHub API'));
+          console.log(colors.muted('Set GITHUB_TOKEN env var or wait before retrying.'));
+        } else {
+          s.stop(colors.warning('Federated search failed'));
+        }
       }
     }
 

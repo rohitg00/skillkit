@@ -10,7 +10,7 @@ export interface ExternalSkill {
 
 export interface ExternalRegistry {
   name: string;
-  search(query: string, options?: { limit?: number }): Promise<ExternalSkill[]>;
+  search(query: string, options?: { limit?: number; timeoutMs?: number }): Promise<ExternalSkill[]>;
 }
 
 export interface FederatedResult {
@@ -20,13 +20,24 @@ export interface FederatedResult {
   query: string;
 }
 
+export class RateLimitError extends Error {
+  constructor(registry: string) {
+    super(`Rate limited by ${registry} API. Authenticate with a token or wait before retrying.`);
+    this.name = 'RateLimitError';
+  }
+}
+
 export class GitHubSkillRegistry implements ExternalRegistry {
   name = 'github';
   private baseUrl = 'https://api.github.com';
 
-  async search(query: string, options?: { limit?: number }): Promise<ExternalSkill[]> {
+  async search(query: string, options?: { limit?: number; timeoutMs?: number }): Promise<ExternalSkill[]> {
     const limit = options?.limit ?? 20;
+    const timeoutMs = options?.timeoutMs ?? 10_000;
     const searchQuery = `SKILL.md ${query} in:path,file`;
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
       const response = await fetch(
@@ -36,12 +47,14 @@ export class GitHubSkillRegistry implements ExternalRegistry {
             Accept: 'application/vnd.github.v3+json',
             'User-Agent': 'skillkit-cli',
           },
+          signal: controller.signal,
         },
       );
+      clearTimeout(timer);
 
       if (!response.ok) {
         if (response.status === 403) {
-          return [];
+          throw new RateLimitError(this.name);
         }
         return [];
       }
@@ -88,7 +101,9 @@ export class GitHubSkillRegistry implements ExternalRegistry {
       }
 
       return skills;
-    } catch {
+    } catch (err) {
+      clearTimeout(timer);
+      if (err instanceof RateLimitError) throw err;
       return [];
     }
   }

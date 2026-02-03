@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, cpSync, rmSync, symlinkSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, resolve, normalize } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
@@ -271,7 +271,13 @@ export class QuickCommand extends Command {
           mkdirSync(installDir, { recursive: true });
         }
 
-        const targetInstallPath = join(installDir, matchedSkill.name);
+        const sanitizedName = matchedSkill.name.split(/[/\\]/).pop() || matchedSkill.name;
+        const targetInstallPath = normalize(join(installDir, sanitizedName));
+
+        if (!isPathInside(targetInstallPath, installDir)) {
+          error(`Skipping ${matchedSkill.name} for ${adapter.name} (install path escapes target directory)`);
+          continue;
+        }
 
         const securityRoot = cloneResult.tempRoot || cloneResult.path;
         if (!isPathInside(matchedSkill.path, securityRoot)) {

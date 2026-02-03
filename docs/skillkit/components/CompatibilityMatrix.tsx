@@ -168,27 +168,30 @@ export function CompatibilityMatrix(): React.ReactElement {
     }, []);
   }, []);
 
-  const filteredAgents = useMemo(() => {
+  const { filteredAgents, filteredCategories } = useMemo(() => {
     let agents = AGENTS;
     if (groupFilter) {
       agents = agents.filter(a => a.group === groupFilter);
     }
-    if (filter.trim()) {
-      const q = filter.toLowerCase();
-      agents = agents.filter(a =>
-        a.name.toLowerCase().includes(q) || a.id.toLowerCase().includes(q)
-      );
-    }
-    return agents;
-  }, [filter, groupFilter]);
 
-  const filteredCategories = useMemo(() => {
-    if (!filter.trim()) return CATEGORIES;
+    if (!filter.trim()) {
+      return { filteredAgents: agents, filteredCategories: CATEGORIES };
+    }
+
     const q = filter.toLowerCase();
-    return CATEGORIES.filter(c =>
+
+    const matchedAgents = agents.filter(a =>
+      a.name.toLowerCase().includes(q) || a.id.toLowerCase().includes(q)
+    );
+    const matchedCategories = CATEGORIES.filter(c =>
       c.name.toLowerCase().includes(q) || c.id.toLowerCase().includes(q)
     );
-  }, [filter]);
+
+    return {
+      filteredAgents: matchedAgents.length > 0 ? matchedAgents : (matchedCategories.length > 0 ? agents : []),
+      filteredCategories: matchedCategories.length > 0 ? matchedCategories : (matchedAgents.length > 0 ? CATEGORIES : []),
+    };
+  }, [filter, groupFilter]);
 
   const maxScore = getMaxScore();
 
