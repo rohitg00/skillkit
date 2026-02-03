@@ -19,7 +19,7 @@ export function categoryRoutes(skills: ApiSkill[]) {
       }
     }
 
-    const categories: CategoryCount[] = Array.from(tagCounts.entries())
+    const categories = Array.from(tagCounts.entries())
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count);
 

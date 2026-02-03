@@ -17,7 +17,7 @@ export function rateLimiter(maxRequests = 60, windowMs = 60_000) {
     }
   }, windowMs).unref();
 
-  return async (c: Context, next: Next) => {
+  return async (c: Context, next: Next): Promise<Response | void> => {
     const ip = c.req.header('x-forwarded-for') || c.req.header('x-real-ip') || 'unknown';
     const now = Date.now();
 
