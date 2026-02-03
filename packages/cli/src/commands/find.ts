@@ -8,6 +8,7 @@ import {
   select,
   header,
 } from '../onboarding/index.js';
+import { FederatedSearch, GitHubSkillRegistry } from '@skillkit/core';
 
 interface SkillResult {
   name: string;
@@ -52,6 +53,10 @@ export class FindCommand extends Command {
 
   quiet = Option.Boolean('--quiet,-q', false, {
     description: 'Minimal output (just list skills)',
+  });
+
+  federated = Option.Boolean('--federated,-f', false, {
+    description: 'Search external registries (GitHub SKILL.md files)',
   });
 
   async execute(): Promise<number> {
@@ -128,12 +133,37 @@ export class FindCommand extends Command {
       }
     }
 
+    if (this.federated && this.query) {
+      s.start('Searching external registries...');
+      const fedSearch = new FederatedSearch();
+      fedSearch.addRegistry(new GitHubSkillRegistry());
+      const fedResult = await fedSearch.search(this.query, { limit: parseInt(this.limit, 10) || 10 });
+      s.stop(`Found ${fedResult.total} external skill(s) from ${fedResult.registries.join(', ') || 'none'}`);
+
+      if (fedResult.skills.length > 0) {
+        console.log('');
+        console.log(colors.bold('External Skills (SKILL.md):'));
+        for (const skill of fedResult.skills) {
+          const stars = typeof skill.stars === 'number' ? colors.muted(` ★${skill.stars}`) : '';
+          const desc = skill.description
+            ? colors.muted(` - ${skill.description.slice(0, 50)}${skill.description.length > 50 ? '...' : ''}`)
+            : '';
+          console.log(`  ${colors.cyan(symbols.bullet)} ${colors.primary(skill.name)}${stars}${desc}`);
+          if (!this.quiet) {
+            console.log(`    ${colors.muted(skill.source)}`);
+          }
+        }
+        console.log('');
+      }
+    }
+
     if (results.length === 0) {
       console.log(colors.muted('No skills found matching your search'));
       console.log('');
       console.log(colors.muted('Try:'));
-      console.log(colors.muted('  skillkit find --top     # Show featured skills'));
-      console.log(colors.muted('  skillkit ui             # Browse in TUI'));
+      console.log(colors.muted('  skillkit find --top       # Show featured skills'));
+      console.log(colors.muted('  skillkit find -f <query>  # Search external registries'));
+      console.log(colors.muted('  skillkit ui               # Browse in TUI'));
       return 0;
     }
 

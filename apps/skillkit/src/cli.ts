@@ -98,6 +98,10 @@ import {
   GuidelineCreateCommand,
   GuidelineRemoveCommand,
   TreeCommand,
+  QuickCommand,
+  SkillMdValidateCommand,
+  SkillMdInitCommand,
+  SkillMdCheckCommand,
 } from '@skillkit/cli';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -219,5 +223,10 @@ cli.register(GuidelineCreateCommand);
 cli.register(GuidelineRemoveCommand);
 
 cli.register(TreeCommand);
+
+cli.register(QuickCommand);
+cli.register(SkillMdValidateCommand);
+cli.register(SkillMdInitCommand);
+cli.register(SkillMdCheckCommand);
 
 cli.runExit(process.argv.slice(2));

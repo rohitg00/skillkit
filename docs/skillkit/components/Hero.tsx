@@ -134,14 +134,14 @@ export function Hero({ version }: HeroProps): React.ReactElement {
             </div>
 
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white mb-3 font-mono">
-              Write Once.<br />
-              <span className="text-zinc-500">Deploy to 32 Agents.</span>
+              One Skill.<br />
+              <span className="text-zinc-500">32 Agents. Zero Rewrites.</span>
             </h1>
 
             <p className="text-sm text-zinc-400 mb-5 max-w-lg font-mono leading-relaxed">
-              The universal skill platform for AI coding agents. Auto-generate instructions 
-              with Primer, persist learnings with Memory, distribute across Mesh networks. 
-              One CLI for Claude, Cursor, Windsurf, Copilot, and 28 more.
+              The package manager for AI agent skills. Install from 15,000+ skills,
+              auto-translate between formats, persist learnings with Memory.
+              Works with Claude, Cursor, Windsurf, Copilot, and 28 more.
             </p>
 
             <div className="flex flex-wrap items-center gap-3 mb-4">

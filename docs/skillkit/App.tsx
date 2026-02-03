@@ -12,6 +12,8 @@ import { Attribution } from './components/Attribution';
 import { AdvancedFeatures } from './components/AdvancedFeatures';
 import { UseCases } from './components/UseCases';
 import { TeamEnterprise } from './components/TeamEnterprise';
+import { BadgeGenerator } from './components/BadgeGenerator';
+import { CompatibilityMatrix } from './components/CompatibilityMatrix';
 import { useStats } from './hooks/useStats';
 
 const GITHUB_ICON = (
@@ -60,6 +62,20 @@ export default function App(): React.ReactElement {
                 className="text-zinc-500 hover:text-white transition-colors"
               >
                 Stack
+              </a>
+              <a
+                href="#matrix"
+                onClick={(e) => scrollToSection(e, 'matrix')}
+                className="text-zinc-500 hover:text-white transition-colors"
+              >
+                Matrix
+              </a>
+              <a
+                href="#badge"
+                onClick={(e) => scrollToSection(e, 'badge')}
+                className="text-zinc-500 hover:text-white transition-colors"
+              >
+                Badge
               </a>
               <a
                 href="#advanced"
@@ -172,6 +188,16 @@ export default function App(): React.ReactElement {
           <StackBuilder />
         </section>
         
+        {/* Compatibility Matrix */}
+        <section id="matrix" style={{ scrollMarginTop: '4rem' }}>
+          <CompatibilityMatrix />
+        </section>
+
+        {/* Badge Generator */}
+        <section id="badge" style={{ scrollMarginTop: '4rem' }}>
+          <BadgeGenerator />
+        </section>
+
         {/* Advanced Capabilities: Memory, Primer, Mesh, Messaging */}
         <section id="advanced" style={{ scrollMarginTop: '4rem' }}>
           <AdvancedFeatures />
