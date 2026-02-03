@@ -107,3 +107,16 @@ export * from './search/index.js';
 
 // Federated Registry (External Skill Sources)
 export * from './registry/index.js';
+
+// Pluggable Cache Backend
+export * from './cache/index.js';
+
+// Multi-Signal Relevance Ranking
+export * from './ranking/index.js';
+
+// Enhanced SKILL.md Parser (References & Frontmatter)
+export { discoverReferences, stripFrontmatter, parseSkillMd } from './parser/index.js';
+export type { SkillReference, ParsedSkillContent } from './parser/index.js';
+
+// Runtime Skill Injection
+export * from './runtime/index.js';

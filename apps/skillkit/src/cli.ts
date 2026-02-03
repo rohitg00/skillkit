@@ -102,6 +102,7 @@ import {
   SkillMdValidateCommand,
   SkillMdInitCommand,
   SkillMdCheckCommand,
+  ServeCommand,
 } from '@skillkit/cli';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -228,5 +229,7 @@ cli.register(QuickCommand);
 cli.register(SkillMdValidateCommand);
 cli.register(SkillMdInitCommand);
 cli.register(SkillMdCheckCommand);
+
+cli.register(ServeCommand);
 
 cli.runExit(process.argv.slice(2));

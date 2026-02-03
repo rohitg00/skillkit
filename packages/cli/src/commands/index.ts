@@ -114,3 +114,6 @@ export { QuickCommand } from './quick.js';
 
 // SKILL.md ecosystem
 export { SkillMdValidateCommand, SkillMdInitCommand, SkillMdCheckCommand } from './skillmd.js';
+
+// API server
+export { ServeCommand } from './serve.js';
