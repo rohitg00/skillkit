@@ -14,10 +14,13 @@
 [![Website](https://img.shields.io/badge/Website-agenstskills.com-black)](https://agenstskills.com)
 [![Docs](https://img.shields.io/badge/Docs-agenstskills.com/docs-blue)](https://agenstskills.com/docs)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![SKILL.md](https://img.shields.io/badge/SKILL.md-compatible-black?style=flat-square)](https://agenstskills.com)
 
-## Supercharge Every AI Coding Agent
+## One Skill. Every Agent.
 
-**Give your AI agents new abilities with portable, reusable skills.** Install from a curated marketplace, create your own, and use them across Claude Code, Cursor, Codex, Windsurf, GitHub Copilot, and 27 more agents (32 total).
+**The package manager for AI agent skills. Install, translate, and share skills across 32 coding agents.**
+
+> Think npm, but for AI agent skills. Write once, deploy to Claude Code, Cursor, Codex, Windsurf, Copilot, and 27 more.
 
 > **What are AI Agent Skills?** Skills are instruction files that teach AI coding agents how to handle specific tasks - like processing PDFs, following React best practices, or enforcing security patterns. Think of them as plugins for your AI assistant.
 

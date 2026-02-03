@@ -2,7 +2,7 @@
   "name": "skillkit-monorepo",
   "version": "1.10.0",
   "private": true,
-  "description": "Universal skills loader for AI coding agents - Monorepo",
+  "description": "The package manager for AI agent skills — install, translate, share across 32 coding agents",
   "type": "module",
   "scripts": {
     "build": "turbo run build",
@@ -31,7 +31,13 @@
     "coding-assistant",
     "skill-loader",
     "cli",
-    "monorepo"
+    "monorepo",
+    "skill-md",
+    "package-manager",
+    "plugin",
+    "workflow",
+    "automation",
+    "SKILL.md"
   ],
   "author": "Rohit Ghumare",
   "license": "Apache-2.0",

@@ -104,3 +104,6 @@ export * from './execution/index.js';
 
 // Hybrid Search (QMD-Inspired Vector + Keyword Search)
 export * from './search/index.js';
+
+// Federated Registry (External Skill Sources)
+export * from './registry/index.js';

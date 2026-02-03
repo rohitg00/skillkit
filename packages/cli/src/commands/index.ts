@@ -108,3 +108,9 @@ export {
 
 // Tree command for hierarchical skill browsing (Phase 21)
 export { TreeCommand } from './tree.js';
+
+// Quick setup (zero-friction entry)
+export { QuickCommand } from './quick.js';
+
+// SKILL.md ecosystem
+export { SkillMdValidateCommand, SkillMdInitCommand, SkillMdCheckCommand } from './skillmd.js';
