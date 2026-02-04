@@ -73,6 +73,16 @@ const COMMAND_GROUPS: CommandGroup[] = [
     ],
   },
   {
+    name: 'Server',
+    commands: [
+      { cmd: 'serve', desc: 'Start REST API' },
+      { cmd: 'serve --port 8080', desc: 'Custom port' },
+      { cmd: 'serve --host localhost', desc: 'Bind host' },
+      { cmd: 'serve --cors "*"', desc: 'Set CORS origin' },
+      { cmd: 'serve --cache-ttl 3600000', desc: 'Cache TTL' },
+    ],
+  },
+  {
     name: 'Advanced',
     commands: [
       { cmd: 'primer', desc: 'Generate CLAUDE.md' },
@@ -93,7 +103,7 @@ export function Commands(): React.ReactElement {
     <section className="py-12 border-b border-zinc-800">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
-          <h2 className="text-xl font-bold text-white mb-2 font-mono">40+ Commands</h2>
+          <h2 className="text-xl font-bold text-white mb-2 font-mono">50+ Commands</h2>
           <p className="text-zinc-500 font-mono text-sm">
             Everything you need from the terminal.
           </p>

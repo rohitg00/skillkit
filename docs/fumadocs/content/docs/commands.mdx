@@ -5,7 +5,7 @@ description: Complete reference for all SkillKit CLI commands
 
 # CLI Commands
 
-SkillKit provides 40+ commands organized into functional categories. Built on Clipanion v4 with interactive prompts via @clack/prompts.
+SkillKit provides 50+ commands organized into functional categories. Built on Clipanion v4 with interactive prompts via @clack/prompts.
 
 ## Global Options
 
@@ -225,6 +225,49 @@ skillkit cicd github-action    # Generate GitHub Actions
 skillkit cicd gitlab-ci        # Generate GitLab CI
 skillkit cicd pre-commit       # Generate pre-commit hooks
 ```
+
+## Serve Command
+
+Start the SkillKit REST API server for runtime skill discovery.
+
+```bash
+skillkit serve [options]
+```
+
+| Option | Short | Default | Description |
+|--------|-------|---------|-------------|
+| `--port` | `-p` | `3737` | Port to listen on |
+| `--host` | `-H` | `0.0.0.0` | Host to bind to |
+| `--cors` | — | `*` | CORS allowed origin |
+| `--cache-ttl` | — | `86400000` | Cache TTL in milliseconds |
+
+### Examples
+
+```bash
+# Start with defaults
+skillkit serve
+
+# Custom port and host
+skillkit serve --port 8080 --host localhost
+
+# Restricted CORS
+skillkit serve --cors "http://localhost:3000"
+
+# Short cache TTL (1 hour)
+skillkit serve --cache-ttl 3600000
+```
+
+### Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/search?q=...` | Search skills |
+| POST | `/search` | Search with filters |
+| GET | `/skills/:owner/:repo/:id` | Get specific skill |
+| GET | `/trending?limit=20` | Trending skills |
+| GET | `/categories` | Skill categories |
+| GET | `/health` | Server health |
+| GET | `/cache/stats` | Cache statistics |
 
 ## Utility Commands
 

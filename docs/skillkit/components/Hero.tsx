@@ -20,17 +20,16 @@ interface TerminalLine {
 }
 
 const TERMINAL_LINES: TerminalLine[] = [
-  { type: 'cmd', text: 'skillkit primer --all-agents' },
-  { type: 'out', text: '→ Analyzing codebase...' },
-  { type: 'out', text: '  ✓ Generated CLAUDE.md' },
-  { type: 'out', text: '  ✓ Generated .cursorrules' },
+  { type: 'cmd', text: 'skillkit install anthropics/skills --agent all' },
+  { type: 'out', text: '→ Installed to 32 agents' },
   { type: 'cmd', text: 'skillkit recommend' },
   { type: 'out', text: '  92% vercel-react-best-practices' },
   { type: 'out', text: '  87% typescript-strict-mode' },
-  { type: 'cmd', text: 'skillkit install anthropics/skills --agent all' },
-  { type: 'out', text: '→ Installed to 32 agents' },
-  { type: 'cmd', text: 'skillkit memory compress' },
-  { type: 'out', text: '→ 12 learnings persisted' },
+  { type: 'cmd', text: 'skillkit serve' },
+  { type: 'out', text: '→ API server on http://0.0.0.0:3737' },
+  { type: 'out', text: '  GET /search · /trending · /categories' },
+  { type: 'cmd', text: 'curl localhost:3737/search?q=react' },
+  { type: 'out', text: '  {"skills":[...],"total":42}' },
 ];
 
 const FADE_ANIMATION_STYLES = `

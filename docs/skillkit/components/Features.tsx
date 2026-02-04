@@ -89,11 +89,11 @@ const FEATURES: Feature[] = [
     )
   },
   {
-    title: 'TS API',
-    description: 'Programmatic access for custom tooling.',
+    title: 'REST & MCP APIs',
+    description: 'REST server, MCP server, and Python client for runtime discovery.',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
       </svg>
     )
   }
@@ -106,6 +106,7 @@ const COMPARISONS = [
   ['Translation', 'Rewrite for each', 'One-click conversion'],
   ['Team Sharing', 'Copy/paste files', '.skills manifest'],
   ['Discovery', 'Search forums', 'AI recommendations'],
+  ['API Access', 'None', 'REST + MCP + Python'],
 ] as const;
 
 export function Features(): React.ReactElement {

@@ -81,6 +81,7 @@ SkillKit features a polished, interactive CLI with visual feedback:
 | **Context Sync** | Configure each agent separately | One config, synced everywhere |
 | **Session Memory** | Knowledge dies with each session | Persistent learning across agents |
 | **Skill Testing** | Hope it works | Test framework with assertions |
+| **Runtime Discovery** | No API access | REST API + MCP server + Python client |
 
 ## 5-Minute Quick Start
 
@@ -180,6 +181,54 @@ skillkit memory export auth-insight --output auth-patterns.md
 
 # Share memory across projects
 skillkit memory --global
+```
+
+### Runtime Skill Discovery
+
+Start a REST API server or MCP server for agent-native skill discovery:
+
+```bash
+# Start REST API server (port 3737)
+skillkit serve
+
+# Custom port and host
+skillkit serve --port 8080 --host localhost
+
+# Endpoints:
+#   GET  /search?q=react       - Search skills
+#   POST /search               - Search with filters
+#   GET  /skills/owner/repo/id - Get specific skill
+#   GET  /trending              - Top skills by relevance
+#   GET  /categories            - Skill categories
+#   GET  /health                - Server health check
+```
+
+**MCP Server** for Claude Desktop, Cursor, and any MCP client:
+
+```json
+{
+  "mcpServers": {
+    "skillkit": {
+      "command": "npx",
+      "args": ["@skillkit/mcp"]
+    }
+  }
+}
+```
+
+**Python Client:**
+
+```bash
+pip install skillkit-client
+```
+
+```python
+from skillkit import SkillKitClient
+
+async with SkillKitClient("http://localhost:3737") as client:
+    results = await client.search("react performance", limit=5)
+    skill = await client.get_skill("owner/repo", "skill-name")
+    trending = await client.trending(limit=10)
 ```
 
 ### Skill Marketplace
@@ -326,6 +375,16 @@ skillkit marketplace          # Browse skill marketplace
 skillkit marketplace search   # Search marketplace
 skillkit find <query>         # Quick skill search
 skillkit check                # Check skill health and updates
+```
+
+### Runtime Discovery Server
+
+```bash
+skillkit serve                # Start REST API on :3737
+skillkit serve --port 8080    # Custom port
+skillkit serve --host localhost  # Bind to localhost
+skillkit serve --cors "http://localhost:3000"  # Custom CORS
+skillkit serve --cache-ttl 3600000  # Cache TTL (1hr)
 ```
 
 ### Translation & Context
@@ -595,6 +654,33 @@ console.log(tree.rootNode.children); // Categories
 const mode = detectExecutionMode();
 console.log(mode.mode); // 'standalone' or 'enhanced'
 console.log(mode.capabilities); // Available MCP capabilities
+```
+
+### REST API (TypeScript)
+
+```typescript
+import { createApp, startServer } from '@skillkit/api';
+
+// Start with custom options
+await startServer({
+  port: 3737,
+  corsOrigin: '*',
+  cacheTtlMs: 86_400_000,
+  skills: [...],
+});
+```
+
+### Caching & Ranking
+
+```typescript
+import { MemoryCache, RelevanceRanker } from '@skillkit/core';
+
+// LRU cache with TTL
+const cache = new MemoryCache({ maxSize: 500, ttlMs: 86_400_000 });
+
+// Multi-signal relevance scoring (0-100)
+const ranker = new RelevanceRanker();
+const results = ranker.rank(skills, 'react performance');
 ```
 
 ## Skill Sources & Attribution

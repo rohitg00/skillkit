@@ -7,7 +7,7 @@ description: Universal CLI for managing AI agent skills across 32 coding platfor
 
 SkillKit is a universal command-line interface (CLI) and programmatic toolkit for managing AI agent skills across **32 AI coding platforms**.
 
-**Current Version:** v1.8.0
+**Current Version:** v1.12.0
 
 ## The Problem
 
@@ -49,6 +49,9 @@ skillkit sync
 | **Workflow Orchestration** | Compose skills into multi-step automated workflows |
 | **Skill Testing** | Built-in test framework with assertions |
 | **CI/CD Integration** | GitHub Actions, GitLab CI, and pre-commit hooks |
+| **REST API Server** | Runtime skill discovery via HTTP on port 3737 |
+| **MCP Server** | Agent-native discovery for Claude Desktop, Cursor |
+| **Python Client** | Async Python SDK for the REST API |
 | **TypeScript API** | Full programmatic access to all features |
 | **Interactive TUI** | Beautiful terminal interface with real-time updates |
 
@@ -100,11 +103,30 @@ skillkit message inbox   # Check your inbox
 
 [Learn more →](/docs/messaging)
 
+### Runtime Skill Discovery
+
+Start a REST API or MCP server for runtime skill discovery by agents and applications.
+
+```bash
+skillkit serve               # REST API on :3737
+```
+
+```json
+{
+  "mcpServers": {
+    "skillkit": { "command": "npx", "args": ["@skillkit/mcp"] }
+  }
+}
+```
+
+[REST API →](/docs/rest-api) · [MCP Server →](/docs/mcp-server) · [Python Client →](/docs/python-client)
+
 ## Architecture
 
 | Tier | Components |
 |------|------------|
-| **User Interfaces** | CLI (Clipanion v4), TUI (OpenTUI/React), Documentation |
+| **User Interfaces** | CLI (Clipanion v4), TUI (OpenTUI/Solid.js), Documentation |
+| **APIs** | @skillkit/api (REST/Hono), @skillkit/mcp (MCP/stdio) |
 | **Business Logic** | @skillkit/core, @skillkit/agents (32 adapters) |
 | **Data Layer** | @skillkit/memory (CozoDB), @skillkit/mesh (WebSocket/UDP) |
 | **External Systems** | GitHub/GitLab, Marketplace (15,000+ skills) |
@@ -131,6 +153,9 @@ Claude Code, Cursor, Codex, Gemini CLI, OpenCode, GitHub Copilot, Windsurf, Anti
 3. [Commands](/docs/commands) - Full CLI reference
 4. [Skills](/docs/skills) - Skill format and lifecycle
 5. [API Reference](/docs/api-reference) - Programmatic access
+6. [REST API](/docs/rest-api) - Runtime discovery server
+7. [MCP Server](/docs/mcp-server) - Agent-native discovery
+8. [Python Client](/docs/python-client) - Python SDK
 
 ## Use Cases
 

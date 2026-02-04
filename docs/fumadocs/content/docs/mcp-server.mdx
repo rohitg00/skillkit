@@ -1,0 +1,128 @@
+---
+title: MCP Server
+description: Agent-native skill discovery via Model Context Protocol
+---
+
+# MCP Server
+
+The `@skillkit/mcp` package provides a Model Context Protocol (MCP) server for agent-native skill discovery. It works with Claude Desktop, Cursor, and any MCP-compatible client.
+
+## Setup
+
+### Claude Desktop
+
+Add to your Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "skillkit": {
+      "command": "npx",
+      "args": ["@skillkit/mcp"]
+    }
+  }
+}
+```
+
+### Cursor
+
+Add to `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "skillkit": {
+      "command": "npx",
+      "args": ["@skillkit/mcp"]
+    }
+  }
+}
+```
+
+### Any MCP Client
+
+The server uses stdio transport. Run directly:
+
+```bash
+npx @skillkit/mcp
+```
+
+## Tools
+
+The MCP server exposes 4 tools:
+
+### search_skills
+
+Search for skills by keyword, tag, or description.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `query` | string | Yes | Search query |
+| `limit` | number | No | Max results (1-50, default 10) |
+| `include_content` | boolean | No | Include full content |
+| `include_references` | boolean | No | Include references |
+| `filters.tags` | string[] | No | Filter by tags |
+| `filters.category` | string | No | Filter by category |
+| `filters.source` | string | No | Filter by source repo |
+
+**Example prompt:** "Search for React performance optimization skills"
+
+### get_skill
+
+Get details of a specific skill.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `source` | string | Yes | Skill source (e.g., `owner/repo`) |
+| `skill_id` | string | Yes | Skill name |
+| `include_references` | boolean | No | Include references |
+
+**Example prompt:** "Get the pdf-processing skill from anthropics/skills"
+
+### recommend_skills
+
+Get skill recommendations based on your tech stack and current task.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `languages` | string[] | No | Programming languages |
+| `frameworks` | string[] | No | Frameworks used |
+| `libraries` | string[] | No | Libraries used |
+| `task` | string | No | Current task description |
+| `limit` | number | No | Max results (1-20, default 5) |
+
+**Example prompt:** "Recommend skills for a TypeScript React project using Next.js"
+
+### list_categories
+
+List all skill categories with their counts.
+
+**Example prompt:** "List all available skill categories"
+
+## Resources
+
+The MCP server exposes 2 resources:
+
+| URI | Description |
+|-----|-------------|
+| `skills://trending` | Top 20 trending skills by relevance score |
+| `skills://categories` | All skill categories with counts |
+
+## How It Works
+
+1. On startup, the server loads the skill catalog from `marketplace/skills.json`
+2. Skills are indexed and available for search via the 4 tools
+3. The `RelevanceRanker` from `@skillkit/core` scores results using multi-signal ranking
+4. Results are returned as structured JSON via the MCP protocol
+
+## Integration with AI Agents
+
+Once configured, your AI agent can natively discover and recommend skills:
+
+> "Search for skills related to authentication and security"
+
+The agent will call `search_skills` and return ranked results with descriptions and sources.
+
+> "What skills would you recommend for my React + TypeScript project?"
+
+The agent will call `recommend_skills` with your stack context and return personalized recommendations.
