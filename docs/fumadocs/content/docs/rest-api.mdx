@@ -1,42 +1,24 @@
 ---
-title: REST API Server
-description: Runtime skill discovery via HTTP REST API
+title: REST API
+description: Runtime skill discovery via HTTP
 ---
 
-# REST API Server
+# REST API
 
-SkillKit includes a built-in REST API server for runtime skill discovery. Start it with the `serve` command or programmatically via `@skillkit/api`.
+Skills shouldn't require pre-installation. With the SkillKit REST API, any agent, framework, or tool can discover and retrieve skills on demand over HTTP.
 
-## Quick Start
+## Start the server
 
 ```bash
-# Start the API server
 skillkit serve
-
-# Server running at http://0.0.0.0:3737
 ```
 
-## CLI Options
+That's it. The API is now running at `http://localhost:3737`.
 
-| Option | Short | Default | Description |
-|--------|-------|---------|-------------|
-| `--port` | `-p` | `3737` | Port to listen on |
-| `--host` | `-H` | `0.0.0.0` | Host to bind to |
-| `--cors` | — | `*` | CORS allowed origin |
-| `--cache-ttl` | — | `86400000` | Cache TTL in ms (default 24h) |
+## Search for skills
 
 ```bash
-skillkit serve --port 8080 --host localhost --cors "http://localhost:3000"
-```
-
-## Endpoints
-
-### Search Skills
-
-**GET** `/search?q=<query>&limit=20&include_content=false`
-
-```bash
-curl "http://localhost:3737/search?q=react+performance&limit=5"
+curl "http://localhost:3737/search?q=react+performance"
 ```
 
 ```json
@@ -52,46 +34,50 @@ curl "http://localhost:3737/search?q=react+performance&limit=5"
   ],
   "total": 42,
   "query": "react performance",
-  "limit": 5
+  "limit": 20
 }
 ```
 
-**POST** `/search` — Search with filters
+Results are ranked by a multi-signal scoring system. The best matches come first.
+
+### With filters
+
+Use POST for advanced filtering:
 
 ```bash
 curl -X POST http://localhost:3737/search \
   -H "Content-Type: application/json" \
   -d '{
     "query": "auth",
-    "limit": 10,
-    "filters": {
-      "tags": ["security"],
-      "category": "backend"
-    }
+    "filters": { "tags": ["security"], "category": "backend" }
   }'
 ```
 
-### Get Specific Skill
+### Include full content
 
-**GET** `/skills/:owner/:repo/:id`
+Add `include_content=true` to get the complete SKILL.md body:
+
+```bash
+curl "http://localhost:3737/search?q=pdf&include_content=true&limit=3"
+```
+
+## Get a specific skill
 
 ```bash
 curl http://localhost:3737/skills/anthropics/skills/pdf-processing
 ```
 
-### Trending Skills
+The path follows the pattern `/skills/:owner/:repo/:skill-name`.
 
-**GET** `/trending?limit=20`
+## Browse trending skills
 
 ```bash
 curl http://localhost:3737/trending?limit=10
 ```
 
-Returns top skills ranked by multi-signal relevance score (content availability, popularity, references).
+Returns the top skills ranked by relevance score across all sources.
 
-### Categories
-
-**GET** `/categories`
+## List categories
 
 ```bash
 curl http://localhost:3737/categories
@@ -101,15 +87,69 @@ curl http://localhost:3737/categories
 {
   "categories": [
     { "name": "react", "count": 156 },
-    { "name": "typescript", "count": 134 }
+    { "name": "typescript", "count": 134 },
+    { "name": "testing", "count": 89 }
   ],
   "total": 89
 }
 ```
 
-### Health Check
+## How ranking works
 
-**GET** `/health`
+Every search result gets a score from 0 to 100, computed from four signals:
+
+| Signal | Points | What it measures |
+|--------|--------|-----------------|
+| Content | 40 | Has a description and SKILL.md body |
+| Query match | 30 | How well the name/description matches your search |
+| Popularity | 15 | GitHub stars + install count (log-scaled) |
+| References | 15 | Has example files, docs, or resources |
+
+A skill with full content, an exact name match, high stars, and example files scores close to 100. A skill with just a name and no content scores around 10.
+
+## Server options
+
+```bash
+skillkit serve --port 8080 --host localhost --cors "http://localhost:3000"
+```
+
+| Option | Default | What it does |
+|--------|---------|-------------|
+| `--port` / `-p` | `3737` | Port to listen on |
+| `--host` / `-H` | `0.0.0.0` | Host to bind to |
+| `--cors` | `*` | Allowed CORS origin |
+| `--cache-ttl` | `86400000` | Cache lifetime in ms (default 24h) |
+
+## Rate limiting
+
+60 requests per minute per IP. Response headers tell you where you stand:
+
+| Header | Meaning |
+|--------|---------|
+| `X-RateLimit-Remaining` | Requests left in this window |
+| `X-RateLimit-Reset` | When the window resets |
+
+Exceed the limit and you'll get HTTP 429 with a `retryAfter` field.
+
+## Caching
+
+Search results are cached in memory using an LRU strategy. Same query, same results, no recomputation. Check cache performance:
+
+```bash
+curl http://localhost:3737/cache/stats
+```
+
+```json
+{
+  "hits": 142,
+  "misses": 38,
+  "size": 45,
+  "maxSize": 500,
+  "hitRate": 0.789
+}
+```
+
+## Health check
 
 ```bash
 curl http://localhost:3737/health
@@ -124,73 +164,42 @@ curl http://localhost:3737/health
 }
 ```
 
-### Cache Statistics
-
-**GET** `/cache/stats`
-
-```bash
-curl http://localhost:3737/cache/stats
-```
-
-## Rate Limiting
-
-The server includes per-IP rate limiting (60 requests per minute by default). Response headers:
-
-| Header | Description |
-|--------|-------------|
-| `X-RateLimit-Limit` | Max requests per window |
-| `X-RateLimit-Remaining` | Remaining requests |
-| `X-RateLimit-Reset` | Window reset timestamp |
-
-Exceeding the limit returns HTTP 429 with a `retryAfter` field.
-
-## Programmatic Usage
+## Use it programmatically
 
 ```typescript
 import { createApp, startServer } from '@skillkit/api';
 
-// Full server
 const { server, app, cache } = await startServer({
   port: 3737,
-  host: '0.0.0.0',
-  corsOrigin: '*',
-  cacheTtlMs: 86_400_000,
-  skills: [...],
+  skills: mySkillsArray,
 });
+```
 
-// Or just the Hono app (for testing or custom servers)
+Or get just the Hono app for testing:
+
+```typescript
 const { app, cache } = createApp({
-  skills: [...],
+  skills: mySkillsArray,
   cacheTtlMs: 3_600_000,
 });
 ```
 
-## Relevance Ranking
+## Interactive docs
 
-Search results are ranked using a multi-signal scoring system (0-100):
+The server includes built-in Swagger UI at `/docs` and an OpenAPI 3.1 spec at `/openapi.json`. Open `http://localhost:3737/docs` in your browser to try endpoints interactively.
 
-| Signal | Max Points | Description |
-|--------|-----------|-------------|
-| Content Availability | 40 | Has description and content |
-| Query Match | 30 | Name/description match quality |
-| Popularity | 15 | Log-scaled stars + installs |
-| References | 15 | Has example files or docs |
+The hosted version is available at [agenstskills.com/api](https://agenstskills.com/api).
 
-## Interactive API Documentation
+## All endpoints
 
-The server includes built-in interactive API docs powered by Swagger UI:
-
-- **`GET /docs`** — Interactive Swagger UI with try-it-out support
-- **`GET /openapi.json`** — OpenAPI 3.1 specification
-- **`GET /`** — API info with endpoint listing
-
-Open `http://localhost:3737/docs` in your browser after starting the server.
-
-## Caching
-
-The server uses an in-memory LRU cache with configurable TTL. Search results are cached by query parameters to avoid redundant ranking computations.
-
-```bash
-# Set 1-hour cache TTL
-skillkit serve --cache-ttl 3600000
-```
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/search?q=...` | Search skills |
+| POST | `/search` | Search with filters |
+| GET | `/skills/:owner/:repo/:id` | Get specific skill |
+| GET | `/trending?limit=20` | Trending skills |
+| GET | `/categories` | Skill categories |
+| GET | `/health` | Server health |
+| GET | `/cache/stats` | Cache statistics |
+| GET | `/docs` | Swagger UI |
+| GET | `/openapi.json` | OpenAPI spec |

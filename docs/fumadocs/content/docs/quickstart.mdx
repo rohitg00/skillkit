@@ -1,58 +1,27 @@
 ---
 title: Quick Start
-description: Get up and running with SkillKit in 5 minutes
+description: Get productive with SkillKit in under 5 minutes
 ---
 
 # Quick Start
 
-This guide walks you through installing SkillKit, setting up your first project, and installing skills.
+Go from zero to skills-enabled in four steps.
 
-## 1. Run SkillKit
-
-No installation required! Use npx:
+## 1. Init
 
 ```bash
-npx skillkit@latest
+npx skillkit@latest init
 ```
 
-Or install globally for frequent use:
+SkillKit detects your AI agent, creates the skills directory, and saves your preferences.
 
-```bash
-npm install -g skillkit
-skillkit --version
-```
-
-## 2. Initialize Your Project
-
-Navigate to your project directory and run:
-
-```bash
-skillkit init
-```
-
-This starts an interactive onboarding that:
-
-1. **Detects your AI agent** - Scans for `.claude/`, `.cursor/`, `.github/` directories
-2. **Creates directories** - Sets up the skills folder for your agent
-3. **Saves preferences** - Remembers your choices for future commands
-
-### Quick Agent Selection
-
-Three options appear for faster interaction:
-
-- **"Same as last time"** - Reuse previous agent choices
-- **"All detected agents"** - Select every agent found
-- **"Select specific agents"** - Open full selection menu
-
-## 3. Get Recommendations
-
-SkillKit analyzes your project and suggests relevant skills:
+## 2. Get recommendations
 
 ```bash
 skillkit recommend
 ```
 
-Example output:
+SkillKit reads your project (package.json, languages, frameworks) and suggests relevant skills:
 
 ```
 Project: my-app (Next.js + TypeScript + Tailwind)
@@ -61,235 +30,93 @@ Recommended Skills:
   92% vercel-react-best-practices
   87% tailwind-v4-patterns
   85% nextjs-app-router
-  78% typescript-strict-mode
 ```
 
-## 4. Install Skills
-
-### Interactive Installation
+## 3. Install
 
 ```bash
 skillkit install anthropics/skills
 ```
 
-This prompts you to:
-- Select which skills to install
-- Choose target agents
-- Pick installation method (symlink or copy)
-
-### Non-Interactive Installation
-
-For CI/CD or scripting:
+Pick which skills to install, choose target agents, and you're set. For CI/CD or scripting:
 
 ```bash
 skillkit install anthropics/skills --skills=pdf,xlsx --agent claude --yes
 ```
 
-### List Available Skills
-
-Preview without installing:
+Install for multiple agents at once:
 
 ```bash
-skillkit install anthropics/skills --list
+skillkit install vercel-labs/agent-skills --agent claude,cursor,windsurf
 ```
 
-## 5. Sync to Your Agent
-
-Deploy installed skills to your agent's configuration:
+## 4. Sync
 
 ```bash
 skillkit sync
 ```
 
-## 6. Launch the TUI
+Skills are now in your agent's configuration. Start coding.
 
-For a visual interface:
+## What else?
+
+### Translate between agents
+
+Already have Claude skills? Deploy them to Cursor:
+
+```bash
+skillkit translate my-skill --to cursor
+```
+
+### Auto-generate agent instructions
+
+Let SkillKit analyze your codebase and create CLAUDE.md, .cursorrules, etc.:
+
+```bash
+skillkit primer --all-agents
+```
+
+### Launch the TUI
 
 ```bash
 skillkit ui
-# or just
-skillkit
 ```
 
-**Navigation:** `h` Home | `m` Marketplace | `r` Recommend | `i` Installed | `s` Sync | `q` Quit
+`h` Home | `m` Marketplace | `r` Recommend | `i` Installed | `s` Sync | `q` Quit
 
-## Complete Example
+### Start the discovery server
+
+Let agents find skills at runtime:
 
 ```bash
-# Install SkillKit
-npm install -g skillkit
-
-# Initialize in your project
-cd my-project
-skillkit init
-
-# Get recommendations
-skillkit recommend
-
-# Install from official marketplace
-skillkit install anthropics/skills
-
-# Install for multiple agents
-skillkit install vercel-labs/agent-skills --agent claude,cursor,windsurf
-
-# Sync to agents
-skillkit sync
+skillkit serve
 ```
 
-## 7. Advanced Features
+[REST API](/docs/rest-api) | [MCP Server](/docs/mcp-server)
 
-### Auto-Generate Instructions (Primer)
-
-Let SkillKit analyze your codebase and generate optimized instructions:
+### Share with your team
 
 ```bash
-skillkit primer                # Analyze and generate
-skillkit primer --all-agents   # Generate for all 32 agents
-```
-
-[Learn more about Primer →](/docs/primer)
-
-### Session Memory
-
-Capture learnings from your AI sessions:
-
-```bash
-skillkit memory compress       # Compress learnings
-skillkit memory search auth    # Search knowledge
-skillkit memory export auth-skill  # Export as skill
-```
-
-[Learn more about Memory →](/docs/memory)
-
-### Mesh Network (Multi-Machine)
-
-Distribute agents across multiple machines:
-
-```bash
-skillkit mesh init             # Initialize mesh node
-skillkit mesh discover         # Find peers on LAN
-skillkit mesh security init    # Setup encryption
-```
-
-[Learn more about Mesh →](/docs/mesh)
-
-### Inter-Agent Messaging
-
-Send messages between AI agents:
-
-```bash
-skillkit message send          # Send to another agent
-skillkit message inbox         # Check your inbox
-skillkit message reply <id>    # Reply to message
-```
-
-[Learn more about Messaging →](/docs/messaging)
-
-## Team Collaboration
-
-Share skills with your team using manifest files:
-
-```bash
-# Create manifest
 skillkit manifest init
-
-# Add skill sources
 skillkit manifest add anthropics/skills
-skillkit manifest add ./local-skills
-
-# Team members install from manifest
-skillkit manifest install
+git add .skills && git commit -m "add team skills"
 ```
 
-The `.skills` file can be committed to Git for team-wide consistency.
+Team members run `skillkit manifest install` and get the same setup.
 
-## Workflows & Automation
-
-### Workflow Orchestration
-
-Compose skills into multi-step workflows:
+## Full workflow
 
 ```bash
-skillkit workflow create feature-development
-skillkit workflow run feature-development
+npx skillkit@latest init          # Detect agents, create dirs
+skillkit recommend                # Get smart suggestions
+skillkit install anthropics/skills  # Install from marketplace
+skillkit primer --all-agents      # Generate agent instructions
+skillkit sync                     # Deploy everything
 ```
 
-[Learn more about Workflows →](/docs/workflows)
+## Next steps
 
-### Skill Testing
-
-Test skills before deployment:
-
-```bash
-skillkit test                  # Run all tests
-skillkit test --tags unit      # Run specific tests
-```
-
-[Learn more about Testing →](/docs/testing)
-
-### CI/CD Integration
-
-Generate GitHub Actions, GitLab CI configs:
-
-```bash
-skillkit cicd init --provider github
-skillkit cicd init --provider gitlab
-```
-
-[Learn more about CI/CD →](/docs/cicd)
-
-## User Preferences
-
-Your choices are saved to `~/.skillkit/preferences.json`:
-
-```json
-{
-  "lastSelectedAgents": ["claude", "cursor"],
-  "autoSync": true,
-  "marketplace": {
-    "lastRefresh": "2025-01-01T00:00:00Z"
-  }
-}
-```
-
-## Complete Workflow Example
-
-```bash
-# 1. Install SkillKit
-npm install -g skillkit
-
-# 2. Initialize in your project
-cd my-project
-skillkit init
-
-# 3. Auto-generate base instructions
-skillkit primer --all-agents
-
-# 4. Get smart recommendations
-skillkit recommend
-
-# 5. Install recommended skills
-skillkit install anthropics/skills
-
-# 6. Setup mesh network (optional)
-skillkit mesh init
-
-# 7. Setup session memory (optional)
-skillkit memory compress
-
-# 8. Sync everything to agents
-skillkit sync
-
-# 9. Launch TUI for visual management
-skillkit
-```
-
-## Next Steps
-
-- **Browse Marketplace** - `skillkit marketplace`
-- **Create Custom Skills** - `skillkit create my-skill`
-- **Translate Between Agents** - `skillkit translate skill --to cursor`
-- **Auto-Generate Instructions** - `skillkit primer`
-- **Setup Memory System** - `skillkit memory compress`
-- **View All Commands** - `skillkit --help`
-- **API Reference** - [Programmatic Access →](/docs/api-reference)
+- [Commands](/docs/commands) — Full CLI reference
+- [Skills](/docs/skills) — Skill format and lifecycle
+- [Memory](/docs/memory) — Persistent session learning
+- [Mesh](/docs/mesh) — Multi-machine distribution

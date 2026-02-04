@@ -1,197 +1,105 @@
 ---
 title: Python Client
-description: Async Python client for the SkillKit REST API
+description: Async Python SDK for skill discovery
 ---
 
 # Python Client
 
-The `skillkit-client` package provides an async Python client for the SkillKit REST API.
+Not everything runs on Node. The `skillkit-client` package gives Python apps the same skill discovery capabilities as the REST API — async, typed, and ready to go.
 
-## Installation
+## Install
 
 ```bash
 pip install skillkit-client
 ```
 
-Requires Python 3.10+ with `httpx` and `pydantic`.
+Requires Python 3.10+.
 
-## Quick Start
+## Quick start
 
 ```python
 from skillkit import SkillKitClient
 
-async with SkillKitClient("http://localhost:3737") as client:
-    # Search for skills
+async with SkillKitClient() as client:
     results = await client.search("react performance", limit=5)
     for skill in results.skills:
         print(f"{skill.name}: {skill.description}")
-
-    # Get trending skills
-    trending = await client.trending(limit=10)
-
-    # Get categories
-    categories = await client.categories()
 ```
 
-## API Reference
+The client connects to `http://localhost:3737` by default. Make sure the API server is running:
 
-### SkillKitClient
+```bash
+skillkit serve
+```
+
+## Search with filters
 
 ```python
-SkillKitClient(base_url: str = "http://localhost:3737", timeout: float = 30.0)
+results = await client.search_with_filters(
+    "authentication",
+    tags=["security"],
+    category="backend",
+    limit=10,
+)
 ```
 
-Supports async context manager (`async with`) for automatic connection cleanup.
-
-### Methods
-
-#### search
-
-```python
-async def search(
-    query: str,
-    limit: int = 20,
-    include_content: bool = False,
-) -> SearchResponse
-```
-
-Search skills by keyword. Returns `SearchResponse` with `skills`, `total`, `query`, and `limit`.
-
-#### search_with_filters
-
-```python
-async def search_with_filters(
-    query: str,
-    limit: int = 20,
-    include_content: bool = False,
-    tags: list[str] | None = None,
-    category: str | None = None,
-    source: str | None = None,
-) -> SearchResponse
-```
-
-Search with tag, category, and source filters via POST.
-
-#### get_skill
-
-```python
-async def get_skill(source: str, skill_id: str) -> Skill
-```
-
-Get a specific skill by source (`owner/repo`) and name.
+## Get a specific skill
 
 ```python
 skill = await client.get_skill("anthropics/skills", "pdf-processing")
-print(skill.name, skill.description)
+print(skill.name, skill.description, skill.tags)
 ```
 
-#### trending
+## Trending and categories
 
 ```python
-async def trending(limit: int = 20) -> list[Skill]
+trending = await client.trending(limit=10)
+categories = await client.categories()
+
+for skill in trending:
+    print(f"{skill.name} ({skill.source})")
+
+for cat in categories:
+    print(f"{cat.name}: {cat.count} skills")
 ```
 
-Get top trending skills ranked by relevance score.
-
-#### categories
+## Health and cache
 
 ```python
-async def categories() -> list[Category]
+health = await client.health()
+print(f"v{health.version} — {health.skill_count} skills loaded")
+
+stats = await client.cache_stats()
+print(f"Cache hit rate: {stats.hit_rate:.0%}")
 ```
 
-Get all skill categories with counts.
-
-#### health
+## Connect to a remote server
 
 ```python
-async def health() -> HealthResponse
+async with SkillKitClient("https://my-server.example.com:3737") as client:
+    results = await client.search("deployment")
 ```
-
-Check server health. Returns `status`, `version`, `skill_count`, `uptime`.
-
-#### cache_stats
-
-```python
-async def cache_stats() -> CacheStats
-```
-
-Get cache statistics: `hits`, `misses`, `size`, `max_size`, `hit_rate`.
-
-#### close
-
-```python
-async def close() -> None
-```
-
-Manually close the HTTP client. Not needed when using `async with`.
 
 ## Models
 
-### Skill
+The client returns typed dataclasses:
 
 ```python
-@dataclass
-class Skill:
-    name: str
-    source: str
-    description: str | None
-    tags: list[str] | None
-    category: str | None
-    content: str | None
-    score: float | None
+Skill(name, source, description, tags, category, content, score)
+SearchResponse(skills, total, query, limit)
+HealthResponse(status, version, skill_count, uptime)
+Category(name, count)
+CacheStats(hits, misses, size, max_size, hit_rate)
 ```
 
-### SearchResponse
-
-```python
-@dataclass
-class SearchResponse:
-    skills: list[Skill]
-    total: int
-    query: str
-    limit: int
-```
-
-### HealthResponse
-
-```python
-@dataclass
-class HealthResponse:
-    status: str
-    version: str
-    skill_count: int
-    uptime: float
-```
-
-### Category
-
-```python
-@dataclass
-class Category:
-    name: str
-    count: int
-```
-
-### CacheStats
-
-```python
-@dataclass
-class CacheStats:
-    hits: int
-    misses: int
-    size: int
-    max_size: int
-    hit_rate: float
-```
+All fields except `name` and `source` on `Skill` are optional — they depend on what the server returns and whether you requested `include_content`.
 
 ## Prerequisites
 
-The Python client requires a running SkillKit API server:
+The Python client talks to the SkillKit REST API. You need a running server:
 
 ```bash
-# In one terminal
 skillkit serve
-
-# In another terminal / script
-python my_script.py
 ```
+
+Then run your Python script in another terminal. The client handles connection management, retries, and cleanup automatically when used with `async with`.

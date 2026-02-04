@@ -5,139 +5,82 @@ description: Install SkillKit and set up your first project
 
 # Installation
 
-SkillKit is distributed as an npm package. Current version: **v1.8.0**
+## No install needed
 
-## Quick Start (No Install)
+The fastest way to start:
 
 ```bash
-# Run without installing
 npx skillkit@latest
-
-# Run specific commands
-npx skillkit recommend
-npx skillkit install anthropics/skills
 ```
 
-## Install Globally
+This runs the latest version directly. No global install, no setup.
+
+## Global install
+
+For frequent use, install globally:
 
 ```bash
 npm install -g skillkit
 ```
 
-The CLI provides two command aliases: `skillkit` and `sk` (shorthand).
-
-## Alternative Methods
+Also works with pnpm, yarn, or bun:
 
 ```bash
-# pnpm
 pnpm add -g skillkit
-
-# yarn
 yarn global add skillkit
-
-# bun
 bun add -g skillkit
-
-# npx (no install required)
-npx skillkit <command>
 ```
 
-## GitHub Packages
+Both `skillkit` and `sk` work as command aliases.
 
-```bash
-npm install -g @rohitg00/skillkit --registry=https://npm.pkg.github.com
-```
-
-## Verify Installation
+## Verify
 
 ```bash
 skillkit --version
-# or
-sk --version
 ```
 
-## Requirements
+**Requirements:** Node.js 18+ (Bun 1.2+ for the TUI).
 
-- **Node.js** 18.0.0 or higher
-- **Bun** 1.2.0 or higher (for TUI only)
-
-## First Run Experience
-
-When you run SkillKit for the first time, it initiates an interactive onboarding that:
-
-1. Detects your current AI agent automatically
-2. Creates necessary project directories
-3. Gathers user preferences for future sessions
-4. Displays contextual guidance
-
-Preferences are stored in `~/.skillkit/preferences.json`.
-
-## Initialize a Project
+## Initialize a project
 
 ```bash
+cd my-project
 skillkit init
 ```
 
-### Init Command Options
+The init command:
 
-| Flag | Short | Purpose |
-|------|-------|---------|
-| `--agent` | `-a` | Specify target agent (auto-detected if omitted) |
-| `--list` | `-l` | Display all supported agents |
-| `--quiet` | `-q` | Suppress welcome logo and confirmations |
+1. **Detects your AI agent** — scans for `.claude/`, `.cursor/`, `.github/` directories
+2. **Creates the skills folder** — sets up the right directory for your agent
+3. **Saves preferences** — remembers your choices for next time
 
-### What Init Creates
+### Specify an agent directly
 
-| Agent | Skills Directory | Config File |
-|-------|-----------------|-------------|
+```bash
+skillkit init --agent cursor
+skillkit init --list             # Show all 32 supported agents
+skillkit init --quiet            # Skip logo and prompts (for CI)
+```
+
+### What gets created
+
+| Agent | Skills Directory | Config |
+|-------|-----------------|--------|
 | Claude Code | `.claude/skills/` | `.claude/config.json` |
 | Cursor | `.cursor/skills/` | `.cursor/config.mdc` |
 | Codex | `.codex/skills/` | `AGENTS.md` |
 | GitHub Copilot | `.github/skills/` | — |
 | Universal | `skills/` | `AGENTS.md` |
 
-## Visual Theme
+Preferences are stored in `~/.skillkit/preferences.json`.
 
-The CLI adapts its logo based on terminal width:
-
-- **≥70 columns** - Full ASCII art with block characters
-- **50-69 columns** - Spaced text display
-- **less than 50 columns** - Minimal format with symbols
-
-## Agent Icons
-
-| Agent | Icon |
-|-------|------|
-| Claude Code | ⟁ |
-| Cursor | ◫ |
-| Codex | ◎ |
-| Gemini CLI | ✦ |
-| OpenCode | ⬡ |
-
-## Non-Interactive Mode
-
-For CI/CD or piped input environments:
+## Next steps
 
 ```bash
-skillkit init --quiet
+skillkit recommend                    # Get skill suggestions for your project
+skillkit install anthropics/skills    # Install skills from GitHub
+skillkit sync                         # Deploy to your agent
+skillkit ui                           # Launch the terminal UI
 ```
 
-This skips the welcome logo, runs agent detection automatically, and produces minimal output.
-
-## Next Steps
-
-After installation, continue with:
-
-```bash
-# Install skills from GitHub
-skillkit install anthropics/skills
-
-# Browse marketplace
-skillkit marketplace
-
-# Synchronize to agent directories
-skillkit sync
-
-# Launch interactive terminal UI
-skillkit ui
-```
+[Quick Start guide](/docs/quickstart) | [Full command reference](/docs/commands)

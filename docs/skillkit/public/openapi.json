@@ -3,7 +3,7 @@
   "info": {
     "title": "SkillKit",
     "version": "1.12.0",
-    "description": "Skill Discovery API for AI coding agents. Search, browse, and retrieve skills from the SkillKit marketplace (15,000+ skills across 32 agents).\n\n## Quick Start\n\n```bash\nnpx skillkit serve\n```\n\nStarts the API server at http://localhost:3737\n\n## MCP Server\n\nFor agent-native discovery via Model Context Protocol:\n\n```json\n{\n  \"mcpServers\": {\n    \"skillkit\": { \"command\": \"npx\", \"args\": [\"@skillkit/mcp\"] }\n  }\n}\n```\n\n## Python Client\n\n```bash\npip install skillkit-client\n```",
+    "description": "Skills shouldn't require pre-installation. This API lets any agent, framework, or tool discover and retrieve skills on demand.\n\n15,000+ skills across 32 AI coding agents. Results ranked by a multi-signal scoring system (content 40pts, query match 30pts, popularity 15pts, references 15pts).\n\n## Quick Start\n\n```bash\nnpx skillkit serve\n```\n\nThe API is now running at http://localhost:3737\n\n## MCP Server\n\nFor agent-native discovery (Claude Desktop, Cursor):\n\n```json\n{\n  \"mcpServers\": {\n    \"skillkit\": { \"command\": \"npx\", \"args\": [\"@skillkit/mcp\"] }\n  }\n}\n```\n\n## Python Client\n\n```bash\npip install skillkit-client\n```",
     "license": {
       "name": "Apache-2.0",
       "url": "https://opensource.org/licenses/Apache-2.0"
@@ -29,7 +29,7 @@
     "/search": {
       "get": {
         "summary": "Search skills",
-        "description": "Locate agent skills matching a query, ranked by multi-signal relevance scoring (content availability 40pts, query match 30pts, popularity 15pts, references 15pts).",
+        "description": "Find skills matching your query. Results are ranked by relevance: content availability (40pts), query match (30pts), popularity (15pts), and references (15pts). Best matches come first.",
         "operationId": "searchSkillsGet",
         "tags": ["Search"],
         "parameters": [
@@ -89,7 +89,7 @@
       },
       "post": {
         "summary": "Search skills with filters",
-        "description": "Advanced search with tag, category, and source filters.",
+        "description": "Search with filters. Narrow results by tags, category, or source repository.",
         "operationId": "searchSkillsPost",
         "tags": ["Search"],
         "requestBody": {
@@ -136,7 +136,7 @@
     "/skills/{owner}/{repo}/{id}": {
       "get": {
         "summary": "Get skill by ID",
-        "description": "Retrieve a specific skill by its source repository and name.",
+        "description": "Get full details of a specific skill by its source repository and name.",
         "operationId": "getSkill",
         "tags": ["Skills"],
         "parameters": [
@@ -180,7 +180,7 @@
     "/trending": {
       "get": {
         "summary": "Trending skills",
-        "description": "Top skills ranked by multi-signal relevance score (content availability, popularity, references).",
+        "description": "The most popular skills right now, ranked by relevance score across all sources.",
         "operationId": "getTrending",
         "tags": ["Discovery"],
         "parameters": [
@@ -202,7 +202,7 @@
     "/categories": {
       "get": {
         "summary": "Skill categories",
-        "description": "All skill categories and tags with their counts, sorted by popularity.",
+        "description": "Browse all skill categories with counts. See what's available before searching.",
         "operationId": "getCategories",
         "tags": ["Discovery"],
         "responses": {
@@ -228,7 +228,7 @@
     "/health": {
       "get": {
         "summary": "Health check",
-        "description": "Server health status including version, loaded skill count, and uptime.",
+        "description": "Check if the server is running. Returns version, skill count, and uptime.",
         "operationId": "getHealth",
         "tags": ["System"],
         "responses": {
@@ -252,7 +252,7 @@
     "/cache/stats": {
       "get": {
         "summary": "Cache statistics",
-        "description": "In-memory LRU cache hit/miss rates and current size.",
+        "description": "See how the cache is performing. Shows hit/miss rates and current size.",
         "operationId": "getCacheStats",
         "tags": ["System"],
         "responses": {
