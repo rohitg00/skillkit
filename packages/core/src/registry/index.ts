@@ -115,6 +115,8 @@ export class GitHubSkillRegistry implements ExternalRegistry {
   }
 }
 
+export { CommunityRegistry } from './community.js';
+
 export class FederatedSearch {
   private registries: ExternalRegistry[] = [];
 
