@@ -7,7 +7,7 @@ description: Agent-native skill discovery via Model Context Protocol
 
 The REST API works great for HTTP clients. But AI agents speak MCP — the Model Context Protocol. The `@skillkit/mcp` package lets agents discover skills natively, without HTTP calls or curl commands.
 
-Think of it as giving your agent a direct line to 15,000+ skills.
+Think of it as giving your agent a direct line to the entire skill catalog.
 
 ## Setup
 
@@ -65,7 +65,7 @@ Behind the scenes, it calls `search_skills` with your query and returns ranked r
 > Search for authentication skills tagged with "security"
 ```
 
-The agent searches across 15,000+ skills, ranks them by relevance, and shows you the best matches.
+The agent searches across the full catalog, ranks results by relevance, and shows you the best matches.
 
 ### Get a specific skill
 
@@ -83,7 +83,7 @@ The agent calls `recommend_skills` with your stack context (languages, framework
 
 Ask: *"What skill categories are available?"*
 
-Returns all categories with counts, so you know what's out there.
+The agent calls `list_categories` and returns all categories with counts, so you know what's out there.
 
 ## Resources
 
