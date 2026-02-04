@@ -59,11 +59,11 @@ async def test_search_with_filters(mock_api):
 
 @pytest.mark.asyncio
 async def test_get_skill(mock_api):
-    mock_api.get("/skills/owner/react-perf").respond(
+    mock_api.get("/skills/owner/repo/react-perf").respond(
         json={"name": "react-perf", "description": "React performance", "source": "owner/repo"}
     )
     async with SkillKitClient(BASE_URL) as client:
-        skill = await client.get_skill("owner", "react-perf")
+        skill = await client.get_skill("owner/repo", "react-perf")
         assert skill.name == "react-perf"
 
 

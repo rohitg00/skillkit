@@ -100,7 +100,10 @@ class SkillKitClient:
 
     async def get_skill(self, source: str, skill_id: str) -> Skill:
         client = self._get_client()
-        response = await client.get(f"/skills/{quote(source, safe='')}/{quote(skill_id, safe='')}")
+        parts = source.split("/", 1)
+        owner = quote(parts[0], safe="")
+        repo = quote(parts[1], safe="") if len(parts) > 1 else owner
+        response = await client.get(f"/skills/{owner}/{repo}/{quote(skill_id, safe='')}")
         response.raise_for_status()
         return Skill(**response.json())
 

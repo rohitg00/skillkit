@@ -10,6 +10,8 @@ export function trendingRoutes(skills: ApiSkill[]) {
     const parsedLimit = parseInt(c.req.query('limit') || '20', 10);
     const limit = Math.min(Number.isNaN(parsedLimit) ? 20 : parsedLimit, 100);
 
+    const skillMap = new Map(skills.map((s) => [`${s.source}:${s.name}`, s]));
+
     const ranked = ranker.rank(
       skills.map((s) => ({
         name: s.name,
@@ -18,11 +20,13 @@ export function trendingRoutes(skills: ApiSkill[]) {
         stars: s.stars,
         installs: s.installs,
         references: [],
+        source: s.source,
       })),
     );
 
     const results = ranked.slice(0, limit).map((r) => {
-      const original = skills.find((s) => s.name === r.skill.name)!;
+      const key = `${(r.skill as Record<string, unknown>).source}:${r.skill.name}`;
+      const original = skillMap.get(key) ?? skills.find((s) => s.name === r.skill.name)!;
       const { content: _, ...rest } = original;
       return rest;
     });

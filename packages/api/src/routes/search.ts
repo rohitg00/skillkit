@@ -21,6 +21,8 @@ export function searchRoutes(skills: ApiSkill[], cache: MemoryCache<SearchRespon
     const cached = cache.get(cacheKey);
     if (cached) return c.json(cached);
 
+    const skillMap = new Map(skills.map((s) => [`${s.source}:${s.name}`, s]));
+
     const ranked = ranker.rank(
       skills.map((s) => ({
         name: s.name,
@@ -28,12 +30,14 @@ export function searchRoutes(skills: ApiSkill[], cache: MemoryCache<SearchRespon
         content: s.content,
         stars: s.stars,
         installs: s.installs,
+        source: s.source,
       })),
       query,
     );
 
     const results: ApiSkill[] = ranked.slice(0, limit).map((r) => {
-      const original = skills.find((s) => s.name === r.skill.name)!;
+      const key = `${(r.skill as Record<string, unknown>).source}:${r.skill.name}`;
+      const original = skillMap.get(key) ?? skills.find((s) => s.name === r.skill.name)!;
       if (!includeContent) {
         const { content: _, ...rest } = original;
         return rest;
@@ -86,6 +90,8 @@ export function searchRoutes(skills: ApiSkill[], cache: MemoryCache<SearchRespon
       }
     }
 
+    const filteredMap = new Map(filtered.map((s) => [`${s.source}:${s.name}`, s]));
+
     const ranked = ranker.rank(
       filtered.map((s) => ({
         name: s.name,
@@ -93,12 +99,14 @@ export function searchRoutes(skills: ApiSkill[], cache: MemoryCache<SearchRespon
         content: s.content,
         stars: s.stars,
         installs: s.installs,
+        source: s.source,
       })),
       body.query,
     );
 
     const results: ApiSkill[] = ranked.slice(0, limit).map((r) => {
-      const original = filtered.find((s) => s.name === r.skill.name)!;
+      const key = `${(r.skill as Record<string, unknown>).source}:${r.skill.name}`;
+      const original = filteredMap.get(key) ?? filtered.find((s) => s.name === r.skill.name)!;
       if (!body.include_content) {
         const { content: _, ...rest } = original;
         return rest;
