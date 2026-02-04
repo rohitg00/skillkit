@@ -35,17 +35,21 @@ export function handleSearchSkills(skills: SkillEntry[], args: unknown) {
     }
   }
 
+  const skillMap = new Map(filtered.map((s) => [`${s.source}:${s.name}`, s]));
+
   const ranked = ranker.rank(
     filtered.map((s) => ({
       name: s.name,
       description: s.description,
       content: s.content,
+      source: s.source,
     })),
     input.query,
   );
 
   const results = ranked.slice(0, input.limit).map((r) => {
-    const original = filtered.find((s) => s.name === r.skill.name)!;
+    const key = `${(r.skill as Record<string, unknown>).source}:${r.skill.name}`;
+    const original = skillMap.get(key) ?? filtered.find((s) => s.name === r.skill.name)!;
     const result: Record<string, unknown> = {
       name: original.name,
       description: original.description,
@@ -71,7 +75,7 @@ export function handleGetSkill(skills: SkillEntry[], args: unknown) {
   const input = GetSkillInputSchema.parse(args);
 
   const skill = skills.find(
-    (s) => s.source.includes(input.source) && s.name === input.skill_id,
+    (s) => s.source === input.source && s.name === input.skill_id,
   );
 
   if (!skill) {
@@ -117,8 +121,9 @@ export function handleRecommendSkills(skills: SkillEntry[], args: unknown) {
     query,
   );
 
+  const recommendMap = new Map(skills.map((s) => [s.name, s]));
   const results = ranked.slice(0, input.limit).map((r) => {
-    const original = skills.find((s) => s.name === r.skill.name)!;
+    const original = recommendMap.get(r.skill.name)!;
     return {
       name: original.name,
       description: original.description,

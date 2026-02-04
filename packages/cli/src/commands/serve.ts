@@ -28,7 +28,7 @@ export class ServeCommand extends Command {
     description: 'Port to listen on',
   });
 
-  host = Option.String('--host,-h', '0.0.0.0', {
+  host = Option.String('--host,-H', '0.0.0.0', {
     description: 'Host to bind to',
   });
 
@@ -74,7 +74,7 @@ export class ServeCommand extends Command {
       console.log(colors.muted(`  GET  /health          - Server health check`));
       console.log(colors.muted(`  GET  /search?q=...    - Search skills`));
       console.log(colors.muted(`  POST /search          - Search with filters`));
-      console.log(colors.muted(`  GET  /skills/:src/:id - Get specific skill`));
+      console.log(colors.muted(`  GET  /skills/:o/:r/:id - Get specific skill`));
       console.log(colors.muted(`  GET  /trending        - Top skills`));
       console.log(colors.muted(`  GET  /categories      - Skill categories`));
       console.log(colors.muted(`  GET  /cache/stats     - Cache statistics`));

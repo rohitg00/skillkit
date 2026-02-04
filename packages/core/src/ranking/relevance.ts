@@ -72,7 +72,7 @@ export class RelevanceRanker {
     const desc = (skill.description || '').toLowerCase();
     const content = (skill.content || '').toLowerCase();
     const searchable = `${name} ${desc} ${content}`;
-    const words = q.split(/\s+/);
+    const words = q.split(/\s+/).filter(Boolean);
     const matched = words.filter((w) => searchable.includes(w)).length;
 
     if (words.length === 0) return 0;

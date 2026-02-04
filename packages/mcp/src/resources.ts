@@ -4,6 +4,8 @@ import type { SkillEntry } from './tools.js';
 const ranker = new RelevanceRanker();
 
 export function getTrendingResource(skills: SkillEntry[]) {
+  const skillMap = new Map(skills.map((s) => [s.name, s]));
+
   const ranked = ranker.rank(
     skills.map((s) => ({
       name: s.name,
@@ -13,7 +15,8 @@ export function getTrendingResource(skills: SkillEntry[]) {
   );
 
   const trending = ranked.slice(0, 20).map((r) => {
-    const original = skills.find((s) => s.name === r.skill.name)!;
+    const original = skillMap.get(r.skill.name);
+    if (!original) return null;
     return {
       name: original.name,
       description: original.description,
@@ -21,7 +24,7 @@ export function getTrendingResource(skills: SkillEntry[]) {
       tags: original.tags,
       score: r.score,
     };
-  });
+  }).filter(Boolean);
 
   return JSON.stringify({ trending, count: trending.length }, null, 2);
 }

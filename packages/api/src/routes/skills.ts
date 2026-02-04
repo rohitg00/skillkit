@@ -4,12 +4,12 @@ import type { ApiSkill } from '../types.js';
 export function skillRoutes(skills: ApiSkill[]) {
   const app = new Hono();
 
-  app.get('/skills/:source/:id', (c) => {
-    const source = c.req.param('source');
+  app.get('/skills/:owner/:repo/:id', (c) => {
+    const source = `${c.req.param('owner')}/${c.req.param('repo')}`;
     const id = c.req.param('id');
 
     const skill = skills.find(
-      (s) => s.source.includes(source) && s.name === id,
+      (s) => s.source === source && s.name === id,
     );
 
     if (!skill) {

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Optional
+from urllib.parse import quote
 
 import httpx
 
@@ -99,7 +100,7 @@ class SkillKitClient:
 
     async def get_skill(self, source: str, skill_id: str) -> Skill:
         client = self._get_client()
-        response = await client.get(f"/skills/{source}/{skill_id}")
+        response = await client.get(f"/skills/{quote(source, safe='')}/{quote(skill_id, safe='')}")
         response.raise_for_status()
         return Skill(**response.json())
 

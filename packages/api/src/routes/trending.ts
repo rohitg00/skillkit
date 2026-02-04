@@ -7,7 +7,8 @@ export function trendingRoutes(skills: ApiSkill[]) {
   const ranker = new RelevanceRanker();
 
   app.get('/trending', (c) => {
-    const limit = Math.min(parseInt(c.req.query('limit') || '20', 10), 100);
+    const parsedLimit = parseInt(c.req.query('limit') || '20', 10);
+    const limit = Math.min(Number.isNaN(parsedLimit) ? 20 : parsedLimit, 100);
 
     const ranked = ranker.rank(
       skills.map((s) => ({

@@ -9,15 +9,15 @@ describe('Skill Routes', () => {
   const { app } = createApp({ skills: testSkills, rateLimitMax: 1000 });
 
   it('GET /skills/:source/:id returns a skill', async () => {
-    const res = await app.request('/skills/owner/my-skill');
+    const res = await app.request('/skills/owner/repo/my-skill');
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.name).toBe('my-skill');
     expect(body.source).toBe('owner/repo');
   });
 
-  it('GET /skills/:source/:id returns 404 for missing skill', async () => {
-    const res = await app.request('/skills/owner/nonexistent');
+  it('GET /skills/:owner/:repo/:id returns 404 for missing skill', async () => {
+    const res = await app.request('/skills/owner/repo/nonexistent');
     expect(res.status).toBe(404);
   });
 });

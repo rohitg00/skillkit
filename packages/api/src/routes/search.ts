@@ -9,7 +9,8 @@ export function searchRoutes(skills: ApiSkill[], cache: MemoryCache<SearchRespon
 
   app.get('/search', (c) => {
     const query = c.req.query('q') || '';
-    const limit = Math.min(parseInt(c.req.query('limit') || '20', 10), 100);
+    const parsedLimit = parseInt(c.req.query('limit') || '20', 10);
+    const limit = Math.min(Number.isNaN(parsedLimit) ? 20 : parsedLimit, 100);
     const includeContent = c.req.query('include_content') === 'true';
 
     if (!query) {
@@ -52,12 +53,17 @@ export function searchRoutes(skills: ApiSkill[], cache: MemoryCache<SearchRespon
   });
 
   app.post('/search', async (c) => {
-    const body = await c.req.json<{
+    let body: {
       query: string;
       limit?: number;
       include_content?: boolean;
       filters?: { tags?: string[]; category?: string; source?: string };
-    }>();
+    };
+    try {
+      body = await c.req.json();
+    } catch {
+      return c.json({ error: 'Invalid JSON body' }, 400);
+    }
 
     if (!body.query) {
       return c.json({ error: 'Field "query" is required' }, 400);

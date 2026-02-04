@@ -62,5 +62,5 @@ A curated list of community-contributed skills for AI coding agents.
 
 ## Animation & Video
 
-- [remotion-best-practices](https://github.com/remoti-dev/skills) - Video creation with Remotion
-- [motion-graphics](https://github.com/remoti-dev/skills) - Kinetic typography and logo animations
+- [remotion-best-practices](https://github.com/remotion-dev/skills) - Video creation with Remotion
+- [motion-graphics](https://github.com/remotion-dev/skills) - Kinetic typography and logo animations
