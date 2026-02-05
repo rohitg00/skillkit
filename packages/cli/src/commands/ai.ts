@@ -8,6 +8,8 @@ import {
   type SkillExample,
   AIManager,
   loadIndex as loadIndexFromCache,
+  detectProviders,
+  getDefaultProvider,
 } from '@skillkit/core';
 
 export class AICommand extends Command {
@@ -102,11 +104,15 @@ export class AICommand extends Command {
         return await this.handleGenerate(manager);
       case 'similar':
         return await this.handleSimilar(manager);
+      case 'wizard':
+        return await this.handleWizard();
+      case 'providers':
+        return this.handleProviders();
       default:
         console.error(
           chalk.red(`Unknown subcommand: ${this.subcommand}\n`)
         );
-        console.log('Valid subcommands: search, generate, similar');
+        console.log('Valid subcommands: search, generate, similar, wizard, providers');
         return 1;
     }
   }
@@ -370,19 +376,76 @@ export class AICommand extends Command {
     }));
   }
 
+  private async handleWizard(): Promise<number> {
+    console.log(chalk.cyan('\nLaunching Smart Generate Wizard...\n'));
+    console.log(chalk.dim('For the full wizard experience, use: skillkit generate\n'));
+
+    const { GenerateCommand } = await import('./generate.js');
+    const generateCmd = new GenerateCommand();
+    return generateCmd.execute();
+  }
+
+  private handleProviders(): number {
+    const detected = detectProviders();
+    const defaultProvider = getDefaultProvider();
+
+    console.log(chalk.cyan('\nAvailable LLM Providers:\n'));
+
+    for (const provider of detected) {
+      const isDefault = provider.provider === defaultProvider;
+      const status = provider.configured
+        ? chalk.green('✓ Configured')
+        : chalk.dim('○ Not configured');
+      const defaultBadge = isDefault ? chalk.yellow(' (default)') : '';
+
+      console.log(`  ${provider.displayName}${defaultBadge}`);
+      console.log(`    ${status}`);
+      if (provider.envVar) {
+        console.log(`    ${chalk.dim(`Set ${provider.envVar} to configure`)}`);
+      }
+      console.log();
+    }
+
+    if (defaultProvider === 'mock') {
+      console.log(`  Mock Provider${chalk.yellow(' (default)')}`);
+      console.log(`    ${chalk.green('✓ Always available')}`);
+      console.log(`    ${chalk.dim('Basic functionality without API keys')}`);
+      console.log();
+    }
+
+    console.log(chalk.dim('Use "skillkit generate --provider <name>" to use a specific provider\n'));
+
+    return 0;
+  }
+
   private getAIConfig() {
+    const provider = process.env.ANTHROPIC_API_KEY
+      ? ('anthropic' as const)
+      : process.env.OPENAI_API_KEY
+        ? ('openai' as const)
+        : process.env.GOOGLE_AI_KEY || process.env.GEMINI_API_KEY
+          ? ('google' as const)
+          : process.env.OPENROUTER_API_KEY
+            ? ('openrouter' as const)
+            : process.env.OLLAMA_HOST
+              ? ('ollama' as const)
+              : ('none' as const);
+
     const apiKey =
-      process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY;
+      provider === 'anthropic'
+        ? process.env.ANTHROPIC_API_KEY
+        : provider === 'openai'
+          ? process.env.OPENAI_API_KEY
+          : provider === 'google'
+            ? (process.env.GOOGLE_AI_KEY || process.env.GEMINI_API_KEY)
+            : provider === 'openrouter'
+              ? process.env.OPENROUTER_API_KEY
+              : undefined;
 
     return {
-      provider:
-        process.env.ANTHROPIC_API_KEY
-          ? ('anthropic' as const)
-          : process.env.OPENAI_API_KEY
-            ? ('openai' as const)
-            : ('none' as const),
+      provider,
       apiKey,
-      model: process.env.ANTHROPIC_API_KEY ? 'claude-3-sonnet-20240229' : undefined,
+      model: provider === 'anthropic' ? 'claude-sonnet-4-20250514' : undefined,
       maxTokens: 4096,
       temperature: 0.7,
     };
