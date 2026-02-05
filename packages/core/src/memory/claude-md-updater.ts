@@ -6,7 +6,7 @@
  */
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, basename } from 'node:path';
 import { homedir } from 'node:os';
 import type { Learning } from './types.js';
 import { LearningStore } from './learning-store.js';
@@ -397,7 +397,7 @@ export class ClaudeMdUpdater {
   }
 
   private createNewClaudeMd(learnedSection: string): string {
-    const projectName = this.projectPath.split('/').pop() || 'Project';
+    const projectName = basename(this.projectPath) || 'Project';
 
     return `# ${projectName}
 

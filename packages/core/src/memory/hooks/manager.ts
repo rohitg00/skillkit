@@ -122,7 +122,9 @@ export class MemoryHookManager {
       tool_calls_count: toolCallsCount,
     };
 
-    return this.sessionEndHook.generateHookOutput(context);
+    const result = await this.sessionEndHook.execute(context);
+
+    return this.sessionEndHook.generateHookOutputFromResult(result);
   }
 
   /**

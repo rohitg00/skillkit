@@ -74,6 +74,8 @@ export class PostToolUseHook {
    * Execute the post tool use hook
    */
   async execute(event: ToolUseEvent): Promise<ToolUseCaptureResult> {
+    this.clearOldPendingErrors();
+
     if (!this.config.enabled || !this.config.autoCaptureToolUse) {
       return { captured: false, reason: 'Hook disabled' };
     }

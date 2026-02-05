@@ -106,7 +106,9 @@ export class ObservationStore {
     data.observations.push(observation);
     this.save();
 
-    this.checkAutoCompression();
+    void this.checkAutoCompression().catch(() => {
+      // Silently ignore auto-compression errors to avoid disrupting add()
+    });
 
     return observation;
   }
@@ -148,6 +150,9 @@ export class ObservationStore {
    * Set compression threshold
    */
   setCompressionThreshold(threshold: number): void {
+    if (threshold < 1 || !Number.isInteger(threshold)) {
+      throw new Error('Compression threshold must be a positive integer');
+    }
     this.compressionThreshold = threshold;
   }
 

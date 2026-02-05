@@ -155,7 +155,12 @@ export class ProgressiveDisclosureManager {
 
   /**
    * Smart retrieval with automatic layer selection
-   * Uses minimum tokens needed to satisfy the query
+   * Uses minimum tokens needed to satisfy the query.
+   *
+   * Note: tokensUsed reflects cumulative cost of the retrieval operation
+   * (index lookup + any deeper layer fetches), not just the returned entries.
+   * This is intentional since progressive disclosure requires scanning
+   * the index first before fetching timeline/details.
    */
   smartRetrieve(
     query: string,

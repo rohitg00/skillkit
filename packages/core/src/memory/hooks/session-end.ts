@@ -5,6 +5,7 @@
  * This enables automatic memory consolidation without manual intervention.
  */
 
+import { basename } from 'node:path';
 import type { AgentType } from '../../types.js';
 import type {
   SessionEndContext,
@@ -61,9 +62,13 @@ export class SessionEndHook {
       };
     }
 
+    const projectName = context.project_path
+      ? basename(context.project_path.replace(/\/+$/, '')) || undefined
+      : undefined;
+
     const compressor = new MemoryCompressor(this.projectPath, {
       scope: 'project',
-      projectName: context.project_path?.split('/').pop(),
+      projectName,
     });
 
     const { learnings, result } = await compressor.compressAndStore(observations, {
@@ -91,7 +96,13 @@ export class SessionEndHook {
    */
   async generateHookOutput(context: SessionEndContext): Promise<ClaudeCodeHookOutput> {
     const result = await this.execute(context);
+    return this.generateHookOutputFromResult(result);
+  }
 
+  /**
+   * Generate hook output from pre-computed result (avoids double execution)
+   */
+  generateHookOutputFromResult(result: SessionEndResult): ClaudeCodeHookOutput {
     let message: string | undefined;
     if (result.compressed) {
       message = `Session memory: ${result.observationCount} observations → ${result.learningCount} learnings`;

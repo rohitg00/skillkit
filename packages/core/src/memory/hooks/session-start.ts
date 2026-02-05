@@ -6,6 +6,7 @@
  * from previous sessions.
  */
 
+import { basename } from 'node:path';
 import type { AgentType } from '../../types.js';
 import type {
   SessionStartContext,
@@ -60,14 +61,15 @@ export class SessionStartHook {
       };
     }
 
-    const injector = new MemoryInjector(
-      this.projectPath,
-      context.project_path?.split('/').pop()
-    );
+    const projectName = context.project_path
+      ? basename(context.project_path.replace(/\/+$/, '')) || undefined
+      : undefined;
+
+    const injector = new MemoryInjector(this.projectPath, projectName);
 
     const result = await injector.injectForAgent(this.agent, {
       maxTokens: this.config.maxTokensForInjection,
-      minRelevance: 30,
+      minRelevance: this.config.minRelevanceForCapture,
       maxLearnings: 10,
       includeGlobal: true,
       disclosureLevel: 'preview',
