@@ -119,13 +119,33 @@ export class PostToolUseHook {
    */
   async generateHookOutput(event: ToolUseEvent): Promise<ClaudeCodeHookOutput> {
     const result = await this.execute(event);
+    return this.generateHookOutputFromResult(event, result);
+  }
 
+  /**
+   * Generate hook output from pre-computed result (avoids double execution)
+   */
+  generateHookOutputFromResult(event: ToolUseEvent, result: ToolUseCaptureResult): ClaudeCodeHookOutput {
     return {
       continue: true,
       message: result.captured
         ? `Observation captured: ${event.tool_name}`
         : undefined,
     };
+  }
+
+  /**
+   * Get configuration
+   */
+  getConfig(): MemoryHookConfig {
+    return { ...this.config };
+  }
+
+  /**
+   * Update configuration
+   */
+  setConfig(config: Partial<MemoryHookConfig>): void {
+    this.config = { ...this.config, ...config };
   }
 
   /**

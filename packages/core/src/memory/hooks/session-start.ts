@@ -88,7 +88,13 @@ export class SessionStartHook {
    */
   async generateHookOutput(context: SessionStartContext): Promise<ClaudeCodeHookOutput> {
     const result = await this.execute(context);
+    return this.generateHookOutputFromResult(result);
+  }
 
+  /**
+   * Generate hook output from pre-computed result (avoids double execution)
+   */
+  generateHookOutputFromResult(result: SessionStartResult): ClaudeCodeHookOutput {
     if (!result.injected || result.learnings.length === 0) {
       return { continue: true };
     }

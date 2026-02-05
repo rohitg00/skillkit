@@ -84,7 +84,7 @@ export class MemoryHookManager {
     this.stats.learningsInjected = result.learnings.length;
     this.stats.tokensUsed = result.tokenCount;
 
-    return this.sessionStartHook.generateHookOutput(context);
+    return this.sessionStartHook.generateHookOutputFromResult(result);
   }
 
   /**
@@ -106,7 +106,7 @@ export class MemoryHookManager {
 
     await this.checkAutoCompression();
 
-    return this.postToolUseHook.generateHookOutput(event);
+    return this.postToolUseHook.generateHookOutputFromResult(event, result);
   }
 
   /**
@@ -224,6 +224,7 @@ export class MemoryHookManager {
   setConfig(config: Partial<MemoryHookConfig>): void {
     this.config = { ...this.config, ...config };
     this.sessionStartHook.setConfig(this.config);
+    this.postToolUseHook.setConfig(this.config);
     this.sessionEndHook.setConfig(this.config);
   }
 
