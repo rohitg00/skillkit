@@ -870,7 +870,17 @@ export class MemoryCommand extends Command {
     const projectPath = process.cwd();
     const manager = createProgressiveDisclosureManager(projectPath);
 
-    const index = manager.getIndex({ includeGlobal: this.global });
+    let maxResults = 50;
+    if (this.limit) {
+      const parsed = parseInt(this.limit, 10);
+      if (isNaN(parsed) || parsed <= 0) {
+        console.log(chalk.red('Invalid --limit value. Must be a positive number.'));
+        return 1;
+      }
+      maxResults = parsed;
+    }
+
+    const index = manager.getIndex({ includeGlobal: this.global, maxResults });
 
     if (this.json) {
       console.log(JSON.stringify(index, null, 2));
@@ -884,8 +894,8 @@ export class MemoryCommand extends Command {
       return 0;
     }
 
-    const limit = this.limit ? parseInt(this.limit, 10) : 20;
-    const displayed = index.slice(0, limit);
+    const displayLimit = this.limit ? parseInt(this.limit, 10) : 20;
+    const displayed = index.slice(0, displayLimit);
 
     for (const entry of displayed) {
       const effectiveness = entry.effectiveness !== undefined
@@ -897,8 +907,8 @@ export class MemoryCommand extends Command {
       console.log(`   Tags: ${entry.tags.join(', ')} | Uses: ${entry.useCount}`);
     }
 
-    if (index.length > limit) {
-      console.log(chalk.gray(`\n... and ${index.length - limit} more (use --limit to show more)`));
+    if (index.length > displayLimit) {
+      console.log(chalk.gray(`\n... and ${index.length - displayLimit} more (use --limit to show more)`));
     }
 
     console.log(chalk.gray('\nUse "skillkit memory show <id>" to view full details'));

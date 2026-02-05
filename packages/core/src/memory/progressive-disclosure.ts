@@ -104,7 +104,7 @@ export class ProgressiveDisclosureManager {
         const scoreB = (b.effectiveness ?? 50) + b.useCount * 5;
         return scoreB - scoreA;
       })
-      .slice(0, options.maxResults || 50);
+      .slice(0, options.maxResults ?? 50);
   }
 
   /**
@@ -125,7 +125,7 @@ export class ProgressiveDisclosureManager {
       }
     }
 
-    return entries.slice(0, options.maxResults || 20);
+    return entries.slice(0, options.maxResults ?? 20);
   }
 
   /**
@@ -150,7 +150,7 @@ export class ProgressiveDisclosureManager {
       }
     }
 
-    return entries.slice(0, options.maxResults || 10);
+    return entries.slice(0, options.maxResults ?? 10);
   }
 
   /**
@@ -172,6 +172,15 @@ export class ProgressiveDisclosureManager {
     tokensUsed: number;
     tokensRemaining: number;
   } {
+    if (tokenBudget <= 0) {
+      return {
+        layer: 1,
+        entries: [],
+        tokensUsed: 0,
+        tokensRemaining: 0,
+      };
+    }
+
     const index = this.getIndex(options);
 
     if (index.length === 0) {
@@ -196,7 +205,7 @@ export class ProgressiveDisclosureManager {
       };
     }
 
-    const relevantIds = this.findRelevantIds(index, query);
+    const relevantIds = this.findRelevantIds(index, query, options.minRelevance ?? 0);
 
     if (relevantIds.length === 0) {
       return {
@@ -403,7 +412,7 @@ export class ProgressiveDisclosureManager {
     return timeline.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   }
 
-  private findRelevantIds(index: IndexEntry[], query: string): string[] {
+  private findRelevantIds(index: IndexEntry[], query: string, minRelevance: number = 0): string[] {
     const queryWords = query.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
     const scored: Array<{ id: string; score: number }> = [];
 
@@ -427,7 +436,7 @@ export class ProgressiveDisclosureManager {
       score += (entry.effectiveness ?? 50) / 10;
       score += Math.min(entry.useCount * 2, 20);
 
-      if (score > 0) {
+      if (score >= minRelevance) {
         scored.push({ id: entry.id, score });
       }
     }
