@@ -412,18 +412,33 @@ export class AICommand extends Command {
   }
 
   private getAIConfig() {
+    const provider = process.env.ANTHROPIC_API_KEY
+      ? ('anthropic' as const)
+      : process.env.OPENAI_API_KEY
+        ? ('openai' as const)
+        : process.env.GOOGLE_AI_KEY || process.env.GEMINI_API_KEY
+          ? ('google' as const)
+          : process.env.OPENROUTER_API_KEY
+            ? ('openrouter' as const)
+            : process.env.OLLAMA_HOST
+              ? ('ollama' as const)
+              : ('none' as const);
+
     const apiKey =
-      process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY;
+      provider === 'anthropic'
+        ? process.env.ANTHROPIC_API_KEY
+        : provider === 'openai'
+          ? process.env.OPENAI_API_KEY
+          : provider === 'google'
+            ? (process.env.GOOGLE_AI_KEY || process.env.GEMINI_API_KEY)
+            : provider === 'openrouter'
+              ? process.env.OPENROUTER_API_KEY
+              : undefined;
 
     return {
-      provider:
-        process.env.ANTHROPIC_API_KEY
-          ? ('anthropic' as const)
-          : process.env.OPENAI_API_KEY
-            ? ('openai' as const)
-            : ('none' as const),
+      provider,
       apiKey,
-      model: process.env.ANTHROPIC_API_KEY ? 'claude-sonnet-4-20250514' : undefined,
+      model: provider === 'anthropic' ? 'claude-sonnet-4-20250514' : undefined,
       maxTokens: 4096,
       temperature: 0.7,
     };

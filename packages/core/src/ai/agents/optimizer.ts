@@ -187,7 +187,7 @@ export class AgentOptimizer {
   }
 
   private truncateContent(content: string, maxTokens: number): string {
-    const targetChars = maxTokens * 3;
+    const targetChars = Math.floor(maxTokens * 4 * 0.95);
 
     if (content.length <= targetChars) {
       return content;

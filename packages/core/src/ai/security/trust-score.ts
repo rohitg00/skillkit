@@ -30,7 +30,16 @@ export class TrustScorer {
   private strictMode: boolean;
 
   constructor(options: TrustScoreOptions = {}) {
-    this.weights = { ...DEFAULT_WEIGHTS, ...options.weights };
+    const merged = { ...DEFAULT_WEIGHTS, ...options.weights };
+    const sum = merged.clarity + merged.boundaries + merged.specificity + merged.safety;
+    this.weights = sum > 0
+      ? {
+          clarity: merged.clarity / sum,
+          boundaries: merged.boundaries / sum,
+          specificity: merged.specificity / sum,
+          safety: merged.safety / sum,
+        }
+      : DEFAULT_WEIGHTS;
     this.strictMode = options.strictMode ?? false;
   }
 
@@ -60,7 +69,8 @@ export class TrustScorer {
       ? Math.min(weightedScore, Math.min(clarity, boundaries, specificity, safety))
       : weightedScore;
 
-    const normalizedScore = Math.round(finalScore * 10) / 10;
+    const clamped = Math.max(0, Math.min(10, finalScore));
+    const normalizedScore = Math.round(clamped * 10) / 10;
 
     this.generateRecommendations(breakdown, recommendations);
 

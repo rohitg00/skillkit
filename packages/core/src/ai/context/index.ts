@@ -59,10 +59,14 @@ export class ContextEngine {
     const configs = sourceConfigs || this.getDefaultSourceConfigs();
     const enabledSources = configs.filter((c) => c.enabled);
 
+    if (enabledSources.length === 0) {
+      return { chunks: [], sources: [], totalTokensEstimate: 0 };
+    }
+
     const results: ContextChunk[] = [];
     const summaries: SourceSummary[] = [];
 
-    const chunksPerSource = Math.floor(this.maxTotalChunks / enabledSources.length);
+    const chunksPerSource = Math.max(1, Math.floor(this.maxTotalChunks / enabledSources.length));
 
     const fetchPromises = enabledSources.map(async (config) => {
       const source = this.sources.get(config.name);

@@ -228,11 +228,13 @@ Format your response as JSON:
   ): AISearchResult[] {
     try {
       const parsed = JSON.parse(response);
-      return parsed.map((item: { index: number; relevance: number; reasoning: string }) => ({
-        skill: skills[item.index - 1],
-        relevance: item.relevance,
-        reasoning: item.reasoning,
-      }));
+      return parsed
+        .filter((item: { index: number }) => item.index >= 1 && item.index <= skills.length)
+        .map((item: { index: number; relevance: number; reasoning: string }) => ({
+          skill: skills[item.index - 1],
+          relevance: item.relevance,
+          reasoning: item.reasoning,
+        }));
     } catch {
       return [];
     }
@@ -258,33 +260,41 @@ Format your response as JSON:
     messages: AnthropicMessage[],
     system?: string
   ): Promise<AnthropicResponse> {
-    const body: Record<string, unknown> = {
-      model: this.model,
-      max_tokens: this.maxTokens,
-      temperature: this.temperature,
-      messages,
-    };
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000);
 
-    if (system) {
-      body.system = system;
+    try {
+      const body: Record<string, unknown> = {
+        model: this.model,
+        max_tokens: this.maxTokens,
+        temperature: this.temperature,
+        messages,
+      };
+
+      if (system) {
+        body.system = system;
+      }
+
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': this.apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Anthropic API error: ${response.status} - ${error}`);
+      }
+
+      return response.json() as Promise<AnthropicResponse>;
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': this.apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Anthropic API error: ${response.status} - ${error}`);
-    }
-
-    return response.json() as Promise<AnthropicResponse>;
   }
 
   private buildGenerationSystemPrompt(): string {

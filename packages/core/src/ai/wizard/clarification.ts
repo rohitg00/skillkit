@@ -47,7 +47,7 @@ export class ClarificationGenerator {
 
   private getFallbackQuestions(context: WizardContext, maxQuestions: number): ClarificationQuestion[] {
     const questions: ClarificationQuestion[] = [];
-    const expertise = context.expertise.toLowerCase();
+    const expertise = (context.expertise || '').toLowerCase();
 
     if (expertise.includes('test') || expertise.includes('testing')) {
       questions.push({

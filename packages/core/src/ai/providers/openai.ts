@@ -56,7 +56,11 @@ export class OpenAIProvider implements LLMProvider {
     }));
 
     const response = await this.makeRequest(openaiMessages);
-    return response.choices[0]?.message.content || '';
+    const choice = response.choices[0];
+    if (!choice) {
+      throw new Error('OpenAI API returned no choices');
+    }
+    return choice.message.content || '';
   }
 
   async generateSkill(context: GenerationContext): Promise<GeneratedSkillResult> {
@@ -134,11 +138,13 @@ ${skillContent}`;
       const match = response.match(/\[[\s\S]*\]/);
       if (match) {
         const parsed = JSON.parse(match[0]) as Array<{ index: number; relevance: number; reasoning: string }>;
-        return parsed.map((item) => ({
-          skill: skills[item.index - 1],
-          relevance: item.relevance,
-          reasoning: item.reasoning,
-        }));
+        return parsed
+          .filter((item) => item.index >= 1 && item.index <= skills.length)
+          .map((item) => ({
+            skill: skills[item.index - 1],
+            relevance: item.relevance,
+            reasoning: item.reasoning,
+          }));
       }
     } catch {
       // Parse error
@@ -173,26 +179,34 @@ ${skillContent}`;
   }
 
   private async makeRequest(messages: OpenAIMessage[]): Promise<OpenAIResponse> {
-    const response = await fetch(`${this.baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: this.model,
-        messages,
-        max_tokens: this.maxTokens,
-        temperature: this.temperature,
-      }),
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000);
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`OpenAI API error: ${response.status} - ${error}`);
+    try {
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: this.model,
+          messages,
+          max_tokens: this.maxTokens,
+          temperature: this.temperature,
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`OpenAI API error: ${response.status} - ${error}`);
+      }
+
+      return response.json() as Promise<OpenAIResponse>;
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    return response.json() as Promise<OpenAIResponse>;
   }
 
   private buildGenerationSystemPrompt(): string {

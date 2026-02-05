@@ -36,7 +36,7 @@ export interface GeneratedSkill {
 }
 
 export interface AIConfig {
-  provider: 'anthropic' | 'openai' | 'none';
+  provider: 'anthropic' | 'openai' | 'google' | 'ollama' | 'openrouter' | 'none';
   apiKey?: string;
   model?: string;
   maxTokens?: number;

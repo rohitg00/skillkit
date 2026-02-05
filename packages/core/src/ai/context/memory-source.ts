@@ -223,7 +223,8 @@ Relevance: ${obs.relevance}%`;
       return globalPath;
     }
 
-    const projectMemoryPath = join(homeDir, '.claude', 'projects', basePath.replace(/\//g, '-'), 'memory', 'MEMORY.md');
+    const projectKey = basePath.replace(/[\\/]/g, '-');
+    const projectMemoryPath = join(homeDir, '.claude', 'projects', projectKey, 'memory', 'MEMORY.md');
     if (existsSync(projectMemoryPath)) {
       return projectMemoryPath;
     }
