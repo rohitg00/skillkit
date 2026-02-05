@@ -167,7 +167,7 @@ export class ProviderFactory {
 
   getProvider(providerName?: ProviderName, config: ProviderConfig = {}): LLMProvider {
     const name = providerName || getDefaultProvider();
-    const cacheKey = `${name}:${config.model || 'default'}`;
+    const cacheKey = `${name}:${config.model || 'default'}:${config.apiKey ? 'custom-key' : 'env'}:${config.maxTokens ?? 'default'}:${config.temperature ?? 'default'}`;
 
     if (!this.providerCache.has(cacheKey)) {
       this.providerCache.set(cacheKey, createProvider(name, config));

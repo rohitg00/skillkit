@@ -68,9 +68,12 @@ export const ContextSourcesStep: StepHandler<{ sources: ContextSourceConfig[] },
 
     state.gatheredContext = aggregated.chunks;
 
-    const memorySource = new MemorySource(options.projectPath);
-    const keywords = state.expertise.toLowerCase().split(/\s+/);
-    const memoryPatterns = await memorySource.getMemoryPatterns(keywords);
+    let memoryPatterns: Awaited<ReturnType<MemorySource['getMemoryPatterns']>> = [];
+    if (state.memoryPersonalization) {
+      const memorySource = new MemorySource(options.projectPath);
+      const keywords = state.expertise.toLowerCase().split(/\s+/);
+      memoryPatterns = await memorySource.getMemoryPatterns(keywords);
+    }
 
     return {
       success: true,
@@ -188,9 +191,12 @@ export const ReviewStep: StepHandler<{ action?: 'approve' | 'edit' | 'regenerate
         return { success: false, error: 'No AI provider configured' };
       }
 
-      const memorySource = new MemorySource(options.projectPath);
-      const keywords = state.expertise.toLowerCase().split(/\s+/);
-      const memoryPatterns = await memorySource.getMemoryPatterns(keywords);
+      let memoryPatterns: Awaited<ReturnType<MemorySource['getMemoryPatterns']>> = [];
+      if (state.memoryPersonalization) {
+        const memorySource = new MemorySource(options.projectPath);
+        const keywords = state.expertise.toLowerCase().split(/\s+/);
+        memoryPatterns = await memorySource.getMemoryPatterns(keywords);
+      }
 
       const result = await options.provider.generateSkill({
         expertise: state.expertise,

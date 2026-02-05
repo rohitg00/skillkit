@@ -111,11 +111,13 @@ Context: ${context.gatheredContext?.map((c) => `[${c.source}] ${c.content.slice(
       const match = response.match(/\[[\s\S]*\]/);
       if (match) {
         const parsed = JSON.parse(match[0]) as Array<{ index: number; relevance: number; reasoning: string }>;
-        return parsed.map((item) => ({
-          skill: skills[item.index - 1],
-          relevance: item.relevance,
-          reasoning: item.reasoning,
-        }));
+        return parsed
+          .filter((item) => item.index >= 1 && item.index <= skills.length)
+          .map((item) => ({
+            skill: skills[item.index - 1],
+            relevance: item.relevance,
+            reasoning: item.reasoning,
+          }));
       }
     } catch {
       // Parse error
@@ -150,28 +152,36 @@ Context: ${context.gatheredContext?.map((c) => `[${c.source}] ${c.content.slice(
   }
 
   private async makeRequest(messages: OpenRouterMessage[]): Promise<OpenRouterResponse> {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.apiKey}`,
-        'HTTP-Referer': 'https://skillkit.dev',
-        'X-Title': 'SkillKit',
-      },
-      body: JSON.stringify({
-        model: this.model,
-        messages,
-        max_tokens: this.maxTokens,
-        temperature: this.temperature,
-      }),
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000);
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`OpenRouter API error: ${response.status} - ${error}`);
+    try {
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.apiKey}`,
+          'HTTP-Referer': 'https://skillkit.dev',
+          'X-Title': 'SkillKit',
+        },
+        body: JSON.stringify({
+          model: this.model,
+          messages,
+          max_tokens: this.maxTokens,
+          temperature: this.temperature,
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`OpenRouter API error: ${response.status} - ${error}`);
+      }
+
+      return response.json() as Promise<OpenRouterResponse>;
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    return response.json() as Promise<OpenRouterResponse>;
   }
 
   private buildGenerationSystemPrompt(): string {

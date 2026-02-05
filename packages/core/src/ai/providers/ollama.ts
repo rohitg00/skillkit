@@ -109,11 +109,13 @@ Return JSON array:
       const match = response.match(/\[[\s\S]*\]/);
       if (match) {
         const parsed = JSON.parse(match[0]) as Array<{ index: number; relevance: number; reasoning: string }>;
-        return parsed.map((item) => ({
-          skill: skills[item.index - 1],
-          relevance: item.relevance,
-          reasoning: item.reasoning,
-        }));
+        return parsed
+          .filter((item) => item.index >= 1 && item.index <= limited.length)
+          .map((item) => ({
+            skill: limited[item.index - 1],
+            relevance: item.relevance,
+            reasoning: item.reasoning,
+          }));
       }
     } catch {
       // Parse error
@@ -147,23 +149,31 @@ Return JSON array:
   }
 
   private async makeRequest(messages: OllamaMessage[]): Promise<OllamaResponse> {
-    const response = await fetch(`${this.baseUrl}/api/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: this.model,
-        messages,
-        stream: false,
-        options: { temperature: this.temperature },
-      }),
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000);
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Ollama API error: ${response.status} - ${error}`);
+    try {
+      const response = await fetch(`${this.baseUrl}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: this.model,
+          messages,
+          stream: false,
+          options: { temperature: this.temperature },
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Ollama API error: ${response.status} - ${error}`);
+      }
+
+      return response.json() as Promise<OllamaResponse>;
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    return response.json() as Promise<OllamaResponse>;
   }
 
   private buildGenerationSystemPrompt(): string {

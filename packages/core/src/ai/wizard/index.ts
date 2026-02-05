@@ -27,18 +27,19 @@ export class SkillWizard {
 
   constructor(config: WizardConfig = {}) {
     this.state = createInitialState();
-    this.provider = config.provider;
     this.projectPath = config.projectPath || process.cwd();
     this.options = config.options || {};
     this.events = config.events || {};
 
-    if (!this.provider && !this.options.provider) {
-      this.provider = createProvider();
+    if (config.provider) {
+      this.provider = config.provider;
     } else if (this.options.provider) {
       this.provider = createProvider(
         this.options.provider as Parameters<typeof createProvider>[0],
         { model: this.options.model }
       );
+    } else {
+      this.provider = createProvider();
     }
   }
 
@@ -84,12 +85,14 @@ export class SkillWizard {
 
       const result = await handler.execute(input, this.state, executionOptions);
 
+      const previousStep = this.state.currentStep;
+
       if (result.success && result.nextStep) {
         this.state.currentStep = result.nextStep;
         this.emitStepChange(result.nextStep);
       }
 
-      if (this.state.currentStep === 'install' && result.success) {
+      if (previousStep === 'install' && result.success && !result.nextStep) {
         this.emitComplete();
       }
 

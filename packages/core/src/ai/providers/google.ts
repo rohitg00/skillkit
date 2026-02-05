@@ -118,11 +118,13 @@ Context: ${context.gatheredContext?.map((c) => `[${c.source}] ${c.content.slice(
       const match = response.match(/\[[\s\S]*\]/);
       if (match) {
         const parsed = JSON.parse(match[0]) as Array<{ index: number; relevance: number; reasoning: string }>;
-        return parsed.map((item) => ({
-          skill: skills[item.index - 1],
-          relevance: item.relevance,
-          reasoning: item.reasoning,
-        }));
+        return parsed
+          .filter((item) => item.index >= 1 && item.index <= skills.length)
+          .map((item) => ({
+            skill: skills[item.index - 1],
+            relevance: item.relevance,
+            reasoning: item.reasoning,
+          }));
       }
     } catch {
       // Parse error

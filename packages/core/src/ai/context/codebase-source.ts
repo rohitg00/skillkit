@@ -318,7 +318,8 @@ export class CodebaseSource implements ContextSource {
       if (fileName.includes(keyword)) {
         score += 0.3;
       }
-      const matches = (contentLower.match(new RegExp(keyword, 'g')) || []).length;
+      const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const matches = (contentLower.match(new RegExp(escapedKeyword, 'g')) || []).length;
       score += Math.min(matches * 0.05, 0.3);
     }
 

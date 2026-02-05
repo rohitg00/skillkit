@@ -94,7 +94,7 @@ export class SkillsSource implements ContextSource {
       }
     }
 
-    return Math.min(score / keywords.length, 1);
+    return keywords.length === 0 ? 0 : Math.min(score / keywords.length, 1);
   }
 
   private extractKeywords(query: string): string[] {
