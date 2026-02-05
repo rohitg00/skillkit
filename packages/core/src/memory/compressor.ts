@@ -95,7 +95,6 @@ export class RuleBasedCompressor implements CompressionEngine {
   ): Promise<CompressionResult> {
     const opts = { ...DEFAULT_COMPRESSION_OPTIONS, ...options };
 
-    // Filter observations
     const filtered = opts.includeLowRelevance
       ? observations
       : observations.filter((o) => o.relevance >= 50);
@@ -116,36 +115,29 @@ export class RuleBasedCompressor implements CompressionEngine {
     const learnings: CompressedLearning[] = [];
     const processedIds: string[] = [];
 
-    // Group observations by type
     const byType = this.groupByType(filtered);
 
-    // Extract error-solution pairs
     const errorSolutionLearnings = this.extractErrorSolutionPairs(byType, opts);
     learnings.push(...errorSolutionLearnings.learnings);
     processedIds.push(...errorSolutionLearnings.processedIds);
 
-    // Extract decision patterns
     const decisionLearnings = this.extractDecisionPatterns(byType, opts);
     learnings.push(...decisionLearnings.learnings);
     processedIds.push(...decisionLearnings.processedIds);
 
-    // Extract file change patterns
     const fileChangeLearnings = this.extractFileChangePatterns(byType, opts);
     learnings.push(...fileChangeLearnings.learnings);
     processedIds.push(...fileChangeLearnings.processedIds);
 
-    // Extract tool usage patterns
     const toolUsageLearnings = this.extractToolUsagePatterns(byType, opts);
     learnings.push(...toolUsageLearnings.learnings);
     processedIds.push(...toolUsageLearnings.processedIds);
 
-    // Filter by importance and limit
     const finalLearnings = learnings
       .filter((l) => l.importance >= opts.minImportance)
       .sort((a, b) => b.importance - a.importance)
       .slice(0, opts.maxLearnings);
 
-    // Add additional tags
     if (opts.additionalTags.length > 0) {
       for (const learning of finalLearnings) {
         learning.tags = [...new Set([...learning.tags, ...opts.additionalTags])];
@@ -187,7 +179,6 @@ export class RuleBasedCompressor implements CompressionEngine {
     const learnings: CompressedLearning[] = [];
     const processedIds: string[] = [];
 
-    // Match errors with solutions
     for (const error of errors) {
       const errorText = error.content.error || error.content.action;
       const matchingSolution = solutions.find((s) => {
@@ -195,21 +186,18 @@ export class RuleBasedCompressor implements CompressionEngine {
         const solutionAction = s.content.action?.toLowerCase() || '';
         const errorLower = errorText.toLowerCase();
 
-        // Require keyword similarity between error and solution
         const hasKeywordMatch = this.hasSimilarKeywords(errorLower, solutionContext) ||
                                 this.hasSimilarKeywords(errorLower, solutionAction);
         if (!hasKeywordMatch) {
           return false;
         }
 
-        // Solution should indicate it's a fix/resolution, or have strong keyword overlap
         const isSolutionIndicator = solutionContext.includes('fix') ||
                                     solutionContext.includes('resolve') ||
                                     solutionContext.includes('solution') ||
                                     solutionAction.includes('fix') ||
                                     solutionAction.includes('resolve');
 
-        // Require both keyword match AND solution indicator
         return isSolutionIndicator || this.hasStrongKeywordOverlap(errorLower, solutionContext);
       });
 
@@ -230,7 +218,6 @@ export class RuleBasedCompressor implements CompressionEngine {
 
         processedIds.push(error.id, matchingSolution.id);
       } else if (error.content.error) {
-        // Standalone error learning
         const title = this.generateTitle('Error Pattern', errorText);
         const content = this.formatStandaloneErrorContent(error);
         const tags = this.extractTags([error]);
@@ -249,7 +236,6 @@ export class RuleBasedCompressor implements CompressionEngine {
       }
     }
 
-    // Process remaining solutions
     for (const solution of solutions) {
       if (!processedIds.includes(solution.id)) {
         const title = this.generateTitle('Solution', solution.content.action);
@@ -310,7 +296,6 @@ export class RuleBasedCompressor implements CompressionEngine {
     const learnings: CompressedLearning[] = [];
     const processedIds: string[] = [];
 
-    // Group file changes by pattern (same files modified together)
     const filePatterns = new Map<string, Observation[]>();
     for (const change of fileChanges) {
       const files = change.content.files || [];
@@ -320,7 +305,6 @@ export class RuleBasedCompressor implements CompressionEngine {
       filePatterns.set(pattern, existing);
     }
 
-    // Create learnings for significant patterns (2+ occurrences)
     for (const [pattern, changes] of filePatterns) {
       if (changes.length >= 2 || changes.some((c) => (c.content.files?.length || 0) > 3)) {
         const title = `File Modification Pattern: ${pattern}`;
@@ -353,10 +337,8 @@ export class RuleBasedCompressor implements CompressionEngine {
     const learnings: CompressedLearning[] = [];
     const processedIds: string[] = [];
 
-    // Only extract if there are significant patterns
     const allObs = [...toolUses, ...checkpoints];
     if (allObs.length >= 5) {
-      // Group by common action patterns
       const actionPatterns = new Map<string, Observation[]>();
       for (const obs of allObs) {
         const actionType = this.getActionType(obs.content.action);
@@ -390,7 +372,6 @@ export class RuleBasedCompressor implements CompressionEngine {
   }
 
   private generateTitle(prefix: string, text: string): string {
-    // Extract key words from text
     const cleaned = text
       .replace(/[^a-zA-Z0-9\s]/g, ' ')
       .replace(/\s+/g, ' ')
@@ -534,7 +515,6 @@ Consider automating or documenting this workflow for future reference.
   private getFilePattern(files: string[]): string {
     if (files.length === 0) return 'unknown';
 
-    // Extract common directory
     const dirs = files.map((f) => {
       const parts = f.split('/');
       return parts.slice(0, -1).join('/') || 'root';
@@ -545,7 +525,6 @@ Consider automating or documenting this workflow for future reference.
       return uniqueDirs[0];
     }
 
-    // Extract file types
     const extensions = files.map((f) => {
       const ext = f.split('.').pop() || 'unknown';
       return ext;
@@ -568,7 +547,6 @@ Consider automating or documenting this workflow for future reference.
   }
 
   private hasSimilarKeywords(text1: string, text2: string): boolean {
-    // Normalize: lowercase and strip punctuation for better matching
     const normalize = (word: string) => word.toLowerCase().replace(/[^a-z0-9]/g, '');
     const words1 = text1.split(/\s+/).map(normalize).filter((w) => w.length > 3);
     const words2 = new Set(text2.split(/\s+/).map(normalize).filter((w) => w.length > 3));
@@ -580,7 +558,6 @@ Consider automating or documenting this workflow for future reference.
    * More strict than hasSimilarKeywords - requires at least 2 matching words
    */
   private hasStrongKeywordOverlap(text1: string, text2: string): boolean {
-    // Normalize: lowercase and strip punctuation for better matching
     const normalize = (word: string) => word.toLowerCase().replace(/[^a-z0-9]/g, '');
     const words1 = text1.split(/\s+/).map(normalize).filter((w) => w.length > 3);
     const words2 = new Set(text2.split(/\s+/).map(normalize).filter((w) => w.length > 3));
@@ -625,7 +602,6 @@ export class APIBasedCompressor implements CompressionEngine {
   ): Promise<CompressionResult> {
     const opts = { ...DEFAULT_COMPRESSION_OPTIONS, ...options };
 
-    // Filter observations
     const filtered = opts.includeLowRelevance
       ? observations
       : observations.filter((o) => o.relevance >= 50);
@@ -643,26 +619,18 @@ export class APIBasedCompressor implements CompressionEngine {
       };
     }
 
-    // Format observations for the prompt
     const observationsText = this.formatObservationsForPrompt(filtered);
-
-    // Build the prompt
     const prompt = this.buildCompressionPrompt(observationsText, opts);
 
     try {
-      // Call the API
       const response = await this.callAPI(prompt);
-
-      // Parse the response
       const learnings = this.parseAPIResponse(response, filtered);
 
-      // Filter and limit
       const finalLearnings = learnings
         .filter((l) => l.importance >= opts.minImportance)
         .sort((a, b) => b.importance - a.importance)
         .slice(0, opts.maxLearnings);
 
-      // Add additional tags
       if (opts.additionalTags.length > 0) {
         for (const learning of finalLearnings) {
           learning.tags = [...new Set([...learning.tags, ...opts.additionalTags])];
@@ -686,7 +654,6 @@ export class APIBasedCompressor implements CompressionEngine {
         },
       };
     } catch (error) {
-      // Fall back to rule-based compression on API failure
       console.warn('API compression failed, falling back to rule-based:', error);
       const fallback = new RuleBasedCompressor();
       return fallback.compress(observations, options);
@@ -820,7 +787,6 @@ Generate up to ${opts.maxLearnings} learnings. Only include learnings with impor
 
   private parseAPIResponse(response: string, observations: Observation[]): CompressedLearning[] {
     try {
-      // Extract JSON from response (handle markdown code blocks)
       let jsonStr = response;
       const jsonMatch = response.match(/```(?:json)?\s*([\s\S]*?)```/);
       if (jsonMatch) {
@@ -833,7 +799,6 @@ Generate up to ${opts.maxLearnings} learnings. Only include learnings with impor
         throw new Error('Response is not an array');
       }
 
-      // Validate and clean up each learning
       const observationIds = new Set(observations.map((o) => o.id));
       return parsed
         .filter((item): item is CompressedLearning => {
@@ -847,7 +812,6 @@ Generate up to ${opts.maxLearnings} learnings. Only include learnings with impor
         })
         .map((item) => ({
           ...item,
-          // Validate source observation IDs
           sourceObservationIds: (item.sourceObservationIds || []).filter((id: string) =>
             observationIds.has(id)
           ),
@@ -884,7 +848,6 @@ export class MemoryCompressor {
       projectPath,
       options?.projectName
     );
-    // For global scope, use home directory; for project scope, use project path
     const indexBasePath = options?.scope === 'global' ? homedir() : projectPath;
     this.indexStore = new MemoryIndexStore(indexBasePath, options?.scope === 'global');
     this.projectName = options?.projectName;
@@ -926,10 +889,8 @@ export class MemoryCompressor {
       projectName: this.projectName || options?.projectName,
     };
 
-    // Compress observations
     const result = await this.engine.compress(observations, compressionOptions);
 
-    // Store each learning
     const storedLearnings: Learning[] = [];
     for (const compressed of result.learnings) {
       const learning = this.learningStore.add({
@@ -942,7 +903,6 @@ export class MemoryCompressor {
         patterns: compressed.patterns,
       });
 
-      // Index the learning
       this.indexStore.indexLearning(learning);
 
       storedLearnings.push(learning);
@@ -1004,12 +964,10 @@ export class LearningConsolidator {
    * Merge two similar learnings
    */
   merge(learning1: Learning, learning2: Learning): Omit<Learning, 'id' | 'createdAt' | 'updatedAt'> {
-    // Keep the more effective/used one as base
     const base = this.getBetterLearning(learning1, learning2);
     const other = base === learning1 ? learning2 : learning1;
 
     return {
-      // Preserve the source from the base learning instead of hard-coding 'session'
       source: base.source,
       sourceObservations: [
         ...(base.sourceObservations || []),
@@ -1046,14 +1004,11 @@ export class LearningConsolidator {
         continue;
       }
 
-      // Merge the learnings
       const merged = this.merge(l1, l2);
 
-      // Add the merged learning
       const newLearning = store.add(merged);
       index.indexLearning(newLearning);
 
-      // Remove the old learnings
       store.delete(l1.id);
       store.delete(l2.id);
       index.removeLearning(l1.id);
@@ -1073,14 +1028,12 @@ export class LearningConsolidator {
   private calculateSimilarity(l1: Learning, l2: Learning): number {
     let score = 0;
 
-    // Title similarity (Jaccard)
     const title1Words = new Set(l1.title.toLowerCase().split(/\s+/));
     const title2Words = new Set(l2.title.toLowerCase().split(/\s+/));
     const titleIntersection = [...title1Words].filter((w) => title2Words.has(w)).length;
     const titleUnion = new Set([...title1Words, ...title2Words]).size;
     score += (titleIntersection / titleUnion) * 0.3;
 
-    // Tag overlap
     const tags1 = new Set(l1.tags);
     const tags2 = new Set(l2.tags);
     const tagIntersection = [...tags1].filter((t) => tags2.has(t)).length;
@@ -1089,7 +1042,6 @@ export class LearningConsolidator {
       score += (tagIntersection / tagUnion) * 0.3;
     }
 
-    // Pattern overlap
     const patterns1 = new Set(l1.patterns || []);
     const patterns2 = new Set(l2.patterns || []);
     const patternIntersection = [...patterns1].filter((p) => patterns2.has(p)).length;
@@ -1098,7 +1050,6 @@ export class LearningConsolidator {
       score += (patternIntersection / patternUnion) * 0.2;
     }
 
-    // Content similarity (simple word overlap)
     const content1Words = new Set(
       l1.content
         .toLowerCase()
@@ -1121,20 +1072,16 @@ export class LearningConsolidator {
   }
 
   private getBetterLearning(l1: Learning, l2: Learning): Learning {
-    // Prefer higher effectiveness
     if (l1.effectiveness !== l2.effectiveness) {
       return (l1.effectiveness || 0) > (l2.effectiveness || 0) ? l1 : l2;
     }
-    // Prefer higher use count
     if (l1.useCount !== l2.useCount) {
       return l1.useCount > l2.useCount ? l1 : l2;
     }
-    // Prefer more recent
     return new Date(l1.updatedAt) > new Date(l2.updatedAt) ? l1 : l2;
   }
 
   private mergeContent(content1: string, content2: string): string {
-    // Simple merge: keep the longer one and add a note
     if (content1.length >= content2.length) {
       return content1;
     }

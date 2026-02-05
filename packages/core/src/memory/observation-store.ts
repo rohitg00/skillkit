@@ -10,14 +10,37 @@ import type {
 } from './types.js';
 import type { AgentType } from '../types.js';
 
+/**
+ * Auto-compression callback type
+ */
+export type AutoCompressCallback = (observations: Observation[]) => Promise<void>;
+
+/**
+ * Observation store options
+ */
+export interface ObservationStoreOptions {
+  compressionThreshold?: number;
+  autoCompress?: boolean;
+  onThresholdReached?: AutoCompressCallback;
+}
+
 export class ObservationStore {
   private readonly filePath: string;
+  private readonly projectPath: string;
   private data: ObservationStoreData | null = null;
   private sessionId: string;
+  private compressionThreshold: number;
+  private autoCompress: boolean;
+  private onThresholdReached?: AutoCompressCallback;
+  private compressionInProgress = false;
 
-  constructor(projectPath: string, sessionId?: string) {
+  constructor(projectPath: string, sessionId?: string, options: ObservationStoreOptions = {}) {
+    this.projectPath = projectPath;
     this.filePath = join(projectPath, '.skillkit', 'memory', 'observations.yaml');
     this.sessionId = sessionId || randomUUID();
+    this.compressionThreshold = options.compressionThreshold ?? 50;
+    this.autoCompress = options.autoCompress ?? true;
+    this.onThresholdReached = options.onThresholdReached;
   }
 
   private ensureDir(): void {
@@ -83,7 +106,70 @@ export class ObservationStore {
     data.observations.push(observation);
     this.save();
 
+    this.checkAutoCompression();
+
     return observation;
+  }
+
+  /**
+   * Check if auto-compression should trigger
+   */
+  private async checkAutoCompression(): Promise<void> {
+    if (!this.autoCompress || this.compressionInProgress) return;
+    if (!this.onThresholdReached) return;
+
+    const count = this.count();
+    if (count >= this.compressionThreshold) {
+      this.compressionInProgress = true;
+      try {
+        const observations = this.getAll();
+        await this.onThresholdReached(observations);
+      } finally {
+        this.compressionInProgress = false;
+      }
+    }
+  }
+
+  /**
+   * Set auto-compression callback
+   */
+  setAutoCompressCallback(callback: AutoCompressCallback): void {
+    this.onThresholdReached = callback;
+  }
+
+  /**
+   * Enable/disable auto-compression
+   */
+  setAutoCompress(enabled: boolean): void {
+    this.autoCompress = enabled;
+  }
+
+  /**
+   * Set compression threshold
+   */
+  setCompressionThreshold(threshold: number): void {
+    this.compressionThreshold = threshold;
+  }
+
+  /**
+   * Get compression threshold
+   */
+  getCompressionThreshold(): number {
+    return this.compressionThreshold;
+  }
+
+  /**
+   * Check if threshold is reached
+   */
+  isThresholdReached(): boolean {
+    return this.count() >= this.compressionThreshold;
+  }
+
+  /**
+   * Get project path
+   */
+  getProjectPath(): string {
+    return this.projectPath;
   }
 
   getAll(): Observation[] {

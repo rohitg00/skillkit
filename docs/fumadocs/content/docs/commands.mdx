@@ -170,10 +170,18 @@ owner/repo@v1.2.3
 ```bash
 skillkit memory status          # View memory status
 skillkit memory search <query>  # Search learnings
-skillkit memory compress        # Compress observations
-skillkit memory export <name>   # Export as skill
+skillkit memory compress        # Compress observations to learnings
+skillkit memory export <name>   # Export learnings as skill
+skillkit memory sync-claude     # Update CLAUDE.md with learnings
+skillkit memory index           # View memory index (Layer 1)
 skillkit memory --global        # Use global memory
 ```
+
+| Option | Purpose |
+|--------|---------|
+| `--global` | Use global memory instead of project |
+| `--min-effectiveness` | Filter by minimum effectiveness score |
+| `--max` | Limit number of results |
 
 ## Translation Commands
 

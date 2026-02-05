@@ -1,8 +1,9 @@
-// Memory Module - Cross-Agent Session Memory System
-// Provides persistent memory across all AI coding agents
-
 export * from './types.js';
-export { ObservationStore } from './observation-store.js';
+export {
+  ObservationStore,
+  type AutoCompressCallback,
+  type ObservationStoreOptions,
+} from './observation-store.js';
 export { LearningStore } from './learning-store.js';
 export { MemoryIndexStore } from './memory-index.js';
 export {
@@ -48,3 +49,25 @@ export {
   type InjectedMemory,
   type InjectionResult,
 } from './injector.js';
+
+export * from './hooks/index.js';
+
+export {
+  ClaudeMdUpdater,
+  createClaudeMdUpdater,
+  updateClaudeMd,
+  syncGlobalClaudeMd,
+  type ClaudeMdUpdateOptions,
+  type ClaudeMdUpdateResult,
+  type ParsedClaudeMd,
+} from './claude-md-updater.js';
+
+export {
+  ProgressiveDisclosureManager,
+  createProgressiveDisclosureManager,
+  type IndexEntry,
+  type TimelineEntry,
+  type DetailsEntry,
+  type ActivityPoint,
+  type ProgressiveDisclosureOptions,
+} from './progressive-disclosure.js';

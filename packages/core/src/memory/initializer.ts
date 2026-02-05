@@ -30,12 +30,10 @@ export function getMemoryPaths(projectPath: string): MemoryPaths {
 export function initializeMemoryDirectory(projectPath: string): MemoryPaths {
   const paths = getMemoryPaths(projectPath);
 
-  // Create project memory directory
   if (!existsSync(paths.projectMemoryDir)) {
     mkdirSync(paths.projectMemoryDir, { recursive: true });
   }
 
-  // Create global memory directory
   if (!existsSync(paths.globalMemoryDir)) {
     mkdirSync(paths.globalMemoryDir, { recursive: true });
   }

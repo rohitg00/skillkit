@@ -8,10 +8,6 @@ export class MemoryIndexStore {
   private data: MemoryIndex | null = null;
 
   constructor(basePath: string, _isGlobal = false) {
-    // Both global and project use .skillkit subdirectory
-    // Global: ~/.skillkit/memory/index.yaml (basePath = homedir())
-    // Project: <projectPath>/.skillkit/memory/index.yaml (basePath = projectPath)
-    // Note: _isGlobal kept for API compatibility but basePath determines the actual path
     this.filePath = join(basePath, '.skillkit', 'memory', 'index.yaml');
   }
 
@@ -58,7 +54,6 @@ export class MemoryIndexStore {
   }
 
   private extractKeywords(text: string): string[] {
-    // Extract meaningful keywords from text
     const stopWords = new Set([
       'a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
       'of', 'with', 'by', 'from', 'is', 'are', 'was', 'were', 'be', 'been',
@@ -79,12 +74,10 @@ export class MemoryIndexStore {
   indexLearning(learning: Learning): void {
     const data = this.load();
 
-    // Extract keywords from title and content
     const titleKeywords = this.extractKeywords(learning.title);
     const contentKeywords = this.extractKeywords(learning.content);
     const allKeywords = [...new Set([...titleKeywords, ...contentKeywords])];
 
-    // Index by keywords
     for (const keyword of allKeywords) {
       if (!data.entries[keyword]) {
         data.entries[keyword] = [];
@@ -94,7 +87,6 @@ export class MemoryIndexStore {
       }
     }
 
-    // Index by tags
     for (const tag of learning.tags) {
       const normalizedTag = tag.toLowerCase();
       if (!data.tags[normalizedTag]) {
@@ -105,7 +97,6 @@ export class MemoryIndexStore {
       }
     }
 
-    // Index by frameworks if present
     if (learning.frameworks) {
       for (const framework of learning.frameworks) {
         const normalizedFw = framework.toLowerCase();
@@ -124,7 +115,6 @@ export class MemoryIndexStore {
   removeLearning(learningId: string): void {
     const data = this.load();
 
-    // Remove from keyword entries
     for (const keyword of Object.keys(data.entries)) {
       data.entries[keyword] = data.entries[keyword].filter((id) => id !== learningId);
       if (data.entries[keyword].length === 0) {
@@ -132,7 +122,6 @@ export class MemoryIndexStore {
       }
     }
 
-    // Remove from tags
     for (const tag of Object.keys(data.tags)) {
       data.tags[tag] = data.tags[tag].filter((id) => id !== learningId);
       if (data.tags[tag].length === 0) {
@@ -149,20 +138,16 @@ export class MemoryIndexStore {
 
     if (keywords.length === 0) return [];
 
-    // Find IDs that match any keyword
     const matchCounts = new Map<string, number>();
 
     for (const keyword of keywords) {
-      // Exact match
       if (data.entries[keyword]) {
         for (const id of data.entries[keyword]) {
           matchCounts.set(id, (matchCounts.get(id) || 0) + 2);
         }
       }
 
-      // Partial match (keyword is substring of indexed word, but not exact match)
       for (const [indexed, ids] of Object.entries(data.entries)) {
-        // Skip exact matches - they're already counted above with higher weight
         if (indexed === keyword) continue;
         if (indexed.includes(keyword) || keyword.includes(indexed)) {
           for (const id of ids) {
@@ -172,7 +157,6 @@ export class MemoryIndexStore {
       }
     }
 
-    // Sort by match count (most matches first)
     return [...matchCounts.entries()]
       .sort((a, b) => b[1] - a[1])
       .map(([id]) => id);
@@ -192,7 +176,6 @@ export class MemoryIndexStore {
       }
     }
 
-    // Sort by match count
     return [...matchCounts.entries()]
       .sort((a, b) => b[1] - a[1])
       .map(([id]) => id);
@@ -210,7 +193,6 @@ export class MemoryIndexStore {
       return tagResults;
     }
 
-    // Combine results, prioritizing items that match both
     const keywordSet = new Set(keywordResults);
     const tagSet = new Set(tagResults);
 
@@ -250,10 +232,8 @@ export class MemoryIndexStore {
   }
 
   rebuildIndex(learnings: Learning[]): void {
-    // Clear existing index
     this.data = this.createEmpty();
 
-    // Re-index all learnings
     for (const learning of learnings) {
       this.indexLearning(learning);
     }

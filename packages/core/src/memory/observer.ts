@@ -118,26 +118,18 @@ export class MemoryObserver {
    * Observe an event and potentially store it
    */
   observe(event: ObservableEvent): Observation | null {
-    // Check if we should capture this event type
     if (!this.shouldCapture(event)) {
       return null;
     }
 
-    // Classify the event into an observation type
     const observationType = this.classifyEvent(event);
-
-    // Extract content from the event
     const content = this.extractContent(event);
-
-    // Score relevance
     const relevance = this.scoreRelevance(event);
 
-    // Check minimum relevance threshold
     if (relevance < this.config.minRelevance) {
       return null;
     }
 
-    // Store the observation
     return this.store.add(observationType, content, this.currentAgent, relevance);
   }
 
@@ -243,7 +235,6 @@ export class MemoryObserver {
       context,
     };
 
-    // Store pending error for potential solution matching
     const errorKey = this.generateErrorKey(error);
     this.pendingErrors.set(errorKey, event);
 
@@ -263,7 +254,6 @@ export class MemoryObserver {
       error: relatedError,
     };
 
-    // If we can match this to a pending error, increase relevance
     if (relatedError) {
       const errorKey = this.generateErrorKey(relatedError);
       this.pendingErrors.delete(errorKey);
@@ -393,7 +383,6 @@ export class MemoryObserver {
       content.solution = event.output;
     }
 
-    // Generate tags based on event
     content.tags = this.generateTags(event);
 
     return content;
@@ -462,15 +451,12 @@ export class MemoryObserver {
   private generateTags(event: ObservableEvent): string[] {
     const tags: string[] = [];
 
-    // Add event type as tag
     tags.push(event.type.replace(/_/g, '-'));
 
-    // Add skill name if present
     if (event.skillName) {
       tags.push(event.skillName.toLowerCase().replace(/[^a-z0-9-]/g, '-'));
     }
 
-    // Add error-related tags
     if (event.error) {
       if (event.error.toLowerCase().includes('type')) tags.push('typescript');
       if (event.error.toLowerCase().includes('import')) tags.push('imports');
@@ -480,7 +466,6 @@ export class MemoryObserver {
         tags.push('async');
     }
 
-    // Add file-related tags
     if (event.files) {
       for (const file of event.files) {
         if (file.endsWith('.ts') || file.endsWith('.tsx')) tags.push('typescript');
@@ -498,16 +483,13 @@ export class MemoryObserver {
    * Score relevance of event
    */
   private scoreRelevance(event: ObservableEvent): number {
-    // Use custom scorer if provided
     if (this.config.relevanceScorer) {
       return this.config.relevanceScorer(event);
     }
 
-    // Default relevance scoring
-    let score = 50; // Base score
+    let score = 50;
 
     switch (event.type) {
-      // High relevance events
       case 'error_encountered':
       case 'task_failed':
         score = 85;
@@ -515,7 +497,6 @@ export class MemoryObserver {
 
       case 'solution_applied':
         score = 90;
-        // Bonus if it matches a pending error
         if (event.error) {
           const errorKey = this.generateErrorKey(event.error);
           if (this.pendingErrors.has(errorKey)) {
@@ -532,10 +513,8 @@ export class MemoryObserver {
         score = 80;
         break;
 
-      // Medium relevance events
       case 'file_modified':
         score = 60;
-        // More files = higher relevance
         if (event.files && event.files.length > 3) {
           score = 70;
         }
@@ -550,7 +529,6 @@ export class MemoryObserver {
         score = 50;
         break;
 
-      // Lower relevance events
       case 'task_start':
         score = 30;
         break;
@@ -568,7 +546,6 @@ export class MemoryObserver {
         score = 50;
     }
 
-    // Adjust based on content richness
     if (event.context && event.context.length > 100) {
       score += 5;
     }
@@ -577,7 +554,6 @@ export class MemoryObserver {
       score += 5;
     }
 
-    // Cap at 100
     return Math.min(score, 100);
   }
 
@@ -585,7 +561,6 @@ export class MemoryObserver {
    * Generate a key for matching errors to solutions
    */
   private generateErrorKey(error: string): string {
-    // Normalize error string for matching
     return error
       .toLowerCase()
       .replace(/[0-9]+/g, 'N') // Replace numbers

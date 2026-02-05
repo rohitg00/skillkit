@@ -109,24 +109,19 @@ export class MemoryInjector {
   async getRelevantMemories(options: InjectionOptions = {}): Promise<InjectedMemory[]> {
     const opts = { ...DEFAULT_OPTIONS, ...options };
 
-    // Collect all learnings
     const projectLearnings = this.projectStore.getAll();
     const globalLearnings = opts.includeGlobal ? this.globalStore.getAll() : [];
     const allLearnings = [...projectLearnings, ...globalLearnings];
 
-    // Score each learning for relevance
     const scored = allLearnings.map((learning) => ({
       learning,
       ...this.scoreLearning(learning, opts),
     }));
 
-    // Filter by minimum relevance
     const filtered = scored.filter((s) => s.relevanceScore >= opts.minRelevance);
 
-    // Sort by relevance (descending)
     filtered.sort((a, b) => b.relevanceScore - a.relevanceScore);
 
-    // Limit to max learnings
     return filtered.slice(0, opts.maxLearnings);
   }
 
@@ -145,7 +140,6 @@ export class MemoryInjector {
       patterns: [] as string[],
     };
 
-    // Match by frameworks from project context
     if (this.projectContext?.stack) {
       const projectFrameworks = this.extractFrameworkNames();
       const learningFrameworks = learning.frameworks || [];
@@ -158,7 +152,6 @@ export class MemoryInjector {
       }
     }
 
-    // Match by explicitly requested tags
     if (options.tags && options.tags.length > 0) {
       const requestedTags = new Set(options.tags.map((t) => t.toLowerCase()));
       for (const tag of learning.tags) {
@@ -169,7 +162,6 @@ export class MemoryInjector {
       }
     }
 
-    // Match by current task keywords
     if (options.currentTask) {
       const taskKeywords = this.extractKeywords(options.currentTask);
       const learningKeywords = [
@@ -189,22 +181,17 @@ export class MemoryInjector {
       }
     }
 
-    // Match by patterns
     if (learning.patterns && learning.patterns.length > 0) {
-      // Patterns are valuable - boost score
       score += learning.patterns.length * 5;
       matchedBy.patterns.push(...learning.patterns);
     }
 
-    // Boost by effectiveness if known
     if (learning.effectiveness !== undefined) {
       score += (learning.effectiveness / 100) * 20;
     }
 
-    // Boost by use count (popular learnings are likely valuable)
     score += Math.min(learning.useCount * 2, 15);
 
-    // Boost recent learnings
     const daysSinceUpdate = this.daysSince(learning.updatedAt);
     if (daysSinceUpdate < 7) {
       score += 10;
@@ -212,10 +199,8 @@ export class MemoryInjector {
       score += 5;
     }
 
-    // Cap score at 100
     score = Math.min(score, 100);
 
-    // Estimate token count
     const tokenEstimate = this.estimateTokens(learning, options.disclosureLevel || 'preview');
 
     return {
@@ -304,7 +289,6 @@ export class MemoryInjector {
     const opts = { ...DEFAULT_OPTIONS, ...options };
     const allMemories = await this.getRelevantMemories(opts);
 
-    // Select memories within token budget
     const selected: InjectedMemory[] = [];
     let totalTokens = 0;
     let truncated = 0;
@@ -314,7 +298,6 @@ export class MemoryInjector {
         selected.push(memory);
         totalTokens += memory.tokenEstimate;
 
-        // Increment use count
         if (memory.learning.scope === 'project') {
           this.projectStore.incrementUseCount(memory.learning.id);
         } else {
@@ -325,7 +308,6 @@ export class MemoryInjector {
       }
     }
 
-    // Format the content
     const formattedContent = this.formatMemories(selected, opts.disclosureLevel || 'preview');
 
     return {
@@ -350,7 +332,6 @@ export class MemoryInjector {
   ): Promise<InjectionResult> {
     const result = await this.inject(options);
 
-    // Reformat for specific agent
     result.formattedContent = this.formatForAgent(result.memories, agent, options.disclosureLevel);
 
     return result;
@@ -381,7 +362,6 @@ export class MemoryInjector {
 
       switch (level) {
         case 'summary':
-          // Just title and tags (already shown above)
           break;
         case 'preview':
           lines.push(learning.content.slice(0, 200) + (learning.content.length > 200 ? '...' : ''));

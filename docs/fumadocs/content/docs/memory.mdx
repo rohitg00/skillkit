@@ -5,24 +5,50 @@ description: Persistent learning across AI agent sessions
 
 # Memory System
 
-Capture learnings from AI sessions and convert them into reusable skills.
+Capture learnings from AI sessions and convert them into reusable skills. SkillKit's memory system provides automatic observation capture, intelligent compression, and token-optimized retrieval.
 
 ## Commands
 
 ```bash
 skillkit memory status        # View status
 skillkit memory search <q>    # Search learnings
-skillkit memory compress      # Compress observations
+skillkit memory compress      # Compress observations to learnings
 skillkit memory export <name> # Export as skill
-skillkit memory --global      # Global memory
+skillkit memory sync-claude   # Update CLAUDE.md with learnings
+skillkit memory index         # View memory index (Layer 1)
+skillkit memory --global      # Global memory operations
 ```
 
 ## How It Works
 
-1. **Observations** - Track patterns during sessions
-2. **Compression** - Distill into reusable knowledge
-3. **Injection** - Load into new sessions
+### Observation → Learning Pipeline
+
+1. **Observations** - Track patterns during sessions (tool use, errors, solutions)
+2. **Compression** - Distill observations into reusable learnings
+3. **Injection** - Load relevant learnings into new sessions
 4. **Export** - Convert to shareable skills
+
+### Lifecycle Hooks
+
+SkillKit integrates with Claude Code's lifecycle hooks for automatic memory capture:
+
+| Hook | Trigger | Action |
+|------|---------|--------|
+| **SessionStart** | Session begins | Inject relevant learnings |
+| **PostToolUse** | Tool completes | Capture outcomes as observations |
+| **SessionEnd** | Session closes | Compress observations to learnings |
+
+### Progressive Disclosure (Token Optimization)
+
+Memory retrieval uses a 3-layer system to minimize token usage:
+
+| Layer | Content | ~Tokens |
+|-------|---------|---------|
+| **Index** | Titles, tags, timestamps | 50-100 |
+| **Timeline** | Context, excerpts, activity | ~200 |
+| **Details** | Full content, metadata | 500-1000 |
+
+The system starts with Layer 1 and progressively fetches deeper layers based on relevance and token budget.
 
 ## Storage
 
@@ -31,17 +57,123 @@ skillkit memory --global      # Global memory
 ├── observations/   # Raw session data
 ├── learnings/      # Compressed knowledge
 └── index.json      # Memory index
+
+<project>/.skillkit/memory/
+├── observations/   # Project-specific observations
+├── learnings/      # Project learnings
+└── index.json      # Project memory index
 ```
 
+## Auto-CLAUDE.md Updates
+
+Sync your most effective learnings to CLAUDE.md:
+
+```bash
+skillkit memory sync-claude
+```
+
+This populates the `## LEARNED` section with high-effectiveness insights, giving your agent persistent context across sessions.
+
 ## Programmatic API
+
+### Memory Compression
 
 ```typescript
 import { MemoryCompressor, LearningStore } from '@skillkit/core'
 
-const compressor = new MemoryCompressor()
-const learning = await compressor.compress(observations)
+const compressor = new MemoryCompressor(projectPath)
+const { learnings } = await compressor.compress(observations)
 
-const store = new LearningStore()
+const store = new LearningStore('project', projectPath)
 await store.add(learning)
 const results = await store.search('authentication')
+```
+
+### Lifecycle Hooks
+
+```typescript
+import { MemoryHookManager } from '@skillkit/core'
+
+const manager = new MemoryHookManager(projectPath)
+
+// Session start - inject relevant learnings
+const startResult = await manager.onSessionStart()
+
+// After tool use - capture outcomes
+await manager.onToolUse({
+  tool_name: 'Write',
+  tool_input: { file_path: '/src/auth.ts' },
+  tool_result: 'File written successfully',
+  duration_ms: 150
+})
+
+// Session end - compress to learnings
+const endResult = await manager.onSessionEnd()
+```
+
+### Progressive Disclosure
+
+```typescript
+import { ProgressiveDisclosureManager } from '@skillkit/core'
+
+const pdm = new ProgressiveDisclosureManager(projectPath)
+
+// Layer 1: Index (~50 tokens each)
+const index = pdm.getIndex({ includeGlobal: true })
+
+// Layer 2: Timeline (~200 tokens each)
+const timeline = pdm.getTimeline(['id1', 'id2'])
+
+// Layer 3: Full details (~600 tokens each)
+const details = pdm.getDetails(['id1'])
+
+// Smart retrieval with token budget
+const result = pdm.smartRetrieve('authentication patterns', 2000)
+// Returns optimal layer based on budget
+```
+
+### CLAUDE.md Updater
+
+```typescript
+import { ClaudeMdUpdater } from '@skillkit/core'
+
+const updater = new ClaudeMdUpdater(projectPath)
+
+// Preview what would be updated
+const preview = updater.preview({ minEffectiveness: 70 })
+
+// Update CLAUDE.md
+const result = updater.update({
+  minEffectiveness: 60,
+  maxLearnings: 20,
+  preserveManualEntries: true
+})
+```
+
+## Configuration
+
+Configure memory behavior in `.skillkit/config.json`:
+
+```json
+{
+  "memory": {
+    "enabled": true,
+    "autoInjectOnSessionStart": true,
+    "autoCaptureToolUse": true,
+    "autoCompressOnSessionEnd": true,
+    "minRelevanceForCapture": 30,
+    "maxTokensForInjection": 2000,
+    "compressionThreshold": 50
+  }
+}
+```
+
+## Claude Code Integration
+
+Generate hooks configuration for Claude Code:
+
+```typescript
+const manager = new MemoryHookManager(projectPath)
+const config = manager.generateClaudeCodeHooksConfig()
+// Outputs hooks.json format for Claude Code integration
 ```

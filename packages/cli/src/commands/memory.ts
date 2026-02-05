@@ -8,6 +8,9 @@ import {
   getMemoryStatus,
   createMemoryCompressor,
   createMemoryInjector,
+  createClaudeMdUpdater,
+  syncGlobalClaudeMd,
+  createProgressiveDisclosureManager,
   type Learning,
 } from '@skillkit/core';
 
@@ -24,17 +27,19 @@ export class MemoryCommand extends Command {
       captured from coding sessions across all AI agents.
 
       Subcommands:
-      - status:   Show current memory status
-      - search:   Search memories by query
-      - list:     List all learnings
-      - show:     Show a specific learning
-      - compress: Compress observations into learnings
-      - export:   Export a learning as a skill
-      - import:   Import memories from another project
-      - clear:    Clear session observations
-      - add:      Manually add a learning
-      - rate:     Rate a learning's effectiveness
-      - config:   Configure memory settings
+      - status:      Show current memory status
+      - search:      Search memories by query
+      - list:        List all learnings
+      - show:        Show a specific learning
+      - compress:    Compress observations into learnings
+      - export:      Export a learning as a skill
+      - import:      Import memories from another project
+      - clear:       Clear session observations
+      - add:         Manually add a learning
+      - rate:        Rate a learning's effectiveness
+      - sync-claude: Sync learnings to CLAUDE.md
+      - index:       Show memory index (progressive disclosure)
+      - config:      Configure memory settings
     `,
     examples: [
       ['Show memory status', '$0 memory status'],
@@ -48,6 +53,8 @@ export class MemoryCommand extends Command {
       ['Clear session', '$0 memory clear'],
       ['Add manual learning', '$0 memory add --title "..." --content "..."'],
       ['Rate effectiveness', '$0 memory rate <id> 85'],
+      ['Sync to CLAUDE.md', '$0 memory sync-claude'],
+      ['Show memory index', '$0 memory index'],
     ],
   });
 
@@ -146,9 +153,13 @@ export class MemoryCommand extends Command {
         return this.rateLearning();
       case 'config':
         return this.showConfig();
+      case 'sync-claude':
+        return this.syncClaudeMd();
+      case 'index':
+        return this.showIndex();
       default:
         console.error(chalk.red(`Unknown action: ${action}`));
-        console.log(chalk.gray('Available actions: status, search, list, show, compress, export, import, clear, add, rate, config'));
+        console.log(chalk.gray('Available actions: status, search, list, show, compress, export, import, clear, add, rate, sync-claude, index, config'));
         return 1;
     }
   }
@@ -757,6 +768,140 @@ export class MemoryCommand extends Command {
     console.log(`  Global learnings: ${chalk.gray(paths.globalLearningsFile)}`);
     console.log(`  Global index: ${chalk.gray(paths.globalIndexFile)}`);
     console.log();
+
+    return 0;
+  }
+
+  /**
+   * Sync learnings to CLAUDE.md
+   */
+  private async syncClaudeMd(): Promise<number> {
+    const projectPath = process.cwd();
+
+    if (this.global) {
+      if (this.dryRun) {
+        console.log(chalk.gray('(Dry run - previewing global CLAUDE.md sync)\n'));
+      }
+
+      const result = this.dryRun
+        ? { updated: false, path: '~/.claude/CLAUDE.md', learningsAdded: 0, learningSummaries: [], previousLearnings: 0 }
+        : syncGlobalClaudeMd({ minEffectiveness: 60 });
+
+      if (this.dryRun) {
+        const globalStore = new LearningStore('global');
+        const learnings = globalStore.getAll()
+          .filter((l) => (l.effectiveness ?? 0) >= 60 || l.useCount >= 3)
+          .slice(0, 20);
+        console.log(chalk.cyan(`Would add ${learnings.length} learnings to global CLAUDE.md`));
+        for (const l of learnings.slice(0, 5)) {
+          console.log(`  ${chalk.gray('●')} ${l.title}`);
+        }
+        if (learnings.length > 5) {
+          console.log(chalk.gray(`  ... and ${learnings.length - 5} more`));
+        }
+        return 0;
+      }
+
+      if (result.updated) {
+        console.log(chalk.green(`✓ Updated global CLAUDE.md with ${result.learningsAdded} learnings`));
+        console.log(chalk.gray(`  Path: ${result.path}`));
+      } else {
+        console.log(chalk.yellow('No learnings to sync to global CLAUDE.md'));
+      }
+
+      return 0;
+    }
+
+    const updater = createClaudeMdUpdater(projectPath);
+
+    if (this.dryRun) {
+      const preview = updater.preview({ minEffectiveness: 60 });
+
+      console.log(chalk.gray('(Dry run preview)\n'));
+
+      if (!preview.wouldUpdate) {
+        console.log(chalk.yellow('No learnings to sync to CLAUDE.md'));
+        return 0;
+      }
+
+      console.log(chalk.cyan(`Would add ${preview.learnings.length} learnings to CLAUDE.md\n`));
+
+      for (const learning of preview.learnings.slice(0, 5)) {
+        console.log(`  ${chalk.gray('●')} ${learning.title}`);
+      }
+
+      if (preview.learnings.length > 5) {
+        console.log(chalk.gray(`  ... and ${preview.learnings.length - 5} more`));
+      }
+
+      console.log(chalk.bold('\nFormatted section preview:'));
+      console.log(chalk.gray('─'.repeat(50)));
+      console.log(preview.formattedSection.slice(0, 500));
+      if (preview.formattedSection.length > 500) {
+        console.log(chalk.gray('...'));
+      }
+
+      return 0;
+    }
+
+    const result = updater.update({ minEffectiveness: 60 });
+
+    if (result.updated) {
+      console.log(chalk.green(`✓ Updated CLAUDE.md with ${result.learningsAdded} learnings`));
+      console.log(chalk.gray(`  Path: ${result.path}`));
+
+      if (this.verbose && result.learningSummaries.length > 0) {
+        console.log(chalk.cyan('\nLearnings added:'));
+        for (const title of result.learningSummaries.slice(0, 10)) {
+          console.log(`  ${chalk.gray('●')} ${title}`);
+        }
+      }
+    } else {
+      console.log(chalk.yellow('No learnings to sync to CLAUDE.md'));
+    }
+
+    return 0;
+  }
+
+  /**
+   * Show memory index (progressive disclosure Layer 1)
+   */
+  private async showIndex(): Promise<number> {
+    const projectPath = process.cwd();
+    const manager = createProgressiveDisclosureManager(projectPath);
+
+    const index = manager.getIndex({ includeGlobal: this.global });
+
+    if (this.json) {
+      console.log(JSON.stringify(index, null, 2));
+      return 0;
+    }
+
+    console.log(chalk.bold(`\nMemory Index (${index.length} entries)\n`));
+
+    if (index.length === 0) {
+      console.log(chalk.gray('No learnings found.'));
+      return 0;
+    }
+
+    const limit = this.limit ? parseInt(this.limit, 10) : 20;
+    const displayed = index.slice(0, limit);
+
+    for (const entry of displayed) {
+      const effectiveness = entry.effectiveness !== undefined
+        ? ` [${this.formatScore(entry.effectiveness)}%]`
+        : '';
+      const scope = entry.scope === 'global' ? chalk.magenta('[G]') : chalk.blue('[P]');
+
+      console.log(`${scope} ${chalk.gray(entry.id.slice(0, 8))} ${entry.title}${chalk.green(effectiveness)}`);
+      console.log(`   Tags: ${entry.tags.join(', ')} | Uses: ${entry.useCount}`);
+    }
+
+    if (index.length > limit) {
+      console.log(chalk.gray(`\n... and ${index.length - limit} more (use --limit to show more)`));
+    }
+
+    console.log(chalk.gray('\nUse "skillkit memory show <id>" to view full details'));
 
     return 0;
   }

@@ -39,30 +39,23 @@ export class MemoryEnabledEngine {
   private userProgressCallback?: ExecutionProgressCallback;
 
   constructor(projectPath: string, options: MemoryEnabledEngineOptions = {}) {
-    // Create memory observer
     this.observer = new MemoryObserver(projectPath, options.sessionId, options.memoryConfig);
 
-    // Set default agent if provided
     if (options.defaultAgent) {
       this.observer.setAgent(options.defaultAgent);
     }
 
-    // Store user's progress callback
     this.userProgressCallback = options.onProgress;
 
-    // Create the combined progress callback
     const combinedProgressCallback: ExecutionProgressCallback = (event: ExecutionProgressEvent) => {
-      // Forward to memory observer
       const observerCallback = this.observer.createProgressCallback();
       observerCallback(event);
 
-      // Forward to user's callback if provided
       if (this.userProgressCallback) {
         this.userProgressCallback(event);
       }
     };
 
-    // Create the underlying engine with the combined callback
     this.engine = createExecutionEngine(projectPath, {
       checkpointHandler: options.checkpointHandler,
       onProgress: combinedProgressCallback,
@@ -76,22 +69,17 @@ export class MemoryEnabledEngine {
     skill: ExecutableSkill,
     options: ExecutionOptions = {}
   ): ReturnType<SkillExecutionEngine['execute']> {
-    // Set skill name in observer
     this.observer.setSkillName(skill.name);
 
-    // Set agent if provided in options
     if (options.agent) {
       this.observer.setAgent(options.agent);
     }
 
-    // Record execution start
     this.observer.recordExecutionStart(skill.name, options.agent || 'claude-code');
 
     try {
-      // Execute the skill
       const result = await this.engine.execute(skill, options);
 
-      // Record file modifications from result
       if (result.filesModified.length > 0) {
         this.observer.recordFileModification(
           result.filesModified,
@@ -99,14 +87,12 @@ export class MemoryEnabledEngine {
         );
       }
 
-      // Record any errors
       if (result.error) {
         this.observer.recordError(result.error, `Skill "${skill.name}" failed`);
       }
 
       return result;
     } catch (error) {
-      // Record unexpected errors
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.observer.recordError(errorMessage, `Unexpected error during skill "${skill.name}" execution`);
       throw error;
