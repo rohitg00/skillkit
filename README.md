@@ -125,6 +125,21 @@ skillkit memory search "auth patterns"
 skillkit memory export auth-patterns
 ```
 
+### AI skill generation
+
+Generate skills from natural language with multi-source context:
+
+```bash
+skillkit generate
+# Interactive wizard with 4 context sources:
+# - Documentation (via Context7)
+# - Your codebase patterns
+# - 15,000+ marketplace skills
+# - Memory (your corrections)
+```
+
+Works with any LLM: Claude, GPT-4, Gemini, Ollama (local), or OpenRouter (100+ models). Generates agent-optimized variants with trust scores.
+
 ### Mesh network
 
 Distribute agents across machines with encrypted P2P:
@@ -182,6 +197,7 @@ skillkit remove <skills>         # Remove skills
 skillkit translate <skill> --to  # Translate between agents
 skillkit sync                    # Deploy to agent config
 skillkit recommend               # Smart recommendations
+skillkit generate                # AI skill generation wizard
 skillkit serve                   # Start REST API server
 ```
 

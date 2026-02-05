@@ -1,6 +1,6 @@
 {
   "name": "@skillkit/tui",
-  "version": "1.13.0",
+  "version": "1.14.0",
   "description": "Unified Terminal UI for SkillKit - Built on OpenTUI",
   "type": "module",
   "main": "./dist/index.js",

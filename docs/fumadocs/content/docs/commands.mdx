@@ -127,6 +127,72 @@ AI-powered recommendations based on project analysis.
 | `--category` | Filter by category |
 | `--min-score` | Quality threshold |
 
+## Generate Command
+
+AI-powered skill generation with multi-source context and agent optimization.
+
+```bash
+skillkit generate [options]
+```
+
+### Generate Options
+
+| Option | Type | Purpose |
+|--------|------|---------|
+| `--provider` | string | LLM provider: anthropic, openai, google, ollama, openrouter |
+| `--model` | string | Specific model (e.g., gpt-4o, gemini-2.0-flash) |
+| `--compose` | string | Natural language search to find skills to compose |
+| `--agents` | array | Target agents for optimization |
+| `--no-memory` | boolean | Skip memory context |
+| `--context-sources` | string | Comma-separated: docs,codebase,skills,memory |
+
+### Context Sources
+
+The wizard gathers context from 4 sources:
+
+| Source | Description |
+|--------|-------------|
+| **Documentation** | Library docs via Context7 MCP |
+| **Codebase** | Local project patterns and conventions |
+| **Skills** | 15,000+ marketplace skills for composition |
+| **Memory** | Your corrections and learned patterns |
+
+### Examples
+
+```bash
+# Interactive wizard (recommended)
+skillkit generate
+
+# Use specific provider
+skillkit generate --provider openai --model gpt-4o
+
+# Compose from existing skills
+skillkit generate --compose "testing patterns for react"
+
+# Generate for specific agents
+skillkit generate --agents claude-code,cursor
+
+# Skip memory personalization
+skillkit generate --no-memory
+```
+
+### Trust Score
+
+Generated skills receive a trust score (0-10):
+
+| Grade | Score | Meaning |
+|-------|-------|---------|
+| Trusted | 8-10 | High clarity, well-bounded |
+| Review | 5-7 | May need refinement |
+| Caution | 0-4 | Requires careful review |
+
+### Agent Compatibility
+
+The wizard shows compatibility scores for each target agent based on:
+- Context length limits
+- MCP/tool support
+- Format requirements
+
 ## Marketplace Command
 
 ```bash

@@ -1,6 +1,6 @@
 {
   "name": "@skillkit/mesh",
-  "version": "1.13.0",
+  "version": "1.14.0",
   "description": "Peer mesh network for multi-machine agent distribution",
   "type": "module",
   "main": "./dist/index.js",

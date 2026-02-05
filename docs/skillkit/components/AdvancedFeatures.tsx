@@ -12,6 +12,24 @@ interface AdvancedFeature {
 
 const ADVANCED_FEATURES: AdvancedFeature[] = [
   {
+    id: 'generate',
+    title: 'AI Generate',
+    subtitle: 'Create Skills from Natural Language',
+    description: 'Generate skills from plain English with multi-source context. Pulls from documentation (Context7), your codebase patterns, 15,000+ marketplace skills, and your corrections. Works with any LLM: Claude, GPT-4, Gemini, Ollama, or OpenRouter.',
+    highlight: 'Multi-provider AI with 4 context sources',
+    icon: (
+      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+    ),
+    commands: [
+      { cmd: 'generate', desc: 'Interactive skill wizard' },
+      { cmd: 'generate --provider openai', desc: 'Use specific LLM' },
+      { cmd: 'generate --compose "testing"', desc: 'Compose from skills' },
+      { cmd: 'generate --agents claude,cursor', desc: 'Multi-agent output' },
+    ],
+  },
+  {
     id: 'memory',
     title: 'Session Memory',
     subtitle: 'AI That Actually Learns',
@@ -86,7 +104,7 @@ const ADVANCED_FEATURES: AdvancedFeature[] = [
 ];
 
 export function AdvancedFeatures(): React.ReactElement {
-  const [activeFeature, setActiveFeature] = useState<string>('memory');
+  const [activeFeature, setActiveFeature] = useState<string>('generate');
   const feature = ADVANCED_FEATURES.find(f => f.id === activeFeature) || ADVANCED_FEATURES[0];
 
   return (
