@@ -1,6 +1,6 @@
 {
   "name": "@skillkit/cli",
-  "version": "1.12.0",
+  "version": "1.13.0",
   "description": "CLI commands for SkillKit",
   "type": "module",
   "main": "./dist/index.js",

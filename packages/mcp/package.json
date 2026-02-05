@@ -1,6 +1,6 @@
 {
   "name": "@skillkit/mcp",
-  "version": "1.12.0",
+  "version": "1.13.0",
   "description": "MCP server for SkillKit skill discovery — agent-native skill search",
   "type": "module",
   "main": "./dist/index.js",
