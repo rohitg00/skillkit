@@ -31,13 +31,20 @@ export class TrustScorer {
 
   constructor(options: TrustScoreOptions = {}) {
     const merged = { ...DEFAULT_WEIGHTS, ...options.weights };
-    const sum = merged.clarity + merged.boundaries + merged.specificity + merged.safety;
+    const sanitize = (v: number) => (Number.isFinite(v) && v >= 0 ? v : 0);
+    const sanitized = {
+      clarity: sanitize(merged.clarity),
+      boundaries: sanitize(merged.boundaries),
+      specificity: sanitize(merged.specificity),
+      safety: sanitize(merged.safety),
+    };
+    const sum = sanitized.clarity + sanitized.boundaries + sanitized.specificity + sanitized.safety;
     this.weights = sum > 0
       ? {
-          clarity: merged.clarity / sum,
-          boundaries: merged.boundaries / sum,
-          specificity: merged.specificity / sum,
-          safety: merged.safety / sum,
+          clarity: sanitized.clarity / sum,
+          boundaries: sanitized.boundaries / sum,
+          specificity: sanitized.specificity / sum,
+          safety: sanitized.safety / sum,
         }
       : DEFAULT_WEIGHTS;
     this.strictMode = options.strictMode ?? false;
@@ -99,7 +106,9 @@ export class TrustScorer {
     if (hasExamples) score += 1;
 
     const sentences = content.split(/[.!?]+/).filter((s) => s.trim().length > 0);
-    const avgSentenceLength = sentences.reduce((sum, s) => sum + s.split(/\s+/).length, 0) / sentences.length;
+    const avgSentenceLength = sentences.length > 0
+      ? sentences.reduce((sum, s) => sum + s.split(/\s+/).length, 0) / sentences.length
+      : 0;
     if (avgSentenceLength < 25) score += 0.5;
 
     const hasAmbiguousTerms = /\b(maybe|perhaps|sometimes|might|could be|possibly)\b/gi.test(content);

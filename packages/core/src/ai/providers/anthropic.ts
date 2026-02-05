@@ -227,9 +227,11 @@ Format your response as JSON:
     skills: SearchableSkill[]
   ): AISearchResult[] {
     try {
-      const parsed = JSON.parse(response);
+      const jsonMatch = response.match(/\[[\s\S]*\]/);
+      if (!jsonMatch) return [];
+      const parsed = JSON.parse(jsonMatch[0]);
       return parsed
-        .filter((item: { index: number }) => item.index >= 1 && item.index <= skills.length)
+        .filter((item: { index: number }) => Number.isInteger(item.index) && item.index >= 1 && item.index <= skills.length)
         .map((item: { index: number; relevance: number; reasoning: string }) => ({
           skill: skills[item.index - 1],
           relevance: item.relevance,

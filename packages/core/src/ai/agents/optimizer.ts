@@ -187,7 +187,8 @@ export class AgentOptimizer {
   }
 
   private truncateContent(content: string, maxTokens: number): string {
-    const targetChars = Math.floor(maxTokens * 4 * 0.95);
+    const truncationMarker = '\n...[truncated]';
+    const targetChars = Math.floor(maxTokens * 4 * 0.95) - truncationMarker.length;
 
     if (content.length <= targetChars) {
       return content;
@@ -203,7 +204,7 @@ export class AgentOptimizer {
       if (currentLength + section.content.length > targetChars) {
         const remaining = targetChars - currentLength;
         if (remaining > 200) {
-          result += section.content.slice(0, remaining) + '\n...[truncated]';
+          result += section.content.slice(0, remaining) + truncationMarker;
         }
         break;
       }
@@ -227,6 +228,17 @@ export class AgentOptimizer {
         title: match[2],
         index: match.index,
       });
+    }
+
+    if (matches.length > 0 && matches[0].index > 0) {
+      const preHeadingContent = content.slice(0, matches[0].index).trim();
+      if (preHeadingContent) {
+        sections.push({
+          title: 'Preamble',
+          content: preHeadingContent,
+          priority: this.getSectionPriority('Preamble', preHeadingContent),
+        });
+      }
     }
 
     for (let i = 0; i < matches.length; i++) {

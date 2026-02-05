@@ -139,7 +139,7 @@ ${skillContent}`;
       if (match) {
         const parsed = JSON.parse(match[0]) as Array<{ index: number; relevance: number; reasoning: string }>;
         return parsed
-          .filter((item) => item.index >= 1 && item.index <= skills.length)
+          .filter((item) => Number.isInteger(item.index) && item.index >= 1 && item.index <= skills.length)
           .map((item) => ({
             skill: skills[item.index - 1],
             relevance: item.relevance,
@@ -163,17 +163,20 @@ ${skillContent}`;
       const match = response.match(/\{[\s\S]*\}/);
       if (match) {
         const parsed = JSON.parse(match[0]);
+        if (typeof parsed.name !== 'string' || typeof parsed.description !== 'string' || typeof parsed.content !== 'string') {
+          throw new Error('Missing required fields: name, description, content');
+        }
         return {
           name: parsed.name,
           description: parsed.description,
           content: parsed.content,
-          tags: parsed.tags || [],
-          confidence: parsed.confidence || 0.7,
-          reasoning: parsed.reasoning || '',
+          tags: Array.isArray(parsed.tags) ? parsed.tags : [],
+          confidence: typeof parsed.confidence === 'number' ? parsed.confidence : 0.7,
+          reasoning: typeof parsed.reasoning === 'string' ? parsed.reasoning : '',
         };
       }
-    } catch {
-      // Parse error
+    } catch (e) {
+      if (e instanceof Error && e.message.includes('required fields')) throw e;
     }
     throw new Error('Failed to parse skill generation response');
   }

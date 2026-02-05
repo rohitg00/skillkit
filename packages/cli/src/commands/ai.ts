@@ -406,6 +406,13 @@ export class AICommand extends Command {
       console.log();
     }
 
+    if (defaultProvider === 'mock') {
+      console.log(`  Mock Provider${chalk.yellow(' (default)')}`);
+      console.log(`    ${chalk.green('✓ Always available')}`);
+      console.log(`    ${chalk.dim('Basic functionality without API keys')}`);
+      console.log();
+    }
+
     console.log(chalk.dim('Use "skillkit generate --provider <name>" to use a specific provider\n'));
 
     return 0;
