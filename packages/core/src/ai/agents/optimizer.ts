@@ -148,6 +148,12 @@ export class AgentOptimizer {
       try {
         optimized = await this.provider.optimizeForAgent(optimized, agentId);
         changes.push('AI-enhanced optimization applied');
+
+        const postAiTokens = Math.ceil(optimized.length / 4);
+        if (postAiTokens > constraints.maxContextLength * 0.9) {
+          optimized = this.truncateContent(optimized, constraints.maxContextLength);
+          changes.push('Truncated after AI optimization');
+        }
       } catch {
         // Use rule-based optimization if AI fails
       }

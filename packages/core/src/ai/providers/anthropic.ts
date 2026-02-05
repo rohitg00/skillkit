@@ -244,17 +244,33 @@ Format your response as JSON:
 
   private parseGenerateResponse(response: string): GeneratedSkill {
     try {
-      const parsed = JSON.parse(response);
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('No JSON object found in response');
+      }
+      const parsed = JSON.parse(jsonMatch[0]);
+
+      if (typeof parsed.name !== 'string' || !parsed.name) {
+        throw new Error('Missing required field: name');
+      }
+      if (typeof parsed.description !== 'string' || !parsed.description) {
+        throw new Error('Missing required field: description');
+      }
+      if (typeof parsed.content !== 'string' || !parsed.content) {
+        throw new Error('Missing required field: content');
+      }
+
       return {
         name: parsed.name,
         description: parsed.description,
         content: parsed.content,
-        tags: parsed.tags || [],
-        confidence: parsed.confidence || 0.7,
-        reasoning: parsed.reasoning || '',
+        tags: Array.isArray(parsed.tags) ? parsed.tags : [],
+        confidence: typeof parsed.confidence === 'number' ? Math.max(0, Math.min(1, parsed.confidence)) : 0.7,
+        reasoning: typeof parsed.reasoning === 'string' ? parsed.reasoning : '',
       };
-    } catch {
-      throw new Error('Failed to parse skill generation response');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Unknown error';
+      throw new Error(`Failed to parse skill generation response: ${msg}`);
     }
   }
 
