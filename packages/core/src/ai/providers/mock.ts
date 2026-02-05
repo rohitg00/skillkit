@@ -1,18 +1,88 @@
-import { BaseAIProvider } from './base.js';
 import type {
+  LLMProvider,
+  ProviderName,
+  GenerationContext,
+  GeneratedSkillResult,
+  WizardContext,
+  ClarificationQuestion,
+  SearchResult,
+  ChatMessage,
+} from './types.js';
+import type {
+  AIProvider,
   AISearchResult,
   GeneratedSkill,
   SearchableSkill,
   SkillExample,
 } from '../types.js';
 
-export class MockAIProvider extends BaseAIProvider {
-  name = 'mock';
+export class MockAIProvider implements LLMProvider, AIProvider {
+  readonly name: ProviderName = 'mock';
+  readonly displayName = 'Mock Provider';
 
-  async search(
-    query: string,
-    skills: SearchableSkill[]
-  ): Promise<AISearchResult[]> {
+  isConfigured(): boolean {
+    return true;
+  }
+
+  async chat(messages: ChatMessage[]): Promise<string> {
+    const lastMessage = messages[messages.length - 1];
+    return `Mock response to: ${lastMessage?.content.slice(0, 50)}...`;
+  }
+
+  async generateSkill(contextOrExample: GenerationContext | SkillExample): Promise<GeneratedSkillResult> {
+    if ('expertise' in contextOrExample) {
+      const context = contextOrExample;
+      const name = this.generateName(context.expertise);
+      const tags = this.generateTags(context.expertise);
+
+      return {
+        name,
+        description: context.expertise,
+        content: this.generateContent(name, context.expertise),
+        tags,
+        confidence: 0.75,
+        reasoning: 'Mock generated skill based on expertise description',
+        composedFrom: context.composedFrom,
+      };
+    } else {
+      const example = contextOrExample;
+      const name = this.generateName(example.description);
+      const tags = this.generateTags(example.description);
+
+      return {
+        name,
+        description: example.description,
+        content: this.generateContentFromExample(name, example),
+        tags,
+        confidence: 0.75,
+        reasoning: 'Mock generated skill based on description and examples',
+      };
+    }
+  }
+
+  async generateClarifications(context: WizardContext): Promise<ClarificationQuestion[]> {
+    return [
+      {
+        id: 'q1',
+        question: `What specific use cases should this skill cover for "${context.expertise}"?`,
+        type: 'text',
+        context: 'Helps narrow down the scope',
+      },
+      {
+        id: 'q2',
+        question: 'Which programming languages should be supported?',
+        type: 'multiselect',
+        options: ['TypeScript', 'JavaScript', 'Python', 'Go', 'Rust'],
+        context: 'Determines code examples and patterns',
+      },
+    ];
+  }
+
+  async optimizeForAgent(skillContent: string, agentId: string): Promise<string> {
+    return `# Optimized for ${agentId}\n\n${skillContent}`;
+  }
+
+  async search(query: string, skills: SearchableSkill[]): Promise<SearchResult[] & AISearchResult[]> {
     const lowerQuery = query.toLowerCase();
     const queryTerms = lowerQuery.split(/\s+/).filter((t) => t.length > 2);
 
@@ -27,7 +97,6 @@ export class MockAIProvider extends BaseAIProvider {
         );
         const contentMatch = skill.content.toLowerCase().includes(lowerQuery);
 
-        // Also check individual terms
         const nameTermMatch = queryTerms.some((term) =>
           skill.name.toLowerCase().includes(term)
         );
@@ -43,7 +112,6 @@ export class MockAIProvider extends BaseAIProvider {
         if (tagMatch) relevance += 0.2;
         if (contentMatch) relevance += 0.1;
 
-        // Partial term matches
         if (!nameMatch && nameTermMatch) relevance += 0.3;
         if (!descMatch && descTermMatch) relevance += 0.2;
         if (!tagMatch && tagTermMatch) relevance += 0.15;
@@ -66,14 +134,14 @@ export class MockAIProvider extends BaseAIProvider {
       .slice(0, 10);
   }
 
-  async generateSkill(example: SkillExample): Promise<GeneratedSkill> {
+  async generateFromExample(example: SkillExample): Promise<GeneratedSkill> {
     const name = this.generateName(example.description);
     const tags = this.generateTags(example.description);
 
     return {
       name,
       description: example.description,
-      content: this.generateContent(name, example),
+      content: this.generateContentFromExample(name, example),
       tags,
       confidence: 0.75,
       reasoning: 'Mock generated skill based on description and examples',
@@ -115,7 +183,27 @@ export class MockAIProvider extends BaseAIProvider {
     return commonTags.slice(0, 5);
   }
 
-  private generateContent(name: string, example: SkillExample): string {
+  private generateContent(name: string, expertise: string): string {
+    return `# ${name}
+
+${expertise}
+
+## Instructions
+
+1. Review the task requirements
+2. Implement the solution
+3. Test the implementation
+4. Document the changes
+
+## Best Practices
+
+- Follow coding standards
+- Write tests for new code
+- Document your changes
+`;
+  }
+
+  private generateContentFromExample(name: string, example: SkillExample): string {
     let content = `# ${name}\n\n${example.description}\n\n`;
 
     if (example.context) {
