@@ -43,7 +43,7 @@ export default function App(): React.ReactElement {
     <div className="min-h-screen text-zinc-100 font-sans selection:bg-white selection:text-black" style={{ backgroundColor: '#000000' }}>
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-zinc-800 backdrop-blur-md" style={{ backgroundColor: 'rgba(0,0,0,0.9)' }}>
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-14 items-center justify-between">
+          <div className="flex h-14 items-center justify-between gap-2">
             <a href="#" onClick={scrollToTop} className="flex items-center gap-2 cursor-pointer">
               <div className="w-4 h-4 bg-white"></div>
               <span className="text-base font-bold tracking-tight text-white font-mono">SKILLKIT</span>
@@ -116,10 +116,14 @@ export default function App(): React.ReactElement {
                 href="https://github.com/rohitg00/skillkit"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-zinc-400 hover:text-white transition-colors p-1"
-                aria-label="GitHub"
+                className="inline-flex items-center gap-1.5 border border-zinc-700 hover:border-zinc-500 px-2 py-1 transition-colors group"
+                aria-label="GitHub Stars"
               >
                 {GITHUB_ICON}
+                <svg className="w-3.5 h-3.5 text-zinc-500 group-hover:text-yellow-500 transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                <span className="text-xs font-mono text-zinc-400 group-hover:text-white transition-colors">{stats.stars}</span>
               </a>
             </div>
           </div>
@@ -127,7 +131,7 @@ export default function App(): React.ReactElement {
       </nav>
 
       <main className="pt-14">
-        <Hero version={stats.version} />
+        <Hero version={stats.version} stars={stats.stars} />
 
         <div className="border-b border-zinc-800/50 py-2.5" style={{ background: 'linear-gradient(to bottom, rgba(9,9,11,0.95), rgba(0,0,0,1))' }}>
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
