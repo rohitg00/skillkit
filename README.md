@@ -1,24 +1,42 @@
 <div align="center">
 
-```
-██ SKILLKIT
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/banner.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/img/banner.svg">
+  <img alt="SkillKit - One Skill. 32 Agents." src="docs/img/banner.svg" width="100%">
+</picture>
+
+<br/>
+
+[![npm version](https://img.shields.io/npm/v/skillkit.svg?style=flat-square)](https://www.npmjs.com/package/skillkit)
+[![npm downloads](https://img.shields.io/npm/dm/skillkit.svg?style=flat-square)](https://www.npmjs.com/package/skillkit)
+[![GitHub stars](https://img.shields.io/github/stars/rohitg00/skillkit?style=flat-square)](https://github.com/rohitg00/skillkit/stargazers)
+[![CI](https://github.com/rohitg00/skillkit/actions/workflows/ci.yml/badge.svg)](https://github.com/rohitg00/skillkit/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
+[![Website](https://img.shields.io/badge/agenstskills.com-black?style=flat-square&logo=vercel)](https://agenstskills.com)
+[![Docs](https://img.shields.io/badge/Docs-blue?style=flat-square&logo=readthedocs&logoColor=white)](https://agenstskills.com/docs)
+[![API](https://img.shields.io/badge/API-green?style=flat-square&logo=swagger&logoColor=white)](https://agenstskills.com/api)
+
+**Write a skill once, deploy it to all 32 agents. No rewrites.**
+
+[Website](https://agenstskills.com) &middot; [Docs](https://agenstskills.com/docs) &middot; [API](https://agenstskills.com/api) &middot; [npm](https://www.npmjs.com/package/skillkit)
+
 </div>
 
-**Universal Skills for AI Coding Agents**
+---
 
-[![npm version](https://img.shields.io/npm/v/skillkit.svg)](https://www.npmjs.com/package/skillkit)
-[![npm downloads](https://img.shields.io/npm/dm/skillkit.svg)](https://www.npmjs.com/package/skillkit)
-[![CI](https://github.com/rohitg00/skillkit/actions/workflows/ci.yml/badge.svg)](https://github.com/rohitg00/skillkit/actions/workflows/ci.yml)
-[![Website](https://img.shields.io/badge/Website-agenstskills.com-black)](https://agenstskills.com)
-[![Docs](https://img.shields.io/badge/Docs-agenstskills.com/docs-blue)](https://agenstskills.com/docs)
-[![API](https://img.shields.io/badge/API-agenstskills.com/api-green)](https://agenstskills.com/api)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![SKILL.md](https://img.shields.io/badge/SKILL.md-compatible-black?style=flat-square)](https://agenstskills.com)
+Skills make AI coding agents smarter. But every agent uses a different format:
 
-Skills make AI coding agents smarter. But every agent uses a different format — Claude Code wants `.claude/skills/`, Cursor uses `.mdc`, Copilot expects `.github/skills/`. You end up rewriting the same skill for each agent, or locking into one platform.
+| Agent | Format | Directory |
+|-------|--------|-----------|
+| Claude Code | `SKILL.md` | `.claude/skills/` |
+| Cursor | `.mdc` | `.cursor/skills/` |
+| Copilot | Markdown | `.github/skills/` |
+| Windsurf | Markdown | `.windsurf/skills/` |
 
-SkillKit fixes this. Write a skill once, deploy it to all 32 agents.
+You end up rewriting the same skill for each agent, or locking into one platform.
+
+**SkillKit fixes this.** Install from 15,000+ skills, auto-translate between formats, persist learnings with Memory. Works with Claude, Cursor, Windsurf, Copilot, and 28 more.
 
 ```bash
 npx skillkit@latest
@@ -26,9 +44,15 @@ npx skillkit@latest
 
 ## See It In Action
 
-<video src="https://raw.githubusercontent.com/rohitg00/skillkit/main/docs/video/skillkit.mp4" controls width="100%"></video>
+<div align="center">
 
-> If the video doesn't play above, [watch it here](https://raw.githubusercontent.com/rohitg00/skillkit/main/docs/video/skillkit.mp4)
+https://github.com/user-attachments/assets/skillkit-demo
+
+[![Watch the demo](docs/img/inital-command.png)](https://raw.githubusercontent.com/rohitg00/skillkit/main/docs/video/skillkit.mp4)
+
+*Click the image above to watch the full demo*
+
+</div>
 
 ## Quick Start
 
@@ -105,7 +129,7 @@ async with SkillKitClient() as client:
     results = await client.search("react performance", limit=5)
 ```
 
-[REST API docs](https://agenstskills.com/docs/rest-api) · [MCP Server docs](https://agenstskills.com/docs/mcp-server) · [Python Client docs](https://agenstskills.com/docs/python-client) · [Interactive API explorer](https://agenstskills.com/api)
+[REST API docs](https://agenstskills.com/docs/rest-api) &middot; [MCP Server docs](https://agenstskills.com/docs/mcp-server) &middot; [Python Client docs](https://agenstskills.com/docs/python-client) &middot; [Interactive API explorer](https://agenstskills.com/api)
 
 ### Auto-generate agent instructions
 
@@ -167,7 +191,7 @@ Team members run `skillkit manifest install` and they're in sync.
 skillkit ui
 ```
 
-`h` Home · `m` Marketplace · `r` Recommend · `t` Translate · `i` Installed · `s` Sync · `q` Quit
+`h` Home &middot; `m` Marketplace &middot; `r` Recommend &middot; `t` Translate &middot; `i` Installed &middot; `s` Sync &middot; `q` Quit
 
 ![SkillKit Interactive CLI](docs/img/inital-command.png)
 
@@ -292,7 +316,7 @@ SkillKit aggregates skills from trusted sources. All original creators are credi
 
 ### Community
 
-[trailofbits/skills](https://github.com/trailofbits/skills) · [obra/superpowers](https://github.com/obra/superpowers) · [wshobson/agents](https://github.com/wshobson/agents) · [ComposioHQ/awesome-claude-skills](https://github.com/ComposioHQ/awesome-claude-skills) · [travisvn/awesome-claude-skills](https://github.com/travisvn/awesome-claude-skills) · [langgenius/dify](https://github.com/langgenius/dify) · [better-auth/skills](https://github.com/better-auth/skills) · [onmax/nuxt-skills](https://github.com/onmax/nuxt-skills) · [elysiajs/skills](https://github.com/elysiajs/skills) · [kadajett/agent-nestjs-skills](https://github.com/kadajett/agent-nestjs-skills) · [cloudai-x/threejs-skills](https://github.com/cloudai-x/threejs-skills) · [dimillian/skills](https://github.com/dimillian/skills) · [waynesutton/convexskills](https://github.com/waynesutton/convexskills) · [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) · [giuseppe-trisciuoglio/developer-kit](https://github.com/giuseppe-trisciuoglio/developer-kit) · [openrouterteam/agent-skills](https://github.com/openrouterteam/agent-skills)
+[trailofbits/skills](https://github.com/trailofbits/skills) &middot; [obra/superpowers](https://github.com/obra/superpowers) &middot; [wshobson/agents](https://github.com/wshobson/agents) &middot; [ComposioHQ/awesome-claude-skills](https://github.com/ComposioHQ/awesome-claude-skills) &middot; [travisvn/awesome-claude-skills](https://github.com/travisvn/awesome-claude-skills) &middot; [langgenius/dify](https://github.com/langgenius/dify) &middot; [better-auth/skills](https://github.com/better-auth/skills) &middot; [onmax/nuxt-skills](https://github.com/onmax/nuxt-skills) &middot; [elysiajs/skills](https://github.com/elysiajs/skills) &middot; [kadajett/agent-nestjs-skills](https://github.com/kadajett/agent-nestjs-skills) &middot; [cloudai-x/threejs-skills](https://github.com/cloudai-x/threejs-skills) &middot; [dimillian/skills](https://github.com/dimillian/skills) &middot; [waynesutton/convexskills](https://github.com/waynesutton/convexskills) &middot; [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) &middot; [giuseppe-trisciuoglio/developer-kit](https://github.com/giuseppe-trisciuoglio/developer-kit) &middot; [openrouterteam/agent-skills](https://github.com/openrouterteam/agent-skills)
 
 **Want to add your skills?** [Submit your repository](https://github.com/rohitg00/skillkit/issues/new?template=add-source.md)
 
@@ -312,4 +336,4 @@ Apache License 2.0 — see [LICENSE](LICENSE).
 
 ## Links
 
-[Documentation](https://agenstskills.com/docs) · [Website](https://agenstskills.com) · [API Explorer](https://agenstskills.com/api) · [npm](https://www.npmjs.com/package/skillkit) · [GitHub](https://github.com/rohitg00/skillkit)
+[Documentation](https://agenstskills.com/docs) &middot; [Website](https://agenstskills.com) &middot; [API Explorer](https://agenstskills.com/api) &middot; [npm](https://www.npmjs.com/package/skillkit) &middot; [GitHub](https://github.com/rohitg00/skillkit)
