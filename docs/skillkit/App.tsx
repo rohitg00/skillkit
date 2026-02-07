@@ -171,6 +171,18 @@ export default function App(): React.ReactElement {
               </a>
               <span className="text-zinc-800 hidden sm:inline">·</span>
               <a
+                href="https://www.producthunt.com/products/skillkit-2?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-skillkit-2"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden sm:flex items-center gap-1.5 text-zinc-500 hover:text-white transition-colors group"
+              >
+                <svg className="w-3 h-3 text-[#da552f] group-hover:text-[#ff6154]" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M13.604 8.4h-3.405V12h3.405a1.8 1.8 0 0 0 0-3.6zM12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zm1.604 14.4h-3.405V18H7.801V6h5.804a4.2 4.2 0 0 1 0 8.4z"/>
+                </svg>
+                <span className="text-zinc-400 group-hover:text-white font-medium">Featured</span>
+              </a>
+              <span className="text-zinc-800 hidden sm:inline">·</span>
+              <a
                 href="https://github.com/rohitg00/skillkit/blob/main/LICENSE"
                 target="_blank"
                 rel="noopener noreferrer"
