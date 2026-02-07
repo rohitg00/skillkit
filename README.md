@@ -46,8 +46,6 @@ npx skillkit@latest
 
 <div align="center">
 
-https://github.com/user-attachments/assets/skillkit-demo
-
 [![Watch the demo](docs/img/inital-command.png)](https://raw.githubusercontent.com/rohitg00/skillkit/main/docs/video/skillkit.mp4)
 
 *Click the image above to watch the full demo*
