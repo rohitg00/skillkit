@@ -180,15 +180,15 @@ export default function App(): React.ReactElement {
                   <path d="M13.604 8.4h-3.405V12h3.405a1.8 1.8 0 0 0 0-3.6zM12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zm1.604 14.4h-3.405V18H7.801V6h5.804a4.2 4.2 0 0 1 0 8.4z"/>
                 </svg>
                 <span className="text-zinc-400 group-hover:text-white font-medium">Featured</span>
-              </a>
-              <span className="text-zinc-800 hidden sm:inline">·</span>
-              <a
-                href="https://github.com/rohitg00/skillkit/blob/main/LICENSE"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-zinc-500 hover:text-white transition-colors hidden sm:inline"
-              >
-                Apache 2.0
+                {stats.phUpvotes > 0 && (
+                  <>
+                    <span className="text-zinc-700 mx-0.5">·</span>
+                    <svg className="w-3 h-3 text-[#da552f]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+                    </svg>
+                    <span className="text-white font-medium">{stats.phUpvotes}</span>
+                  </>
+                )}
               </a>
             </div>
           </div>
