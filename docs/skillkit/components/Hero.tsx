@@ -143,7 +143,7 @@ export function Hero({ version, stars }: HeroProps): React.ReactElement {
               Works with Claude, Cursor, Windsurf, Copilot, and 28 more.
             </p>
 
-            <div className="flex flex-wrap items-center gap-3 mb-4">
+            <div className="flex flex-wrap items-center gap-2 mb-4">
               <button
                 onClick={copyInstall}
                 className="inline-flex items-center bg-black border border-zinc-700 px-3 py-2 hover:border-zinc-500 transition-colors"
