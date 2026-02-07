@@ -19,6 +19,8 @@
 
 **Write a skill once, deploy it to all 32 agents. No rewrites.**
 
+<a href="https://www.producthunt.com/products/skillkit-2?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-skillkit-2" target="_blank" rel="noopener noreferrer"><img alt="Skillkit - The package manager for AI agent skills | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1071813&theme=dark&t=1770471290456"></a>
+
 [Website](https://agenstskills.com) &middot; [Docs](https://agenstskills.com/docs) &middot; [API](https://agenstskills.com/api) &middot; [npm](https://www.npmjs.com/package/skillkit)
 
 </div>
