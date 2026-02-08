@@ -171,15 +171,16 @@ export default function App(): React.ReactElement {
               </a>
               <span className="text-zinc-800 hidden sm:inline">·</span>
               <a
-                href="https://www.producthunt.com/products/skillkit-2?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-skillkit-2"
+                href="https://www.producthunt.com/products/skillkit-2?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_campaign=badge-skillkit-2"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hidden sm:inline-flex items-center hover:opacity-80 transition-opacity"
               >
                 <img
-                  src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1071813&theme=dark"
-                  alt="SkillKit on Product Hunt"
-                  height="28"
+                  src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=1071813&theme=dark&period=daily"
+                  alt="Skillkit - The package manager for AI agent skills | Product Hunt"
+                  width="250"
+                  height="54"
                   style={{ height: '28px', width: 'auto' }}
                 />
               </a>
