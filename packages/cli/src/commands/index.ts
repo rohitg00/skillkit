@@ -118,3 +118,4 @@ export { SkillMdValidateCommand, SkillMdInitCommand, SkillMdCheckCommand } from 
 
 // API server
 export { ServeCommand } from './serve.js';
+export { ScanCommand } from './scan.js';

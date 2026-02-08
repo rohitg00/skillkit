@@ -2,7 +2,7 @@ import { existsSync, readFileSync, mkdirSync, writeFileSync, readdirSync, statSy
 import { join, basename, dirname, resolve } from 'node:path';
 import chalk from 'chalk';
 import { Command, Option } from 'clipanion';
-import { generateWellKnownIndex, type WellKnownSkill } from '@skillkit/core';
+import { generateWellKnownIndex, type WellKnownSkill, SkillScanner, formatSummary, Severity } from '@skillkit/core';
 
 function sanitizeSkillName(name: string): string | null {
   if (!name || typeof name !== 'string') return null;
@@ -70,6 +70,20 @@ export class PublishCommand extends Command {
     }
 
     console.log(chalk.white(`Found ${discoveredSkills.length} skill(s):\n`));
+
+    const scanner = new SkillScanner({ failOnSeverity: Severity.HIGH });
+    for (const skill of discoveredSkills) {
+      const scanResult = await scanner.scan(skill.path);
+      if (scanResult.verdict === 'fail') {
+        console.error(chalk.red(`\nSecurity scan FAILED for "${skill.name}"`));
+        console.error(formatSummary(scanResult));
+        console.error(chalk.dim('Fix security issues before publishing.'));
+        return 1;
+      }
+      if (scanResult.verdict === 'warn') {
+        console.log(chalk.yellow(`  Security warnings for "${skill.name}" (${scanResult.findings.length} findings)`));
+      }
+    }
 
     const wellKnownSkills: WellKnownSkill[] = [];
 

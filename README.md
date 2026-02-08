@@ -223,12 +223,13 @@ skillkit generate                # AI skill generation wizard
 skillkit serve                   # Start REST API server
 ```
 
-### Discovery
+### Discovery & Security
 
 ```bash
 skillkit marketplace             # Browse skills
 skillkit tree                    # Hierarchical taxonomy
 skillkit find <query>            # Quick search
+skillkit scan <path>             # Security scan for skills
 ```
 
 ### Advanced

@@ -83,6 +83,17 @@ const COMMAND_GROUPS: CommandGroup[] = [
     ],
   },
   {
+    name: 'Security',
+    commands: [
+      { cmd: 'scan <path>', desc: 'Security scan' },
+      { cmd: 'scan --format sarif', desc: 'SARIF output' },
+      { cmd: 'scan --fail-on high', desc: 'CI gate' },
+      { cmd: 'install --no-scan', desc: 'Skip scan' },
+      { cmd: 'audit log', desc: 'View audit logs' },
+      { cmd: 'validate', desc: 'Validate format' },
+    ],
+  },
+  {
     name: 'Advanced',
     commands: [
       { cmd: 'primer', desc: 'Generate CLAUDE.md' },

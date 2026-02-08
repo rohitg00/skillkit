@@ -120,3 +120,6 @@ export type { SkillReference, ParsedSkillContent } from './parser/index.js';
 
 // Runtime Skill Injection
 export * from './runtime/index.js';
+
+// Security Scanner
+export * from './scanner/index.js';

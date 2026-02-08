@@ -362,6 +362,40 @@ skillkit publish --dry-run     # Preview without writing
 skillkit publish submit        # Submit to SkillKit marketplace
 ```
 
+## Security Scanning
+
+```bash
+skillkit scan <path>                       # Scan skill for vulnerabilities
+skillkit scan <path> --format json         # Output as JSON
+skillkit scan <path> --format table        # Tabular output
+skillkit scan <path> --format sarif        # SARIF for GitHub Code Scanning
+skillkit scan <path> --fail-on high        # Exit 1 if HIGH+ findings
+skillkit scan <path> --skip-rules UC001    # Skip specific rules
+skillkit scan <path> --quiet               # Suppress non-essential output
+```
+
+**Threat Categories:**
+
+| Category | Description |
+|----------|-------------|
+| Prompt Injection | Override/bypass agent instructions |
+| Command Injection | eval(), exec(), shell commands |
+| Data Exfiltration | Webhook URLs, env var reads, credential access |
+| Tool Abuse | Tool shadowing, autonomy escalation |
+| Hardcoded Secrets | API keys, tokens, private keys |
+| Unicode Steganography | Zero-width chars, bidi overrides |
+
+**Install Integration:**
+
+Skills are automatically scanned during `skillkit install`. Use `--no-scan` to skip, or `--force` to install despite findings.
+
+**Output Formats:**
+
+- `summary` (default) - colored terminal output
+- `json` - machine-readable JSON
+- `table` - tabular format
+- `sarif` - SARIF v2.1 for GitHub Code Scanning / IDE integration
+
 ## Interactive TUI
 
 ```bash

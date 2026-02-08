@@ -159,6 +159,20 @@ skillkit command generate <agent>    # Generate agent-native commands
 skillkit command list <agent>        # List available commands
 ```
 
+### Security Scanning
+
+```bash
+skillkit scan <path>                  # Scan skill for vulnerabilities
+skillkit scan <path> --format json    # Output as JSON
+skillkit scan <path> --format sarif   # SARIF for GitHub Code Scanning
+skillkit scan <path> --fail-on high   # Exit code 1 if HIGH+ findings
+skillkit scan <path> --skip-rules UC001,UC002  # Skip specific rules
+```
+
+Detects: prompt injection, command injection, data exfiltration, tool abuse, hardcoded secrets, unicode steganography.
+
+Skills are automatically scanned during `install` (use `--no-scan` to skip) and `publish`.
+
 ### Utilities
 
 ```bash
@@ -184,6 +198,7 @@ skillkit install ./local/path            # Local directory
 --yes                     # Skip confirmation prompts
 --global                  # Install globally
 --force                   # Overwrite existing
+--no-scan                 # Skip security scan
 --agent=cursor,windsurf   # Install to specific agents
 ```
 

@@ -34,6 +34,15 @@ const COMMAND_GROUPS: CommandGroup[] = [
     ],
   },
   {
+    name: 'Security',
+    commands: [
+      { cmd: 'scan <path>', desc: 'Security vulnerability scanner' },
+      { cmd: 'scan --format sarif', desc: 'SARIF for GitHub Code Scanning' },
+      { cmd: 'scan --fail-on high', desc: 'CI security gate' },
+      { cmd: 'audit log', desc: 'View audit trail' },
+    ],
+  },
+  {
     name: 'Advanced',
     commands: [
       { cmd: 'ui', desc: 'Launch terminal UI' },

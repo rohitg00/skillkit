@@ -5,7 +5,7 @@ import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
 import { Command, Option } from 'clipanion';
-import { detectProvider, isLocalPath, getProvider, evaluateSkillDirectory } from '@skillkit/core';
+import { detectProvider, isLocalPath, getProvider, evaluateSkillDirectory, SkillScanner, formatSummary, Severity } from '@skillkit/core';
 import type { SkillMetadata, GitProvider, AgentType } from '@skillkit/core';
 import { isPathInside } from '@skillkit/core';
 import { getAdapter, detectAgent, getAllAdapters } from '@skillkit/agents';
@@ -92,6 +92,10 @@ export class InstallCommand extends Command {
 
   quiet = Option.Boolean('--quiet,-q', false, {
     description: 'Minimal output (no logo)',
+  });
+
+  scan = Option.Boolean('--scan', true, {
+    description: 'Run security scan before installing (default: true)',
   });
 
   async execute(): Promise<number> {
@@ -256,6 +260,29 @@ export class InstallCommand extends Command {
             score: quality.overall,
             warnings: quality.warnings.slice(0, 2),
           });
+        }
+      }
+
+      if (this.scan) {
+        const scanner = new SkillScanner({ failOnSeverity: Severity.HIGH });
+        for (const skill of skillsToInstall) {
+          const scanResult = await scanner.scan(skill.path);
+
+          if (scanResult.verdict === 'fail' && !this.force) {
+            error(`Security scan FAILED for "${skill.name}"`);
+            console.log(formatSummary(scanResult));
+            console.log(colors.muted('Use --force to install anyway, or --no-scan to skip scanning'));
+
+            const cleanupPath = result.tempRoot || result.path;
+            if (!isLocalPath(this.source) && cleanupPath && existsSync(cleanupPath)) {
+              rmSync(cleanupPath, { recursive: true, force: true });
+            }
+            return 1;
+          }
+
+          if (scanResult.verdict === 'warn' && !this.quiet) {
+            warn(`Security warnings for "${skill.name}" (${scanResult.stats.medium} medium, ${scanResult.stats.low} low)`);
+          }
         }
       }
 
