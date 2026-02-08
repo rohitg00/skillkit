@@ -27,6 +27,7 @@ export interface SecurityRule {
   patterns: RegExp[];
   excludePatterns?: RegExp[];
   fileTypes?: string[];
+  multiline?: boolean;
   description: string;
   remediation: string;
 }
@@ -64,7 +65,5 @@ export interface ScanResult {
 
 export interface ScanOptions {
   failOnSeverity?: Severity;
-  format?: 'summary' | 'json' | 'table' | 'sarif';
-  quiet?: boolean;
   skipRules?: string[];
 }

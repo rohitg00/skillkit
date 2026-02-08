@@ -58,14 +58,25 @@ export class ScanCommand extends Command {
       return 1;
     }
 
+    const validFormats = ['summary', 'json', 'table', 'sarif'];
+    if (!validFormats.includes(this.format)) {
+      this.context.stderr.write(`Invalid format: "${this.format}". Must be one of: ${validFormats.join(', ')}\n`);
+      return 1;
+    }
+
     const skipRules = this.skipRules?.split(',').map((s) => s.trim()) ?? [];
 
-    const failOnSeverity = this.failOn ? SEVERITY_MAP[this.failOn.toLowerCase()] : undefined;
+    let failOnSeverity: Severity | undefined;
+    if (this.failOn) {
+      failOnSeverity = SEVERITY_MAP[this.failOn.toLowerCase()];
+      if (!failOnSeverity) {
+        this.context.stderr.write(`Invalid --fail-on value: "${this.failOn}". Must be one of: ${Object.keys(SEVERITY_MAP).join(', ')}\n`);
+        return 1;
+      }
+    }
 
     const scanner = new SkillScanner({
       failOnSeverity,
-      format: this.format as 'summary' | 'json' | 'table' | 'sarif',
-      quiet: this.quiet,
       skipRules,
     });
 

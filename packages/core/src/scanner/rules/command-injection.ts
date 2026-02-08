@@ -61,7 +61,7 @@ export const commandInjectionRules: SecurityRule[] = [
     id: 'CI006',
     category: ThreatCategory.COMMAND_INJECTION,
     severity: Severity.HIGH,
-    patterns: [/\.\.\//g, /\.\.\\/g],
+    patterns: [/\.\.\//, /\.\.\\/],
     excludePatterns: [/import\s+.*from\s+['"]\.\.\//, /require\s*\(\s*['"]\.\.\//, /\/\/.*\.\.\//, /#.*\.\.\//],
     description: 'Path traversal: relative path escaping directory boundaries',
     remediation: 'Use path.resolve() and validate paths are within expected directories.',

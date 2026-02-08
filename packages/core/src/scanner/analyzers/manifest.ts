@@ -23,6 +23,7 @@ export class ManifestAnalyzer implements Analyzer {
   private findingCounter = 0;
 
   async analyze(_skillPath: string, files: string[]): Promise<Finding[]> {
+    this.findingCounter = 0;
     const findings: Finding[] = [];
 
     const skillMdFiles = files.filter((f) => f.toLowerCase().endsWith('skill.md'));
@@ -45,7 +46,7 @@ export class ManifestAnalyzer implements Analyzer {
   }
 
   private validateFrontmatter(content: string, filePath: string, findings: Finding[]): void {
-    const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
+    const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
     if (!fmMatch) {
       findings.push({
         id: `MF${++this.findingCounter}`,
@@ -110,7 +111,7 @@ export class ManifestAnalyzer implements Analyzer {
       });
     } else {
       const desc = descMatch[1].trim().replace(/^["']|["']$/g, '');
-      if (desc.length < 10) {
+      if (desc.length < 20) {
         findings.push({
           id: `MF${++this.findingCounter}`,
           ruleId: 'MF005',
@@ -125,23 +126,32 @@ export class ManifestAnalyzer implements Analyzer {
       }
     }
 
-    const toolsMatch = fm.match(/^allowed-tools:\s*\[([^\]]*)\]/m);
-    if (toolsMatch) {
-      const tools = toolsMatch[1].split(',').map((t) => t.trim().replace(/^["']|["']$/g, ''));
-      for (const tool of tools) {
-        if (DANGEROUS_TOOLS.has(tool)) {
-          findings.push({
-            id: `MF${++this.findingCounter}`,
-            ruleId: 'MF006',
-            category: ThreatCategory.TOOL_ABUSE,
-            severity: Severity.HIGH,
-            title: `Dangerous tool in allowed-tools: ${tool}`,
-            description: `The tool "${tool}" grants shell access. This is a significant security risk.`,
-            filePath,
-            analyzer: this.name,
-            remediation: 'Restrict allowed-tools to the minimum needed. Avoid shell/exec tools.',
-          });
-        }
+    const inlineToolsMatch = fm.match(/^allowed-tools:\s*\[([^\]]*)\]/m);
+    const multiLineToolsMatch = fm.match(/^allowed-tools:\s*\n((?:\s+-\s+.+\n?)+)/m);
+
+    let tools: string[] = [];
+    if (inlineToolsMatch) {
+      tools = inlineToolsMatch[1].split(',').map((t) => t.trim().replace(/^["']|["']$/g, ''));
+    } else if (multiLineToolsMatch) {
+      tools = multiLineToolsMatch[1]
+        .split('\n')
+        .map((line) => line.replace(/^\s*-\s*/, '').trim().replace(/^["']|["']$/g, ''))
+        .filter((t) => t.length > 0);
+    }
+
+    for (const tool of tools) {
+      if (DANGEROUS_TOOLS.has(tool)) {
+        findings.push({
+          id: `MF${++this.findingCounter}`,
+          ruleId: 'MF006',
+          category: ThreatCategory.TOOL_ABUSE,
+          severity: Severity.HIGH,
+          title: `Dangerous tool in allowed-tools: ${tool}`,
+          description: `The tool "${tool}" grants shell access. This is a significant security risk.`,
+          filePath,
+          analyzer: this.name,
+          remediation: 'Restrict allowed-tools to the minimum needed. Avoid shell/exec tools.',
+        });
       }
     }
   }

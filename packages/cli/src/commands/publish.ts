@@ -71,22 +71,7 @@ export class PublishCommand extends Command {
 
     console.log(chalk.white(`Found ${discoveredSkills.length} skill(s):\n`));
 
-    const scanner = new SkillScanner({ failOnSeverity: Severity.HIGH });
-    for (const skill of discoveredSkills) {
-      const scanResult = await scanner.scan(skill.path);
-      if (scanResult.verdict === 'fail') {
-        console.error(chalk.red(`\nSecurity scan FAILED for "${skill.name}"`));
-        console.error(formatSummary(scanResult));
-        console.error(chalk.dim('Fix security issues before publishing.'));
-        return 1;
-      }
-      if (scanResult.verdict === 'warn') {
-        console.log(chalk.yellow(`  Security warnings for "${skill.name}" (${scanResult.findings.length} findings)`));
-      }
-    }
-
     const wellKnownSkills: WellKnownSkill[] = [];
-
     const validSkills: Array<{ name: string; safeName: string; description?: string; path: string }> = [];
 
     for (const skill of discoveredSkills) {
@@ -107,6 +92,20 @@ export class PublishCommand extends Command {
         description: skill.description,
         files,
       });
+    }
+
+    const scanner = new SkillScanner({ failOnSeverity: Severity.HIGH });
+    for (const skill of validSkills) {
+      const scanResult = await scanner.scan(skill.path);
+      if (scanResult.verdict === 'fail') {
+        console.error(chalk.red(`\nSecurity scan FAILED for "${skill.safeName}"`));
+        console.error(formatSummary(scanResult));
+        console.error(chalk.dim('Fix security issues before publishing.'));
+        return 1;
+      }
+      if (scanResult.verdict === 'warn') {
+        console.log(chalk.yellow(`  Security warnings for "${skill.safeName}" (${scanResult.findings.length} findings)`));
+      }
     }
 
     if (validSkills.length === 0) {

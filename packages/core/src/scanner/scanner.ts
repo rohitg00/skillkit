@@ -29,7 +29,7 @@ async function discoverFiles(dirPath: string): Promise<string[]> {
 
     for (const entry of entries) {
       const fullPath = join(dir, entry.name);
-      if (entry.name.startsWith('.') && entry.name !== '.env') continue;
+      if (entry.name.startsWith('.') && entry.name !== '.env' && !entry.name.startsWith('.env.')) continue;
       if (entry.name === 'node_modules') continue;
 
       if (entry.isDirectory()) {

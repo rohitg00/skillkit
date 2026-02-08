@@ -75,6 +75,7 @@ export class StaticAnalyzer implements Analyzer {
   }
 
   async analyze(_skillPath: string, files: string[]): Promise<Finding[]> {
+    this.findingCounter = 0;
     const findings: Finding[] = [];
 
     for (const file of files) {
@@ -97,6 +98,38 @@ export class StaticAnalyzer implements Analyzer {
       const lines = content.split('\n');
 
       for (const rule of applicableRules) {
+        if (rule.multiline) {
+          for (const pattern of rule.patterns) {
+            pattern.lastIndex = 0;
+            let match: RegExpExecArray | null;
+            while ((match = pattern.exec(content)) !== null) {
+              const lineNumber = content.substring(0, match.index).split('\n').length;
+              const snippetStart = Math.max(0, match.index - 40);
+              const snippet = content.substring(snippetStart, match.index + match[0].length + 40).trim().substring(0, 200);
+
+              if (isPlaceholderLine(snippet)) continue;
+              if (matchesExcludePatterns(snippet, rule)) continue;
+
+              findings.push({
+                id: `F${++this.findingCounter}`,
+                ruleId: rule.id,
+                category: rule.category,
+                severity: rule.severity,
+                title: rule.description,
+                description: rule.description,
+                filePath: file,
+                lineNumber,
+                snippet,
+                remediation: rule.remediation,
+                analyzer: this.name,
+              });
+
+              if (!pattern.global) break;
+            }
+          }
+          continue;
+        }
+
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i];
 

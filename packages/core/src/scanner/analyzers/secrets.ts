@@ -116,6 +116,7 @@ export class SecretsAnalyzer implements Analyzer {
   private findingCounter = 0;
 
   async analyze(_skillPath: string, files: string[]): Promise<Finding[]> {
+    this.findingCounter = 0;
     const findings: Finding[] = [];
 
     for (const file of files) {
@@ -166,7 +167,7 @@ export class SecretsAnalyzer implements Analyzer {
               description: `Potential ${secret.name} found in skill file`,
               filePath: file,
               lineNumber: i + 1,
-              snippet: line.trim().substring(0, 100).replace(secret.pattern, '[REDACTED]'),
+              snippet: line.trim().replace(secret.pattern, '[REDACTED]').substring(0, 100),
               analyzer: this.name,
               remediation: 'Remove hardcoded secrets. Use environment variables or secret managers.',
             });

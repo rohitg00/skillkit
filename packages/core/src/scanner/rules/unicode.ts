@@ -5,7 +5,7 @@ export const unicodeRules: SecurityRule[] = [
     id: 'UC001',
     category: ThreatCategory.UNICODE_STEGANOGRAPHY,
     severity: Severity.MEDIUM,
-    patterns: [/[\u200B\u200C\u200D\uFEFF]/],
+    patterns: [/\u200B|\u200C|\u200D|\uFEFF/],
     description: 'Zero-width characters detected: may hide invisible instructions',
     remediation: 'Remove zero-width characters (U+200B, U+200C, U+200D, U+FEFF).',
   },
@@ -37,6 +37,7 @@ export const unicodeRules: SecurityRule[] = [
     id: 'UC005',
     category: ThreatCategory.UNICODE_STEGANOGRAPHY,
     severity: Severity.MEDIUM,
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: intentional detection of control characters
     patterns: [/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/],
     description: 'Control characters detected: non-printable characters in content',
     remediation: 'Remove control characters. Use only printable Unicode content.',

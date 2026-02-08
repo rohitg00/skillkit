@@ -1,5 +1,9 @@
+import { basename } from 'node:path';
 import type { Finding, ScanResult } from './types.js';
 import { Severity } from './types.js';
+
+declare const __PACKAGE_VERSION__: string;
+const SCANNER_VERSION = typeof __PACKAGE_VERSION__ !== 'undefined' ? __PACKAGE_VERSION__ : '0.0.0';
 
 const SEVERITY_COLORS: Record<string, string> = {
   [Severity.CRITICAL]: '\x1b[91m',
@@ -86,7 +90,7 @@ export function formatTable(result: ScanResult): string {
       f.severity.toUpperCase().padEnd(widths[0]),
       f.ruleId.padEnd(widths[1]),
       f.title.substring(0, widths[2]).padEnd(widths[2]),
-      (f.filePath?.split('/').pop() ?? '').substring(0, widths[3]).padEnd(widths[3]),
+      (f.filePath ? basename(f.filePath) : '').substring(0, widths[3]).padEnd(widths[3]),
       String(f.lineNumber ?? '').padEnd(widths[4]),
     ];
     lines.push(row.join(' | '));
@@ -120,7 +124,7 @@ export function formatSarif(result: ScanResult): string {
         tool: {
           driver: {
             name: 'skillkit-scanner',
-            version: '1.0.0',
+            version: SCANNER_VERSION,
             informationUri: 'https://agenstskills.com',
             rules: [...rules.values()].map((r) => ({
               id: r.ruleId,
@@ -145,7 +149,11 @@ export function formatSarif(result: ScanResult): string {
             ? [
                 {
                   physicalLocation: {
-                    artifactLocation: { uri: f.filePath },
+                    artifactLocation: {
+                      uri: f.filePath.startsWith(result.skillPath)
+                        ? f.filePath.slice(result.skillPath.length).replace(/^\//, '')
+                        : f.filePath,
+                    },
                     region: f.lineNumber
                       ? { startLine: f.lineNumber }
                       : undefined,
