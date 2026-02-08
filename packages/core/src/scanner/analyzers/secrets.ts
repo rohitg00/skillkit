@@ -15,7 +15,7 @@ const SECRET_PATTERNS: SecretPattern[] = [
   {
     id: 'SK001',
     name: 'OpenAI API key',
-    pattern: /sk-(?:proj-|admin-)?[A-Za-z0-9-]{20,}/,
+    pattern: /sk-(?!ant-)(?:proj-|admin-)?[A-Za-z0-9-]{20,}/,
     severity: Severity.CRITICAL,
   },
   {
@@ -114,6 +114,11 @@ function isPlaceholder(line: string): boolean {
 export class SecretsAnalyzer implements Analyzer {
   name = 'secrets';
   private findingCounter = 0;
+  private skipRules: Set<string>;
+
+  constructor(skipRules?: string[]) {
+    this.skipRules = new Set(skipRules ?? []);
+  }
 
   async analyze(_skillPath: string, files: string[]): Promise<Finding[]> {
     this.findingCounter = 0;
@@ -122,7 +127,7 @@ export class SecretsAnalyzer implements Analyzer {
     for (const file of files) {
       const name = basename(file);
 
-      if (ENV_FILE_PATTERN.test(name)) {
+      if (ENV_FILE_PATTERN.test(name) && !this.skipRules.has('SK-ENV')) {
         findings.push({
           id: `SK${++this.findingCounter}`,
           ruleId: 'SK-ENV',
@@ -153,6 +158,7 @@ export class SecretsAnalyzer implements Analyzer {
         if (isPlaceholder(line)) continue;
 
         for (const secret of SECRET_PATTERNS) {
+          if (this.skipRules.has(secret.id)) continue;
           if (secret.pattern.test(line)) {
             if (secret.id === 'SK013') {
               if (!/(?:key|token|secret|password|credential|api)/i.test(line)) continue;

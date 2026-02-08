@@ -107,8 +107,10 @@ export class StaticAnalyzer implements Analyzer {
               const snippetStart = Math.max(0, match.index - 40);
               const snippet = content.substring(snippetStart, match.index + match[0].length + 40).trim().substring(0, 200);
 
-              if (isPlaceholderLine(snippet)) continue;
-              if (matchesExcludePatterns(snippet, rule)) continue;
+              if (isPlaceholderLine(snippet) || matchesExcludePatterns(snippet, rule)) {
+                if (!pattern.global) break;
+                continue;
+              }
 
               findings.push({
                 id: `F${++this.findingCounter}`,

@@ -21,6 +21,11 @@ const BINARY_EXTENSIONS = new Set([
 export class ManifestAnalyzer implements Analyzer {
   name = 'manifest';
   private findingCounter = 0;
+  private skipRules: Set<string>;
+
+  constructor(skipRules?: string[]) {
+    this.skipRules = new Set(skipRules ?? []);
+  }
 
   async analyze(_skillPath: string, files: string[]): Promise<Finding[]> {
     this.findingCounter = 0;
@@ -45,26 +50,32 @@ export class ManifestAnalyzer implements Analyzer {
     return findings;
   }
 
+  private shouldSkip(ruleId: string): boolean {
+    return this.skipRules.has(ruleId);
+  }
+
   private validateFrontmatter(content: string, filePath: string, findings: Finding[]): void {
     const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
     if (!fmMatch) {
-      findings.push({
-        id: `MF${++this.findingCounter}`,
-        ruleId: 'MF001',
-        category: ThreatCategory.POLICY_VIOLATION,
-        severity: Severity.LOW,
-        title: 'Missing SKILL.md frontmatter',
-        description: 'SKILL.md should have YAML frontmatter with name, description, and allowed-tools',
-        filePath,
-        analyzer: this.name,
-        remediation: 'Add YAML frontmatter with name, description, and allowed-tools fields.',
-      });
+      if (!this.shouldSkip('MF001')) {
+        findings.push({
+          id: `MF${++this.findingCounter}`,
+          ruleId: 'MF001',
+          category: ThreatCategory.POLICY_VIOLATION,
+          severity: Severity.LOW,
+          title: 'Missing SKILL.md frontmatter',
+          description: 'SKILL.md should have YAML frontmatter with name, description, and allowed-tools',
+          filePath,
+          analyzer: this.name,
+          remediation: 'Add YAML frontmatter with name, description, and allowed-tools fields.',
+        });
+      }
       return;
     }
 
     const fm = fmMatch[1];
 
-    if (!/^name:/m.test(fm)) {
+    if (!/^name:/m.test(fm) && !this.shouldSkip('MF002')) {
       findings.push({
         id: `MF${++this.findingCounter}`,
         ruleId: 'MF002',
@@ -81,7 +92,7 @@ export class ManifestAnalyzer implements Analyzer {
     const nameMatch = fm.match(/^name:\s*(.+)$/m);
     if (nameMatch) {
       const name = nameMatch[1].trim().replace(/^["']|["']$/g, '');
-      if (!/^[a-z0-9][a-z0-9._-]*$/i.test(name)) {
+      if (!/^[a-z0-9][a-z0-9._-]*$/i.test(name) && !this.shouldSkip('MF003')) {
         findings.push({
           id: `MF${++this.findingCounter}`,
           ruleId: 'MF003',
@@ -98,20 +109,22 @@ export class ManifestAnalyzer implements Analyzer {
 
     const descMatch = fm.match(/^description:\s*(.+)$/m);
     if (!descMatch) {
-      findings.push({
-        id: `MF${++this.findingCounter}`,
-        ruleId: 'MF004',
-        category: ThreatCategory.POLICY_VIOLATION,
-        severity: Severity.INFO,
-        title: 'Missing skill description',
-        description: 'SKILL.md should include a description for discoverability',
-        filePath,
-        analyzer: this.name,
-        remediation: 'Add a description field to the YAML frontmatter.',
-      });
+      if (!this.shouldSkip('MF004')) {
+        findings.push({
+          id: `MF${++this.findingCounter}`,
+          ruleId: 'MF004',
+          category: ThreatCategory.POLICY_VIOLATION,
+          severity: Severity.INFO,
+          title: 'Missing skill description',
+          description: 'SKILL.md should include a description for discoverability',
+          filePath,
+          analyzer: this.name,
+          remediation: 'Add a description field to the YAML frontmatter.',
+        });
+      }
     } else {
       const desc = descMatch[1].trim().replace(/^["']|["']$/g, '');
-      if (desc.length < 20) {
+      if (desc.length < 20 && !this.shouldSkip('MF005')) {
         findings.push({
           id: `MF${++this.findingCounter}`,
           ruleId: 'MF005',
@@ -140,7 +153,7 @@ export class ManifestAnalyzer implements Analyzer {
     }
 
     for (const tool of tools) {
-      if (DANGEROUS_TOOLS.has(tool)) {
+      if (DANGEROUS_TOOLS.has(tool) && !this.shouldSkip('MF006')) {
         findings.push({
           id: `MF${++this.findingCounter}`,
           ruleId: 'MF006',
@@ -159,7 +172,7 @@ export class ManifestAnalyzer implements Analyzer {
   private checkImpersonation(content: string, filePath: string, findings: Finding[]): void {
     for (const pattern of IMPERSONATION_PATTERNS) {
       const match = content.match(pattern);
-      if (match) {
+      if (match && !this.shouldSkip('MF007')) {
         const lineNumber = content.substring(0, match.index).split('\n').length;
         findings.push({
           id: `MF${++this.findingCounter}`,
@@ -181,7 +194,7 @@ export class ManifestAnalyzer implements Analyzer {
   private checkBinaryFiles(files: string[], findings: Finding[]): void {
     for (const file of files) {
       const ext = extname(file).toLowerCase();
-      if (BINARY_EXTENSIONS.has(ext)) {
+      if (BINARY_EXTENSIONS.has(ext) && !this.shouldSkip('MF008')) {
         findings.push({
           id: `MF${++this.findingCounter}`,
           ruleId: 'MF008',

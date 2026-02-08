@@ -29,7 +29,7 @@ export const unicodeRules: SecurityRule[] = [
     id: 'UC004',
     category: ThreatCategory.UNICODE_STEGANOGRAPHY,
     severity: Severity.HIGH,
-    patterns: [/[\uE0001-\uE007F]/u],
+    patterns: [/[\u{E0001}-\u{E007F}]/u],
     description: 'Tag characters detected: Unicode tag block can encode hidden payloads',
     remediation: 'Remove Unicode tag characters (U+E0001-U+E007F).',
   },

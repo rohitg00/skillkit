@@ -100,7 +100,7 @@ export const promptInjectionRules: SecurityRule[] = [
     category: ThreatCategory.PROMPT_INJECTION,
     severity: Severity.HIGH,
     patterns: [
-      /```\s*(system|assistant|user)\s*\n/i,
+      /```\s*(system|assistant|user)\s*$/im,
       /<\/?(?:system|user|assistant|human|ai|claude)>/i,
     ],
     description: 'Delimiter injection: attempts to inject conversation role markers',

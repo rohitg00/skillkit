@@ -95,8 +95,8 @@ export class SkillScanner {
     this.options = options ?? {};
     this.analyzers = [
       new StaticAnalyzer(this.options.skipRules),
-      new ManifestAnalyzer(),
-      new SecretsAnalyzer(),
+      new ManifestAnalyzer(this.options.skipRules),
+      new SecretsAnalyzer(this.options.skipRules),
     ];
   }
 
