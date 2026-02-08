@@ -15,7 +15,7 @@ const SECRET_PATTERNS: SecretPattern[] = [
   {
     id: 'SK001',
     name: 'OpenAI API key',
-    pattern: /sk-[a-zA-Z0-9]{20,}/,
+    pattern: /sk-(?:proj-|admin-)?[A-Za-z0-9-]{20,}/,
     severity: Severity.CRITICAL,
   },
   {

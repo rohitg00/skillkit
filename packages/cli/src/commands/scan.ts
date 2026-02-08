@@ -46,10 +46,6 @@ export class ScanCommand extends Command {
     description: 'Comma-separated rule IDs or categories to skip',
   });
 
-  quiet = Option.Boolean('--quiet,-q', false, {
-    description: 'Suppress non-essential output',
-  });
-
   async execute(): Promise<number> {
     const targetPath = resolve(this.skillPath);
 
