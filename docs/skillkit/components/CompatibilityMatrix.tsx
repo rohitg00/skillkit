@@ -16,111 +16,106 @@ interface CategoryDef {
 }
 
 const AGENTS: AgentDef[] = [
-  { id: 'claude-code', name: 'Claude Code', icon: '\u27C1', group: 'Tier 1' },
+  { id: 'claude-code', name: 'Claude', icon: '\u27C1', group: 'Tier 1' },
   { id: 'cursor', name: 'Cursor', icon: '\u25EB', group: 'Tier 1' },
   { id: 'codex', name: 'Codex', icon: '\u25CE', group: 'Tier 1' },
-  { id: 'gemini-cli', name: 'Gemini CLI', icon: '\u2726', group: 'Tier 1' },
+  { id: 'gemini-cli', name: 'Gemini', icon: '\u2726', group: 'Tier 1' },
   { id: 'opencode', name: 'OpenCode', icon: '\u2B21', group: 'Tier 1' },
   { id: 'windsurf', name: 'Windsurf', icon: '\u25C7', group: 'Tier 1' },
   { id: 'github-copilot', name: 'Copilot', icon: '\u2318', group: 'Tier 1' },
-  { id: 'goose', name: 'Goose', icon: '\u25CA', group: 'Tier 2' },
+  { id: 'cline', name: 'Cline', icon: '\u25CF', group: 'Tier 1' },
+  { id: 'roo', name: 'Roo', icon: '\u25C6', group: 'Tier 2' },
   { id: 'kilo', name: 'Kilo', icon: '\u25B3', group: 'Tier 2' },
   { id: 'kiro-cli', name: 'Kiro CLI', icon: '\u25BD', group: 'Tier 2' },
-  { id: 'roo', name: 'Roo', icon: '\u25C6', group: 'Tier 2' },
+  { id: 'goose', name: 'Goose', icon: '\u25CA', group: 'Tier 2' },
   { id: 'trae', name: 'Trae', icon: '\u25A0', group: 'Tier 2' },
   { id: 'amp', name: 'AMP', icon: '\u26A1', group: 'Tier 2' },
-  { id: 'cline', name: 'Cline', icon: '\u25CF', group: 'Tier 3' },
+  { id: 'antigravity', name: 'Antigrav', icon: '\u2191', group: 'Tier 3' },
   { id: 'continue', name: 'Continue', icon: '\u25B6', group: 'Tier 3' },
-  { id: 'antigravity', name: 'Antigravity', icon: '\u2191', group: 'Tier 3' },
 ];
 
 const CATEGORIES: CategoryDef[] = [
-  { id: 'security', name: 'Security', icon: '\u25D0' },
-  { id: 'testing', name: 'Testing', icon: '\u25D2' },
-  { id: 'react-frontend', name: 'React/Frontend', icon: '\u269B' },
-  { id: 'backend', name: 'Backend', icon: '\u2393' },
-  { id: 'devops', name: 'DevOps', icon: '\u25D1' },
-  { id: 'python', name: 'Python', icon: '\u25C9' },
-  { id: 'go', name: 'Go', icon: '\u25C8' },
-  { id: 'typescript', name: 'TypeScript', icon: '\u25C8' },
-  { id: 'database', name: 'Database', icon: '\u25A3' },
-  { id: 'performance', name: 'Performance', icon: '\u25CE' },
-  { id: 'documentation', name: 'Documentation', icon: '\u25A1' },
-  { id: 'ai-ml', name: 'AI/ML', icon: '\u25CE' },
+  { id: 'translation', name: 'Skill Translation', icon: '\u21C4' },
+  { id: 'hooks', name: 'Hooks', icon: '\u2693' },
+  { id: 'mcp-tools', name: 'MCP & Tools', icon: '\u2699' },
+  { id: 'context', name: 'Context Window', icon: '\u25A3' },
+  { id: 'security', name: 'Security Skills', icon: '\u25D0' },
+  { id: 'testing', name: 'Testing Skills', icon: '\u25D2' },
+  { id: 'frontend', name: 'Frontend Skills', icon: '\u269B' },
+  { id: 'backend', name: 'Backend Skills', icon: '\u2393' },
+  { id: 'devops', name: 'DevOps Skills', icon: '\u25D1' },
+  { id: 'docs', name: 'Documentation', icon: '\u25A1' },
 ];
 
+// Based on actual SkillKit translator, agent constraints, and compatibility scoring:
+// - claude-code, cline, roo: MCP + Tools + Hooks + large context (full support)
+// - cursor: 32K context, no MCP/tools, hooks need manual adjustment
+// - gemini-cli: 128K context, no MCP/tools, JSON-in-markdown format
+// - opencode: 100K context, no MCP/tools, XML skills format
+// - codex, github-copilot: 8K context, no MCP/tools (content condensed)
+// - windsurf: 32K context, no MCP/tools, workflow YAML format
+// - kilo, kiro-cli: XML block format, multi-mode support, no MCP
+// - goose, amp, antigravity, trae, continue: varies, mostly universal adapter
 const MATRIX: Record<string, Record<string, Support>> = {
-  'security': {
+  'translation': {
     'claude-code': 'full', 'cursor': 'full', 'codex': 'full', 'gemini-cli': 'full',
-    'opencode': 'full', 'windsurf': 'full', 'github-copilot': 'full', 'goose': 'partial',
-    'kilo': 'partial', 'kiro-cli': 'partial', 'roo': 'full', 'trae': 'partial',
-    'amp': 'full', 'cline': 'full', 'continue': 'partial', 'antigravity': 'partial',
+    'opencode': 'full', 'windsurf': 'full', 'github-copilot': 'full', 'cline': 'full',
+    'roo': 'full', 'kilo': 'full', 'kiro-cli': 'partial', 'goose': 'full',
+    'trae': 'full', 'amp': 'full', 'antigravity': 'full', 'continue': 'full',
+  },
+  'hooks': {
+    'claude-code': 'full', 'cursor': 'partial', 'codex': 'partial', 'gemini-cli': 'partial',
+    'opencode': 'partial', 'windsurf': 'none', 'github-copilot': 'none', 'cline': 'full',
+    'roo': 'full', 'kilo': 'partial', 'kiro-cli': 'partial', 'goose': 'partial',
+    'trae': 'partial', 'amp': 'partial', 'antigravity': 'none', 'continue': 'none',
+  },
+  'mcp-tools': {
+    'claude-code': 'full', 'cursor': 'none', 'codex': 'none', 'gemini-cli': 'none',
+    'opencode': 'none', 'windsurf': 'none', 'github-copilot': 'none', 'cline': 'full',
+    'roo': 'full', 'kilo': 'none', 'kiro-cli': 'none', 'goose': 'none',
+    'trae': 'none', 'amp': 'none', 'antigravity': 'none', 'continue': 'none',
+  },
+  'context': {
+    'claude-code': 'full', 'cursor': 'partial', 'codex': 'partial', 'gemini-cli': 'full',
+    'opencode': 'full', 'windsurf': 'partial', 'github-copilot': 'partial', 'cline': 'full',
+    'roo': 'full', 'kilo': 'full', 'kiro-cli': 'full', 'goose': 'full',
+    'trae': 'partial', 'amp': 'full', 'antigravity': 'partial', 'continue': 'partial',
+  },
+  'security': {
+    'claude-code': 'full', 'cursor': 'full', 'codex': 'partial', 'gemini-cli': 'full',
+    'opencode': 'full', 'windsurf': 'full', 'github-copilot': 'partial', 'cline': 'full',
+    'roo': 'full', 'kilo': 'full', 'kiro-cli': 'full', 'goose': 'full',
+    'trae': 'full', 'amp': 'full', 'antigravity': 'partial', 'continue': 'partial',
   },
   'testing': {
-    'claude-code': 'full', 'cursor': 'full', 'codex': 'full', 'gemini-cli': 'full',
-    'opencode': 'full', 'windsurf': 'full', 'github-copilot': 'full', 'goose': 'full',
-    'kilo': 'partial', 'kiro-cli': 'partial', 'roo': 'full', 'trae': 'partial',
-    'amp': 'full', 'cline': 'full', 'continue': 'full', 'antigravity': 'partial',
+    'claude-code': 'full', 'cursor': 'full', 'codex': 'partial', 'gemini-cli': 'full',
+    'opencode': 'full', 'windsurf': 'full', 'github-copilot': 'partial', 'cline': 'full',
+    'roo': 'full', 'kilo': 'full', 'kiro-cli': 'full', 'goose': 'full',
+    'trae': 'full', 'amp': 'full', 'antigravity': 'partial', 'continue': 'partial',
   },
-  'react-frontend': {
-    'claude-code': 'full', 'cursor': 'full', 'codex': 'full', 'gemini-cli': 'full',
-    'opencode': 'partial', 'windsurf': 'full', 'github-copilot': 'full', 'goose': 'partial',
-    'kilo': 'partial', 'kiro-cli': 'partial', 'roo': 'full', 'trae': 'full',
-    'amp': 'full', 'cline': 'full', 'continue': 'full', 'antigravity': 'none',
+  'frontend': {
+    'claude-code': 'full', 'cursor': 'full', 'codex': 'partial', 'gemini-cli': 'full',
+    'opencode': 'full', 'windsurf': 'full', 'github-copilot': 'partial', 'cline': 'full',
+    'roo': 'full', 'kilo': 'partial', 'kiro-cli': 'partial', 'goose': 'partial',
+    'trae': 'full', 'amp': 'full', 'antigravity': 'partial', 'continue': 'partial',
   },
   'backend': {
-    'claude-code': 'full', 'cursor': 'full', 'codex': 'full', 'gemini-cli': 'full',
-    'opencode': 'full', 'windsurf': 'full', 'github-copilot': 'full', 'goose': 'full',
-    'kilo': 'partial', 'kiro-cli': 'partial', 'roo': 'full', 'trae': 'partial',
-    'amp': 'full', 'cline': 'full', 'continue': 'full', 'antigravity': 'partial',
+    'claude-code': 'full', 'cursor': 'full', 'codex': 'partial', 'gemini-cli': 'full',
+    'opencode': 'full', 'windsurf': 'full', 'github-copilot': 'partial', 'cline': 'full',
+    'roo': 'full', 'kilo': 'full', 'kiro-cli': 'full', 'goose': 'full',
+    'trae': 'full', 'amp': 'full', 'antigravity': 'partial', 'continue': 'partial',
   },
   'devops': {
-    'claude-code': 'full', 'cursor': 'full', 'codex': 'full', 'gemini-cli': 'full',
-    'opencode': 'full', 'windsurf': 'partial', 'github-copilot': 'full', 'goose': 'partial',
-    'kilo': 'partial', 'kiro-cli': 'none', 'roo': 'partial', 'trae': 'partial',
-    'amp': 'full', 'cline': 'partial', 'continue': 'partial', 'antigravity': 'none',
+    'claude-code': 'full', 'cursor': 'full', 'codex': 'partial', 'gemini-cli': 'full',
+    'opencode': 'full', 'windsurf': 'partial', 'github-copilot': 'partial', 'cline': 'full',
+    'roo': 'full', 'kilo': 'partial', 'kiro-cli': 'partial', 'goose': 'partial',
+    'trae': 'partial', 'amp': 'partial', 'antigravity': 'partial', 'continue': 'partial',
   },
-  'python': {
-    'claude-code': 'full', 'cursor': 'full', 'codex': 'full', 'gemini-cli': 'full',
-    'opencode': 'full', 'windsurf': 'full', 'github-copilot': 'full', 'goose': 'full',
-    'kilo': 'partial', 'kiro-cli': 'partial', 'roo': 'full', 'trae': 'partial',
-    'amp': 'full', 'cline': 'full', 'continue': 'full', 'antigravity': 'partial',
-  },
-  'go': {
-    'claude-code': 'full', 'cursor': 'full', 'codex': 'full', 'gemini-cli': 'full',
-    'opencode': 'full', 'windsurf': 'partial', 'github-copilot': 'full', 'goose': 'partial',
-    'kilo': 'none', 'kiro-cli': 'none', 'roo': 'partial', 'trae': 'partial',
-    'amp': 'partial', 'cline': 'partial', 'continue': 'partial', 'antigravity': 'none',
-  },
-  'typescript': {
-    'claude-code': 'full', 'cursor': 'full', 'codex': 'full', 'gemini-cli': 'full',
-    'opencode': 'full', 'windsurf': 'full', 'github-copilot': 'full', 'goose': 'full',
-    'kilo': 'partial', 'kiro-cli': 'partial', 'roo': 'full', 'trae': 'full',
-    'amp': 'full', 'cline': 'full', 'continue': 'full', 'antigravity': 'partial',
-  },
-  'database': {
-    'claude-code': 'full', 'cursor': 'full', 'codex': 'full', 'gemini-cli': 'full',
-    'opencode': 'partial', 'windsurf': 'partial', 'github-copilot': 'full', 'goose': 'partial',
-    'kilo': 'none', 'kiro-cli': 'none', 'roo': 'partial', 'trae': 'partial',
-    'amp': 'partial', 'cline': 'partial', 'continue': 'partial', 'antigravity': 'none',
-  },
-  'performance': {
-    'claude-code': 'full', 'cursor': 'full', 'codex': 'full', 'gemini-cli': 'full',
-    'opencode': 'partial', 'windsurf': 'partial', 'github-copilot': 'partial', 'goose': 'partial',
-    'kilo': 'none', 'kiro-cli': 'none', 'roo': 'partial', 'trae': 'partial',
-    'amp': 'partial', 'cline': 'partial', 'continue': 'partial', 'antigravity': 'none',
-  },
-  'documentation': {
-    'claude-code': 'full', 'cursor': 'full', 'codex': 'full', 'gemini-cli': 'full',
-    'opencode': 'full', 'windsurf': 'full', 'github-copilot': 'full', 'goose': 'full',
-    'kilo': 'partial', 'kiro-cli': 'partial', 'roo': 'full', 'trae': 'full',
-    'amp': 'full', 'cline': 'full', 'continue': 'full', 'antigravity': 'partial',
-  },
-  'ai-ml': {
-    'claude-code': 'full', 'cursor': 'full', 'codex': 'full', 'gemini-cli': 'full',
-    'opencode': 'partial', 'windsurf': 'partial', 'github-copilot': 'partial', 'goose': 'partial',
-    'kilo': 'none', 'kiro-cli': 'none', 'roo': 'partial', 'trae': 'partial',
-    'amp': 'partial', 'cline': 'partial', 'continue': 'partial', 'antigravity': 'none',
+  'docs': {
+    'claude-code': 'full', 'cursor': 'full', 'codex': 'partial', 'gemini-cli': 'full',
+    'opencode': 'full', 'windsurf': 'full', 'github-copilot': 'full', 'cline': 'full',
+    'roo': 'full', 'kilo': 'full', 'kiro-cli': 'full', 'goose': 'full',
+    'trae': 'full', 'amp': 'full', 'antigravity': 'full', 'continue': 'full',
   },
 };
 
@@ -202,7 +197,7 @@ export function CompatibilityMatrix(): React.ReactElement {
           <div>
             <h2 className="text-lg sm:text-xl font-bold text-white mb-1 font-mono">Compatibility Matrix</h2>
             <p className="text-zinc-500 font-mono text-[10px] sm:text-xs">
-              Skill support across 16 agents and 12 categories.
+              Skill support across {AGENTS.length} agents and {CATEGORIES.length} categories.
             </p>
           </div>
           <div className="flex items-center gap-2">
