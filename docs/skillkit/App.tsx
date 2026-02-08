@@ -123,7 +123,7 @@ export default function App(): React.ReactElement {
                 <svg className="w-3.5 h-3.5 text-zinc-500 group-hover:text-yellow-500 transition-colors" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                 </svg>
-                <span className="text-xs font-mono text-zinc-400 group-hover:text-white transition-colors">{stats.stars}</span>
+                <span className="text-xs font-mono text-zinc-400 group-hover:text-white transition-colors">{stats.stars || '—'}</span>
               </a>
             </div>
           </div>
@@ -131,7 +131,7 @@ export default function App(): React.ReactElement {
       </nav>
 
       <main className="pt-14">
-        <Hero version={stats.version} stars={stats.stars} />
+        <Hero version={stats.version || '—'} stars={stats.stars || '—'} />
 
         <div className="border-b border-zinc-800/50 py-2.5" style={{ background: 'linear-gradient(to bottom, rgba(9,9,11,0.95), rgba(0,0,0,1))' }}>
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -143,7 +143,7 @@ export default function App(): React.ReactElement {
                 className="flex items-center gap-1.5 text-zinc-500 hover:text-white transition-colors group"
               >
                 <span className="text-zinc-600 group-hover:text-zinc-400">v</span>
-                <span className="text-white font-medium">{stats.version}</span>
+                <span className="text-white font-medium">{stats.version || '—'}</span>
               </a>
               <span className="text-zinc-800">·</span>
               <a
@@ -155,7 +155,7 @@ export default function App(): React.ReactElement {
                 <svg className="w-3 h-3 text-zinc-600 group-hover:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
-                <span className="text-white font-medium">{stats.downloads}</span>
+                <span className="text-white font-medium">{stats.downloads || '—'}</span>
               </a>
               <span className="text-zinc-800">·</span>
               <a
@@ -167,7 +167,7 @@ export default function App(): React.ReactElement {
                 <svg className="w-3 h-3 text-zinc-600 group-hover:text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                 </svg>
-                <span className="text-white font-medium">{stats.stars}</span>
+                <span className="text-white font-medium">{stats.stars || '—'}</span>
               </a>
               <span className="text-zinc-800 hidden sm:inline">·</span>
               <a
