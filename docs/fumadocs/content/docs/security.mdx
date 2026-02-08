@@ -1,0 +1,259 @@
+---
+title: Security Scanner
+description: Detect malicious patterns, secrets, and vulnerabilities in AI agent skills
+---
+
+# Security Scanner
+
+SkillKit includes a built-in security scanner that analyzes skills for prompt injection, command injection, data exfiltration, hardcoded secrets, and other threats before installation.
+
+## Quick Start
+
+```bash
+skillkit scan ./my-skill
+```
+
+The scanner runs automatically during `skillkit install`. Use `--no-scan` to skip or `--force` to install despite findings.
+
+## CLI Usage
+
+```bash
+skillkit scan <path>                       # Scan skill directory
+skillkit scan <path> --format json         # JSON output
+skillkit scan <path> --format table        # Tabular output
+skillkit scan <path> --format sarif        # SARIF v2.1 for GitHub Code Scanning
+skillkit scan <path> --fail-on high        # Exit code 1 if HIGH+ findings
+skillkit scan <path> --skip-rules UC001    # Skip specific rules
+skillkit scan <path> --skip-rules PI001,PI002  # Skip multiple rules
+```
+
+## Threat Categories
+
+The scanner detects 46+ patterns across 6 threat categories:
+
+### Prompt Injection (PI001–PI015)
+
+Detects attempts to override, bypass, or manipulate agent instructions.
+
+| Rule | Severity | Description |
+|------|----------|-------------|
+| PI001 | Critical | Instruction override ("ignore previous instructions") |
+| PI002 | Critical | Context clearing ("forget everything") |
+| PI003 | Critical | Training bypass ("disregard your training") |
+| PI004 | Critical | System prompt injection ("new instructions:") |
+| PI005 | High | Role manipulation ("you are now a...") |
+| PI006 | High | Roleplay manipulation ("pretend to be...") |
+| PI007 | High | Persistent behavior change ("from now on...") |
+| PI008 | High | System prompt extraction ("show me your instructions") |
+| PI009 | Critical | Policy bypass (jailbreak, unrestricted mode, DAN) |
+| PI010 | High | Concealment ("don't tell the user") |
+| PI011 | High | Delimiter injection (conversation role markers) |
+| PI012 | High | Model-specific delimiters (Llama [INST] tags) |
+| PI013 | Medium | YAML front-matter injection |
+| PI014 | Medium | Hidden HTML comments with instructions |
+| PI015 | Medium | Hidden Markdown comments with instructions |
+
+### Command Injection (CI001–CI010)
+
+Detects code execution, shell injection, and path traversal patterns.
+
+| Rule | Severity | Description |
+|------|----------|-------------|
+| CI001 | Critical | `eval()` calls |
+| CI002 | Critical | `Function()` constructor |
+| CI003 | Critical | `child_process` exec/execSync |
+| CI004 | Critical | Python `subprocess` with `shell=True` |
+| CI005 | Medium | Template literals with dynamic content in command context |
+| CI006 | Medium | Path traversal (`../`) |
+| CI007 | High | Shell command chaining with dangerous commands |
+| CI008 | Medium | Process execution functions |
+| CI009 | High | Python dynamic import/compile |
+| CI010 | Medium | Node.js `vm` module usage |
+
+### Data Exfiltration (DE001–DE008)
+
+Detects network requests, webhook URLs, and credential access patterns.
+
+| Rule | Severity | Description |
+|------|----------|-------------|
+| DE001 | Critical | Discord webhook URLs |
+| DE002 | Critical | Telegram bot API URLs |
+| DE003 | High | Slack webhook URLs |
+| DE004 | High | HTTP POST with env variables |
+| DE005 | High | Fetch/axios sending to external URLs |
+| DE006 | Medium | Reading `.env` or credentials files |
+| DE007 | Medium | Environment variable access patterns |
+| DE008 | Medium | DNS/IP-based exfiltration patterns |
+
+### Tool Abuse (TA001–TA006)
+
+Detects tool shadowing, autonomy escalation, and capability manipulation.
+
+| Rule | Severity | Description |
+|------|----------|-------------|
+| TA001 | High | Tool shadowing (redefining built-in tools) |
+| TA002 | High | Autonomy abuse ("keep retrying", "run without confirmation") |
+| TA003 | High | Capability inflation (discovering/enabling extra tools) |
+| TA004 | Medium | Tool chaining (read sensitive data then send externally) |
+| TA005 | Medium | Permission escalation patterns |
+| TA006 | Medium | Recursive self-invocation |
+
+### Hardcoded Secrets (SK001–SK013)
+
+Detects API keys, tokens, and credentials embedded in skill files.
+
+| Rule | Severity | Description |
+|------|----------|-------------|
+| SK001 | Critical | OpenAI API key (`sk-...`) |
+| SK002 | Critical | Stripe live publishable key |
+| SK003 | Critical | Stripe secret key |
+| SK004 | Critical | GitHub personal access token |
+| SK005 | Critical | GitHub OAuth token |
+| SK006 | Critical | AWS access key (`AKIA...`) |
+| SK007 | Critical | Slack bot token (`xoxb-...`) |
+| SK008 | Critical | Slack user token (`xoxp-...`) |
+| SK009 | Critical | Private key block |
+| SK010 | High | Google API key |
+| SK011 | Critical | Anthropic API key (`sk-ant-...`) |
+| SK012 | High | npm token |
+| SK013 | Low | UUID patterns (with credential context) |
+| SK-ENV | High | Environment file included in skill |
+
+### Unicode Steganography (UC001–UC007)
+
+Detects invisible characters and obfuscation techniques.
+
+| Rule | Severity | Description |
+|------|----------|-------------|
+| UC001 | Medium | Zero-width characters (U+200B, U+200C, U+200D, U+FEFF) |
+| UC002 | High | Bidirectional text override (U+202A–U+202E) |
+| UC003 | High | Bidirectional isolate characters (U+2066–U+2069) |
+| UC004 | High | Unicode tag characters (U+E0001–U+E007F) |
+| UC005 | Medium | Control characters |
+| UC006 | Medium | Base64-encoded payloads |
+| UC007 | Medium | Hex/Unicode escape sequences |
+
+### Manifest Validation (MF001–MF008)
+
+Validates SKILL.md frontmatter and skill structure.
+
+| Rule | Severity | Description |
+|------|----------|-------------|
+| MF001 | Low | Missing SKILL.md frontmatter |
+| MF002 | Low | Missing skill name |
+| MF003 | Low | Invalid skill name format |
+| MF004 | Info | Missing skill description |
+| MF005 | Info | Short skill description |
+| MF006 | High | Dangerous tool in allowed-tools (Bash, shell) |
+| MF007 | High | Impersonation (claiming official affiliation) |
+| MF008 | Medium | Binary files in skill directory |
+
+## Analyzers
+
+The scanner uses three analyzers that run in parallel:
+
+| Analyzer | Purpose | Rules |
+|----------|---------|-------|
+| **StaticAnalyzer** | Regex pattern matching against security rules | PI, CI, DE, TA, UC |
+| **ManifestAnalyzer** | SKILL.md frontmatter validation | MF |
+| **SecretsAnalyzer** | Credential and secret detection | SK |
+
+## Output Formats
+
+### Summary (default)
+
+Colored terminal output with severity indicators, file locations, snippets, and remediation advice.
+
+### JSON
+
+Machine-readable JSON with all findings, stats, and verdict.
+
+```bash
+skillkit scan ./my-skill --format json | jq '.findings[] | {ruleId, severity, title}'
+```
+
+### Table
+
+Tabular format for quick review:
+
+```bash
+skillkit scan ./my-skill --format table
+```
+
+### SARIF
+
+SARIF v2.1 for GitHub Code Scanning and IDE integration:
+
+```bash
+skillkit scan ./my-skill --format sarif > results.sarif
+```
+
+Upload to GitHub:
+
+```bash
+gh api repos/{owner}/{repo}/code-scanning/sarifs \
+  -f "sarif=$(gzip -c results.sarif | base64)"
+```
+
+## CI/CD Integration
+
+### GitHub Actions
+
+```yaml
+- name: Scan skills
+  run: npx skillkit scan ./skills --format sarif --fail-on high > results.sarif
+
+- name: Upload SARIF
+  uses: github/codeql-action/upload-sarif@v3
+  with:
+    sarif_file: results.sarif
+```
+
+### Pre-commit Hook
+
+```bash
+skillkit scan . --fail-on medium
+```
+
+## Programmatic Usage
+
+```typescript
+import { SkillScanner, formatResult } from '@skillkit/core';
+
+const scanner = new SkillScanner({
+  failOnSeverity: 'high',
+  skipRules: ['UC001', 'MF004'],
+});
+
+const result = await scanner.scan('./my-skill');
+
+console.log(formatResult(result, 'summary'));
+console.log(`Verdict: ${result.verdict}`);
+console.log(`Findings: ${result.findings.length}`);
+```
+
+## Severity Levels
+
+| Level | Exit Code | Description |
+|-------|-----------|-------------|
+| **Critical** | 1 (with `--fail-on critical`) | Immediate security threat |
+| **High** | 1 (with `--fail-on high`, default) | Significant security risk |
+| **Medium** | 1 (with `--fail-on medium`) | Potential security concern |
+| **Low** | 1 (with `--fail-on low`) | Minor issue or best practice |
+| **Info** | 0 | Informational finding |
+
+## False Positive Handling
+
+The scanner automatically filters:
+
+- **Placeholder patterns**: `your-api-key`, `example`, `sample`, `dummy`, `xxx`
+- **Test files**: `*.test.ts`, `*.spec.ts`, `__tests__/`
+- **Import statements**: `import ... from '../'` (not path traversal)
+- **Comments**: Code comments mentioning patterns
+- **Security discussions**: Text discussing jailbreaks or vulnerabilities (uses negative lookbehind)
+
+To skip specific rules:
+
+```bash
+skillkit scan . --skip-rules UC001,UC002,MF004
+```

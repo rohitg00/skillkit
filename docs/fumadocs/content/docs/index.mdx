@@ -100,6 +100,18 @@ SkillKit sits between your skills and your agents. It handles format translation
 
 [Full agent details](/docs/agents)
 
+### Security scanning
+
+Every skill is scanned for threats before installation — prompt injection, hardcoded secrets, command injection, and more:
+
+```bash
+skillkit scan ./my-skill                     # 46+ detection rules
+skillkit scan ./my-skill --format sarif      # GitHub Code Scanning
+skillkit scan ./my-skill --fail-on high      # CI gate
+```
+
+[Security Scanner](/docs/security)
+
 ## Beyond Basic Skills
 
 ### Session Memory
@@ -145,6 +157,7 @@ Team members run `skillkit manifest install` and they're in sync.
 
 - [Installation](/docs/installation) — Install and configure
 - [Quick Start](/docs/quickstart) — First project setup
+- [Security Scanner](/docs/security) — Threat detection for skills
 - [Commands](/docs/commands) — Full CLI reference
 - [REST API](/docs/rest-api) — Runtime discovery server
 - [MCP Server](/docs/mcp-server) — Agent-native discovery

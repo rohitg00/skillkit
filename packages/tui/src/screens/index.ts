@@ -22,3 +22,4 @@ export { Settings } from './Settings.js';
 export { Help } from './Help.js';
 export { Mesh } from './Mesh.js';
 export { Message } from './Message.js';
+export { Scan } from './Scan.js';

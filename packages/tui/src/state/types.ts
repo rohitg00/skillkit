@@ -25,14 +25,14 @@ export type Screen =
   | 'home' | 'browse' | 'installed' | 'marketplace' | 'recommend'
   | 'translate' | 'context' | 'memory' | 'team' | 'plugins'
   | 'methodology' | 'plan' | 'workflow' | 'execute' | 'history'
-  | 'sync' | 'settings' | 'help' | 'mesh' | 'message';
+  | 'sync' | 'settings' | 'help' | 'mesh' | 'message' | 'scan';
 
 export const NAV_KEYS: Record<string, Screen> = {
   h: 'home', m: 'marketplace', b: 'browse', w: 'workflow',
   x: 'execute', y: 'history', r: 'recommend', t: 'translate',
   c: 'context', e: 'memory', i: 'installed', s: 'sync',
   a: 'team', p: 'plugins', o: 'methodology', n: 'plan',
-  ',': 'settings', '/': 'help', 'g': 'mesh', 'j': 'message',
+  ',': 'settings', '/': 'help', 'g': 'mesh', 'j': 'message', 'z': 'scan',
 } as const;
 
 export const STATUS_BAR_SHORTCUTS = 'b browse  m market  i installed  s sync  / help  q quit';
@@ -64,6 +64,7 @@ export const SIDEBAR_NAV: SidebarSection[] = [
       { key: 'i', label: 'Installed', screen: 'installed' },
       { key: 's', label: 'Sync', screen: 'sync' },
       { key: 't', label: 'Translate', screen: 'translate' },
+      { key: 'z', label: 'Scan', screen: 'scan' },
     ],
   },
   {

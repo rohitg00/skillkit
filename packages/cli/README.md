@@ -222,6 +222,12 @@ await installCommand('anthropics/skills', {
 // List installed skills
 const skills = await listCommand({ json: true });
 
+// Security scan
+import { SkillScanner, formatResult } from '@skillkit/core';
+const scanner = new SkillScanner({ failOnSeverity: 'high' });
+const result = await scanner.scan('./my-skill');
+console.log(formatResult(result, 'summary'));
+
 // Sync to agent
 await syncCommand({ all: true });
 

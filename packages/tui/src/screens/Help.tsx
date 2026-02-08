@@ -26,6 +26,7 @@ const SHORTCUTS = [
     { key: 'n', desc: 'Plan' },
     { key: 'v', desc: 'Validate' },
     { key: 'u', desc: 'Publish' },
+    { key: 'z', desc: 'Security scan' },
   ]},
   { section: 'Team & Config', items: [
     { key: 'a', desc: 'Team settings' },

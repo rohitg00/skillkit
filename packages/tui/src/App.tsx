@@ -8,7 +8,7 @@ import { StatusBar } from './components/StatusBar.js';
 import {
   Home, Browse, Installed, Marketplace, Settings, Recommend,
   Translate, Context, Memory, Team, Plugins, Methodology,
-  Plan, Workflow, Execute, History, Sync, Help, Mesh, Message,
+  Plan, Workflow, Execute, History, Sync, Help, Mesh, Message, Scan,
 } from './screens/index.js';
 
 const DOCS_URL = 'https://agenstskills.com/docs';
@@ -137,6 +137,7 @@ export function App(props: AppProps) {
               <Match when={currentScreen() === 'help'}><Help {...screenProps()} /></Match>
               <Match when={currentScreen() === 'mesh'}><Mesh {...screenProps()} /></Match>
               <Match when={currentScreen() === 'message'}><Message {...screenProps()} /></Match>
+              <Match when={currentScreen() === 'scan'}><Scan {...screenProps()} /></Match>
             </Switch>
           </box>
         </box>
