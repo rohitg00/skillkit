@@ -1,6 +1,10 @@
 <div align="center">
 
-<img alt="SkillKit - One Skill. Every Agent." src="docs/img/banner.gif" width="100%">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/banner.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/img/banner.svg">
+  <img alt="SkillKit - One Skill. Every Agent." src="docs/img/banner.svg" width="100%">
+</picture>
 
 <br/>
 <br/>
