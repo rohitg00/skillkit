@@ -329,7 +329,7 @@ Follow these guidelines`;
   });
 
   describe('supported agents', () => {
-    it('should support all 32 agents', () => {
+    it('should support all 44 agents', () => {
       const allAgents = [
         'claude-code',
         'cursor',
@@ -348,6 +348,18 @@ Follow these guidelines`;
         'trae',
         'windsurf',
         'universal',
+        'devin',
+        'aider',
+        'sourcegraph-cody',
+        'amazon-q',
+        'augment-code',
+        'replit-agent',
+        'bolt',
+        'lovable',
+        'tabby',
+        'tabnine',
+        'codegpt',
+        'playcode-agent',
       ] as const;
 
       const skill: CanonicalSkill = {

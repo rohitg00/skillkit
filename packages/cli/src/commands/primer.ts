@@ -22,13 +22,13 @@ export class PrimerCommand extends Command {
       for AI coding agents.
 
       By default, it generates instructions for detected agents in your project.
-      Use --all-agents to generate for all 32 supported agents.
+      Use --all-agents to generate for all 44 supported agents.
 
       Inspired by github.com/pierceboggan/primer but extended for all SkillKit agents.
     `,
     examples: [
       ['Generate for detected agents', '$0 primer'],
-      ['Generate for all 32 agents', '$0 primer --all-agents'],
+      ['Generate for all 44 agents', '$0 primer --all-agents'],
       ['Generate for specific agents', '$0 primer --agent claude-code,cursor,github-copilot'],
       ['Custom output directory', '$0 primer --output ./instructions'],
       ['Preview without writing files', '$0 primer --dry-run'],
@@ -42,7 +42,7 @@ export class PrimerCommand extends Command {
   });
 
   allAgents = Option.Boolean('--all-agents,-A', false, {
-    description: 'Generate for all 32 supported agents',
+    description: 'Generate for all 44 supported agents',
   });
 
   output = Option.String('--output,-o', {

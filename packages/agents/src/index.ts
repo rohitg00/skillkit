@@ -75,6 +75,18 @@ const adapters: Record<AgentType, AgentAdapter> = {
   qwen: new UniversalAdapter(),
   vercel: new UniversalAdapter(),
   zencoder: new UniversalAdapter(),
+  devin: new UniversalAdapter(),
+  aider: new UniversalAdapter(),
+  'sourcegraph-cody': new UniversalAdapter(),
+  'amazon-q': new UniversalAdapter(),
+  'augment-code': new UniversalAdapter(),
+  'replit-agent': new UniversalAdapter(),
+  bolt: new UniversalAdapter(),
+  lovable: new UniversalAdapter(),
+  tabby: new UniversalAdapter(),
+  tabnine: new UniversalAdapter(),
+  codegpt: new UniversalAdapter(),
+  'playcode-agent': new UniversalAdapter(),
 };
 
 export function getAdapter(type: AgentType): AgentAdapter {
@@ -126,6 +138,18 @@ export async function detectAgent(): Promise<AgentType> {
     'qwen',
     'vercel',
     'zencoder',
+    'devin',
+    'aider',
+    'sourcegraph-cody',
+    'amazon-q',
+    'augment-code',
+    'replit-agent',
+    'bolt',
+    'lovable',
+    'tabby',
+    'tabnine',
+    'codegpt',
+    'playcode-agent',
     'universal',
   ];
 

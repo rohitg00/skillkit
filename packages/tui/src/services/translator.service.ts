@@ -30,7 +30,19 @@ export type AgentType =
   | 'qoder'
   | 'qwen'
   | 'vercel'
-  | 'zencoder';
+  | 'zencoder'
+  | 'devin'
+  | 'aider'
+  | 'sourcegraph-cody'
+  | 'amazon-q'
+  | 'augment-code'
+  | 'replit-agent'
+  | 'bolt'
+  | 'lovable'
+  | 'tabby'
+  | 'tabnine'
+  | 'codegpt'
+  | 'playcode-agent';
 
 export interface TranslationDisplay {
   sourceFormat: string;

@@ -5,7 +5,7 @@ const OPENAPI_SPEC = {
   info: {
     title: 'SkillKit',
     version: '1.12.0',
-    description: 'Skill Discovery API for AI coding agents. Search, browse, and retrieve skills from the SkillKit marketplace (15,000+ skills across 32 agents).',
+    description: 'Skill Discovery API for AI coding agents. Search, browse, and retrieve skills from the SkillKit marketplace (15,000+ skills across 44 agents).',
     license: { name: 'Apache-2.0', url: 'https://opensource.org/licenses/Apache-2.0' },
     contact: { name: 'SkillKit', url: 'https://github.com/rohitg00/skillkit' },
   },

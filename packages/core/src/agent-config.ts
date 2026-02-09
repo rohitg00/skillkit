@@ -348,6 +348,119 @@ export const AGENT_CONFIG: Record<AgentType, AgentDirectoryConfig> = {
     usesFrontmatter: true,
     supportsAutoDiscovery: true,
   },
+
+  // Devin (Cognition Labs)
+  devin: {
+    skillsDir: '.devin/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'markdown',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Aider
+  aider: {
+    skillsDir: '.aider/skills',
+    configFile: 'AGENTS.md',
+    globalSkillsDir: '~/.aider/skills',
+    configFormat: 'markdown',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Sourcegraph Cody
+  'sourcegraph-cody': {
+    skillsDir: '.cody/skills',
+    configFile: 'AGENTS.md',
+    globalSkillsDir: '~/.cody/skills',
+    configFormat: 'markdown',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Amazon Q Developer
+  'amazon-q': {
+    skillsDir: '.amazonq/skills',
+    configFile: 'AGENTS.md',
+    globalSkillsDir: '~/.amazonq/skills',
+    configFormat: 'markdown',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Augment Code
+  'augment-code': {
+    skillsDir: '.augment/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'markdown',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Replit Agent
+  'replit-agent': {
+    skillsDir: '.replit/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'markdown',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Bolt (Vercel)
+  bolt: {
+    skillsDir: '.bolt/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'markdown',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Lovable
+  lovable: {
+    skillsDir: '.lovable/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'markdown',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Tabby
+  tabby: {
+    skillsDir: '.tabby/skills',
+    configFile: 'AGENTS.md',
+    globalSkillsDir: '~/.tabby/skills',
+    configFormat: 'markdown',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // Tabnine
+  tabnine: {
+    skillsDir: '.tabnine/skills',
+    configFile: 'AGENTS.md',
+    globalSkillsDir: '~/.tabnine/skills',
+    configFormat: 'markdown',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // CodeGPT
+  codegpt: {
+    skillsDir: '.codegpt/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'markdown',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
+  // PlayCode Agent
+  'playcode-agent': {
+    skillsDir: '.playcode/skills',
+    configFile: 'AGENTS.md',
+    configFormat: 'markdown',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
 };
 
 /**

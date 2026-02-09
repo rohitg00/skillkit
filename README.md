@@ -17,7 +17,7 @@
 [![Docs](https://img.shields.io/badge/Docs-blue?style=flat-square&logo=readthedocs&logoColor=white)](https://agenstskills.com/docs)
 [![API](https://img.shields.io/badge/API-green?style=flat-square&logo=swagger&logoColor=white)](https://agenstskills.com/api)
 
-**Write a skill once, deploy it to all 32 agents. No rewrites.**
+**Write a skill once, deploy it to all 44 agents. No rewrites.**
 
 [Website](https://agenstskills.com) &middot; [Docs](https://agenstskills.com/docs) &middot; [API](https://agenstskills.com/api) &middot; [npm](https://www.npmjs.com/package/skillkit)
 

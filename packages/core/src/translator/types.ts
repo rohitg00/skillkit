@@ -46,6 +46,18 @@ export const AGENT_FORMAT_MAP: Record<AgentType, FormatCategory> = {
   'qwen': 'skill-md',
   'vercel': 'skill-md',
   'zencoder': 'skill-md',
+  'devin': 'external',
+  'aider': 'skill-md',
+  'sourcegraph-cody': 'skill-md',
+  'amazon-q': 'skill-md',
+  'augment-code': 'skill-md',
+  'replit-agent': 'external',
+  'bolt': 'external',
+  'lovable': 'external',
+  'tabby': 'skill-md',
+  'tabnine': 'skill-md',
+  'codegpt': 'skill-md',
+  'playcode-agent': 'external',
 };
 
 /**

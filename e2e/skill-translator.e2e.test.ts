@@ -28,7 +28,7 @@ import {
   type CrossAgentSkill,
 } from '@skillkit/core';
 
-// All 32 supported agents
+// All 44 supported agents
 const SUPPORTED_AGENTS = [
   'claude-code',
   'cursor',
@@ -47,6 +47,18 @@ const SUPPORTED_AGENTS = [
   'trae',
   'windsurf',
   'universal',
+  'devin',
+  'aider',
+  'sourcegraph-cody',
+  'amazon-q',
+  'augment-code',
+  'replit-agent',
+  'bolt',
+  'lovable',
+  'tabby',
+  'tabnine',
+  'codegpt',
+  'playcode-agent',
 ] as const;
 
 describe('E2E: Skill Translator - Parsing', () => {

@@ -47,6 +47,18 @@ export const AGENT_LOGOS: Record<string, AgentLogo> = {
   'qwen': { icon: '⊧', name: 'Qwen', company: 'Alibaba' },
   'vercel': { icon: '▲', name: 'Vercel', company: 'Vercel' },
   'zencoder': { icon: '⊩', name: 'Zencoder', company: '' },
+  'devin': { icon: '▧', name: 'Devin', company: 'Cognition' },
+  'aider': { icon: '▨', name: 'Aider', company: '' },
+  'sourcegraph-cody': { icon: '▩', name: 'Cody', company: 'Sourcegraph' },
+  'amazon-q': { icon: '▪', name: 'Amazon Q', company: 'AWS' },
+  'augment-code': { icon: '▫', name: 'Augment', company: 'Augment Code' },
+  'replit-agent': { icon: '▴', name: 'Replit Agent', company: 'Replit' },
+  'bolt': { icon: '⚡', name: 'Bolt', company: 'StackBlitz' },
+  'lovable': { icon: '♥', name: 'Lovable', company: 'Lovable' },
+  'tabby': { icon: '▹', name: 'Tabby', company: 'TabbyML' },
+  'tabnine': { icon: '►', name: 'Tabnine', company: 'Tabnine' },
+  'codegpt': { icon: '▻', name: 'CodeGPT', company: '' },
+  'playcode-agent': { icon: '▽', name: 'PlayCode', company: '' },
   'universal': { icon: '●', name: 'Universal', company: '' },
 } as const;
 
