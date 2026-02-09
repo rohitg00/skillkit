@@ -1,57 +1,107 @@
 <svg width="1200" height="400" viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#0a0a0a"/>
-      <stop offset="50%" style="stop-color:#111111"/>
-      <stop offset="100%" style="stop-color:#0a0a0a"/>
+      <stop offset="0%" style="stop-color:#000000"/>
+      <stop offset="100%" style="stop-color:#0d0d0d"/>
     </linearGradient>
-    <linearGradient id="border" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#333"/>
-      <stop offset="50%" style="stop-color:#555"/>
-      <stop offset="100%" style="stop-color:#333"/>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0"/>
+      <stop offset="50%" style="stop-color:#3b82f6;stop-opacity:0.08"/>
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0"/>
     </linearGradient>
-    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#666"/>
-      <stop offset="100%" style="stop-color:#999"/>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#e0e0e0"/>
     </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#60a5fa"/>
+    </linearGradient>
+    <filter id="glow-filter">
+      <feGaussianBlur stdDeviation="20" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
 
-  <rect width="1200" height="400" fill="url(#bg)" rx="12"/>
-  <rect x="1" y="1" width="1198" height="398" fill="none" stroke="url(#border)" stroke-width="1" rx="12"/>
+  <!-- Background -->
+  <rect width="1200" height="400" fill="url(#bg)"/>
 
-  <line x1="60" y1="340" x2="1140" y2="340" stroke="#1a1a1a" stroke-width="1"/>
-
-  <g transform="translate(60, 80)">
-    <rect width="16" height="16" fill="white" rx="2"/>
+  <!-- Subtle grid pattern -->
+  <g opacity="0.03">
+    <line x1="0" y1="0" x2="0" y2="400" stroke="white" stroke-width="1" transform="translate(100,0)"/>
+    <line x1="0" y1="0" x2="0" y2="400" stroke="white" stroke-width="1" transform="translate(200,0)"/>
+    <line x1="0" y1="0" x2="0" y2="400" stroke="white" stroke-width="1" transform="translate(300,0)"/>
+    <line x1="0" y1="0" x2="0" y2="400" stroke="white" stroke-width="1" transform="translate(400,0)"/>
+    <line x1="0" y1="0" x2="0" y2="400" stroke="white" stroke-width="1" transform="translate(500,0)"/>
+    <line x1="0" y1="0" x2="0" y2="400" stroke="white" stroke-width="1" transform="translate(600,0)"/>
+    <line x1="0" y1="0" x2="0" y2="400" stroke="white" stroke-width="1" transform="translate(700,0)"/>
+    <line x1="0" y1="0" x2="0" y2="400" stroke="white" stroke-width="1" transform="translate(800,0)"/>
+    <line x1="0" y1="0" x2="0" y2="400" stroke="white" stroke-width="1" transform="translate(900,0)"/>
+    <line x1="0" y1="0" x2="0" y2="400" stroke="white" stroke-width="1" transform="translate(1000,0)"/>
+    <line x1="0" y1="0" x2="0" y2="400" stroke="white" stroke-width="1" transform="translate(1100,0)"/>
+    <line x1="0" y1="100" x2="1200" y2="100" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="200" x2="1200" y2="200" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="300" x2="1200" y2="300" stroke="white" stroke-width="1"/>
   </g>
 
-  <text x="90" y="94" font-family="'SF Mono', 'Fira Code', 'JetBrains Mono', Consolas, monospace" font-size="20" font-weight="700" fill="white" letter-spacing="3">SKILLKIT</text>
+  <!-- Accent glow behind title -->
+  <ellipse cx="600" cy="170" rx="300" ry="80" fill="#3b82f6" opacity="0.04" filter="url(#glow-filter)"/>
 
-  <text x="600" y="200" font-family="'SF Mono', 'Fira Code', 'JetBrains Mono', Consolas, monospace" font-size="62" font-weight="700" fill="white" text-anchor="middle" letter-spacing="-1">One Skill. 32 Agents.</text>
-
-  <text x="600" y="248" font-family="'SF Mono', 'Fira Code', 'JetBrains Mono', Consolas, monospace" font-size="20" fill="#888" text-anchor="middle" letter-spacing="0.5">The open source package manager for AI agent skills</text>
-
-  <g transform="translate(280, 280)">
-    <rect width="280" height="40" fill="#1a1a1a" stroke="#333" stroke-width="1" rx="6"/>
-    <text x="16" y="26" font-family="'SF Mono', 'Fira Code', monospace" font-size="14" fill="#666">$</text>
-    <text x="32" y="26" font-family="'SF Mono', 'Fira Code', monospace" font-size="14" fill="#ccc">npx skillkit@latest</text>
+  <!-- Logo mark -->
+  <g transform="translate(600, 75)" text-anchor="middle">
+    <!-- Diamond logo -->
+    <g transform="translate(0, 0)">
+      <polygon points="0,-18 18,0 0,18 -18,0" fill="none" stroke="url(#accentGrad)" stroke-width="2"/>
+      <polygon points="0,-10 10,0 0,10 -10,0" fill="url(#accentGrad)" opacity="0.3"/>
+      <line x1="0" y1="-18" x2="0" y2="18" stroke="url(#accentGrad)" stroke-width="1" opacity="0.5"/>
+      <line x1="-18" y1="0" x2="18" y2="0" stroke="url(#accentGrad)" stroke-width="1" opacity="0.5"/>
+    </g>
   </g>
 
-  <g transform="translate(580, 280)">
-    <rect width="160" height="40" fill="transparent" stroke="#444" stroke-width="1" rx="6"/>
-    <text x="80" y="26" font-family="'SF Mono', 'Fira Code', monospace" font-size="14" fill="#999" text-anchor="middle">15,000+ skills</text>
+  <!-- SKILL text -->
+  <text x="487" y="195" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="72" font-weight="800" fill="url(#textGrad)" letter-spacing="-2">SKILL</text>
+  <!-- KIT text in accent -->
+  <text x="713" y="195" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="72" font-weight="800" fill="url(#accentGrad)" letter-spacing="-2">KIT</text>
+
+  <!-- Tagline -->
+  <text x="600" y="232" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="18" fill="#888" text-anchor="middle" letter-spacing="4" font-weight="500">ONE SKILL. EVERY AGENT.</text>
+
+  <!-- Stats row -->
+  <g transform="translate(600, 285)" text-anchor="middle">
+    <!-- 44 Agents pill -->
+    <g transform="translate(-200, 0)">
+      <rect x="-60" y="-16" width="120" height="32" fill="#1a1a2e" stroke="#3b82f6" stroke-width="1" rx="16" opacity="0.8"/>
+      <text x="0" y="5" font-family="system-ui, sans-serif" font-size="13" fill="#60a5fa" font-weight="600">44 Agents</text>
+    </g>
+    <!-- 15K Skills pill -->
+    <g transform="translate(-50, 0)">
+      <rect x="-60" y="-16" width="120" height="32" fill="#1a1a2e" stroke="#374151" stroke-width="1" rx="16" opacity="0.8"/>
+      <text x="0" y="5" font-family="system-ui, sans-serif" font-size="13" fill="#9ca3af" font-weight="600">15,000+ Skills</text>
+    </g>
+    <!-- Zero Rewrites pill -->
+    <g transform="translate(100, 0)">
+      <rect x="-60" y="-16" width="120" height="32" fill="#1a1a2e" stroke="#374151" stroke-width="1" rx="16" opacity="0.8"/>
+      <text x="0" y="5" font-family="system-ui, sans-serif" font-size="13" fill="#9ca3af" font-weight="600">Zero Rewrites</text>
+    </g>
+    <!-- Open Source pill -->
+    <g transform="translate(250, 0)">
+      <rect x="-65" y="-16" width="130" height="32" fill="#1a1a2e" stroke="#374151" stroke-width="1" rx="16" opacity="0.8"/>
+      <text x="0" y="5" font-family="system-ui, sans-serif" font-size="13" fill="#9ca3af" font-weight="600">Apache-2.0</text>
+    </g>
   </g>
 
-  <g transform="translate(760, 280)">
-    <rect width="160" height="40" fill="transparent" stroke="#444" stroke-width="1" rx="6"/>
-    <text x="80" y="26" font-family="'SF Mono', 'Fira Code', monospace" font-size="14" fill="#999" text-anchor="middle">Zero rewrites</text>
+  <!-- Command -->
+  <g transform="translate(600, 340)" text-anchor="middle">
+    <rect x="-130" y="-16" width="260" height="32" fill="#111" stroke="#2a2a2a" stroke-width="1" rx="6"/>
+    <text x="-100" y="5" font-family="'SF Mono', 'Fira Code', 'JetBrains Mono', monospace" font-size="13" fill="#4b5563">$</text>
+    <text x="-84" y="5" font-family="'SF Mono', 'Fira Code', 'JetBrains Mono', monospace" font-size="13" fill="#d1d5db">npx skillkit@latest</text>
   </g>
 
-  <g transform="translate(60, 355)">
-    <circle cx="5" cy="5" r="3" fill="#666"/>
-    <circle cx="15" cy="5" r="3" fill="#555"/>
-    <circle cx="25" cy="5" r="3" fill="#444"/>
-    <circle cx="35" cy="5" r="3" fill="#333"/>
-    <text x="50" y="9" font-family="'SF Mono', monospace" font-size="11" fill="#444">Claude  Cursor  Codex  Gemini  Copilot  Windsurf  OpenCode  +25 more</text>
+  <!-- Agent icons row at bottom -->
+  <g transform="translate(600, 380)" text-anchor="middle">
+    <text x="0" y="0" font-family="system-ui, sans-serif" font-size="11" fill="#374151" letter-spacing="1">Claude  ·  Cursor  ·  Codex  ·  Gemini  ·  Copilot  ·  Windsurf  ·  Devin  ·  Aider  ·  Cody  ·  +35 more</text>
   </g>
 </svg>

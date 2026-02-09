@@ -3,23 +3,21 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/banner.svg">
   <source media="(prefers-color-scheme: light)" srcset="docs/img/banner.svg">
-  <img alt="SkillKit - One Skill. 32 Agents." src="docs/img/banner.svg" width="100%">
+  <img alt="SkillKit - One Skill. Every Agent." src="docs/img/banner.svg" width="100%">
 </picture>
 
 <br/>
+<br/>
 
-[![npm version](https://img.shields.io/npm/v/skillkit.svg?style=flat-square)](https://www.npmjs.com/package/skillkit)
+[![CI](https://github.com/rohitg00/skillkit/actions/workflows/ci.yml/badge.svg)](https://github.com/rohitg00/skillkit/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/skillkit.svg?style=flat-square&color=3b82f6)](https://www.npmjs.com/package/skillkit)
 [![npm downloads](https://img.shields.io/npm/dm/skillkit.svg?style=flat-square)](https://www.npmjs.com/package/skillkit)
 [![GitHub stars](https://img.shields.io/github/stars/rohitg00/skillkit?style=flat-square)](https://github.com/rohitg00/skillkit/stargazers)
-[![CI](https://github.com/rohitg00/skillkit/actions/workflows/ci.yml/badge.svg)](https://github.com/rohitg00/skillkit/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
-[![Website](https://img.shields.io/badge/agenstskills.com-black?style=flat-square&logo=vercel)](https://agenstskills.com)
-[![Docs](https://img.shields.io/badge/Docs-blue?style=flat-square&logo=readthedocs&logoColor=white)](https://agenstskills.com/docs)
-[![API](https://img.shields.io/badge/API-green?style=flat-square&logo=swagger&logoColor=white)](https://agenstskills.com/api)
 
-**Write a skill once, deploy it to all 44 agents. No rewrites.**
+**SkillKit** is the open source package manager for AI agent skills. Write a skill once, deploy it to **44 agents** — Claude, Cursor, Copilot, Windsurf, Devin, Codex, and 38 more. No rewrites. 15,000+ skills in the marketplace.
 
-[Website](https://agenstskills.com) &middot; [Docs](https://agenstskills.com/docs) &middot; [API](https://agenstskills.com/api) &middot; [npm](https://www.npmjs.com/package/skillkit)
+[Website](https://agenstskills.com) &middot; [Docs](https://agenstskills.com/docs) &middot; [API Explorer](https://agenstskills.com/api) &middot; [npm](https://www.npmjs.com/package/skillkit)
 
 </div>
 
@@ -36,7 +34,7 @@ Skills make AI coding agents smarter. But every agent uses a different format:
 
 You end up rewriting the same skill for each agent, or locking into one platform.
 
-**SkillKit fixes this.** Install from 15,000+ skills, auto-translate between formats, persist learnings with Memory. Works with Claude, Cursor, Windsurf, Copilot, and 28 more.
+**SkillKit fixes this.** Install from 15,000+ skills, auto-translate between formats, persist learnings with Memory. Works with Claude, Cursor, Windsurf, Copilot, and 40 more.
 
 ```bash
 npx skillkit@latest
@@ -193,7 +191,7 @@ skillkit ui
 
 ![SkillKit Interactive CLI](docs/img/inital-command.png)
 
-## Supported Agents (32)
+## Supported Agents (44)
 
 | Agent | Format | Directory |
 |-------|--------|-----------|
@@ -204,8 +202,12 @@ skillkit ui
 | **OpenCode** | SKILL.md | `.opencode/skills/` |
 | **GitHub Copilot** | Markdown | `.github/skills/` |
 | **Windsurf** | Markdown | `.windsurf/skills/` |
+| **Devin** | Markdown | `.devin/skills/` |
+| **Aider** | SKILL.md | `.aider/skills/` |
+| **Sourcegraph Cody** | SKILL.md | `.cody/skills/` |
+| **Amazon Q** | SKILL.md | `.amazonq/skills/` |
 
-Plus 25 more: Amp, Antigravity, Clawdbot, Cline, CodeBuddy, CommandCode, Continue, Crush, Droid, Factory, Goose, Kilo Code, Kiro CLI, MCPJam, Mux, Neovate, OpenHands, Pi, Qoder, Qwen, Roo Code, Trae, Vercel, Zencoder, Universal
+Plus 33 more: Amp, Antigravity, Augment Code, Bolt, Clawdbot, Cline, CodeBuddy, CodeGPT, CommandCode, Continue, Crush, Droid, Factory, Goose, Kilo Code, Kiro CLI, Lovable, MCPJam, Mux, Neovate, OpenHands, Pi, PlayCode, Qoder, Qwen, Replit Agent, Roo Code, Tabby, Tabnine, Trae, Vercel, Zencoder, Universal
 
 [Full agent details](https://agenstskills.com/docs/agents)
 
