@@ -401,6 +401,11 @@ export function translateSkillToAll(
     'claude-code', 'cursor', 'codex', 'gemini-cli', 'opencode',
     'antigravity', 'amp', 'clawdbot', 'droid', 'github-copilot',
     'goose', 'kilo', 'kiro-cli', 'roo', 'trae', 'windsurf', 'universal',
+    'cline', 'codebuddy', 'commandcode', 'continue', 'crush', 'factory',
+    'mcpjam', 'mux', 'neovate', 'openhands', 'pi', 'qoder', 'qwen',
+    'vercel', 'zencoder', 'devin', 'aider', 'sourcegraph-cody', 'amazon-q',
+    'augment-code', 'replit-agent', 'bolt', 'lovable', 'tabby', 'tabnine',
+    'codegpt', 'playcode-agent',
   ];
 
   for (const agent of agents) {
