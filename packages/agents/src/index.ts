@@ -18,6 +18,7 @@ import { RooAdapter } from './roo.js';
 import { TraeAdapter } from './trae.js';
 import { WindsurfAdapter } from './windsurf.js';
 import { UniversalAdapter } from './universal.js';
+import { GenericAgentAdapter } from './generic.js';
 
 export * from './base.js';
 export * from './claude-code.js';
@@ -38,6 +39,7 @@ export * from './roo.js';
 export * from './trae.js';
 export * from './windsurf.js';
 export * from './universal.js';
+export * from './generic.js';
 
 // Agent features
 export * from './features/index.js';
@@ -60,33 +62,33 @@ const adapters: Record<AgentType, AgentAdapter> = {
   trae: new TraeAdapter(),
   windsurf: new WindsurfAdapter(),
   universal: new UniversalAdapter(),
-  cline: new UniversalAdapter(),
-  codebuddy: new UniversalAdapter(),
-  commandcode: new UniversalAdapter(),
-  continue: new UniversalAdapter(),
-  crush: new UniversalAdapter(),
   factory: new FactoryAdapter(),
-  mcpjam: new UniversalAdapter(),
-  mux: new UniversalAdapter(),
-  neovate: new UniversalAdapter(),
-  openhands: new UniversalAdapter(),
-  pi: new UniversalAdapter(),
-  qoder: new UniversalAdapter(),
-  qwen: new UniversalAdapter(),
-  vercel: new UniversalAdapter(),
-  zencoder: new UniversalAdapter(),
-  devin: new UniversalAdapter(),
-  aider: new UniversalAdapter(),
-  'sourcegraph-cody': new UniversalAdapter(),
-  'amazon-q': new UniversalAdapter(),
-  'augment-code': new UniversalAdapter(),
-  'replit-agent': new UniversalAdapter(),
-  bolt: new UniversalAdapter(),
-  lovable: new UniversalAdapter(),
-  tabby: new UniversalAdapter(),
-  tabnine: new UniversalAdapter(),
-  codegpt: new UniversalAdapter(),
-  'playcode-agent': new UniversalAdapter(),
+  cline: new GenericAgentAdapter('cline'),
+  codebuddy: new GenericAgentAdapter('codebuddy'),
+  commandcode: new GenericAgentAdapter('commandcode'),
+  continue: new GenericAgentAdapter('continue'),
+  crush: new GenericAgentAdapter('crush'),
+  mcpjam: new GenericAgentAdapter('mcpjam'),
+  mux: new GenericAgentAdapter('mux'),
+  neovate: new GenericAgentAdapter('neovate'),
+  openhands: new GenericAgentAdapter('openhands'),
+  pi: new GenericAgentAdapter('pi'),
+  qoder: new GenericAgentAdapter('qoder'),
+  qwen: new GenericAgentAdapter('qwen'),
+  vercel: new GenericAgentAdapter('vercel'),
+  zencoder: new GenericAgentAdapter('zencoder'),
+  devin: new GenericAgentAdapter('devin'),
+  aider: new GenericAgentAdapter('aider'),
+  'sourcegraph-cody': new GenericAgentAdapter('sourcegraph-cody'),
+  'amazon-q': new GenericAgentAdapter('amazon-q'),
+  'augment-code': new GenericAgentAdapter('augment-code'),
+  'replit-agent': new GenericAgentAdapter('replit-agent'),
+  bolt: new GenericAgentAdapter('bolt'),
+  lovable: new GenericAgentAdapter('lovable'),
+  tabby: new GenericAgentAdapter('tabby'),
+  tabnine: new GenericAgentAdapter('tabnine'),
+  codegpt: new GenericAgentAdapter('codegpt'),
+  'playcode-agent': new GenericAgentAdapter('playcode-agent'),
 };
 
 export function getAdapter(type: AgentType): AgentAdapter {
@@ -162,6 +164,3 @@ export async function detectAgent(): Promise<AgentType> {
 
   return 'universal';
 }
-
-// getSkillsDir and getConfigFile are now re-exported from @skillkit/core above
-// This ensures a single source of truth for agent configurations
