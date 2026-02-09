@@ -81,6 +81,18 @@ describe('E2E: Onboarding UI', () => {
         'Qwen',
         'Vercel',
         'Zencoder',
+        'Devin',
+        'Aider',
+        'Cody',
+        'Amazon Q',
+        'Augment',
+        'Replit',
+        'Bolt',
+        'Lovable',
+        'Tabby',
+        'Tabnine',
+        'CodeGPT',
+        'PlayCode',
       ];
 
       for (const agent of agents) {
