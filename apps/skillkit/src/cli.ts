@@ -104,6 +104,7 @@ import {
   SkillMdCheckCommand,
   ServeCommand,
   ScanCommand,
+  DoctorCommand,
   SaveCommand,
   AgentsMdCommand,
   AgentsMdInitCommand,
@@ -238,6 +239,7 @@ cli.register(SkillMdCheckCommand);
 
 cli.register(ServeCommand);
 cli.register(ScanCommand);
+cli.register(DoctorCommand);
 cli.register(SaveCommand);
 cli.register(AgentsMdCommand);
 cli.register(AgentsMdInitCommand);

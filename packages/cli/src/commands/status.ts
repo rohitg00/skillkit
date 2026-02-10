@@ -1,7 +1,10 @@
 import { Command, Option } from 'clipanion';
 import { resolve } from 'node:path';
+import { existsSync } from 'node:fs';
 import chalk from 'chalk';
-import { SessionManager } from '@skillkit/core';
+import { SessionManager, findAllSkills, loadConfig, getProjectConfigPath } from '@skillkit/core';
+import { detectAgent, getAdapter } from '@skillkit/agents';
+import { getSearchDirs } from '../helpers.js';
 
 /**
  * Status command - show current session state
@@ -22,22 +25,18 @@ export class StatusCommand extends Command {
     ],
   });
 
-  // Show history
   history = Option.Boolean('--history,-h', false, {
     description: 'Show execution history',
   });
 
-  // History limit
   limit = Option.String('--limit,-l', {
     description: 'Limit history entries (default: 10)',
   });
 
-  // JSON output
   json = Option.Boolean('--json,-j', false, {
     description: 'Output in JSON format',
   });
 
-  // Project path
   projectPath = Option.String('--path,-p', {
     description: 'Project path (default: current directory)',
   });
@@ -47,14 +46,18 @@ export class StatusCommand extends Command {
     const manager = new SessionManager(targetPath);
     const state = manager.get();
 
-    if (this.json) {
-      console.log(JSON.stringify(state || { message: 'No session found' }, null, 2));
+    if (!state) {
+      const overview = await this.buildOverview(manager);
+      if (this.json) {
+        console.log(JSON.stringify({ session: null, overview }, null, 2));
+        return 0;
+      }
+      this.showOverview(overview);
       return 0;
     }
 
-    if (!state) {
-      console.log(chalk.dim('No active session found.'));
-      console.log(chalk.dim('Run a skill with "skillkit run <skill>" to start a session.'));
+    if (this.json) {
+      console.log(JSON.stringify(state, null, 2));
       return 0;
     }
 
@@ -132,6 +135,83 @@ export class StatusCommand extends Command {
     }
 
     return 0;
+  }
+
+  private async buildOverview(manager: SessionManager): Promise<Record<string, unknown>> {
+    let agent = 'universal';
+    try {
+      agent = await detectAgent();
+    } catch {
+      // fallback
+    }
+
+    const configPath = getProjectConfigPath();
+    const hasConfig = existsSync(configPath);
+    let configAgent = 'universal';
+    if (hasConfig) {
+      try {
+        configAgent = loadConfig().agent;
+      } catch {
+        // ignore
+      }
+    }
+
+    const version = this.cli.binaryVersion ?? 'unknown';
+
+    let searchDirs: string[] = [];
+    try {
+      searchDirs = getSearchDirs(agent as any);
+    } catch {
+      // fallback
+    }
+
+    const allSkills = findAllSkills(searchDirs);
+    const projectSkills = allSkills.filter(s => s.location === 'project');
+    const globalSkills = allSkills.filter(s => s.location === 'global');
+    const adapter = getAdapter(agent as any);
+    const recentHistory = manager.getHistory(3);
+
+    return {
+      agent,
+      config: hasConfig ? configPath : null,
+      configAgent,
+      version,
+      totalSkills: allSkills.length,
+      projectSkills: projectSkills.length,
+      globalSkills: globalSkills.length,
+      skillsDir: adapter.skillsDir,
+      recentHistory,
+    };
+  }
+
+  private showOverview(overview: Record<string, unknown>): void {
+    console.log('');
+    console.log(chalk.cyan('  Project Overview'));
+    console.log(`    Agent:    ${chalk.bold(String(overview.agent))}`);
+    console.log(`    Config:   ${overview.config ? chalk.green('skillkit.yaml') : chalk.dim('none (defaults)')}`);
+    console.log(`    Version:  ${chalk.bold(String(overview.version))}`);
+    console.log('');
+
+    const total = overview.totalSkills as number;
+    console.log(chalk.cyan(`  Skills (${total} installed)`));
+    console.log(`    Project:  ${overview.projectSkills} skills in ${overview.skillsDir}`);
+    console.log(`    Global:   ${overview.globalSkills} skills`);
+    console.log('');
+
+    console.log(chalk.cyan('  Recent Activity'));
+    const history = overview.recentHistory as Array<{ status: string; skillName: string; completedAt: string }>;
+    if (history.length === 0) {
+      console.log(chalk.dim('    No recent executions.'));
+    } else {
+      for (const entry of history) {
+        const statusColor = entry.status === 'completed' ? chalk.green : chalk.red;
+        console.log(`    ${statusColor('\u25cf')} ${entry.skillName} - ${new Date(entry.completedAt).toLocaleDateString()}`);
+      }
+    }
+    console.log('');
+
+    console.log(chalk.dim('  Tip: Run "skillkit doctor" for a full health check.'));
+    console.log('');
   }
 
   private getStatusIcon(status: string): string {
