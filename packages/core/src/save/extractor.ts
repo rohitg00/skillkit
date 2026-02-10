@@ -45,6 +45,7 @@ const LANGUAGE_MAP: Record<string, string> = {
 
 const GITHUB_URL_PATTERN = /^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+)$/;
 const GITHUB_RAW_PATTERN = /^https?:\/\/raw\.githubusercontent\.com\//;
+const FETCH_TIMEOUT = 30_000;
 
 export class ContentExtractor {
   private turndown: TurndownService;
@@ -61,7 +62,7 @@ export class ContentExtractor {
       return this.fetchGitHubContent(url, options);
     }
 
-    const response = await fetch(url);
+    const response = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT) });
     if (!response.ok) {
       throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
     }
@@ -149,7 +150,7 @@ export class ContentExtractor {
       rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
     }
 
-    const response = await fetch(rawUrl);
+    const response = await fetch(rawUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT) });
     if (!response.ok) {
       throw new Error(`Failed to fetch GitHub content: ${response.status} ${response.statusText}`);
     }

@@ -44,17 +44,21 @@ export class AgentsMdInitCommand extends Command {
       return 1;
     }
 
-    const generator = new AgentsMdGenerator({ projectPath });
-    const result = generator.generate();
+    try {
+      const generator = new AgentsMdGenerator({ projectPath });
+      const result = generator.generate();
 
-    console.log(chalk.dim('Preview:'));
-    console.log('');
-    console.log(result.content);
+      console.log(chalk.dim('Preview:'));
+      console.log('');
+      console.log(result.content);
 
-    writeFileSync(agentsPath, result.content, 'utf-8');
-    console.log(chalk.green(`Created ${agentsPath}`));
-
-    return 0;
+      writeFileSync(agentsPath, result.content, 'utf-8');
+      console.log(chalk.green(`Created ${agentsPath}`));
+      return 0;
+    } catch (err) {
+      console.log(chalk.red(`Failed to generate AGENTS.md: ${err instanceof Error ? err.message : String(err)}`));
+      return 1;
+    }
   }
 }
 
@@ -74,23 +78,27 @@ export class AgentsMdSyncCommand extends Command {
       return 1;
     }
 
-    const existing = readFileSync(agentsPath, 'utf-8');
-    const parser = new AgentsMdParser();
+    try {
+      const existing = readFileSync(agentsPath, 'utf-8');
+      const parser = new AgentsMdParser();
 
-    if (!parser.hasManagedSections(existing)) {
-      console.log(chalk.yellow('No managed sections found in AGENTS.md. Nothing to update.'));
+      if (!parser.hasManagedSections(existing)) {
+        console.log(chalk.yellow('No managed sections found in AGENTS.md. Nothing to update.'));
+        return 0;
+      }
+
+      const generator = new AgentsMdGenerator({ projectPath });
+      const result = generator.generate();
+      const managedSections = result.sections.filter(s => s.managed);
+      const updated = parser.updateManagedSections(existing, managedSections);
+
+      writeFileSync(agentsPath, updated, 'utf-8');
+      console.log(chalk.green(`Updated ${managedSections.length} managed section(s) in AGENTS.md`));
       return 0;
+    } catch (err) {
+      console.log(chalk.red(`Failed to sync AGENTS.md: ${err instanceof Error ? err.message : String(err)}`));
+      return 1;
     }
-
-    const generator = new AgentsMdGenerator({ projectPath });
-    const result = generator.generate();
-    const managedSections = result.sections.filter(s => s.managed);
-    const updated = parser.updateManagedSections(existing, managedSections);
-
-    writeFileSync(agentsPath, updated, 'utf-8');
-    console.log(chalk.green(`Updated ${managedSections.length} managed section(s) in AGENTS.md`));
-
-    return 0;
   }
 }
 

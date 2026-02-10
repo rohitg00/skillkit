@@ -90,19 +90,18 @@ export class SkillGenerator {
     const yamlTags = tags.map((t) => `  - ${t}`).join('\n');
     const savedAt = new Date().toISOString();
 
-    return [
+    const lines = [
       '---',
       `name: ${name}`,
       `description: ${this.yamlEscape(description)}`,
-      tags.length > 0 ? `tags:\n${yamlTags}` : '',
+      tags.length > 0 ? `tags:\n${yamlTags}` : null,
       'metadata:',
-      source ? `  source: ${source}` : '',
+      source ? `  source: ${source}` : null,
       `  savedAt: ${savedAt}`,
       '---',
-      '',
-    ]
-      .filter(Boolean)
-      .join('\n');
+    ].filter((l): l is string => l !== null);
+
+    return lines.join('\n') + '\n';
   }
 
   private yamlEscape(value: string): string {

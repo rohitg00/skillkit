@@ -6,6 +6,18 @@ import type { GitProviderAdapter, CloneOptions } from './base.js';
 import { isGitUrl, isLocalPath } from './base.js';
 import type { GitProvider, CloneResult } from '../types.js';
 
+function skillNameFromUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    const segments = parsed.pathname.split('/').filter(Boolean);
+    return segments[segments.length - 1] || parsed.hostname.split('.')[0] || 'default';
+  } catch {
+    return basename(url) || 'default';
+  }
+}
+
+const FRONTMATTER_REGEX = /^---\s*\n[\s\S]*?name:\s*.+/;
+
 function sanitizeSkillName(name: string): string | null {
   if (!name || typeof name !== 'string') return null;
   const base = basename(name);
@@ -85,8 +97,8 @@ export class WellKnownProvider implements GitProviderAdapter {
           const response = await fetch(fullUrl);
           if (response.ok) {
             const content = await response.text();
-            if (/^---\s*\n[\s\S]*?name:\s*.+/m.test(content)) {
-              const skillName = basename(baseUrl) || 'default';
+            if (FRONTMATTER_REGEX.test(content)) {
+              const skillName = skillNameFromUrl(baseUrl);
               const safeName = sanitizeSkillName(skillName) ?? 'default';
               const skillDir = join(tempDir, safeName);
               mkdirSync(skillDir, { recursive: true });
@@ -158,8 +170,8 @@ export class WellKnownProvider implements GitProviderAdapter {
             const response = await fetch(fullUrl);
             if (response.ok) {
               const content = await response.text();
-              if (/^---\s*\n[\s\S]*?name:\s*.+/m.test(content)) {
-                const skillName = basename(baseUrl) || 'default';
+              if (FRONTMATTER_REGEX.test(content)) {
+                const skillName = skillNameFromUrl(baseUrl);
                 const safeName = sanitizeSkillName(skillName) ?? 'default';
                 const skillDir = join(tempDir, safeName);
                 mkdirSync(skillDir, { recursive: true });

@@ -129,8 +129,14 @@ export class PublishCommand extends Command {
         return 0;
       }
 
+      const resolvedOutput = resolve(outputDir);
       for (const skill of validSkills) {
         const mintlifyDir = join(outputDir, '.well-known', 'skills', skill.safeName);
+        const resolvedDir = resolve(mintlifyDir);
+        if (!resolvedDir.startsWith(resolvedOutput)) {
+          console.log(chalk.red(`Skipping ${skill.safeName} (path traversal detected)`));
+          continue;
+        }
         mkdirSync(mintlifyDir, { recursive: true });
         const skillMdPath = join(skill.path, 'SKILL.md');
         if (existsSync(skillMdPath)) {

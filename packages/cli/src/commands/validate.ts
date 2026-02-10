@@ -158,19 +158,6 @@ function printSpecReport(specResult: SpecValidationResult): void {
     }
   }
 
-  if (specResult.errors.length > 0) {
-    console.log('');
-    for (const err of specResult.errors) {
-      console.log(`  ${colors.error(symbols.error)} ${err}`);
-    }
-  }
-
-  if (specResult.warnings.length > 0) {
-    console.log('');
-    for (const w of specResult.warnings) {
-      console.log(`  ${colors.warning(symbols.warning)} ${w}`);
-    }
-  }
 }
 
 function getOrdinal(n: number): string {
