@@ -1,6 +1,7 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { fileURLToPath } from 'node:url';
+import { realpathSync } from 'node:fs';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -22,10 +23,12 @@ async function loadSkills(): Promise<SkillEntry[]> {
   const { readFileSync } = await import('node:fs');
   const { join, dirname } = await import('node:path');
 
+  const pkgDir = dirname(fileURLToPath(import.meta.url));
   const possiblePaths = [
+    join(pkgDir, '..', 'data', 'skills.json'),
+    join(pkgDir, '..', '..', '..', 'marketplace', 'skills.json'),
+    join(pkgDir, '..', '..', 'marketplace', 'skills.json'),
     join(process.cwd(), 'marketplace', 'skills.json'),
-    join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'marketplace', 'skills.json'),
-    join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'marketplace', 'skills.json'),
   ];
 
   for (const path of possiblePaths) {
@@ -52,7 +55,7 @@ async function loadSkills(): Promise<SkillEntry[]> {
 const server = new Server(
   {
     name: 'skillkit-discovery',
-    version: '1.12.0',
+    version: '1.16.0',
   },
   {
     capabilities: {
@@ -212,8 +215,9 @@ async function main() {
   console.error('SkillKit Discovery MCP Server running on stdio');
 }
 
-const isMain = process.argv[1] === fileURLToPath(import.meta.url);
-if (isMain) {
+const resolvedArgv = realpathSync(process.argv[1]);
+const resolvedModule = fileURLToPath(import.meta.url);
+if (resolvedArgv === resolvedModule) {
   main().catch((error) => {
     console.error('Fatal error:', error);
     process.exit(1);

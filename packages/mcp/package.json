@@ -15,9 +15,11 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "data"
   ],
   "scripts": {
+    "prebuild": "mkdir -p data && cp ../../marketplace/skills.json data/skills.json",
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
