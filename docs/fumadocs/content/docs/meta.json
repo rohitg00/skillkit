@@ -3,6 +3,7 @@
   "pages": [
     "index",
     "installation",
+    "chrome-extension",
     "quickstart",
     "tui",
     "skills",

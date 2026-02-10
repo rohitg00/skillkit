@@ -17,7 +17,7 @@
 
 **SkillKit** is the open source package manager for AI agent skills. Write a skill once, deploy it to **44 agents** — Claude, Cursor, Copilot, Windsurf, Devin, Codex, and 38 more. No rewrites. 15,000+ skills in the marketplace.
 
-[Website](https://agenstskills.com) &middot; [Docs](https://agenstskills.com/docs) &middot; [API Explorer](https://agenstskills.com/api) &middot; [npm](https://www.npmjs.com/package/skillkit)
+[Website](https://agenstskills.com) &middot; [Docs](https://agenstskills.com/docs) &middot; [API Explorer](https://agenstskills.com/api) &middot; [Chrome Extension](https://github.com/rohitg00/skillkit/tree/main/packages/extension#readme) &middot; [npm](https://www.npmjs.com/package/skillkit)
 
 </div>
 
@@ -180,6 +180,18 @@ git commit -m "add team skills"
 ```
 
 Team members run `skillkit manifest install` and they're in sync.
+
+### Chrome Extension
+
+Save any webpage as a skill directly from your browser. No server needed.
+
+1. Build: `pnpm --filter @skillkit/extension build`
+2. Chrome → `chrome://extensions` → Load unpacked → `packages/extension/dist/`
+3. Click the extension icon or right-click → "Save page as Skill"
+
+The extension extracts page content as markdown, generates SKILL.md with auto-detected tags, and downloads it. Then run `skillkit install ~/Downloads/skillkit-skills/my-skill` to deploy to all agents.
+
+[Extension docs](https://agenstskills.com/docs/chrome-extension)
 
 ### Interactive TUI
 

@@ -98,6 +98,14 @@ export default function App(): React.ReactElement {
               >
                 Generator
               </a>
+              <a
+                href="https://github.com/rohitg00/skillkit/tree/main/packages/extension#readme"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-zinc-500 hover:text-white transition-colors"
+              >
+                Extension
+              </a>
             </div>
             <div className="flex items-center gap-3 sm:gap-4">
               <a

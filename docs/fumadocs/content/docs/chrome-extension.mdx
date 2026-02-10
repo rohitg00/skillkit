@@ -1,0 +1,119 @@
+---
+title: Chrome Extension
+description: Save any webpage as an AI agent skill from your browser
+---
+
+# Chrome Extension
+
+Save any webpage as a SKILL.md directly from your browser. No server needed.
+
+## Install
+
+1. Download the extension from the [releases page](https://github.com/rohitg00/skillkit/releases)
+2. Open `chrome://extensions` in Chrome
+3. Enable "Developer mode" (top right)
+4. Click "Load unpacked" and select the `packages/extension/dist/` folder
+
+Or build from source:
+
+```bash
+git clone https://github.com/rohitg00/skillkit.git
+cd skillkit
+pnpm install && pnpm --filter @skillkit/extension build
+```
+
+Then load `packages/extension/dist/` as an unpacked extension.
+
+## Usage
+
+### Popup
+
+1. Navigate to any webpage
+2. Click the SkillKit extension icon
+3. Optionally enter a custom skill name
+4. Click **Save as Skill**
+
+The extension extracts the page content as markdown, generates a SKILL.md with YAML frontmatter and auto-detected tags, and downloads it to your `Downloads/skillkit-skills/` folder.
+
+### Context Menu
+
+Right-click on any page:
+
+- **Save page as Skill** — saves the entire page
+- **Save selection as Skill** — saves only the selected text
+
+### Making Skills Available to Agents
+
+After downloading, install the skill so all agents can use it:
+
+```bash
+skillkit install ~/Downloads/skillkit-skills/my-skill
+```
+
+Or copy directly:
+
+```bash
+cp -r ~/Downloads/skillkit-skills/my-skill ~/.skillkit/skills/
+skillkit sync
+```
+
+## How It Works
+
+The extension runs entirely in the browser:
+
+1. **Content script** extracts page content using [Turndown](https://github.com/mixmark-io/turndown) to convert HTML to clean markdown. It targets `<article>`, `<main>`, or `<body>` and strips scripts, nav, footer, and iframes.
+
+2. **Background service worker** generates the SKILL.md:
+   - Slugifies the page title into a skill name
+   - Builds YAML frontmatter (name, description, source URL, timestamp)
+   - Auto-detects tags from 40+ tech keywords (react, typescript, docker, kubernetes, etc.)
+   - Downloads via `chrome.downloads` API
+
+3. **No server required** — the `POST /save` API endpoint exists for CLI users (`skillkit save`), but the extension works independently.
+
+## Permissions
+
+| Permission | Why |
+|-----------|-----|
+| `contextMenus` | Right-click "Save as Skill" menu items |
+| `activeTab` | Access current page URL and title |
+| `storage` | Persist extension preferences |
+| `downloads` | Save SKILL.md files to disk |
+
+No `host_permissions` needed. The extension never sends data to any server.
+
+## Generated SKILL.md Format
+
+```yaml
+---
+name: react-performance-tips
+description: Optimizing React rendering with memo and useMemo
+tags:
+  - react
+  - javascript
+  - testing
+metadata:
+  source: https://example.com/react-performance
+  savedAt: 2026-02-10T09:00:00.000Z
+---
+
+# React Performance Tips
+
+The extracted markdown content of the page...
+```
+
+## Building from Source
+
+The extension uses tsup to bundle TypeScript into IIFE format for browser compatibility:
+
+```bash
+pnpm --filter @skillkit/extension build
+```
+
+Output goes to `packages/extension/dist/` with:
+- `background.global.js` — Service worker (5KB)
+- `content.global.js` — Content script with Turndown (23KB)
+- `popup.global.js` — Popup UI logic (3KB)
+- `popup.html` + `popup.css` — Monochromatic UI
+- `manifest.json` — Chrome Manifest V3
+- `icons/` — 16/48/128px PNG icons

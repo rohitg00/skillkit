@@ -173,6 +173,19 @@ export function Hero({ version, stars }: HeroProps): React.ReactElement {
                   )}
                 </span>
               </button>
+              <a
+                href="https://github.com/rohitg00/skillkit/tree/main/packages/extension#readme"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-white text-black border border-zinc-300 px-3 py-2 hover:bg-zinc-200 transition-colors font-mono text-sm font-semibold"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" fill="#09090b"/>
+                  <circle cx="12" cy="12" r="4.5" fill="white"/>
+                  <path d="M12 2v5.5M12 16.5V22M2 12h5.5M16.5 12H22" stroke="white" strokeWidth="1.5"/>
+                </svg>
+                Add to Chrome
+              </a>
               <button
                 onClick={openGitHub}
                 className="inline-flex items-center gap-2 border border-zinc-700 px-3 py-2 hover:border-zinc-500 transition-colors group"
