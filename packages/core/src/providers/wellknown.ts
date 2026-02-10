@@ -179,6 +179,7 @@ export class WellKnownProvider implements GitProviderAdapter {
           }
         }
 
+        rmSync(tempDir, { recursive: true, force: true });
         return {
           success: false,
           error: `No skills found at ${baseUrl}/.well-known/skills/index.json`,

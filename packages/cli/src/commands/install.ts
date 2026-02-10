@@ -441,16 +441,20 @@ export class InstallCommand extends Command {
       }
 
       if (totalInstalled > 0) {
-        const agentsMdPath = join(process.cwd(), 'AGENTS.md');
-        if (existsSync(agentsMdPath)) {
-          const parser = new AgentsMdParser();
-          const existing = readFileSync(agentsMdPath, 'utf-8');
-          if (parser.hasManagedSections(existing)) {
-            const gen = new AgentsMdGenerator({ projectPath: process.cwd() });
-            const genResult = gen.generate();
-            const updated = parser.updateManagedSections(existing, genResult.sections.filter(s => s.managed));
-            writeFileSync(agentsMdPath, updated, 'utf-8');
+        try {
+          const agentsMdPath = join(process.cwd(), 'AGENTS.md');
+          if (existsSync(agentsMdPath)) {
+            const parser = new AgentsMdParser();
+            const existing = readFileSync(agentsMdPath, 'utf-8');
+            if (parser.hasManagedSections(existing)) {
+              const gen = new AgentsMdGenerator({ projectPath: process.cwd() });
+              const genResult = gen.generate();
+              const updated = parser.updateManagedSections(existing, genResult.sections.filter(s => s.managed));
+              writeFileSync(agentsMdPath, updated, 'utf-8');
+            }
           }
+        } catch {
+          warn('Failed to update AGENTS.md');
         }
       }
 
