@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "SkillKit - Save as Skill",
+  "version": "1.16.0",
+  "description": "Save any webpage as an AI agent skill — instantly available across 44 agents",
+  "permissions": ["contextMenus", "activeTab", "storage", "downloads"],
+  "background": {
+    "service_worker": "background.global.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.global.js"]
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

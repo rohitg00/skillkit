@@ -1,0 +1,195 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 360px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #09090b;
+  color: #fafafa;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#app {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+header h1 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: #71717a;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #a1a1aa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.field span {
+  font-size: 13px;
+  color: #d4d4d8;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mono {
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  font-size: 11px;
+}
+
+#page-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: #18181b;
+  border-radius: 6px;
+  border: 1px solid #27272a;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 8px 10px;
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 6px;
+  color: #fafafa;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+input[type="text"]:focus {
+  border-color: #52525b;
+}
+
+input[type="text"]::placeholder {
+  color: #52525b;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkbox-field input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: #fafafa;
+}
+
+.checkbox-field label {
+  font-size: 12px;
+  color: #a1a1aa;
+  cursor: pointer;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.primary {
+  background: #fafafa;
+  color: #09090b;
+}
+
+button.secondary {
+  background: #27272a;
+  color: #d4d4d8;
+  margin-top: -4px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.status.saving {
+  background: #18181b;
+  border: 1px solid #27272a;
+  color: #a1a1aa;
+}
+
+.status.success {
+  background: #052e16;
+  border: 1px solid #166534;
+  color: #4ade80;
+}
+
+.status.error {
+  background: #450a0a;
+  border: 1px solid #991b1b;
+  color: #fca5a5;
+}
+
+#result {
+  padding: 10px;
+  background: #18181b;
+  border-radius: 6px;
+  border: 1px solid #27272a;
+}
+
+.hint {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #52525b;
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+}

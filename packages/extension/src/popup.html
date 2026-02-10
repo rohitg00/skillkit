@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=360">
+  <title>SkillKit</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>SkillKit</h1>
+      <p class="subtitle">Save as Skill</p>
+    </header>
+
+    <div id="page-info">
+      <div class="field">
+        <label>Page</label>
+        <span id="page-title" class="truncate">Loading...</span>
+      </div>
+      <div class="field">
+        <label>URL</label>
+        <span id="page-url" class="truncate mono">&mdash;</span>
+      </div>
+    </div>
+
+    <div class="form">
+      <div class="field">
+        <label for="skill-name">Skill name (optional)</label>
+        <input type="text" id="skill-name" placeholder="auto-generated from title">
+      </div>
+    </div>
+
+    <button id="save-btn" class="primary">Save as Skill</button>
+    <button id="save-selection-btn" class="secondary" style="display:none">Save Selection as Skill</button>
+
+    <div id="status" class="status" style="display:none">
+      <span id="status-icon"></span>
+      <span id="status-text"></span>
+    </div>
+
+    <div id="result" style="display:none">
+      <div class="field">
+        <label>Downloaded to</label>
+        <span id="result-path" class="mono truncate"></span>
+      </div>
+      <p class="hint">Run <code>skillkit install &lt;path&gt;</code> to make available to all agents</p>
+    </div>
+  </div>
+
+  <script src="popup.global.js"></script>
+</body>
+</html>

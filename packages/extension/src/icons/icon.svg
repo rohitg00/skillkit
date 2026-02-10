@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <rect width="128" height="128" rx="16" fill="#09090b"/>
+  <text x="64" y="52" text-anchor="middle" font-family="monospace" font-size="18" font-weight="700" fill="#fafafa">SK</text>
+  <rect x="28" y="64" width="72" height="2" rx="1" fill="#52525b"/>
+  <rect x="34" y="74" width="24" height="6" rx="3" fill="#71717a"/>
+  <rect x="62" y="74" width="32" height="6" rx="3" fill="#71717a"/>
+  <rect x="40" y="84" width="48" height="6" rx="3" fill="#3f3f46"/>
+</svg>
