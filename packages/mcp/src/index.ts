@@ -215,9 +215,13 @@ async function main() {
   console.error('SkillKit Discovery MCP Server running on stdio');
 }
 
-const resolvedArgv = realpathSync(process.argv[1]);
-const resolvedModule = fileURLToPath(import.meta.url);
-if (resolvedArgv === resolvedModule) {
+let isMain = false;
+try {
+  const resolvedArgv = process.argv[1] ? realpathSync(process.argv[1]) : '';
+  const resolvedModule = realpathSync(fileURLToPath(import.meta.url));
+  isMain = resolvedArgv === resolvedModule;
+} catch {}
+if (isMain) {
   main().catch((error) => {
     console.error('Fatal error:', error);
     process.exit(1);
