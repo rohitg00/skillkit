@@ -86,6 +86,12 @@ import {
   SessionNoteCommand,
   SessionCompleteCommand,
   SessionInProgressCommand,
+  SessionSnapshotSaveCommand,
+  SessionSnapshotRestoreCommand,
+  SessionSnapshotListCommand,
+  SessionSnapshotDeleteCommand,
+  SessionExplainCommand,
+  ActivityCommand,
   ProfileCommand,
   ProfileListCommand,
   ProfileCreateCommand,
@@ -216,6 +222,12 @@ cli.register(SessionListCommand);
 cli.register(SessionNoteCommand);
 cli.register(SessionCompleteCommand);
 cli.register(SessionInProgressCommand);
+cli.register(SessionSnapshotSaveCommand);
+cli.register(SessionSnapshotRestoreCommand);
+cli.register(SessionSnapshotListCommand);
+cli.register(SessionSnapshotDeleteCommand);
+cli.register(SessionExplainCommand);
+cli.register(ActivityCommand);
 
 cli.register(ProfileCommand);
 cli.register(ProfileListCommand);

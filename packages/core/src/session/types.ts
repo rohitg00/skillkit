@@ -115,3 +115,45 @@ export interface SessionState {
  * Session state file path within .skillkit directory
  */
 export const SESSION_FILE = 'session.yaml';
+
+export interface SkillActivity {
+  commitSha: string;
+  committedAt: string;
+  activeSkills: string[];
+  filesChanged: string[];
+  message: string;
+}
+
+export interface ActivityLogData {
+  version: 1;
+  activities: SkillActivity[];
+}
+
+export interface SessionSnapshot {
+  version: 1;
+  name: string;
+  createdAt: string;
+  description?: string;
+  sessionState: SessionState;
+  observations: Array<{
+    id: string;
+    timestamp: string;
+    sessionId: string;
+    agent: string;
+    type: string;
+    content: Record<string, unknown>;
+    relevance: number;
+  }>;
+}
+
+export interface SessionExplanation {
+  date: string;
+  agent: string;
+  duration?: string;
+  skillsUsed: Array<{ name: string; status: string }>;
+  tasks: Array<{ name: string; status: string; duration?: string }>;
+  filesModified: string[];
+  decisions: Array<{ key: string; value: string }>;
+  observationCounts: { errors: number; solutions: number; patterns: number; total: number };
+  gitCommits: number;
+}

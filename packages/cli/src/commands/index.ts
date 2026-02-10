@@ -90,7 +90,13 @@ export {
   SessionNoteCommand,
   SessionCompleteCommand,
   SessionInProgressCommand,
+  SessionSnapshotSaveCommand,
+  SessionSnapshotRestoreCommand,
+  SessionSnapshotListCommand,
+  SessionSnapshotDeleteCommand,
+  SessionExplainCommand,
 } from './session.js';
+export { ActivityCommand } from './activity.js';
 export {
   ProfileCommand,
   ProfileListCommand,
