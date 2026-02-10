@@ -9,8 +9,10 @@ import {
   isHighQuality,
   findAllSkills,
   benchmarkSkill,
+  SpecValidator,
   type QualityScore,
   type BenchmarkResult,
+  type SpecValidationResult,
 } from '@skillkit/core';
 import { getSearchDirs } from '../helpers.js';
 import {
@@ -142,6 +144,35 @@ function printBenchmarkReport(benchmark: BenchmarkResult): void {
   }
 }
 
+function printSpecReport(specResult: SpecValidationResult): void {
+  console.log('');
+  console.log(colors.bold('Spec Validation'));
+  console.log(`  ${colors.muted('Spec Version:')} ${specResult.specVersion}`);
+  console.log(`  ${colors.muted('Valid:')} ${specResult.valid ? colors.success('yes') : colors.error('no')}`);
+
+  if (specResult.checks.length > 0) {
+    console.log('');
+    for (const check of specResult.checks) {
+      const icon = check.passed ? colors.success(symbols.success) : (check.severity === 'error' ? colors.error(symbols.error) : colors.warning(symbols.warning));
+      console.log(`  ${icon} ${check.message}`);
+    }
+  }
+
+  if (specResult.errors.length > 0) {
+    console.log('');
+    for (const err of specResult.errors) {
+      console.log(`  ${colors.error(symbols.error)} ${err}`);
+    }
+  }
+
+  if (specResult.warnings.length > 0) {
+    console.log('');
+    for (const w of specResult.warnings) {
+      console.log(`  ${colors.warning(symbols.warning)} ${w}`);
+    }
+  }
+}
+
 function getOrdinal(n: number): string {
   const s = ['th', 'st', 'nd', 'rd'];
   const v = n % 100;
@@ -196,6 +227,10 @@ export class ValidateCommand extends Command {
 
   benchmark = Option.Boolean('--benchmark,-b', false, {
     description: 'Compare skill against category leaders',
+  });
+
+  strict = Option.Boolean('--strict,-s', false, {
+    description: 'Run strict spec validation checks',
   });
 
   fix = Option.Boolean('--fix', false, {
@@ -378,7 +413,7 @@ export class ValidateCommand extends Command {
 
     filteredResults.sort((a, b) => (b.quality?.overall ?? 0) - (a.quality?.overall ?? 0));
 
-    for (const { name, quality, formatValid, formatErrors } of filteredResults) {
+    for (const { name, quality, formatValid, formatErrors, path: skillPath } of filteredResults) {
       if (!formatValid) {
         console.log(`\n${colors.error(symbols.error)} ${colors.primary(name)}`);
         console.log(`  ${colors.error('Format validation failed:')}`);
@@ -394,6 +429,12 @@ export class ValidateCommand extends Command {
           const benchmark = benchmarkSkill(name, quality);
           printBenchmarkReport(benchmark);
         }
+      }
+
+      if (this.strict && skillPath) {
+        const specValidator = new SpecValidator();
+        const specResult = specValidator.validate(skillPath, { strict: true });
+        printSpecReport(specResult);
       }
     }
 

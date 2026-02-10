@@ -123,3 +123,12 @@ export * from './runtime/index.js';
 
 // Security Scanner
 export * from './scanner/index.js';
+
+// Spec Validation
+export * from './validation/index.js';
+
+// AGENTS.md generator
+export * from './agents-md/index.js';
+
+// Save (Content Extraction & Skill Generation)
+export * from './save/index.js';

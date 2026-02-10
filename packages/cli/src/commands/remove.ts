@@ -1,7 +1,8 @@
-import { existsSync, rmSync } from 'node:fs';
+import { existsSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import chalk from 'chalk';
 import { Command, Option } from 'clipanion';
-import { findSkill } from '@skillkit/core';
+import { findSkill, AgentsMdParser, AgentsMdGenerator } from '@skillkit/core';
 import { getSearchDirs } from '../helpers.js';
 
 export class RemoveCommand extends Command {
@@ -52,6 +53,22 @@ export class RemoveCommand extends Command {
     }
 
     if (removed > 0) {
+      try {
+        const agentsMdPath = join(process.cwd(), 'AGENTS.md');
+        if (existsSync(agentsMdPath)) {
+          const parser = new AgentsMdParser();
+          const existing = readFileSync(agentsMdPath, 'utf-8');
+          if (parser.hasManagedSections(existing)) {
+            const gen = new AgentsMdGenerator({ projectPath: process.cwd() });
+            const genResult = gen.generate();
+            const updated = parser.updateManagedSections(existing, genResult.sections.filter(s => s.managed));
+            writeFileSync(agentsMdPath, updated, 'utf-8');
+          }
+        }
+      } catch (error) {
+        console.log(chalk.yellow('Warning: Failed to update AGENTS.md'));
+        console.error(chalk.dim(error instanceof Error ? error.message : String(error)));
+      }
       console.log(chalk.dim('\nRun `skillkit sync` to update your agent config'));
     }
 

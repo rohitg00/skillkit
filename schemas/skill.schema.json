@@ -30,6 +30,16 @@
     },
     "metadata": {
       "type": "object",
+      "properties": {
+        "skillkit-tags": {
+          "type": "string",
+          "description": "Comma-separated categorization tags (strict mode preferred location)"
+        },
+        "skillkit-agents": {
+          "type": "string",
+          "description": "Comma-separated compatible agent list (strict mode preferred location)"
+        }
+      },
       "additionalProperties": { "type": "string" },
       "description": "Arbitrary key-value mapping for additional metadata."
     },
@@ -54,7 +64,7 @@
       "type": "array",
       "items": {
         "type": "string",
-        "enum": ["claude-code", "codex", "cursor", "antigravity", "opencode", "gemini-cli", "universal"]
+        "enum": ["claude-code", "codex", "cursor", "antigravity", "opencode", "gemini-cli", "amp", "clawdbot", "droid", "github-copilot", "goose", "kilo", "kiro-cli", "roo", "trae", "windsurf", "universal", "cline", "codebuddy", "commandcode", "continue", "crush", "factory", "mcpjam", "mux", "neovate", "openhands", "pi", "qoder", "qwen", "vercel", "zencoder", "devin", "aider", "sourcegraph-cody", "amazon-q", "augment-code", "replit-agent", "bolt", "lovable", "tabby", "tabnine", "codegpt", "playcode-agent"]
       },
       "description": "Compatible AI agents (empty = all agents)"
     }

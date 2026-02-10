@@ -104,6 +104,7 @@ import {
   SkillMdCheckCommand,
   ServeCommand,
   ScanCommand,
+  SaveCommand,
 } from '@skillkit/cli';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -233,5 +234,6 @@ cli.register(SkillMdCheckCommand);
 
 cli.register(ServeCommand);
 cli.register(ScanCommand);
+cli.register(SaveCommand);
 
 cli.runExit(process.argv.slice(2));

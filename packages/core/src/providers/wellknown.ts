@@ -29,6 +29,12 @@ export interface WellKnownIndex {
   skills: WellKnownSkill[];
 }
 
+const MINTLIFY_PATHS = [
+  '/.well-known/skills/default/skill.md',
+  '/skill.md',
+  '/.well-known/skill.md',
+];
+
 export class WellKnownProvider implements GitProviderAdapter {
   readonly type: GitProvider = 'wellknown';
   readonly name = 'Well-Known';
@@ -66,6 +72,57 @@ export class WellKnownProvider implements GitProviderAdapter {
     return '';
   }
 
+  async discoverFromUrl(url: string): Promise<CloneResult> {
+    const baseUrl = url.replace(/\/$/, '');
+    const tempDir = join(tmpdir(), `skillkit-wellknown-${randomUUID()}`);
+
+    try {
+      mkdirSync(tempDir, { recursive: true });
+
+      for (const mintlifyPath of MINTLIFY_PATHS) {
+        const fullUrl = `${baseUrl}${mintlifyPath}`;
+        try {
+          const response = await fetch(fullUrl);
+          if (response.ok) {
+            const content = await response.text();
+            if (/^---\s*\n[\s\S]*?name:\s*.+/m.test(content)) {
+              const skillName = basename(baseUrl) || 'default';
+              const safeName = sanitizeSkillName(skillName) ?? 'default';
+              const skillDir = join(tempDir, safeName);
+              mkdirSync(skillDir, { recursive: true });
+              writeFileSync(join(skillDir, 'SKILL.md'), content);
+
+              return {
+                success: true,
+                path: tempDir,
+                tempRoot: tempDir,
+                skills: [safeName],
+                discoveredSkills: [{ name: safeName, dirName: safeName, path: skillDir }],
+              };
+            }
+          }
+        } catch {
+          continue;
+        }
+      }
+
+      const indexResult = await this.clone(baseUrl, '', {});
+      if (indexResult.success) {
+        rmSync(tempDir, { recursive: true, force: true });
+        return indexResult;
+      }
+
+      rmSync(tempDir, { recursive: true, force: true });
+      return { success: false, error: 'No well-known skills found' };
+    } catch (error) {
+      if (existsSync(tempDir)) {
+        rmSync(tempDir, { recursive: true, force: true });
+      }
+      const message = error instanceof Error ? error.message : String(error);
+      return { success: false, error: `Failed to discover skills: ${message}` };
+    }
+  }
+
   async clone(source: string, _targetDir: string, _options: CloneOptions = {}): Promise<CloneResult> {
     const tempDir = join(tmpdir(), `skillkit-wellknown-${randomUUID()}`);
 
@@ -95,6 +152,33 @@ export class WellKnownProvider implements GitProviderAdapter {
       }
 
       if (!index || !index.skills || index.skills.length === 0) {
+        for (const mintlifyPath of MINTLIFY_PATHS) {
+          const fullUrl = `${baseUrl}${mintlifyPath}`;
+          try {
+            const response = await fetch(fullUrl);
+            if (response.ok) {
+              const content = await response.text();
+              if (/^---\s*\n[\s\S]*?name:\s*.+/m.test(content)) {
+                const skillName = basename(baseUrl) || 'default';
+                const safeName = sanitizeSkillName(skillName) ?? 'default';
+                const skillDir = join(tempDir, safeName);
+                mkdirSync(skillDir, { recursive: true });
+                writeFileSync(join(skillDir, 'SKILL.md'), content);
+
+                return {
+                  success: true,
+                  path: tempDir,
+                  tempRoot: tempDir,
+                  skills: [safeName],
+                  discoveredSkills: [{ name: safeName, dirName: safeName, path: skillDir }],
+                };
+              }
+            }
+          } catch {
+            continue;
+          }
+        }
+
         return {
           success: false,
           error: `No skills found at ${baseUrl}/.well-known/skills/index.json`,

@@ -1,11 +1,11 @@
-import { existsSync, mkdirSync, cpSync, rmSync, symlinkSync } from 'node:fs';
+import { existsSync, mkdirSync, cpSync, rmSync, symlinkSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
 import { Command, Option } from 'clipanion';
-import { detectProvider, isLocalPath, getProvider, evaluateSkillDirectory, SkillScanner, formatSummary, Severity } from '@skillkit/core';
+import { detectProvider, isLocalPath, getProvider, evaluateSkillDirectory, SkillScanner, formatSummary, Severity, WellKnownProvider, AgentsMdParser, AgentsMdGenerator } from '@skillkit/core';
 import type { SkillMetadata, GitProvider, AgentType } from '@skillkit/core';
 import { isPathInside } from '@skillkit/core';
 import { getAdapter, detectAgent, getAllAdapters } from '@skillkit/agents';
@@ -109,6 +109,25 @@ export class InstallCommand extends Command {
       }
 
       let providerAdapter = detectProvider(this.source);
+      let result: { success: boolean; path?: string; tempRoot?: string; error?: string; skills?: string[]; discoveredSkills?: Array<{ name: string; dirName: string; path: string }> } | null = null;
+
+      const isUrl = this.source.startsWith('http://') || this.source.startsWith('https://');
+      if (isUrl && !this.provider && !providerAdapter) {
+        s.start('Checking for well-known skills...');
+        const wellKnown = new WellKnownProvider();
+        const discovery = await wellKnown.discoverFromUrl(this.source);
+        if (discovery.success) {
+          s.stop(`Found ${discovery.skills?.length || 0} skill(s) via well-known discovery`);
+          providerAdapter = wellKnown;
+          result = discovery;
+        } else {
+          s.stop('No well-known skills found');
+          warn(`No well-known skills found at ${this.source}`);
+          console.log(colors.muted('You can save this URL as a skill instead:'));
+          console.log(colors.muted(`  skillkit save ${this.source}`));
+          return 1;
+        }
+      }
 
       if (this.provider) {
         providerAdapter = getProvider(this.provider as GitProvider);
@@ -124,18 +143,20 @@ export class InstallCommand extends Command {
         return 1;
       }
 
-      s.start(`Fetching from ${providerAdapter.name}...`);
+      if (!result) {
+        s.start(`Fetching from ${providerAdapter.name}...`);
+        result = await providerAdapter.clone(this.source, '', { depth: 1 });
 
-      const result = await providerAdapter.clone(this.source, '', { depth: 1 });
+        if (!result.success || !result.path) {
+          s.stop(colors.error(result.error || 'Failed to fetch source'));
+          return 1;
+        }
 
-      if (!result.success || !result.path) {
-        s.stop(colors.error(result.error || 'Failed to fetch source'));
-        return 1;
+        s.stop(`Found ${result.skills?.length || 0} skill(s)`);
       }
 
-      s.stop(`Found ${result.skills?.length || 0} skill(s)`);
-
-      const discoveredSkills = result.discoveredSkills || [];
+      const cloneResult = result!;
+      const discoveredSkills = cloneResult.discoveredSkills || [];
 
       // List mode - just show skills and exit
       if (this.list) {
@@ -155,7 +176,7 @@ export class InstallCommand extends Command {
           console.log(colors.muted('To install: skillkit install <source> --skill=name'));
         }
 
-        const cleanupPath = result.tempRoot || result.path;
+        const cleanupPath = cloneResult.tempRoot || cloneResult.path;
         if (!isLocalPath(this.source) && cleanupPath && existsSync(cleanupPath)) {
           rmSync(cleanupPath, { recursive: true, force: true });
         }
@@ -273,7 +294,7 @@ export class InstallCommand extends Command {
             console.log(formatSummary(scanResult));
             console.log(colors.muted('Use --force to install anyway, or --no-scan to skip scanning'));
 
-            const cleanupPath = result.tempRoot || result.path;
+            const cleanupPath = cloneResult.tempRoot || cloneResult.path;
             if (!isLocalPath(this.source) && cleanupPath && existsSync(cleanupPath)) {
               rmSync(cleanupPath, { recursive: true, force: true });
             }
@@ -343,8 +364,8 @@ export class InstallCommand extends Command {
             continue;
           }
 
-          const securityRoot = result.tempRoot || result.path;
-          if (!isPathInside(sourcePath, securityRoot)) {
+          const securityRoot = cloneResult.tempRoot || cloneResult.path || '';
+          if (!securityRoot || !isPathInside(sourcePath, securityRoot)) {
             error(`Skipping ${skillName} (path traversal detected)`);
             continue;
           }
@@ -414,9 +435,23 @@ export class InstallCommand extends Command {
       }
 
       // Cleanup temp directory
-      const cleanupPath = result.tempRoot || result.path;
+      const cleanupPath = cloneResult.tempRoot || cloneResult.path;
       if (!isLocalPath(this.source) && cleanupPath && existsSync(cleanupPath)) {
         rmSync(cleanupPath, { recursive: true, force: true });
+      }
+
+      if (totalInstalled > 0) {
+        const agentsMdPath = join(process.cwd(), 'AGENTS.md');
+        if (existsSync(agentsMdPath)) {
+          const parser = new AgentsMdParser();
+          const existing = readFileSync(agentsMdPath, 'utf-8');
+          if (parser.hasManagedSections(existing)) {
+            const gen = new AgentsMdGenerator({ projectPath: process.cwd() });
+            const genResult = gen.generate();
+            const updated = parser.updateManagedSections(existing, genResult.sections.filter(s => s.managed));
+            writeFileSync(agentsMdPath, updated, 'utf-8');
+          }
+        }
       }
 
       // Show summary

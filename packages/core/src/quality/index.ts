@@ -559,10 +559,39 @@ export function evaluateSkillFile(filePath: string): QualityScore | null {
   }
 }
 
+function checkNameDirectoryMatch(content: string, dirPath: string): string | null {
+  const frontmatter = extractFrontmatter(content);
+  if (!frontmatter || typeof frontmatter.name !== 'string') return null;
+  const dirName = basename(dirPath);
+  if (frontmatter.name !== dirName) {
+    return `Skill name "${frontmatter.name}" does not match directory "${dirName}"`;
+  }
+  return null;
+}
+
+function checkTokenBudget(content: string): string | null {
+  const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const fmMatch = normalizedContent.match(/^---\s*\n[\s\S]*?\n---\s*\n?/);
+  const body = fmMatch ? normalizedContent.slice(fmMatch[0].length) : normalizedContent;
+  const bodyLines = body.split('\n').length;
+  if (bodyLines > 500) {
+    return `Body is ${bodyLines} lines (exceeds 500). Consider moving content to references/ directory`;
+  }
+  return null;
+}
+
 export function evaluateSkillDirectory(dirPath: string): QualityScore | null {
   const skillMdPath = join(dirPath, 'SKILL.md');
   if (existsSync(skillMdPath)) {
-    return evaluateSkillFile(skillMdPath);
+    const result = evaluateSkillFile(skillMdPath);
+    if (result) {
+      const content = readFileSync(skillMdPath, 'utf-8');
+      const nameWarning = checkNameDirectoryMatch(content, dirPath);
+      if (nameWarning) result.warnings.push(nameWarning);
+      const budgetWarning = checkTokenBudget(content);
+      if (budgetWarning) result.warnings.push(budgetWarning);
+    }
+    return result;
   }
 
   const mdcFiles = ['index.mdc', `${basename(dirPath)}.mdc`];

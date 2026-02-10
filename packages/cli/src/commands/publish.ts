@@ -55,6 +55,10 @@ export class PublishCommand extends Command {
     description: 'Show what would be generated without writing files',
   });
 
+  format = Option.String('--format', {
+    description: 'Output format: "standard" (default) or "mintlify" (.well-known/skills/default/skill.md)',
+  });
+
   async execute(): Promise<number> {
     const basePath = this.skillPath || process.cwd();
     const outputDir = this.output || basePath;
@@ -114,6 +118,38 @@ export class PublishCommand extends Command {
     }
 
     console.log('');
+
+    if (this.format === 'mintlify') {
+      if (this.dryRun) {
+        console.log(chalk.yellow('Dry run - not writing files\n'));
+        console.log(chalk.white('Would generate (Mintlify format):'));
+        for (const skill of validSkills) {
+          console.log(chalk.dim(`  ${outputDir}/.well-known/skills/${skill.safeName}/skill.md`));
+        }
+        return 0;
+      }
+
+      for (const skill of validSkills) {
+        const mintlifyDir = join(outputDir, '.well-known', 'skills', skill.safeName);
+        mkdirSync(mintlifyDir, { recursive: true });
+        const skillMdPath = join(skill.path, 'SKILL.md');
+        if (existsSync(skillMdPath)) {
+          const content = readFileSync(skillMdPath, 'utf-8');
+          writeFileSync(join(mintlifyDir, 'skill.md'), content);
+        }
+      }
+
+      console.log(chalk.green('Generated Mintlify well-known structure:\n'));
+      for (const skill of validSkills) {
+        console.log(chalk.dim(`  ${outputDir}/.well-known/skills/${skill.safeName}/skill.md`));
+      }
+      console.log('');
+      console.log(chalk.cyan('Next steps:'));
+      console.log(chalk.dim('  1. Deploy the .well-known directory to your web server'));
+      console.log(chalk.dim('  2. Users can install via: skillkit install https://your-domain.com'));
+      console.log(chalk.dim('  3. Skills auto-discovered from /.well-known/skills/{name}/skill.md'));
+      return 0;
+    }
 
     if (this.dryRun) {
       console.log(chalk.yellow('Dry run - not writing files\n'));
