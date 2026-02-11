@@ -343,6 +343,41 @@ skillkit serve --cache-ttl 3600000
 | GET | `/health` | Server health |
 | GET | `/cache/stats` | Cache statistics |
 
+## Issue Planner
+
+Generate structured plans from GitHub Issues. Requires the `gh` CLI.
+
+```bash
+skillkit issue plan "#42"                        # Plan from current repo
+skillkit issue plan rohitg00/skillkit#42          # Cross-repo
+skillkit issue plan "#42" --agent cursor          # Target specific agent
+skillkit issue plan "#42" --no-tests              # Skip test steps
+skillkit issue plan "#42" --json                  # JSON output
+skillkit issue plan "#42" --tech-stack react,ts   # Override tech stack
+```
+
+### Issue Plan Options
+
+| Option | Short | Default | Purpose |
+|--------|-------|---------|---------|
+| `--agent` | `-a` | `claude-code` | Target agent |
+| `--output` | `-o` | `.skillkit/plans/issue-<n>.md` | Output file path |
+| `--no-tests` | — | `false` | Skip test steps |
+| `--json` | — | `false` | Output as JSON |
+| `--tech-stack` | — | — | Comma-separated tech stack |
+
+### Issue List
+
+```bash
+skillkit issue list                               # List open issues
+skillkit issue list --repo owner/repo             # Specific repo
+skillkit issue list --label bug                   # Filter by label
+skillkit issue list --limit 20                    # More results
+skillkit issue list --json                        # JSON output
+```
+
+The planner extracts task lists (checkboxes) from the issue body, infers file mentions from backtick-quoted paths, and maps labels to tags (e.g., `bug` → `fix`, `enhancement` → `feature`). Generated plans work with `skillkit plan validate` and `skillkit plan execute`.
+
 ## Utility Commands
 
 ```bash

@@ -27,6 +27,10 @@ export type { TaskTemplate } from './generator.js';
 export { PlanExecutor, createPlanExecutor, dryRunExecutor, shellExecutor } from './executor.js';
 export type { StepExecutor } from './executor.js';
 
+// Issue Planner
+export { IssuePlanner, createIssuePlanner } from './issue-planner.js';
+export type { GitHubIssue, IssuePlanOptions } from './issue-planner.js';
+
 // Types
 export type {
   // Core types
@@ -53,4 +57,7 @@ export type {
   // Events
   PlanEvent,
   PlanEventListener,
+
+  // Issue Plan
+  IssuePlanMetadata,
 } from './types.js';

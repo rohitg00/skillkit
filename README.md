@@ -246,6 +246,14 @@ skillkit find <query>            # Quick search
 skillkit scan <path>             # Security scan for skills
 ```
 
+### Issue Planner
+
+```bash
+skillkit issue plan "#42"        # Plan from GitHub Issue
+skillkit issue plan owner/repo#42 # Cross-repo plan
+skillkit issue list              # List open issues
+```
+
 ### Advanced
 
 ```bash

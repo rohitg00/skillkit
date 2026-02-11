@@ -94,6 +94,17 @@ const COMMAND_GROUPS: CommandGroup[] = [
     ],
   },
   {
+    name: 'Issues',
+    commands: [
+      { cmd: 'issue plan "#42"', desc: 'Plan from issue' },
+      { cmd: 'issue plan owner/repo#42', desc: 'Cross-repo plan' },
+      { cmd: 'issue plan "#42" --agent cursor', desc: 'Target agent' },
+      { cmd: 'issue plan "#42" --json', desc: 'JSON output' },
+      { cmd: 'issue list', desc: 'List open issues' },
+      { cmd: 'issue list --label bug', desc: 'Filter by label' },
+    ],
+  },
+  {
     name: 'Advanced',
     commands: [
       { cmd: 'primer', desc: 'Generate CLAUDE.md' },

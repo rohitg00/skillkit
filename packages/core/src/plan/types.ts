@@ -270,3 +270,11 @@ export type PlanEventListener = (
   task?: PlanTask,
   result?: PlanTaskResult
 ) => void | Promise<void>;
+
+export interface IssuePlanMetadata {
+  issueNumber: number;
+  issueUrl: string;
+  issueLabels: string[];
+  agent: string;
+  generatedAt: string;
+}
