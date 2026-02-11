@@ -402,7 +402,7 @@ export class SessionSnapshotRestoreCommand extends Command {
       return 1;
     }
 
-    const { sessionState } = manager.restore(this.name);
+    const { sessionState, observations } = manager.restore(this.name);
 
     const sessionMgr = new SessionManager(projectPath);
     const currentState = sessionMgr.getOrCreate();
@@ -412,6 +412,22 @@ export class SessionSnapshotRestoreCommand extends Command {
       decisions: sessionState.decisions,
     });
     sessionMgr.save();
+
+    try {
+      if (observations && observations.length > 0) {
+        const store = new ObservationStore(projectPath);
+        for (const obs of observations) {
+          store.add(
+            obs.type as Parameters<ObservationStore['add']>[0],
+            obs.content as unknown as Parameters<ObservationStore['add']>[1],
+            obs.agent as Parameters<ObservationStore['add']>[2],
+            obs.relevance,
+          );
+        }
+      }
+    } catch {
+      // Non-critical: session state restored even if observations fail
+    }
 
     console.log(chalk.green(`\u2713 Snapshot restored: ${this.name}`));
     return 0;

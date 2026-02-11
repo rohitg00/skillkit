@@ -228,6 +228,9 @@ export class IssuePlanner {
         files,
         steps: [
           { type: 'implement', description: issue.title },
+          ...(includeTests
+            ? [{ type: 'test' as const, description: `Write tests for ${issue.title}` }]
+            : []),
         ],
       });
     }
