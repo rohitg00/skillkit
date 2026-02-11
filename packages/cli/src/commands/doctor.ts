@@ -1,9 +1,10 @@
 import { Command, Option } from 'clipanion';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { existsSync, lstatSync, readlinkSync, readdirSync, mkdirSync, unlinkSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { homedir } from 'node:os';
 import { detectAgent, getAllAdapters, getAdapter } from '@skillkit/agents';
+import type { AgentType } from '@skillkit/core';
 import { findAllSkills, validateSkill, loadConfig, getProjectConfigPath } from '@skillkit/core';
 import { getSearchDirs } from '../helpers.js';
 import { colors, symbols } from '../onboarding/index.js';
@@ -81,7 +82,7 @@ export class DoctorCommand extends Command {
     }
 
     // --- Agent Detection ---
-    let detectedAgent = 'universal';
+    let detectedAgent: AgentType = 'universal';
     try {
       detectedAgent = await detectAgent();
       results.push({ name: 'Detected agent', status: 'pass', message: `Detected: ${detectedAgent}` });
@@ -110,7 +111,7 @@ export class DoctorCommand extends Command {
     }
 
     // --- Skills ---
-    const adapter = getAdapter(detectedAgent as any);
+    const adapter = getAdapter(detectedAgent);
     const skillsDir = resolve(adapter.skillsDir);
     const skillsDirExists = existsSync(skillsDir);
 
@@ -142,7 +143,7 @@ export class DoctorCommand extends Command {
     // Skill validation
     let searchDirs: string[] = [];
     try {
-      searchDirs = getSearchDirs(detectedAgent as any);
+      searchDirs = getSearchDirs(detectedAgent);
     } catch {
       searchDirs = skillsDirExists ? [skillsDir] : [];
     }
@@ -285,7 +286,7 @@ export class DoctorCommand extends Command {
 
   private whichVersion(cmd: string): string | null {
     try {
-      return execSync(`${cmd} --version`, { encoding: 'utf-8', timeout: 5000 })
+      return execFileSync(cmd, ['--version'], { encoding: 'utf-8', timeout: 5000 })
         .trim()
         .replace(/^v/, '');
     } catch {

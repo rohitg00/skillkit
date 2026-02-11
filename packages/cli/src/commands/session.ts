@@ -12,6 +12,7 @@ import {
   SessionExplainer,
   ObservationStore,
   type SessionFile,
+  type SessionSnapshot,
 } from '@skillkit/core';
 
 export class SessionCommand extends Command {
@@ -357,9 +358,18 @@ export class SessionSnapshotSaveCommand extends Command {
       return 1;
     }
 
-    let observations: Array<Record<string, unknown>> = [];
+    let observations: SessionSnapshot['observations'] = [];
     try {
-      observations = new ObservationStore(projectPath).getAll() as unknown as Array<Record<string, unknown>>;
+      const raw = new ObservationStore(projectPath).getAll();
+      observations = raw.map((o) => ({
+        id: o.id,
+        timestamp: o.timestamp,
+        sessionId: o.sessionId,
+        agent: o.agent as string,
+        type: o.type as string,
+        content: { ...o.content } as Record<string, unknown>,
+        relevance: o.relevance,
+      }));
     } catch {
       // No observations available
     }

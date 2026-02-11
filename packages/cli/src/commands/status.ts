@@ -2,9 +2,22 @@ import { Command, Option } from 'clipanion';
 import { resolve } from 'node:path';
 import { existsSync } from 'node:fs';
 import chalk from 'chalk';
+import type { AgentType } from '@skillkit/core';
 import { SessionManager, findAllSkills, loadConfig, getProjectConfigPath } from '@skillkit/core';
 import { detectAgent, getAdapter } from '@skillkit/agents';
 import { getSearchDirs } from '../helpers.js';
+
+interface StatusOverview {
+  agent: string;
+  config: string | null;
+  configAgent: string;
+  version: string;
+  totalSkills: number;
+  projectSkills: number;
+  globalSkills: number;
+  skillsDir: string;
+  recentHistory: Array<{ status: string; skillName: string; completedAt: string }>;
+}
 
 /**
  * Status command - show current session state
@@ -137,8 +150,8 @@ export class StatusCommand extends Command {
     return 0;
   }
 
-  private async buildOverview(manager: SessionManager): Promise<Record<string, unknown>> {
-    let agent = 'universal';
+  private async buildOverview(manager: SessionManager): Promise<StatusOverview> {
+    let agent: AgentType = 'universal';
     try {
       agent = await detectAgent();
     } catch {
@@ -160,7 +173,7 @@ export class StatusCommand extends Command {
 
     let searchDirs: string[] = [];
     try {
-      searchDirs = getSearchDirs(agent as any);
+      searchDirs = getSearchDirs(agent);
     } catch {
       // fallback
     }
@@ -168,7 +181,7 @@ export class StatusCommand extends Command {
     const allSkills = findAllSkills(searchDirs);
     const projectSkills = allSkills.filter(s => s.location === 'project');
     const globalSkills = allSkills.filter(s => s.location === 'global');
-    const adapter = getAdapter(agent as any);
+    const adapter = getAdapter(agent);
     const recentHistory = manager.getHistory(3);
 
     return {
@@ -184,26 +197,24 @@ export class StatusCommand extends Command {
     };
   }
 
-  private showOverview(overview: Record<string, unknown>): void {
+  private showOverview(overview: StatusOverview): void {
     console.log('');
     console.log(chalk.cyan('  Project Overview'));
-    console.log(`    Agent:    ${chalk.bold(String(overview.agent))}`);
+    console.log(`    Agent:    ${chalk.bold(overview.agent)}`);
     console.log(`    Config:   ${overview.config ? chalk.green('skillkit.yaml') : chalk.dim('none (defaults)')}`);
-    console.log(`    Version:  ${chalk.bold(String(overview.version))}`);
+    console.log(`    Version:  ${chalk.bold(overview.version)}`);
     console.log('');
 
-    const total = overview.totalSkills as number;
-    console.log(chalk.cyan(`  Skills (${total} installed)`));
+    console.log(chalk.cyan(`  Skills (${overview.totalSkills} installed)`));
     console.log(`    Project:  ${overview.projectSkills} skills in ${overview.skillsDir}`);
     console.log(`    Global:   ${overview.globalSkills} skills`);
     console.log('');
 
     console.log(chalk.cyan('  Recent Activity'));
-    const history = overview.recentHistory as Array<{ status: string; skillName: string; completedAt: string }>;
-    if (history.length === 0) {
+    if (overview.recentHistory.length === 0) {
       console.log(chalk.dim('    No recent executions.'));
     } else {
-      for (const entry of history) {
+      for (const entry of overview.recentHistory) {
         const statusColor = entry.status === 'completed' ? chalk.green : chalk.red;
         console.log(`    ${statusColor('\u25cf')} ${entry.skillName} - ${new Date(entry.completedAt).toLocaleDateString()}`);
       }

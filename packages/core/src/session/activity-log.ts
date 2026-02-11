@@ -73,6 +73,7 @@ export class ActivityLog {
   }
 
   getByCommit(sha: string): SkillActivity | undefined {
+    if (sha.length < 4) return undefined;
     const data = this.load();
     return data.activities.find(
       (a) => a.commitSha === sha || a.commitSha.startsWith(sha)

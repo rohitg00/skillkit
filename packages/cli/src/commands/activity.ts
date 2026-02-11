@@ -29,7 +29,8 @@ export class ActivityCommand extends Command {
   async execute(): Promise<number> {
     const projectPath = process.cwd();
     const log = new ActivityLog(projectPath);
-    const limit = this.limit ? parseInt(this.limit) : 10;
+    const parsed = this.limit ? parseInt(this.limit, 10) : 10;
+    const limit = Number.isFinite(parsed) && parsed > 0 ? parsed : 10;
 
     const activities = this.skill
       ? log.getBySkill(this.skill)

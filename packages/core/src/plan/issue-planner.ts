@@ -1,6 +1,8 @@
 import { execFileSync } from 'node:child_process';
 import { PlanGenerator } from './generator.js';
-import type { StructuredPlan, PlanTaskFiles } from './types.js';
+import type { StructuredPlan, PlanTaskFiles, IssuePlanMetadata } from './types.js';
+
+export type { IssuePlanMetadata };
 
 export interface GitHubIssue {
   number: number;
@@ -17,14 +19,6 @@ export interface IssuePlanOptions {
   techStack?: string[];
   outputPath?: string;
   includeTests?: boolean;
-}
-
-export interface IssuePlanMetadata {
-  issueNumber: number;
-  issueUrl: string;
-  issueLabels: string[];
-  agent: string;
-  generatedAt: string;
 }
 
 interface ParsedRef {
@@ -110,17 +104,26 @@ export class IssuePlanner {
       timeout: 15_000,
     });
 
-    const data = JSON.parse(result);
+    let data: {
+      number: number;
+      title: string;
+      body?: string;
+      labels?: Array<{ name: string }>;
+      assignees?: Array<{ login: string }>;
+      url: string;
+      state: string;
+    };
+    try {
+      data = JSON.parse(result);
+    } catch {
+      throw new Error(`Failed to parse GitHub CLI response for issue ${parsed.number}`);
+    }
     return {
       number: data.number,
       title: data.title,
       body: data.body || '',
-      labels: (data.labels || []).map(
-        (l: { name: string }) => l.name
-      ),
-      assignees: (data.assignees || []).map(
-        (a: { login: string }) => a.login
-      ),
+      labels: (data.labels || []).map((l) => l.name),
+      assignees: (data.assignees || []).map((a) => a.login),
       url: data.url,
       state: data.state,
     };
@@ -205,7 +208,7 @@ export class IssuePlanner {
           steps: [
             { type: 'implement', description: item.name },
             ...(includeTests
-              ? []
+              ? [{ type: 'test' as const, description: `Write tests for ${item.name}` }]
               : []),
           ],
         });

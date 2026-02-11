@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { execSync } from 'node:child_process';
-import { mkdirSync, rmSync, existsSync, readFileSync } from 'node:fs';
+import { mkdirSync, rmSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { stringify } from 'yaml';
 
 const CLI = join(__dirname, '../../../../apps/skillkit/dist/cli.js');
 
@@ -82,8 +83,6 @@ describe('E2E: Session Features', () => {
     });
 
     it('should save and restore snapshot with active session', () => {
-      const { stringify } = require('yaml');
-
       const skillkitDir = join(testDir, '.skillkit');
       mkdirSync(skillkitDir, { recursive: true });
 
@@ -111,7 +110,6 @@ describe('E2E: Session Features', () => {
         decisions: [{ key: 'test-key', value: 'test-value', madeAt: new Date().toISOString() }],
       };
 
-      const { writeFileSync } = require('node:fs');
       writeFileSync(
         join(skillkitDir, 'session.yaml'),
         stringify(sessionState)
@@ -158,9 +156,6 @@ describe('E2E: Session Features', () => {
     });
 
     it('should explain session with active execution', () => {
-      const { stringify } = require('yaml');
-      const { writeFileSync } = require('node:fs');
-
       const skillkitDir = join(testDir, '.skillkit');
       mkdirSync(skillkitDir, { recursive: true });
 

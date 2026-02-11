@@ -245,12 +245,18 @@ export class IssueListCommand extends Command {
       return 1;
     }
 
-    const issues = JSON.parse(result) as Array<{
+    let issues: Array<{
       number: number;
       title: string;
       labels: Array<{ name: string }>;
       assignees: Array<{ login: string }>;
     }>;
+    try {
+      issues = JSON.parse(result);
+    } catch {
+      this.context.stderr.write('Error: Failed to parse GitHub CLI response.\n');
+      return 1;
+    }
 
     if (this.json) {
       this.context.stdout.write(JSON.stringify(issues, null, 2) + '\n');

@@ -40,7 +40,7 @@ export class SnapshotManager {
   save(
     name: string,
     sessionState: SessionState,
-    observations: Array<Record<string, unknown>>,
+    observations: SessionSnapshot['observations'],
     description?: string
   ): void {
     this.ensureDir();
@@ -51,7 +51,7 @@ export class SnapshotManager {
       createdAt: new Date().toISOString(),
       description,
       sessionState,
-      observations: observations as SessionSnapshot['observations'],
+      observations,
     };
 
     writeFileSync(this.getPath(name), stringify(snapshot));
