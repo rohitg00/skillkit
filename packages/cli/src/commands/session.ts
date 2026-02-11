@@ -360,7 +360,7 @@ export class SessionSnapshotSaveCommand extends Command {
 
     let observations: SessionSnapshot['observations'] = [];
     try {
-      const raw = new ObservationStore(projectPath).getAll();
+      const raw = ObservationStore.readAll(projectPath);
       observations = raw.map((o) => ({
         id: o.id,
         timestamp: o.timestamp,

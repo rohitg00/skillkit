@@ -181,6 +181,18 @@ export class ObservationStore {
     return this.load().observations;
   }
 
+  static readAll(projectPath: string): Observation[] {
+    const filePath = join(projectPath, '.skillkit', 'memory', 'observations.yaml');
+    if (!existsSync(filePath)) return [];
+    try {
+      const content = readFileSync(filePath, 'utf-8');
+      const data = parseYaml(content) as ObservationStoreData;
+      return data?.observations ?? [];
+    } catch {
+      return [];
+    }
+  }
+
   getByType(type: ObservationType): Observation[] {
     return this.load().observations.filter((o) => o.type === type);
   }

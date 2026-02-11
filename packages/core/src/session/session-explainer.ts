@@ -2,6 +2,7 @@ import type { SessionExplanation } from './types.js';
 import { SessionManager } from './manager.js';
 import { ObservationStore } from '../memory/observation-store.js';
 import { getGitCommits } from '../learning/git-analyzer.js';
+import { loadConfig } from '../config.js';
 
 function formatDuration(ms: number): string {
   const seconds = Math.floor(ms / 1000);
@@ -46,9 +47,21 @@ export class SessionExplainer {
       return explanation;
     }
 
+    try {
+      const configAgent = loadConfig().agent;
+      if (configAgent && configAgent !== 'universal') {
+        explanation.agent = configAgent;
+      } else if (state.currentExecution?.skillSource) {
+        explanation.agent = state.currentExecution.skillSource;
+      }
+    } catch {
+      if (state.currentExecution?.skillSource) {
+        explanation.agent = state.currentExecution.skillSource;
+      }
+    }
+
     if (state.currentExecution) {
       const exec = state.currentExecution;
-      explanation.agent = exec.skillSource || 'unknown';
 
       const startTime = new Date(exec.startedAt).getTime();
       explanation.duration = formatDuration(Date.now() - startTime);
@@ -79,7 +92,7 @@ export class SessionExplainer {
       }
     }
 
-    for (const hist of state.history) {
+    for (const hist of state.history ?? []) {
       const alreadyListed = explanation.skillsUsed.some(
         (s) => s.name === hist.skillName
       );
@@ -96,10 +109,10 @@ export class SessionExplainer {
 
     explanation.filesModified = [...new Set(explanation.filesModified)];
 
-    explanation.decisions = state.decisions.map(({ key, value }) => ({ key, value }));
+    explanation.decisions = (state.decisions ?? []).map(({ key, value }) => ({ key, value }));
 
     try {
-      const observations = new ObservationStore(this.projectPath).getAll();
+      const observations = ObservationStore.readAll(this.projectPath);
       const countByType = (type: string) => observations.filter((o) => o.type === type).length;
       explanation.observationCounts = {
         total: observations.length,

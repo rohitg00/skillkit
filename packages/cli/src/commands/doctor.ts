@@ -3,9 +3,9 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, lstatSync, readlinkSync, readdirSync, mkdirSync, unlinkSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { homedir } from 'node:os';
-import { detectAgent, getAllAdapters, getAdapter } from '@skillkit/agents';
-import type { AgentType } from '@skillkit/core';
-import { findAllSkills, validateSkill, loadConfig, getProjectConfigPath } from '@skillkit/core';
+import { detectAgent, getAdapter } from '@skillkit/agents';
+import { AgentType, findAllSkills, validateSkill, loadConfig, getProjectConfigPath, getGlobalSkillsDir } from '@skillkit/core';
+import type { AgentType as AgentTypeT } from '@skillkit/core';
 import { getSearchDirs } from '../helpers.js';
 import { colors, symbols } from '../onboarding/index.js';
 
@@ -82,7 +82,7 @@ export class DoctorCommand extends Command {
     }
 
     // --- Agent Detection ---
-    let detectedAgent: AgentType = 'universal';
+    let detectedAgent: AgentTypeT = 'universal';
     try {
       detectedAgent = await detectAgent();
       results.push({ name: 'Detected agent', status: 'pass', message: `Detected: ${detectedAgent}` });
@@ -92,12 +92,12 @@ export class DoctorCommand extends Command {
 
     const otherDetected: string[] = [];
     try {
-      const allAdapters = getAllAdapters();
-      for (const adapter of allAdapters) {
-        if (adapter.agentType === detectedAgent || adapter.agentType === 'universal') continue;
+      for (const agentType of AgentType.options) {
+        if (agentType === detectedAgent || agentType === 'universal') continue;
         try {
-          if (await adapter.isDetected()) {
-            otherDetected.push(adapter.agentType);
+          const agentAdapter = getAdapter(agentType);
+          if (await agentAdapter.isDetected()) {
+            otherDetected.push(agentType);
           }
         } catch {
           // skip
@@ -132,8 +132,9 @@ export class DoctorCommand extends Command {
       }
     }
 
-    const globalSkillsDir = join(homedir(), `.${detectedAgent === 'claude-code' ? 'claude' : detectedAgent}`, 'skills');
-    if (existsSync(globalSkillsDir)) {
+    const globalSkillsDirRaw = getGlobalSkillsDir(detectedAgent);
+    const globalSkillsDir = globalSkillsDirRaw ? globalSkillsDirRaw.replace(/^~/, homedir()) : null;
+    if (globalSkillsDir && existsSync(globalSkillsDir)) {
       const entries = readdirSync(globalSkillsDir).filter(e => !e.startsWith('.'));
       results.push({ name: 'Global skills dir', status: 'pass', message: `${globalSkillsDir} (${entries.length} entries)` });
     } else {
