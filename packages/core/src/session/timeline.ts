@@ -44,6 +44,9 @@ export class SessionTimeline {
     const limit = options?.limit ?? 50;
     const includeGit = options?.includeGit !== false;
     const sinceDate = options?.since ? new Date(options.since) : undefined;
+    if (sinceDate && isNaN(sinceDate.getTime())) {
+      return { projectPath: this.projectPath, sessionDate: new Date().toISOString().split('T')[0], events: [], totalCount: 0 };
+    }
 
     if (state?.currentExecution) {
       const exec = state.currentExecution;

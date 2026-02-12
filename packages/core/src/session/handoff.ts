@@ -98,7 +98,7 @@ export class SessionHandoff {
       if (hist.status === 'completed') {
         section.tasks.push({
           name: hist.skillName,
-          duration: formatDuration(hist.durationMs),
+          duration: Number.isFinite(hist.durationMs) ? formatDuration(hist.durationMs) : undefined,
           commitSha: hist.commits?.[0],
         });
       }
@@ -230,7 +230,7 @@ export class SessionHandoff {
           .slice(0, 3);
 
         for (const [file, count] of highChurn) {
-          recs.push(`Review high-churn file: ${file} (${count} commits)`);
+          recs.push(`Review high-churn file: ${file} (${count} changes)`);
         }
       } catch {
         // activity log not available
