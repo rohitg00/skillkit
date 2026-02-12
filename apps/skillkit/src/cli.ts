@@ -118,6 +118,9 @@ import {
   AgentsMdShowCommand,
   IssuePlanCommand,
   IssueListCommand,
+  TimelineCommand,
+  SessionHandoffCommand,
+  LineageCommand,
 } from '@skillkit/cli';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -262,5 +265,9 @@ cli.register(AgentsMdShowCommand);
 
 cli.register(IssuePlanCommand);
 cli.register(IssueListCommand);
+
+cli.register(TimelineCommand);
+cli.register(SessionHandoffCommand);
+cli.register(LineageCommand);
 
 cli.runExit(process.argv.slice(2));

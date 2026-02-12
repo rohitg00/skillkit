@@ -105,6 +105,17 @@ const COMMAND_GROUPS: CommandGroup[] = [
     ],
   },
   {
+    name: 'Session',
+    commands: [
+      { cmd: 'timeline', desc: 'Unified event stream' },
+      { cmd: 'session handoff', desc: 'Agent handoff doc' },
+      { cmd: 'lineage', desc: 'Skill impact graph' },
+      { cmd: 'session explain', desc: 'Session summary' },
+      { cmd: 'activity', desc: 'Skill activity log' },
+      { cmd: 'session snapshot save', desc: 'Save state' },
+    ],
+  },
+  {
     name: 'Advanced',
     commands: [
       { cmd: 'primer', desc: 'Generate CLAUDE.md' },

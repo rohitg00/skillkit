@@ -213,6 +213,13 @@ skillkit primer --dry-run      # Preview without writing files
 skillkit primer --json         # Output analysis as JSON
 skillkit primer --output ./dir # Custom output directory`}</CodeBlock>
 
+        <h3 className="text-lg font-semibold text-white mt-6">Session Intelligence</h3>
+        <CodeBlock>{`skillkit timeline               # Unified event stream
+skillkit session handoff        # Agent-to-agent context
+skillkit lineage                # Skill impact graph
+skillkit session explain        # Session summary
+skillkit activity               # Skill activity log`}</CodeBlock>
+
         <h3 className="text-lg font-semibold text-white mt-6">Advanced</h3>
         <CodeBlock>{`skillkit ui                    # Launch Terminal UI
 skillkit workflow              # Manage workflows

@@ -378,6 +378,66 @@ skillkit issue list --json                        # JSON output
 
 The planner extracts task lists (checkboxes) from the issue body, infers file mentions from backtick-quoted paths, and maps labels to tags (e.g., `bug` → `fix`, `enhancement` → `feature`). Generated plans work with `skillkit plan validate` and `skillkit plan execute`.
 
+## Session Intelligence
+
+Track skill executions, generate handoff documents, and analyze skill impact.
+
+### Timeline
+
+View a unified chronological event stream of all session activity.
+
+```bash
+skillkit timeline                          # Last 50 events
+skillkit timeline --type git_commit        # Filter by event type
+skillkit timeline --skill code-simplifier  # Filter by skill
+skillkit timeline --since 2026-02-10       # Date filter
+skillkit timeline --limit 20 --json        # JSON output
+```
+
+| Option | Short | Purpose |
+|--------|-------|---------|
+| `--type` | `-t` | Filter: skill_start, skill_complete, task_progress, git_commit, observation, decision, snapshot |
+| `--skill` | `-s` | Filter events by skill name |
+| `--since` | — | Show events since date (YYYY-MM-DD) |
+| `--limit` | `-l` | Max events (default: 50) |
+| `--json` | `-j` | JSON output |
+
+### Session Handoff
+
+Generate a structured context document for agent switching.
+
+```bash
+skillkit session handoff                    # Print markdown to stdout
+skillkit session handoff --to cursor        # Target agent recommendations
+skillkit session handoff --out handoff.md   # Save to file
+skillkit session handoff --json             # JSON output
+```
+
+| Option | Short | Purpose |
+|--------|-------|---------|
+| `--to` | — | Target agent for recommendations |
+| `--out` | `-o` | Save to file path |
+| `--json` | `-j` | JSON output |
+
+### Lineage
+
+Show which skills produced which code changes with aggregate impact stats.
+
+```bash
+skillkit lineage                           # Full overview
+skillkit lineage --skill code-simplifier   # Single skill
+skillkit lineage --file src/index.ts       # Single file
+skillkit lineage --since 2026-02-01 --json # Date filter + JSON
+```
+
+| Option | Short | Purpose |
+|--------|-------|---------|
+| `--skill` | `-s` | Filter by skill name |
+| `--file` | `-f` | Filter by file path |
+| `--since` | — | Show lineage since date |
+| `--limit` | `-l` | Max entries |
+| `--json` | `-j` | JSON output |
+
 ## Utility Commands
 
 ```bash

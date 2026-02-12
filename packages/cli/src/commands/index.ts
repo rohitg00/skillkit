@@ -127,6 +127,9 @@ export { ServeCommand } from './serve.js';
 export { ScanCommand } from './scan.js';
 export { IssuePlanCommand, IssueListCommand } from './issue.js';
 export { DoctorCommand } from './doctor.js';
+export { TimelineCommand } from './timeline.js';
+export { SessionHandoffCommand } from './handoff.js';
+export { LineageCommand } from './lineage.js';
 export { SaveCommand } from './save.js';
 export {
   AgentsMdCommand,

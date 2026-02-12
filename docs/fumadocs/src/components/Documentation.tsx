@@ -44,12 +44,12 @@ const sections: DocSection[] = [
     content: (
       <div className="space-y-4">
         <p className="text-zinc-300">
-          SkillKit is a universal command-line interface (CLI) and programmatic toolkit for managing AI agent skills across 32 AI coding platforms. It solves the fragmentation problem where each AI agent uses different skill formats and directory structures.
+          SkillKit is a universal command-line interface (CLI) and programmatic toolkit for managing AI agent skills across 44 AI coding platforms. It solves the fragmentation problem where each AI agent uses different skill formats and directory structures.
         </p>
         <h3 className="text-lg font-semibold text-white mt-6">Core Capabilities</h3>
         <ul className="list-disc list-inside space-y-2 text-zinc-400">
           <li><span className="text-white">Skill Discovery</span> - Browse 15,000+ skills from marketplace with AI-powered recommendations</li>
-          <li><span className="text-white">Cross-Agent Translation</span> - Automatically convert skills between 32 agent-specific formats</li>
+          <li><span className="text-white">Cross-Agent Translation</span> - Automatically convert skills between 44 agent-specific formats</li>
           <li><span className="text-white">Team Collaboration</span> - Share skills via .skills manifest files and publish to marketplace</li>
         </ul>
       </div>
@@ -102,7 +102,7 @@ skillkit install anthropics/skills`}</CodeBlock>
         <ul className="list-disc list-inside space-y-2 text-zinc-400">
           <li><span className="text-white">UI Tier</span> - CLI commands, Terminal UI (OpenTUI-based), and documentation website</li>
           <li><span className="text-white">Core Logic Tier</span> - @skillkit/core for business logic; @skillkit/agents for adapter implementations</li>
-          <li><span className="text-white">Integration Tier</span> - File systems, Git repositories, marketplace APIs, and 32 AI agents</li>
+          <li><span className="text-white">Integration Tier</span> - File systems, Git repositories, marketplace APIs, and 44 AI agents</li>
         </ul>
 
         <h3 className="text-lg font-semibold text-white mt-6">Monorepo Structure</h3>
@@ -130,7 +130,7 @@ skillkit install anthropics/skills`}</CodeBlock>
     content: (
       <div className="space-y-4">
         <p className="text-zinc-300">
-          SkillKit supports 32 AI coding agents with automatic format translation:
+          SkillKit supports 44 AI coding agents with automatic format translation:
         </p>
 
         <Table
@@ -167,6 +167,18 @@ skillkit install anthropics/skills`}</CodeBlock>
             ['Trae', '.trae/skills/', 'SKILL.md'],
             ['Vercel', '.vercel/skills/', 'SKILL.md'],
             ['Zencoder', '.zencoder/skills/', 'SKILL.md'],
+            ['Devin', '.devin/skills/', 'SKILL.md'],
+            ['Aider', '.aider/skills/', 'SKILL.md'],
+            ['Sourcegraph Cody', '.cody/skills/', 'SKILL.md'],
+            ['Amazon Q', '.amazonq/skills/', 'SKILL.md'],
+            ['Augment Code', '.augment/skills/', 'SKILL.md'],
+            ['Replit Agent', '.replit/skills/', 'SKILL.md'],
+            ['Bolt', '.bolt/skills/', 'SKILL.md'],
+            ['Lovable', '.lovable/skills/', 'SKILL.md'],
+            ['Tabby', '.tabby/skills/', 'SKILL.md'],
+            ['Tabnine', '.tabnine/skills/', 'SKILL.md'],
+            ['CodeGPT', '.codegpt/skills/', 'SKILL.md'],
+            ['PlayCode Agent', '.playcode/skills/', 'SKILL.md'],
             ['Universal', 'skills/', 'SKILL.md'],
           ]}
         />

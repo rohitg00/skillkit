@@ -254,6 +254,16 @@ skillkit issue plan owner/repo#42 # Cross-repo plan
 skillkit issue list              # List open issues
 ```
 
+### Session Intelligence
+
+```bash
+skillkit timeline                # Unified event stream
+skillkit session handoff         # Agent-to-agent context
+skillkit lineage                 # Skill impact graph
+skillkit session explain         # Human-readable summary
+skillkit activity                # Skill activity log
+```
+
 ### Advanced
 
 ```bash

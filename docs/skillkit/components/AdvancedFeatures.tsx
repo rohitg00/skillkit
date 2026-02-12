@@ -48,6 +48,24 @@ const ADVANCED_FEATURES: AdvancedFeature[] = [
     ],
   },
   {
+    id: 'session',
+    title: 'Session Intelligence',
+    subtitle: 'Skill Lineage & Agent Handoffs',
+    description: 'Track which skills produced which code changes. Generate handoff documents when switching agents. View unified timelines of all session events — skill executions, git commits, observations, and decisions in one stream.',
+    highlight: 'Timeline, handoff, and lineage in one place',
+    icon: (
+      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+    commands: [
+      { cmd: 'timeline', desc: 'Unified event stream' },
+      { cmd: 'session handoff', desc: 'Agent-to-agent context' },
+      { cmd: 'lineage', desc: 'Skill impact graph' },
+      { cmd: 'lineage --skill code-simplifier', desc: 'Per-skill impact' },
+    ],
+  },
+  {
     id: 'primer',
     title: 'Primer',
     subtitle: 'Zero-Config AI Instructions',

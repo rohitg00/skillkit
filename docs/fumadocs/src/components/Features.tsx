@@ -9,7 +9,7 @@ interface Feature {
 const FEATURES: Feature[] = [
   {
     title: 'Multi-Agent',
-    description: 'Deploy to 32 AI coding agents with one command.',
+    description: 'Deploy to 44 AI coding agents with one command.',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -64,7 +64,7 @@ const FEATURES: Feature[] = [
 ];
 
 const COMPARISONS = [
-  ['Agents', '1', '32'],
+  ['Agents', '1', '44'],
   ['Translation', 'Manual', 'Auto'],
   ['Sharing', 'Copy/paste', '.skills manifest'],
   ['Discovery', 'Forums', 'CLI + AI'],
@@ -83,7 +83,7 @@ export function Features(): React.ReactElement {
             </p>
             <div className="flex gap-6 sm:gap-8">
               <div>
-                <div className="text-2xl sm:text-3xl font-bold text-white font-mono">32</div>
+                <div className="text-2xl sm:text-3xl font-bold text-white font-mono">44</div>
                 <div className="text-zinc-600 text-[10px] sm:text-xs font-mono">Agents</div>
               </div>
               <div>

@@ -146,6 +146,100 @@ export interface SessionSnapshot {
   }>;
 }
 
+// Timeline types
+export type TimelineEventType = 'skill_start' | 'skill_complete' | 'task_progress' | 'git_commit' | 'observation' | 'decision' | 'snapshot';
+
+export interface TimelineEvent {
+  timestamp: string;
+  type: TimelineEventType;
+  source: string;
+  summary: string;
+  details?: Record<string, unknown>;
+}
+
+export interface TimelineData {
+  projectPath: string;
+  sessionDate: string;
+  events: TimelineEvent[];
+  totalCount: number;
+}
+
+export interface TimelineOptions {
+  since?: string;
+  types?: TimelineEventType[];
+  limit?: number;
+  skillFilter?: string;
+  includeGit?: boolean;
+}
+
+// Handoff types
+export interface HandoffDocument {
+  generatedAt: string;
+  fromAgent: string;
+  projectPath: string;
+  accomplished: HandoffSection;
+  pending: HandoffSection;
+  keyFiles: Array<{ path: string; changeType: string }>;
+  observations: {
+    errors: Array<{ action: string; error: string }>;
+    solutions: Array<{ action: string; solution: string }>;
+    patterns: Array<{ action: string; context: string }>;
+  };
+  recommendations: string[];
+}
+
+export interface HandoffSection {
+  tasks: Array<{ name: string; duration?: string; commitSha?: string }>;
+  commits: Array<{ sha: string; message: string; filesCount: number }>;
+}
+
+export interface HandoffOptions {
+  targetAgent?: string;
+  includeGit?: boolean;
+  includeObservations?: boolean;
+  maxObservations?: number;
+}
+
+// Lineage types
+export interface SkillLineageEntry {
+  skillName: string;
+  executions: number;
+  totalDurationMs: number;
+  commits: string[];
+  filesModified: string[];
+  observationIds: string[];
+  firstSeen: string;
+  lastSeen: string;
+}
+
+export interface FileLineage {
+  path: string;
+  skills: string[];
+  commitCount: number;
+  lastModified: string;
+}
+
+export interface LineageData {
+  projectPath: string;
+  skills: SkillLineageEntry[];
+  files: FileLineage[];
+  stats: {
+    totalSkillExecutions: number;
+    totalCommits: number;
+    totalFilesChanged: number;
+    mostImpactfulSkill: string | null;
+    mostChangedFile: string | null;
+    errorProneFiles: string[];
+  };
+}
+
+export interface LineageOptions {
+  skill?: string;
+  file?: string;
+  limit?: number;
+  since?: string;
+}
+
 export interface SessionExplanation {
   date: string;
   agent: string;

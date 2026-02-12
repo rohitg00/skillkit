@@ -18,7 +18,7 @@ export default function HomePage() {
           
           <p className="text-lg text-zinc-400 mb-8 max-w-2xl mx-auto font-mono">
             One CLI to install, sync, and manage skills across Claude Code, Cursor,
-            Windsurf, Copilot, and 28 more agents. 15,000+ skills ready to use.
+            Windsurf, Copilot, and 40 more agents. 15,000+ skills ready to use.
           </p>
           
           <div className="flex flex-wrap justify-center gap-4 mb-12">
@@ -39,8 +39,8 @@ export default function HomePage() {
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           <div className="border border-zinc-800 bg-zinc-900/30 p-6">
-            <h3 className="text-lg font-bold text-white mb-2 font-mono">32 Agents</h3>
-            <p className="text-zinc-500 text-sm">Claude, Cursor, Codex, Windsurf, Copilot, and 27 more supported out of the box.</p>
+            <h3 className="text-lg font-bold text-white mb-2 font-mono">44 Agents</h3>
+            <p className="text-zinc-500 text-sm">Claude, Cursor, Codex, Windsurf, Copilot, and 39 more supported out of the box.</p>
           </div>
           <div className="border border-zinc-800 bg-zinc-900/30 p-6">
             <h3 className="text-lg font-bold text-white mb-2 font-mono">15,000+ Skills</h3>
