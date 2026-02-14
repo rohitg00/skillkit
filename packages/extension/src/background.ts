@@ -77,15 +77,20 @@ async function callSaveApi(url: string, name?: string): Promise<SaveResponse | E
     body: JSON.stringify({ url, name }),
   });
 
-  const data = await response.json();
+  let data: Record<string, unknown>;
+  try {
+    data = await response.json();
+  } catch {
+    return { error: `Server error: ${response.status}` };
+  }
   if (!response.ok) {
-    return { error: data.error ?? `Server error: ${response.status}` };
+    return { error: (data.error as string) ?? `Server error: ${response.status}` };
   }
   return {
-    name: data.name,
+    name: data.name as string,
     filename: `${data.name}/SKILL.md`,
-    skillMd: data.skillMd,
-    tags: data.tags ?? [],
+    skillMd: data.skillMd as string,
+    tags: (data.tags as string[]) ?? [],
   };
 }
 
@@ -98,7 +103,7 @@ function buildSelectionSkill(text: string, url: string, name?: string): SaveResp
     `name: ${skillName}\n` +
     `description: Selected text saved as skill\n` +
     `metadata:\n` +
-    (url ? `  source: ${url}\n` : '') +
+    (url ? `  source: ${yamlEscape(url)}\n` : '') +
     `  savedAt: ${savedAt}\n` +
     `---\n\n` +
     text + '\n';
@@ -109,6 +114,14 @@ function buildSelectionSkill(text: string, url: string, name?: string): SaveResp
     skillMd,
     tags: [],
   };
+}
+
+function yamlEscape(value: string): string {
+  const singleLine = value.replace(/\r?\n/g, ' ').trim();
+  if (/[:#{}[\],&*?|>!%@`]/.test(singleLine) || singleLine.startsWith("'") || singleLine.startsWith('"')) {
+    return `"${singleLine.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+  }
+  return singleLine;
 }
 
 function slugify(input: string): string {

@@ -38,9 +38,9 @@ function isAllowedUrl(url: string): boolean {
     if (bare.startsWith('10.') || bare.startsWith('192.168.')) return false;
     if (/^172\.(1[6-9]|2\d|3[01])\./.test(bare)) return false;
     if (bare.startsWith('169.254.')) return false;
-    if (bare.startsWith('fe80:') || bare.startsWith('fc') || bare.startsWith('fd')) return false;
+    if (bare.startsWith('fe80:') || bare.startsWith('fc00:') || bare.startsWith('fd')) return false;
     if (/^(22[4-9]|23\d|24\d|25[0-5])\./.test(bare)) return false;
-    if (bare.startsWith('ff')) return false;
+    if (/^ff[0-9a-f]{2}:/.test(bare)) return false;
     return true;
   } catch {
     return false;
@@ -80,13 +80,22 @@ async function extractFromUrl(url: string): Promise<ExtractedContent> {
     return fetchGitHubContent(url);
   }
 
+  const MAX_BODY_SIZE = 5 * 1024 * 1024;
   const response = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT) });
   if (!response.ok) {
     throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
   }
 
+  const contentLength = Number(response.headers.get('content-length') || '0');
+  if (contentLength > MAX_BODY_SIZE) {
+    throw new Error('Response too large');
+  }
+
   const contentType = response.headers.get('content-type') ?? '';
   const body = await response.text();
+  if (body.length > MAX_BODY_SIZE) {
+    throw new Error('Response too large');
+  }
 
   if (contentType.includes('text/html')) {
     const titleMatch = body.match(/<title[^>]*>([^<]+)<\/title>/i);
@@ -115,12 +124,21 @@ async function fetchGitHubContent(url: string): Promise<ExtractedContent> {
     rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
   }
 
+  const MAX_BODY_SIZE = 5 * 1024 * 1024;
   const response = await fetch(rawUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT) });
   if (!response.ok) {
     throw new Error(`Failed to fetch GitHub content: ${response.status} ${response.statusText}`);
   }
 
+  const contentLength = Number(response.headers.get('content-length') || '0');
+  if (contentLength > MAX_BODY_SIZE) {
+    throw new Error('Response too large');
+  }
+
   const body = await response.text();
+  if (body.length > MAX_BODY_SIZE) {
+    throw new Error('Response too large');
+  }
   const filename = rawUrl.split('/').pop() ?? 'file';
   const ext = filename.includes('.') ? '.' + filename.split('.').pop()!.toLowerCase() : '';
   const language = LANG_MAP[ext];
