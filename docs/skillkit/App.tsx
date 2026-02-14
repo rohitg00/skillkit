@@ -5,16 +5,11 @@ import { Agents } from './components/Agents';
 import { Footer } from './components/Footer';
 import { SkillGenerator } from './components/SkillGenerator';
 import { SkillSubmitForm } from './components/SkillSubmitForm';
-import { Commands } from './components/Commands';
-import { StackBuilder } from './components/StackBuilder';
 import { TrendingSkills } from './components/TrendingSkills';
 import { Attribution } from './components/Attribution';
 import { AdvancedFeatures } from './components/AdvancedFeatures';
 import { UseCases } from './components/UseCases';
-import { TeamEnterprise } from './components/TeamEnterprise';
-import { BadgeGenerator } from './components/BadgeGenerator';
 import { CompatibilityMatrix } from './components/CompatibilityMatrix';
-import { WhySkillKit } from './components/WhySkillKit';
 import { useStats } from './hooks/useStats';
 
 const GITHUB_ICON = (
@@ -51,13 +46,6 @@ export default function App(): React.ReactElement {
             </a>
             <div className="hidden sm:flex items-center gap-4 text-xs font-mono">
               <a
-                href="#why"
-                onClick={(e) => scrollToSection(e, 'why')}
-                className="text-zinc-500 hover:text-white transition-colors"
-              >
-                Why SkillKit
-              </a>
-              <a
                 href="#trending"
                 onClick={(e) => scrollToSection(e, 'trending')}
                 className="text-zinc-500 hover:text-white transition-colors"
@@ -93,12 +81,12 @@ export default function App(): React.ReactElement {
                 Generator
               </a>
               <a
-                href="https://github.com/rohitg00/skillkit/tree/main/packages/extension#readme"
+                href="https://agenstskills.com/docs"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-zinc-500 hover:text-white transition-colors"
               >
-                Extension
+                Docs
               </a>
             </div>
             <div className="flex items-center gap-3 sm:gap-4">
@@ -107,12 +95,6 @@ export default function App(): React.ReactElement {
                 className="text-zinc-400 hover:text-white transition-colors text-xs sm:text-sm font-mono"
               >
                 API
-              </a>
-              <a
-                href="https://agenstskills.com/docs"
-                className="text-zinc-400 hover:text-white transition-colors text-xs sm:text-sm font-mono"
-              >
-                Docs
               </a>
               <a
                 href="https://github.com/rohitg00/skillkit"
@@ -181,27 +163,14 @@ export default function App(): React.ReactElement {
         {/* Core Features & Comparison - Value prop at a glance */}
         <Features />
 
-        {/* Why SkillKit - Competitor landscape & aggregator positioning */}
-        <WhySkillKit />
-
         {/* Trending Skills - Social proof, what's popular */}
         <section id="trending" style={{ scrollMarginTop: '4rem' }}>
           <TrendingSkills />
         </section>
 
-        {/* Stack Builder - Interactive, engaging */}
-        <section id="stack" style={{ scrollMarginTop: '4rem' }}>
-          <StackBuilder />
-        </section>
-        
         {/* Compatibility Matrix */}
         <section id="matrix" style={{ scrollMarginTop: '4rem' }}>
           <CompatibilityMatrix />
-        </section>
-
-        {/* Badge Generator */}
-        <section id="badge" style={{ scrollMarginTop: '4rem' }}>
-          <BadgeGenerator />
         </section>
 
         {/* Advanced Capabilities: Memory, Primer, Mesh, Messaging */}
@@ -209,19 +178,29 @@ export default function App(): React.ReactElement {
           <AdvancedFeatures />
         </section>
         
-        {/* Commands Reference */}
-        <Commands />
-        
+        {/* Docs CTA */}
+        <section className="py-8 border-b border-zinc-800">
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
+            <p className="text-sm font-mono text-zinc-400">
+              Explore all 50+ commands, team workflows, and integrations in the{' '}
+              <a
+                href="https://agenstskills.com/docs"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white underline underline-offset-4 hover:text-zinc-300 transition-colors"
+              >
+                documentation
+              </a>
+              .
+            </p>
+          </div>
+        </section>
+
         {/* Real-World Use Cases */}
         <section id="use-cases" style={{ scrollMarginTop: '4rem' }}>
           <UseCases />
         </section>
         
-        {/* Team & Enterprise */}
-        <section id="team" style={{ scrollMarginTop: '4rem' }}>
-          <TeamEnterprise />
-        </section>
-
         {/* Skill Generator */}
         <section id="skills" className="py-12 border-b border-zinc-800" style={{ scrollMarginTop: '4rem' }}>
           <SkillGenerator />
