@@ -4,7 +4,6 @@ const pageTitle = document.getElementById('page-title')!;
 const pageUrl = document.getElementById('page-url')!;
 const skillNameInput = document.getElementById('skill-name') as HTMLInputElement;
 const saveBtn = document.getElementById('save-btn')!;
-const saveSelectionBtn = document.getElementById('save-selection-btn')!;
 const statusEl = document.getElementById('status')!;
 const statusIcon = document.getElementById('status-icon')!;
 const statusText = document.getElementById('status-text')!;
@@ -12,8 +11,6 @@ const resultEl = document.getElementById('result')!;
 const resultPath = document.getElementById('result-path')!;
 
 let currentUrl = '';
-let currentSelection = '';
-let currentMarkdown = '';
 let currentTitle = '';
 
 async function init() {
@@ -25,63 +22,33 @@ async function init() {
   currentUrl = tab.url || '';
   currentTitle = tab.title || '';
 
-  try {
-    const response = await chrome.tabs.sendMessage(
-      tab.id,
-      { type: 'GET_PAGE_INFO' } satisfies ExtensionMessage,
-    );
-    if (response?.type === 'PAGE_INFO') {
-      currentMarkdown = response.payload.markdown;
-      currentSelection = response.payload.selection;
-      currentTitle = response.payload.title || currentTitle;
-      if (currentSelection) {
-        saveSelectionBtn.style.display = 'block';
-      }
-    }
-  } catch {
-    // Content script not loaded (chrome:// pages, etc.)
+  const isRestricted = !currentUrl || currentUrl.startsWith('chrome://') || currentUrl.startsWith('chrome-extension://') || currentUrl.startsWith('about:');
+  if (isRestricted) {
+    saveBtn.setAttribute('disabled', '');
+    setStatus('error', 'Cannot save skills from this page');
+    return;
   }
 }
 
 saveBtn.addEventListener('click', async () => {
   if (!currentUrl) return;
-  await save({
+
+  setStatus('saving', 'Saving...');
+  saveBtn.setAttribute('disabled', '');
+
+  const message: ExtensionMessage = {
     type: 'SAVE_PAGE',
     payload: {
       url: currentUrl,
       title: currentTitle,
-      markdown: currentMarkdown,
       name: skillNameInput.value.trim() || undefined,
     },
-  });
-});
-
-saveSelectionBtn.addEventListener('click', async () => {
-  if (!currentSelection) return;
-  await save({
-    type: 'SAVE_SELECTION',
-    payload: {
-      text: currentSelection,
-      url: currentUrl,
-      name: skillNameInput.value.trim() || undefined,
-    },
-  });
-});
-
-function setButtonsDisabled(disabled: boolean): void {
-  const method = disabled ? 'setAttribute' : 'removeAttribute';
-  saveBtn[method]('disabled', '');
-  saveSelectionBtn[method]('disabled', '');
-}
-
-async function save(message: ExtensionMessage) {
-  setStatus('saving', 'Saving...');
-  setButtonsDisabled(true);
+  };
 
   const response: SaveResponse | ErrorResponse | undefined =
     await chrome.runtime.sendMessage(message);
 
-  setButtonsDisabled(false);
+  saveBtn.removeAttribute('disabled');
 
   if (!response) {
     setStatus('error', 'No response from background script');
@@ -98,7 +65,7 @@ async function save(message: ExtensionMessage) {
   setStatus('success', `Saved "${response.name}"`);
   resultPath.textContent = `Downloads/skillkit-skills/${response.filename}`;
   resultEl.style.display = 'block';
-}
+});
 
 function setStatus(type: 'saving' | 'success' | 'error', text: string) {
   statusEl.style.display = 'flex';
