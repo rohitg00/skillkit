@@ -81,7 +81,7 @@ export default function App(): React.ReactElement {
                 Generator
               </a>
               <a
-                href="https://agenstskills.com/docs"
+                href="https://skillkit.sh/docs"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-zinc-500 hover:text-white transition-colors"
@@ -184,7 +184,7 @@ export default function App(): React.ReactElement {
             <p className="text-sm font-mono text-zinc-400">
               Explore all 50+ commands, team workflows, and integrations in the{' '}
               <a
-                href="https://agenstskills.com/docs"
+                href="https://skillkit.sh/docs"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white underline underline-offset-4 hover:text-zinc-300 transition-colors"

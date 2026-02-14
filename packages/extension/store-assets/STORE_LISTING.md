@@ -14,7 +14,7 @@ How it works:
 - Right-click any page and select "Save page as Skill"
 - Select text, right-click, and choose "Save selection as Skill"
 
-When you save a page, the extension sends the page URL to agenstskills.com where it is converted to clean markdown with auto-generated tags and YAML frontmatter. The resulting skill file is downloaded to your computer. No page content, browsing history, or personal data is ever sent — only the URL of the page you choose to save.
+When you save a page, the extension sends the page URL to skillkit.sh (or agenstskills.com) where it is converted to clean markdown with auto-generated tags and YAML frontmatter. The resulting skill file is downloaded to your computer. No page content, browsing history, or personal data is ever sent — only the URL of the page you choose to save.
 
 Saving selected text works entirely offline with no network requests.
 
@@ -29,7 +29,7 @@ Features:
 - Works on any webpage
 - No account or API key required
 
-Part of the SkillKit ecosystem: https://agenstskills.com
+Part of the SkillKit ecosystem: https://skillkit.sh
 
 ## Category
 Developer Tools
@@ -38,13 +38,13 @@ Developer Tools
 English
 
 ## Website
-https://agenstskills.com
+https://skillkit.sh
 
 ## Support URL
 https://github.com/rohitg00/skillkit/issues
 
 ## Privacy Policy URL
-https://agenstskills.com/privacy.html
+https://skillkit.sh/privacy.html
 
 ## Single Purpose
 Save webpages as AI agent skill files (SKILL.md) for use with coding AI agents.
@@ -56,10 +56,10 @@ Save webpages as AI agent skill files (SKILL.md) for use with coding AI agents.
 
 ## Data Usage Disclosure (for Chrome Web Store Privacy tab)
 - Does the extension use remote code? No
-- Does it collect user data? No personal data. The page URL is sent to agenstskills.com when the user clicks save.
+- Does it collect user data? No personal data. The page URL is sent to skillkit.sh (or agenstskills.com) when the user clicks save.
 - Data type: Website content (URL only, on user action)
 - Use: Required for core functionality (converting webpage to skill file)
-- Transfer: Sent to agenstskills.com (our own server) over HTTPS
+- Transfer: Sent to skillkit.sh / agenstskills.com (our own servers) over HTTPS
 - Not sold to third parties
 - Not used for creditworthiness or lending
 

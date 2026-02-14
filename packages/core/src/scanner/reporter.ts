@@ -125,13 +125,13 @@ export function formatSarif(result: ScanResult): string {
           driver: {
             name: 'skillkit-scanner',
             version: SCANNER_VERSION,
-            informationUri: 'https://agenstskills.com',
+            informationUri: 'https://skillkit.sh',
             rules: [...rules.values()].map((r) => ({
               id: r.ruleId,
               name: r.ruleId,
               shortDescription: { text: r.title },
               fullDescription: { text: r.description },
-              helpUri: 'https://agenstskills.com/docs/security',
+              helpUri: 'https://skillkit.sh/docs/security',
               defaultConfiguration: {
                 level: severityToSarif[r.severity] ?? 'warning',
               },

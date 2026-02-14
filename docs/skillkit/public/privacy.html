@@ -32,7 +32,7 @@
     <h2>Chrome Extension — "SkillKit - Save as Skill"</h2>
     <p>The Chrome extension helps you save webpages as AI agent skill files.</p>
     <ul>
-      <li><strong>What data is sent:</strong> When you click "Save as Skill", the extension sends the URL of the current page to our server at <code>agenstskills.com/api/save-skill</code>. This is required to fetch and convert the webpage content into a skill file.</li>
+      <li><strong>What data is sent:</strong> When you click "Save as Skill", the extension sends the URL of the current page to our server at <code>skillkit.sh/api/save-skill</code> or <code>agenstskills.com/api/save-skill</code>. This is required to fetch and convert the webpage content into a skill file.</li>
       <li><strong>What data is NOT sent:</strong> We do not send page content, browsing history, personal information, cookies, authentication tokens, or any data beyond the single URL you choose to save.</li>
       <li><strong>No data stored on server:</strong> The URL is processed in real time to extract content, generate tags, and build the skill file. No URLs, page content, or user data are stored, logged, or retained on the server after the response is returned.</li>
       <li><strong>Selection saves are local:</strong> When you save selected text via the right-click menu, the skill file is built entirely in the browser with no network requests.</li>
@@ -55,10 +55,10 @@
     <p>The SkillKit MCP server runs locally and provides skill discovery over the Model Context Protocol. It loads skill data from a bundled JSON file and does not make external network requests or collect user data.</p>
 
     <h2>Website</h2>
-    <p>The SkillKit website (<a href="https://agenstskills.com">agenstskills.com</a>) is a static site hosted on Vercel. We do not use cookies, analytics trackers, or collect personal information. Vercel may collect standard web server logs (IP address, user agent) as described in their <a href="https://vercel.com/legal/privacy-policy">privacy policy</a>.</p>
+    <p>The SkillKit website is available at <a href="https://skillkit.sh">skillkit.sh</a> and <a href="https://agenstskills.com">agenstskills.com</a>. It is a static site hosted on Vercel. We do not use cookies, analytics trackers, or collect personal information. Vercel may collect standard web server logs (IP address, user agent) as described in their <a href="https://vercel.com/legal/privacy-policy">privacy policy</a>.</p>
 
     <h2>Third-Party Services</h2>
-    <p>The Chrome extension communicates with <code>agenstskills.com</code> (our own server, hosted on Vercel) to process webpage URLs. No third-party data processors, advertising networks, or analytics services are used.</p>
+    <p>The Chrome extension communicates with <code>skillkit.sh</code> and <code>agenstskills.com</code> (both our own servers, hosted on Vercel) to process webpage URLs. No third-party data processors, advertising networks, or analytics services are used.</p>
 
     <h2>Data Retention</h2>
     <p>We do not retain any user data. URLs sent to the API are processed in memory and discarded immediately after the response.</p>

@@ -35,8 +35,8 @@ export function BadgeGenerator(): React.ReactElement {
 
   const badgeUrl = useMemo(() => buildBadgeUrl(skills), [skills]);
 
-  const markdown = `[![SkillKit Stack](${badgeUrl})](https://agenstskills.com)`;
-  const html = `<a href="https://agenstskills.com"><img src="${badgeUrl}" alt="SkillKit Stack" /></a>`;
+  const markdown = `[![SkillKit Stack](${badgeUrl})](https://skillkit.sh)`;
+  const html = `<a href="https://skillkit.sh"><img src="${badgeUrl}" alt="SkillKit Stack" /></a>`;
 
   function addSkill(skill: string): void {
     const trimmed = skill.trim().toLowerCase();

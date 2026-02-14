@@ -1,6 +1,6 @@
 import type { SaveResponse, ErrorResponse, ExtensionMessage } from './types';
 
-const API_URL = 'https://agenstskills.com/api/save-skill';
+const API_URL = 'https://skillkit.sh/api/save-skill';
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({

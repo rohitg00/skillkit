@@ -16,8 +16,8 @@ export function generateBadge(skills: string[]): {
     const url = `https://img.shields.io/badge/SkillKit-No%20Skills-555555?style=flat-square&logo=data:image/svg+xml;base64,${SKILLKIT_LOGO_SVG_BASE64}`;
     return {
       url,
-      markdown: `[![SkillKit Stack](${url})](https://agenstskills.com)`,
-      html: `<a href="https://agenstskills.com"><img src="${url}" alt="SkillKit Stack" /></a>`,
+      markdown: `[![SkillKit Stack](${url})](https://skillkit.sh)`,
+      html: `<a href="https://skillkit.sh"><img src="${url}" alt="SkillKit Stack" /></a>`,
     };
   }
 
@@ -33,7 +33,7 @@ export function generateBadge(skills: string[]): {
 
   return {
     url,
-    markdown: `[![SkillKit Stack](${url})](https://agenstskills.com)`,
-    html: `<a href="https://agenstskills.com"><img src="${url}" alt="SkillKit Stack" /></a>`,
+    markdown: `[![SkillKit Stack](${url})](https://skillkit.sh)`,
+    html: `<a href="https://skillkit.sh"><img src="${url}" alt="SkillKit Stack" /></a>`,
   };
 }

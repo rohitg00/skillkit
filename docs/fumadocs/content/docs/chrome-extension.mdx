@@ -65,7 +65,7 @@ Extension → POST /api/save-skill { url } → Server pipeline → Download
 
 1. **Popup** reads the current tab's URL and title via `activeTab` permission. No content script injection needed.
 
-2. **Background service worker** sends the URL to `agenstskills.com/api/save-skill`:
+2. **Background service worker** sends the URL to `skillkit.sh/api/save-skill` (or `agenstskills.com/api/save-skill`):
    - Server fetches the page and converts HTML to markdown via Turndown
    - GitHub URLs are auto-converted to raw content
    - Tags are detected from 5 weighted sources (URL segments, headings, code blocks, keywords, language)

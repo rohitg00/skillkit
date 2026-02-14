@@ -17,7 +17,7 @@
 
 **SkillKit** is the open source package manager for AI agent skills. Write a skill once, deploy it to **44 agents** — Claude, Cursor, Copilot, Windsurf, Devin, Codex, and 38 more. No rewrites. 15,000+ skills in the marketplace.
 
-[Website](https://agenstskills.com) &middot; [Docs](https://agenstskills.com/docs) &middot; [API Explorer](https://agenstskills.com/api) &middot; [Chrome Extension](https://github.com/rohitg00/skillkit/tree/main/packages/extension#readme) &middot; [npm](https://www.npmjs.com/package/skillkit)
+[Website](https://skillkit.sh) &middot; [Docs](https://skillkit.sh/docs) &middot; [API Explorer](https://skillkit.sh/api) &middot; [Chrome Extension](https://github.com/rohitg00/skillkit/tree/main/packages/extension#readme) &middot; [npm](https://www.npmjs.com/package/skillkit)
 
 </div>
 
@@ -125,7 +125,7 @@ async with SkillKitClient() as client:
     results = await client.search("react performance", limit=5)
 ```
 
-[REST API docs](https://agenstskills.com/docs/rest-api) &middot; [MCP Server docs](https://agenstskills.com/docs/mcp-server) &middot; [Python Client docs](https://agenstskills.com/docs/python-client) &middot; [Interactive API explorer](https://agenstskills.com/api)
+[REST API docs](https://skillkit.sh/docs/rest-api) &middot; [MCP Server docs](https://skillkit.sh/docs/mcp-server) &middot; [Python Client docs](https://skillkit.sh/docs/python-client) &middot; [Interactive API explorer](https://skillkit.sh/api)
 
 ### Auto-generate agent instructions
 
@@ -191,7 +191,7 @@ Save any webpage as a skill directly from your browser.
 
 The extension sends the page URL to the SkillKit API for server-side extraction with Turndown, 5-source weighted tag detection, and GitHub URL support. The resulting SKILL.md downloads automatically. Then run `skillkit install ~/Downloads/skillkit-skills/my-skill` to deploy to all agents.
 
-[Extension docs](https://agenstskills.com/docs/chrome-extension)
+[Extension docs](https://skillkit.sh/docs/chrome-extension)
 
 ### Interactive TUI
 
@@ -221,7 +221,7 @@ skillkit ui
 
 Plus 33 more: Amp, Antigravity, Augment Code, Bolt, Clawdbot, Cline, CodeBuddy, CodeGPT, CommandCode, Continue, Crush, Droid, Factory, Goose, Kilo Code, Kiro CLI, Lovable, MCPJam, Mux, Neovate, OpenHands, Pi, PlayCode, Qoder, Qwen, Replit Agent, Roo Code, Tabby, Tabnine, Trae, Vercel, Zencoder, Universal
 
-[Full agent details](https://agenstskills.com/docs/agents)
+[Full agent details](https://skillkit.sh/docs/agents)
 
 ## Commands
 
@@ -276,7 +276,7 @@ skillkit test                    # Test skills
 skillkit cicd init               # CI/CD templates
 ```
 
-[Full command reference](https://agenstskills.com/docs/commands)
+[Full command reference](https://skillkit.sh/docs/commands)
 
 ## Creating Skills
 
@@ -367,4 +367,4 @@ Apache License 2.0 — see [LICENSE](LICENSE).
 
 ## Links
 
-[Documentation](https://agenstskills.com/docs) &middot; [Website](https://agenstskills.com) &middot; [API Explorer](https://agenstskills.com/api) &middot; [npm](https://www.npmjs.com/package/skillkit) &middot; [GitHub](https://github.com/rohitg00/skillkit)
+[Documentation](https://skillkit.sh/docs) &middot; [Website](https://skillkit.sh) &middot; [API Explorer](https://skillkit.sh/api) &middot; [npm](https://www.npmjs.com/package/skillkit) &middot; [GitHub](https://github.com/rohitg00/skillkit)

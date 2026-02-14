@@ -38,5 +38,5 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/rohitg00/skillkit"
-Documentation = "https://agenstskills.com"
+Documentation = "https://skillkit.sh"
 Repository = "https://github.com/rohitg00/skillkit"

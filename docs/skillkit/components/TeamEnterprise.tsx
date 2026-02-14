@@ -92,7 +92,7 @@ export function TeamEnterprise(): React.ReactElement {
               </p>
             </div>
             <a 
-              href="https://agenstskills.com/docs/api-reference"
+              href="https://skillkit.sh/docs/api-reference"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-zinc-800 text-white font-mono text-xs sm:text-sm hover:bg-zinc-700 transition-colors border border-zinc-700 whitespace-nowrap"
@@ -108,7 +108,7 @@ export function TeamEnterprise(): React.ReactElement {
         {/* Bottom CTA */}
         <div className="mt-6 sm:mt-8 text-center">
           <a 
-            href="https://agenstskills.com/docs"
+            href="https://skillkit.sh/docs"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-white text-black font-mono text-xs sm:text-sm hover:bg-zinc-200 transition-colors cursor-pointer"

@@ -351,7 +351,7 @@ export class QuickCommand extends Command {
         console.log('');
         const badgeUrl = `https://img.shields.io/badge/SkillKit-${encodeURIComponent(matchedSkill.name)}-black?style=flat-square`;
         console.log(colors.dim('Add to your README:'));
-        console.log(colors.muted(`  [![SkillKit](${badgeUrl})](https://agenstskills.com)`));
+        console.log(colors.muted(`  [![SkillKit](${badgeUrl})](https://skillkit.sh)`));
 
         outro('Quick setup complete!');
 

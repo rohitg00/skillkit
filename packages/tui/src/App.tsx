@@ -12,7 +12,7 @@ import {
   Timeline, Lineage, Handoff,
 } from './screens/index.js';
 
-const DOCS_URL = 'https://agenstskills.com/docs';
+const DOCS_URL = 'https://skillkit.sh/docs';
 
 function openUrl(url: string): void {
   if (process.platform === 'win32') {
