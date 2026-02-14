@@ -24,19 +24,28 @@
   <div class="container">
     <a href="/" class="back">&larr; Back to SkillKit</a>
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: February 10, 2026</p>
+    <p class="updated">Last updated: February 14, 2026</p>
 
     <h2>Overview</h2>
     <p>SkillKit ("we", "our", "us") is an open-source CLI tool and Chrome extension for managing AI agent skills. We are committed to protecting your privacy. This policy explains what data we collect (or don't) across all SkillKit products.</p>
 
     <h2>Chrome Extension — "SkillKit - Save as Skill"</h2>
-    <p>The Chrome extension operates entirely within your browser. It does not collect, transmit, or store any personal data externally.</p>
+    <p>The Chrome extension helps you save webpages as AI agent skill files.</p>
     <ul>
-      <li><strong>No data collection:</strong> We do not collect browsing history, page content, personal information, or any other user data.</li>
-      <li><strong>No external requests:</strong> The extension makes zero network requests. All processing (HTML to markdown conversion, SKILL.md generation) happens locally in your browser.</li>
+      <li><strong>What data is sent:</strong> When you click "Save as Skill", the extension sends the URL of the current page to our server at <code>agenstskills.com/api/save-skill</code>. This is required to fetch and convert the webpage content into a skill file.</li>
+      <li><strong>What data is NOT sent:</strong> We do not send page content, browsing history, personal information, cookies, authentication tokens, or any data beyond the single URL you choose to save.</li>
+      <li><strong>No data stored on server:</strong> The URL is processed in real time to extract content, generate tags, and build the skill file. No URLs, page content, or user data are stored, logged, or retained on the server after the response is returned.</li>
+      <li><strong>Selection saves are local:</strong> When you save selected text via the right-click menu, the skill file is built entirely in the browser with no network requests.</li>
       <li><strong>No analytics or tracking:</strong> We do not use any analytics, telemetry, or tracking services.</li>
-      <li><strong>Local storage only:</strong> The Chrome storage API is used solely to store user preferences (e.g., default settings) on your device. This data never leaves your browser.</li>
+      <li><strong>No user accounts:</strong> No login, API key, or account is required.</li>
       <li><strong>Downloads:</strong> Generated skill files are saved to your local filesystem via the Chrome Downloads API. No files are uploaded anywhere.</li>
+    </ul>
+
+    <h2>Permissions Used</h2>
+    <ul>
+      <li><strong>activeTab:</strong> Read the URL and title of the tab you are viewing when you click the extension. Only accessed when you actively use the extension.</li>
+      <li><strong>contextMenus:</strong> Add "Save page as Skill" and "Save selection as Skill" to the right-click menu.</li>
+      <li><strong>downloads:</strong> Save the generated SKILL.md file to your Downloads folder.</li>
     </ul>
 
     <h2>CLI Tool</h2>
@@ -49,10 +58,10 @@
     <p>The SkillKit website (<a href="https://agenstskills.com">agenstskills.com</a>) is a static site hosted on Vercel. We do not use cookies, analytics trackers, or collect personal information. Vercel may collect standard web server logs (IP address, user agent) as described in their <a href="https://vercel.com/legal/privacy-policy">privacy policy</a>.</p>
 
     <h2>Third-Party Services</h2>
-    <p>SkillKit does not integrate with any third-party data processors, advertising networks, or analytics services.</p>
+    <p>The Chrome extension communicates with <code>agenstskills.com</code> (our own server, hosted on Vercel) to process webpage URLs. No third-party data processors, advertising networks, or analytics services are used.</p>
 
     <h2>Data Retention</h2>
-    <p>We do not retain any user data because we do not collect any user data.</p>
+    <p>We do not retain any user data. URLs sent to the API are processed in memory and discarded immediately after the response.</p>
 
     <h2>Changes to This Policy</h2>
     <p>We may update this privacy policy from time to time. Changes will be posted on this page with an updated revision date.</p>
