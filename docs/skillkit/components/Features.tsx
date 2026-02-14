@@ -109,13 +109,13 @@ const FEATURES: Feature[] = [
 ];
 
 const COMPARISONS = [
-  ['Agent Support', '1 agent', '44 agents'],
-  ['Setup', 'Write rules manually', 'Auto-generate (Primer)'],
-  ['Learning', 'Lost each session', 'Persistent memory'],
-  ['Translation', 'Rewrite for each', 'One-click conversion'],
-  ['Team Sharing', 'Copy/paste files', '.skills manifest'],
-  ['Discovery', 'Search forums', 'AI recommendations'],
-  ['Security', 'Manual review', 'Auto-scan on install'],
+  ['Agent Support', '1-17 agents', '44 agents'],
+  ['Sources', 'Single registry', '31+ aggregated'],
+  ['Translation', 'None or limited', 'All 44 formats'],
+  ['Memory', 'None', 'Persistent learning'],
+  ['Security', 'None', '46-rule scanner'],
+  ['Team Sync', 'None', '.skills manifest'],
+  ['Telemetry', 'Varies', 'Zero. Ever.'],
   ['API Access', 'None', 'REST + MCP + Python'],
 ] as const;
 
@@ -125,18 +125,18 @@ export function Features(): React.ReactElement {
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8 mb-10">
           <div className="lg:col-span-2">
-            <h2 className="text-xl font-bold text-white mb-2 font-mono">Why SkillKit?</h2>
+            <h2 className="text-xl font-bold text-white mb-2 font-mono">At a Glance</h2>
             <p className="text-zinc-500 font-mono text-sm mb-6">
-              Universal bridge for AI coding agents.
+              What you get vs. a simple installer.
             </p>
             <div className="flex gap-6 sm:gap-8">
               <div>
-                <div className="text-2xl sm:text-3xl font-bold text-white font-mono">32</div>
+                <div className="text-2xl sm:text-3xl font-bold text-white font-mono">44</div>
                 <div className="text-zinc-600 text-[10px] sm:text-xs font-mono">Agents</div>
               </div>
               <div>
-                <div className="text-2xl sm:text-3xl font-bold text-white font-mono">50+</div>
-                <div className="text-zinc-600 text-[10px] sm:text-xs font-mono">Commands</div>
+                <div className="text-2xl sm:text-3xl font-bold text-white font-mono">31+</div>
+                <div className="text-zinc-600 text-[10px] sm:text-xs font-mono">Sources</div>
               </div>
               <div>
                 <div className="text-2xl sm:text-3xl font-bold text-white font-mono">15K+</div>
@@ -147,8 +147,8 @@ export function Features(): React.ReactElement {
 
           <div className="lg:col-span-3 border border-zinc-800 bg-black/50 p-4 font-mono text-xs backdrop-blur-sm">
             <div className="grid grid-cols-3 gap-2 border-b border-zinc-800 pb-2 mb-3 text-zinc-500 uppercase tracking-wider text-[10px]">
-              <div>Feature</div>
-              <div className="text-center">Without</div>
+              <div>Capability</div>
+              <div className="text-center">Simple Installers</div>
               <div className="text-right">SkillKit</div>
             </div>
             <div className="space-y-1">

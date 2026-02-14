@@ -24,14 +24,42 @@ const AGENTS: AgentDef[] = [
   { id: 'windsurf', name: 'Windsurf', icon: '\u25C7', group: 'Tier 1' },
   { id: 'github-copilot', name: 'Copilot', icon: '\u2318', group: 'Tier 1' },
   { id: 'cline', name: 'Cline', icon: '\u25CF', group: 'Tier 1' },
+  { id: 'devin', name: 'Devin', icon: '\u25C9', group: 'Tier 1' },
   { id: 'roo', name: 'Roo', icon: '\u25C6', group: 'Tier 2' },
   { id: 'kilo', name: 'Kilo', icon: '\u25B3', group: 'Tier 2' },
   { id: 'kiro-cli', name: 'Kiro CLI', icon: '\u25BD', group: 'Tier 2' },
   { id: 'goose', name: 'Goose', icon: '\u25CA', group: 'Tier 2' },
   { id: 'trae', name: 'Trae', icon: '\u25A0', group: 'Tier 2' },
   { id: 'amp', name: 'AMP', icon: '\u26A1', group: 'Tier 2' },
+  { id: 'aider', name: 'Aider', icon: '\u25E6', group: 'Tier 2' },
+  { id: 'cody', name: 'Cody', icon: '\u25D0', group: 'Tier 2' },
+  { id: 'amazon-q', name: 'Amazon Q', icon: '\u25A3', group: 'Tier 2' },
   { id: 'antigravity', name: 'Antigrav', icon: '\u2191', group: 'Tier 3' },
   { id: 'continue', name: 'Continue', icon: '\u25B6', group: 'Tier 3' },
+  { id: 'augment', name: 'Augment', icon: '\u25C8', group: 'Tier 3' },
+  { id: 'replit', name: 'Replit', icon: '\u25B7', group: 'Tier 3' },
+  { id: 'bolt', name: 'Bolt', icon: '\u2605', group: 'Tier 3' },
+  { id: 'lovable', name: 'Lovable', icon: '\u2665', group: 'Tier 3' },
+  { id: 'tabby', name: 'Tabby', icon: '\u25AB', group: 'Tier 3' },
+  { id: 'tabnine', name: 'Tabnine', icon: '\u25AA', group: 'Tier 3' },
+  { id: 'codegpt', name: 'CodeGPT', icon: '\u25E7', group: 'Tier 3' },
+  { id: 'playcode', name: 'PlayCode', icon: '\u25B9', group: 'Tier 3' },
+  { id: 'clawdbot', name: 'Clawdbot', icon: '\u25D1', group: 'Tier 3' },
+  { id: 'droid', name: 'Droid', icon: '\u25D2', group: 'Tier 3' },
+  { id: 'codebuddy', name: 'CodeBuddy', icon: '\u25D3', group: 'Tier 3' },
+  { id: 'commandcode', name: 'CmdCode', icon: '\u25D4', group: 'Tier 3' },
+  { id: 'crush', name: 'Crush', icon: '\u25D5', group: 'Tier 3' },
+  { id: 'factory', name: 'Factory', icon: '\u25D6', group: 'Tier 3' },
+  { id: 'mcpjam', name: 'MCPJam', icon: '\u25D7', group: 'Tier 3' },
+  { id: 'mux', name: 'Mux', icon: '\u25E0', group: 'Tier 3' },
+  { id: 'neovate', name: 'Neovate', icon: '\u25E1', group: 'Tier 3' },
+  { id: 'openhands', name: 'OpenHands', icon: '\u25E2', group: 'Tier 3' },
+  { id: 'pi', name: 'Pi', icon: '\u25E3', group: 'Tier 3' },
+  { id: 'qoder', name: 'Qoder', icon: '\u25E4', group: 'Tier 3' },
+  { id: 'qwen', name: 'Qwen', icon: '\u25E5', group: 'Tier 3' },
+  { id: 'vercel', name: 'Vercel', icon: '\u25B2', group: 'Tier 3' },
+  { id: 'zencoder', name: 'Zencoder', icon: '\u25E8', group: 'Tier 3' },
+  { id: 'universal', name: 'Universal', icon: '\u25CB', group: 'Tier 3' },
 ];
 
 const CATEGORIES: CategoryDef[] = [
@@ -56,66 +84,87 @@ const CATEGORIES: CategoryDef[] = [
 // - windsurf: 32K context, no MCP/tools, workflow YAML format
 // - kilo, kiro-cli: XML block format, multi-mode support, no MCP
 // - goose, amp, antigravity, trae, continue: varies, mostly universal adapter
+const T3_FULL: Record<string, Support> = {
+  'augment': 'full', 'replit': 'full', 'bolt': 'full', 'lovable': 'full',
+  'tabby': 'full', 'tabnine': 'full', 'codegpt': 'full', 'playcode': 'full',
+  'clawdbot': 'full', 'droid': 'full', 'codebuddy': 'full', 'commandcode': 'full',
+  'crush': 'full', 'factory': 'full', 'mcpjam': 'full', 'mux': 'full',
+  'neovate': 'full', 'openhands': 'full', 'pi': 'full', 'qoder': 'full',
+  'qwen': 'full', 'vercel': 'full', 'zencoder': 'full', 'universal': 'full',
+};
+const T3_PARTIAL: Record<string, Support> = Object.fromEntries(Object.keys(T3_FULL).map(k => [k, 'partial']));
+const T3_NONE: Record<string, Support> = Object.fromEntries(Object.keys(T3_FULL).map(k => [k, 'none']));
+
 const MATRIX: Record<string, Record<string, Support>> = {
   'translation': {
     'claude-code': 'full', 'cursor': 'full', 'codex': 'full', 'gemini-cli': 'full',
     'opencode': 'full', 'windsurf': 'full', 'github-copilot': 'full', 'cline': 'full',
-    'roo': 'full', 'kilo': 'full', 'kiro-cli': 'partial', 'goose': 'full',
-    'trae': 'full', 'amp': 'full', 'antigravity': 'full', 'continue': 'full',
+    'devin': 'full', 'roo': 'full', 'kilo': 'full', 'kiro-cli': 'partial', 'goose': 'full',
+    'trae': 'full', 'amp': 'full', 'aider': 'full', 'cody': 'full', 'amazon-q': 'full',
+    'antigravity': 'full', 'continue': 'full', ...T3_FULL,
   },
   'hooks': {
     'claude-code': 'full', 'cursor': 'partial', 'codex': 'partial', 'gemini-cli': 'partial',
     'opencode': 'partial', 'windsurf': 'none', 'github-copilot': 'none', 'cline': 'full',
-    'roo': 'full', 'kilo': 'partial', 'kiro-cli': 'partial', 'goose': 'partial',
-    'trae': 'partial', 'amp': 'partial', 'antigravity': 'none', 'continue': 'none',
+    'devin': 'partial', 'roo': 'full', 'kilo': 'partial', 'kiro-cli': 'partial', 'goose': 'partial',
+    'trae': 'partial', 'amp': 'partial', 'aider': 'none', 'cody': 'none', 'amazon-q': 'none',
+    'antigravity': 'none', 'continue': 'none', ...T3_NONE,
   },
   'mcp-tools': {
     'claude-code': 'full', 'cursor': 'none', 'codex': 'none', 'gemini-cli': 'none',
     'opencode': 'none', 'windsurf': 'none', 'github-copilot': 'none', 'cline': 'full',
-    'roo': 'full', 'kilo': 'none', 'kiro-cli': 'none', 'goose': 'none',
-    'trae': 'none', 'amp': 'none', 'antigravity': 'none', 'continue': 'none',
+    'devin': 'partial', 'roo': 'full', 'kilo': 'none', 'kiro-cli': 'none', 'goose': 'none',
+    'trae': 'none', 'amp': 'none', 'aider': 'none', 'cody': 'none', 'amazon-q': 'none',
+    'antigravity': 'none', 'continue': 'none', ...T3_NONE,
   },
   'context': {
     'claude-code': 'full', 'cursor': 'partial', 'codex': 'partial', 'gemini-cli': 'full',
     'opencode': 'full', 'windsurf': 'partial', 'github-copilot': 'partial', 'cline': 'full',
-    'roo': 'full', 'kilo': 'full', 'kiro-cli': 'full', 'goose': 'full',
-    'trae': 'partial', 'amp': 'full', 'antigravity': 'partial', 'continue': 'partial',
+    'devin': 'full', 'roo': 'full', 'kilo': 'full', 'kiro-cli': 'full', 'goose': 'full',
+    'trae': 'partial', 'amp': 'full', 'aider': 'full', 'cody': 'full', 'amazon-q': 'partial',
+    'antigravity': 'partial', 'continue': 'partial', ...T3_PARTIAL,
   },
   'security': {
     'claude-code': 'full', 'cursor': 'full', 'codex': 'partial', 'gemini-cli': 'full',
     'opencode': 'full', 'windsurf': 'full', 'github-copilot': 'partial', 'cline': 'full',
-    'roo': 'full', 'kilo': 'full', 'kiro-cli': 'full', 'goose': 'full',
-    'trae': 'full', 'amp': 'full', 'antigravity': 'partial', 'continue': 'partial',
+    'devin': 'full', 'roo': 'full', 'kilo': 'full', 'kiro-cli': 'full', 'goose': 'full',
+    'trae': 'full', 'amp': 'full', 'aider': 'full', 'cody': 'full', 'amazon-q': 'full',
+    'antigravity': 'partial', 'continue': 'partial', ...T3_PARTIAL,
   },
   'testing': {
     'claude-code': 'full', 'cursor': 'full', 'codex': 'partial', 'gemini-cli': 'full',
     'opencode': 'full', 'windsurf': 'full', 'github-copilot': 'partial', 'cline': 'full',
-    'roo': 'full', 'kilo': 'full', 'kiro-cli': 'full', 'goose': 'full',
-    'trae': 'full', 'amp': 'full', 'antigravity': 'partial', 'continue': 'partial',
+    'devin': 'full', 'roo': 'full', 'kilo': 'full', 'kiro-cli': 'full', 'goose': 'full',
+    'trae': 'full', 'amp': 'full', 'aider': 'full', 'cody': 'full', 'amazon-q': 'partial',
+    'antigravity': 'partial', 'continue': 'partial', ...T3_PARTIAL,
   },
   'frontend': {
     'claude-code': 'full', 'cursor': 'full', 'codex': 'partial', 'gemini-cli': 'full',
     'opencode': 'full', 'windsurf': 'full', 'github-copilot': 'partial', 'cline': 'full',
-    'roo': 'full', 'kilo': 'partial', 'kiro-cli': 'partial', 'goose': 'partial',
-    'trae': 'full', 'amp': 'full', 'antigravity': 'partial', 'continue': 'partial',
+    'devin': 'full', 'roo': 'full', 'kilo': 'partial', 'kiro-cli': 'partial', 'goose': 'partial',
+    'trae': 'full', 'amp': 'full', 'aider': 'partial', 'cody': 'partial', 'amazon-q': 'partial',
+    'antigravity': 'partial', 'continue': 'partial', ...T3_PARTIAL,
   },
   'backend': {
     'claude-code': 'full', 'cursor': 'full', 'codex': 'partial', 'gemini-cli': 'full',
     'opencode': 'full', 'windsurf': 'full', 'github-copilot': 'partial', 'cline': 'full',
-    'roo': 'full', 'kilo': 'full', 'kiro-cli': 'full', 'goose': 'full',
-    'trae': 'full', 'amp': 'full', 'antigravity': 'partial', 'continue': 'partial',
+    'devin': 'full', 'roo': 'full', 'kilo': 'full', 'kiro-cli': 'full', 'goose': 'full',
+    'trae': 'full', 'amp': 'full', 'aider': 'full', 'cody': 'full', 'amazon-q': 'partial',
+    'antigravity': 'partial', 'continue': 'partial', ...T3_PARTIAL,
   },
   'devops': {
     'claude-code': 'full', 'cursor': 'full', 'codex': 'partial', 'gemini-cli': 'full',
     'opencode': 'full', 'windsurf': 'partial', 'github-copilot': 'partial', 'cline': 'full',
-    'roo': 'full', 'kilo': 'partial', 'kiro-cli': 'partial', 'goose': 'partial',
-    'trae': 'partial', 'amp': 'partial', 'antigravity': 'partial', 'continue': 'partial',
+    'devin': 'full', 'roo': 'full', 'kilo': 'partial', 'kiro-cli': 'partial', 'goose': 'partial',
+    'trae': 'partial', 'amp': 'partial', 'aider': 'partial', 'cody': 'partial', 'amazon-q': 'partial',
+    'antigravity': 'partial', 'continue': 'partial', ...T3_PARTIAL,
   },
   'docs': {
     'claude-code': 'full', 'cursor': 'full', 'codex': 'partial', 'gemini-cli': 'full',
     'opencode': 'full', 'windsurf': 'full', 'github-copilot': 'full', 'cline': 'full',
-    'roo': 'full', 'kilo': 'full', 'kiro-cli': 'full', 'goose': 'full',
-    'trae': 'full', 'amp': 'full', 'antigravity': 'full', 'continue': 'full',
+    'devin': 'full', 'roo': 'full', 'kilo': 'full', 'kiro-cli': 'full', 'goose': 'full',
+    'trae': 'full', 'amp': 'full', 'aider': 'full', 'cody': 'full', 'amazon-q': 'full',
+    'antigravity': 'full', 'continue': 'full', ...T3_FULL,
   },
 };
 
@@ -197,7 +246,7 @@ export function CompatibilityMatrix(): React.ReactElement {
           <div>
             <h2 className="text-lg sm:text-xl font-bold text-white mb-1 font-mono">Compatibility Matrix</h2>
             <p className="text-zinc-500 font-mono text-[10px] sm:text-xs">
-              Skill support across {AGENTS.length} agents and {CATEGORIES.length} categories.
+              Skill support across all 44 agents and {CATEGORIES.length} categories.
             </p>
           </div>
           <div className="flex items-center gap-2">

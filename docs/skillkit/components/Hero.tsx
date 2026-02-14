@@ -141,14 +141,14 @@ export function Hero({ version, stars }: HeroProps): React.ReactElement {
             </div>
 
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white mb-3 font-mono">
-              One Skill.<br />
-              <span className="text-zinc-500">44 Agents. Zero Rewrites.</span>
+              One CLI. Every Source.<br />
+              <span className="text-zinc-500">Every Agent. Zero Telemetry.</span>
             </h1>
 
             <p className="text-sm text-zinc-400 mb-5 max-w-lg font-mono leading-relaxed">
-              The open source package manager for AI agent skills. Install from 15,000+ skills,
-              auto-translate between formats, persist learnings with Memory.
-              Works with Claude, Cursor, Windsurf, Copilot, Devin, Codex, and 38 more.
+              The open source package manager that aggregates 31+ skill sources,
+              auto-translates to 44 agent formats, and adds memory, security scanning,
+              and team workflows. No account required. Everything runs locally.
             </p>
 
             <div className="flex flex-wrap items-center gap-2 mb-4">

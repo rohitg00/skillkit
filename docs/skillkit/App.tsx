@@ -14,6 +14,7 @@ import { UseCases } from './components/UseCases';
 import { TeamEnterprise } from './components/TeamEnterprise';
 import { BadgeGenerator } from './components/BadgeGenerator';
 import { CompatibilityMatrix } from './components/CompatibilityMatrix';
+import { WhySkillKit } from './components/WhySkillKit';
 import { useStats } from './hooks/useStats';
 
 const GITHUB_ICON = (
@@ -50,6 +51,13 @@ export default function App(): React.ReactElement {
             </a>
             <div className="hidden sm:flex items-center gap-4 text-xs font-mono">
               <a
+                href="#why"
+                onClick={(e) => scrollToSection(e, 'why')}
+                className="text-zinc-500 hover:text-white transition-colors"
+              >
+                Why SkillKit
+              </a>
+              <a
                 href="#trending"
                 onClick={(e) => scrollToSection(e, 'trending')}
                 className="text-zinc-500 hover:text-white transition-colors"
@@ -57,25 +65,11 @@ export default function App(): React.ReactElement {
                 Trending
               </a>
               <a
-                href="#stack"
-                onClick={(e) => scrollToSection(e, 'stack')}
-                className="text-zinc-500 hover:text-white transition-colors"
-              >
-                Stack
-              </a>
-              <a
                 href="#matrix"
                 onClick={(e) => scrollToSection(e, 'matrix')}
                 className="text-zinc-500 hover:text-white transition-colors"
               >
                 Matrix
-              </a>
-              <a
-                href="#badge"
-                onClick={(e) => scrollToSection(e, 'badge')}
-                className="text-zinc-500 hover:text-white transition-colors"
-              >
-                Badge
               </a>
               <a
                 href="#advanced"
@@ -186,6 +180,9 @@ export default function App(): React.ReactElement {
         
         {/* Core Features & Comparison - Value prop at a glance */}
         <Features />
+
+        {/* Why SkillKit - Competitor landscape & aggregator positioning */}
+        <WhySkillKit />
 
         {/* Trending Skills - Social proof, what's popular */}
         <section id="trending" style={{ scrollMarginTop: '4rem' }}>
