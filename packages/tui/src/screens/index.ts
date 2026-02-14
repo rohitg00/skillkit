@@ -23,3 +23,6 @@ export { Help } from './Help.js';
 export { Mesh } from './Mesh.js';
 export { Message } from './Message.js';
 export { Scan } from './Scan.js';
+export { Timeline } from './Timeline.js';
+export { Lineage } from './Lineage.js';
+export { Handoff } from './Handoff.js';

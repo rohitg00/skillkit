@@ -9,6 +9,7 @@ import {
   Home, Browse, Installed, Marketplace, Settings, Recommend,
   Translate, Context, Memory, Team, Plugins, Methodology,
   Plan, Workflow, Execute, History, Sync, Help, Mesh, Message, Scan,
+  Timeline, Lineage, Handoff,
 } from './screens/index.js';
 
 const DOCS_URL = 'https://agenstskills.com/docs';
@@ -138,6 +139,9 @@ export function App(props: AppProps) {
               <Match when={currentScreen() === 'mesh'}><Mesh {...screenProps()} /></Match>
               <Match when={currentScreen() === 'message'}><Message {...screenProps()} /></Match>
               <Match when={currentScreen() === 'scan'}><Scan {...screenProps()} /></Match>
+              <Match when={currentScreen() === 'timeline'}><Timeline {...screenProps()} /></Match>
+              <Match when={currentScreen() === 'lineage'}><Lineage {...screenProps()} /></Match>
+              <Match when={currentScreen() === 'handoff'}><Handoff {...screenProps()} /></Match>
             </Switch>
           </box>
         </box>

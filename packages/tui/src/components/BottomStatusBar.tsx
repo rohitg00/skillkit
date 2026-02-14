@@ -29,6 +29,9 @@ const SCREEN_LABELS: Record<Screen, string> = {
   mesh: 'Mesh',
   message: 'Message',
   scan: 'Security Scan',
+  timeline: 'Timeline',
+  lineage: 'Lineage',
+  handoff: 'Handoff',
 };
 
 export function BottomStatusBar(props: BottomStatusBarProps) {
