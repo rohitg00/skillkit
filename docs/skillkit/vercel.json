@@ -1,4 +1,5 @@
 {
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- .",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
