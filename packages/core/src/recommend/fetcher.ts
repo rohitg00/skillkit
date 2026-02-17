@@ -12,7 +12,7 @@ import { discoverSkills, extractFrontmatter } from '../skills.js';
 export const KNOWN_SKILL_REPOS = [
   { owner: 'anthropics', repo: 'courses', description: 'Anthropic official courses and skills' },
   { owner: 'vercel-labs', repo: 'ai-sdk-preview-internal-knowledge-base', description: 'Vercel AI SDK skills' },
-  { owner: 'composioHQ', repo: 'awesome-claude-code-skills', description: 'Curated Claude Code skills' },
+  { owner: 'composioHQ', repo: 'awesome-claude-skills', description: 'Curated Claude Code skills' },
 ] as const;
 
 /**

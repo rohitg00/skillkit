@@ -536,28 +536,28 @@
       ]
     },
     {
-      "id": "composioHQ/awesome-claude-code-skills/python-best-practices",
+      "id": "composioHQ/awesome-claude-skills/python-best-practices",
       "name": "Python Best Practices",
       "description": "Python coding standards and patterns",
-      "source": "composioHQ/awesome-claude-code-skills",
+      "source": "composioHQ/awesome-claude-skills",
       "tags": [
         "python"
       ]
     },
     {
-      "id": "composioHQ/awesome-claude-code-skills/rust-patterns",
+      "id": "composioHQ/awesome-claude-skills/rust-patterns",
       "name": "Rust Patterns",
       "description": "Rust memory safety and performance patterns",
-      "source": "composioHQ/awesome-claude-code-skills",
+      "source": "composioHQ/awesome-claude-skills",
       "tags": [
         "rust"
       ]
     },
     {
-      "id": "composioHQ/awesome-claude-code-skills/go-patterns",
+      "id": "composioHQ/awesome-claude-skills/go-patterns",
       "name": "Go Patterns",
       "description": "Go concurrency and idiomatic patterns",
-      "source": "composioHQ/awesome-claude-code-skills",
+      "source": "composioHQ/awesome-claude-skills",
       "tags": [
         "golang",
         "go"

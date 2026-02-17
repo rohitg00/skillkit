@@ -23,7 +23,7 @@ export class MarketplaceCommand extends Command {
       from curated repositories.
 
       Skills are aggregated from multiple sources including:
-      - composioHQ/awesome-claude-code-skills
+      - composioHQ/awesome-claude-skills
       - anthropics/courses
       - User-added custom sources
     `,
