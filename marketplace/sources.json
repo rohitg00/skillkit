@@ -34,6 +34,7 @@
     { "source": "jimliu/baoyu-skills", "name": "Baoyu Tools" },
     { "source": "giuseppe-trisciuoglio/developer-kit", "name": "Shadcn / Radix" },
     { "source": "openrouterteam/agent-skills", "name": "OpenRouter SDK" },
-    { "source": "intellectronica/agent-skills", "name": "Context7" }
+    { "source": "intellectronica/agent-skills", "name": "Context7" },
+    { "source": "skills.sh", "name": "Skills.sh Leaderboard", "official": true, "registry": "skills-sh" }
   ]
 }

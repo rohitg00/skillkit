@@ -1,20 +1,23 @@
-import type { GitProviderAdapter } from './base.js';
-import type { GitProvider } from '../types.js';
-import { GitHubProvider } from './github.js';
-import { GitLabProvider } from './gitlab.js';
-import { BitbucketProvider } from './bitbucket.js';
-import { LocalProvider } from './local.js';
-import { WellKnownProvider } from './wellknown.js';
+import type { GitProviderAdapter } from "./base.js";
+import type { GitProvider } from "../types.js";
+import { GitHubProvider } from "./github.js";
+import { GitLabProvider } from "./gitlab.js";
+import { BitbucketProvider } from "./bitbucket.js";
+import { LocalProvider } from "./local.js";
+import { WellKnownProvider } from "./wellknown.js";
+import { SkillsShProvider } from "./skills-sh.js";
 
-export * from './base.js';
-export * from './github.js';
-export * from './gitlab.js';
-export * from './bitbucket.js';
-export * from './local.js';
-export * from './wellknown.js';
+export * from "./base.js";
+export * from "./github.js";
+export * from "./gitlab.js";
+export * from "./bitbucket.js";
+export * from "./local.js";
+export * from "./wellknown.js";
+export * from "./skills-sh.js";
 
 const providers: GitProviderAdapter[] = [
   new LocalProvider(),
+  new SkillsShProvider(),
   new GitLabProvider(),
   new BitbucketProvider(),
   new WellKnownProvider(),
@@ -22,7 +25,7 @@ const providers: GitProviderAdapter[] = [
 ];
 
 export function getProvider(type: GitProvider): GitProviderAdapter | undefined {
-  return providers.find(p => p.type === type);
+  return providers.find((p) => p.type === type);
 }
 
 export function getAllProviders(): GitProviderAdapter[] {
@@ -30,7 +33,7 @@ export function getAllProviders(): GitProviderAdapter[] {
 }
 
 export function detectProvider(source: string): GitProviderAdapter | undefined {
-  return providers.find(p => p.matches(source));
+  return providers.find((p) => p.matches(source));
 }
 
 export function parseSource(source: string): {

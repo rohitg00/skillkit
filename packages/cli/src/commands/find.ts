@@ -1,4 +1,4 @@
-import { Command, Option } from 'clipanion';
+import { Command, Option } from "clipanion";
 import {
   colors,
   symbols,
@@ -7,8 +7,13 @@ import {
   isCancel,
   select,
   header,
-} from '../onboarding/index.js';
-import { FederatedSearch, GitHubSkillRegistry, RateLimitError } from '@skillkit/core';
+} from "../onboarding/index.js";
+import {
+  FederatedSearch,
+  GitHubSkillRegistry,
+  SkillsShRegistry,
+  RateLimitError,
+} from "@skillkit/core";
 
 interface SkillResult {
   name: string;
@@ -17,46 +22,46 @@ interface SkillResult {
   repoName: string;
 }
 
-import skillsData from '../../../../marketplace/skills.json' with { type: 'json' };
-import sourcesData from '../../../../marketplace/sources.json' with { type: 'json' };
+import skillsData from "../../../../marketplace/skills.json" with { type: "json" };
+import sourcesData from "../../../../marketplace/sources.json" with { type: "json" };
 
 export class FindCommand extends Command {
-  static override paths = [['find'], ['search']];
+  static override paths = [["find"], ["search"]];
 
   static override usage = Command.Usage({
-    description: 'Search for skills in the marketplace',
+    description: "Search for skills in the marketplace",
     details: `
       Quickly find and install skills from the marketplace.
       Interactive mode lets you browse and install in one step.
     `,
     examples: [
-      ['Interactive search', '$0 find'],
-      ['Search for specific skill', '$0 find pdf'],
-      ['Search with keyword', '$0 find "nextjs"'],
-      ['List top skills', '$0 find --top'],
+      ["Interactive search", "$0 find"],
+      ["Search for specific skill", "$0 find pdf"],
+      ["Search with keyword", '$0 find "nextjs"'],
+      ["List top skills", "$0 find --top"],
     ],
   });
 
   query = Option.String({ required: false });
 
-  top = Option.Boolean('--top,-t', false, {
-    description: 'Show top/featured skills',
+  top = Option.Boolean("--top,-t", false, {
+    description: "Show top/featured skills",
   });
 
-  limit = Option.String('--limit,-l', '10', {
-    description: 'Maximum results to show',
+  limit = Option.String("--limit,-l", "10", {
+    description: "Maximum results to show",
   });
 
-  install = Option.Boolean('--install,-i', false, {
-    description: 'Prompt to install after finding',
+  install = Option.Boolean("--install,-i", false, {
+    description: "Prompt to install after finding",
   });
 
-  quiet = Option.Boolean('--quiet,-q', false, {
-    description: 'Minimal output (just list skills)',
+  quiet = Option.Boolean("--quiet,-q", false, {
+    description: "Minimal output (just list skills)",
   });
 
-  federated = Option.Boolean('--federated,-f', false, {
-    description: 'Search external registries (GitHub SKILL.md files)',
+  federated = Option.Boolean("--federated,-f", false, {
+    description: "Search external registries (GitHub SKILL.md files)",
   });
 
   async execute(): Promise<number> {
@@ -64,15 +69,22 @@ export class FindCommand extends Command {
     const limit = parseInt(this.limit, 10) || 10;
 
     if (!this.quiet) {
-      header('Find Skills');
+      header("Find Skills");
     }
 
-    const allSkills: SkillResult[] = (skillsData.skills || []).map((skill: { name: string; description?: string; source?: string; repo?: string }) => ({
-      name: skill.name,
-      description: skill.description,
-      source: skill.source || '',
-      repoName: skill.repo || skill.source?.split('/').pop() || '',
-    }));
+    const allSkills: SkillResult[] = (skillsData.skills || []).map(
+      (skill: {
+        name: string;
+        description?: string;
+        source?: string;
+        repo?: string;
+      }) => ({
+        name: skill.name,
+        description: skill.description,
+        source: skill.source || "",
+        repoName: skill.repo || skill.source?.split("/").pop() || "",
+      }),
+    );
 
     let results: SkillResult[];
 
@@ -82,35 +94,42 @@ export class FindCommand extends Command {
         .slice(0, 5);
 
       results = allSkills
-        .filter(skill => featured.some((f: { source: string }) => skill.source.includes(f.source)))
+        .filter((skill) =>
+          featured.some((f: { source: string }) =>
+            skill.source.includes(f.source),
+          ),
+        )
         .slice(0, limit);
 
       if (!this.quiet) {
-        step('Showing featured skills');
+        step("Showing featured skills");
       }
     } else if (this.query) {
       const query = this.query.toLowerCase();
 
-      s.start('Searching...');
+      s.start("Searching...");
 
-      results = allSkills.filter(skill =>
-        skill.name.toLowerCase().includes(query) ||
-        skill.description?.toLowerCase().includes(query) ||
-        skill.source.toLowerCase().includes(query) ||
-        skill.repoName.toLowerCase().includes(query)
-      ).slice(0, limit);
+      results = allSkills
+        .filter(
+          (skill) =>
+            skill.name.toLowerCase().includes(query) ||
+            skill.description?.toLowerCase().includes(query) ||
+            skill.source.toLowerCase().includes(query) ||
+            skill.repoName.toLowerCase().includes(query),
+        )
+        .slice(0, limit);
 
       s.stop(`Found ${results.length} skill(s)`);
     } else {
       if (!this.quiet) {
-        step('Enter a search term or browse featured skills');
+        step("Enter a search term or browse featured skills");
       }
 
-      const { text } = await import('../onboarding/prompts.js');
+      const { text } = await import("../onboarding/prompts.js");
 
       const searchResult = await text({
-        message: 'Search skills',
-        placeholder: 'e.g., pdf, nextjs, testing',
+        message: "Search skills",
+        placeholder: "e.g., pdf, nextjs, testing",
       });
 
       if (isCancel(searchResult)) {
@@ -120,101 +139,177 @@ export class FindCommand extends Command {
       const query = (searchResult as string).toLowerCase();
 
       if (query) {
-        s.start('Searching...');
-        results = allSkills.filter(skill =>
-          skill.name.toLowerCase().includes(query) ||
-          skill.description?.toLowerCase().includes(query) ||
-          skill.source.toLowerCase().includes(query) ||
-          skill.repoName.toLowerCase().includes(query)
-        ).slice(0, limit);
+        s.start("Searching...");
+        results = allSkills
+          .filter(
+            (skill) =>
+              skill.name.toLowerCase().includes(query) ||
+              skill.description?.toLowerCase().includes(query) ||
+              skill.source.toLowerCase().includes(query) ||
+              skill.repoName.toLowerCase().includes(query),
+          )
+          .slice(0, limit);
         s.stop(`Found ${results.length} skill(s)`);
       } else {
         results = allSkills.slice(0, limit);
       }
     }
 
-    if (this.federated && this.query) {
-      s.start('Searching external registries...');
+    // Always search skills.sh registry alongside marketplace
+    if (this.query) {
+      s.start("Searching skills.sh + external registries...");
       const fedSearch = new FederatedSearch();
-      fedSearch.addRegistry(new GitHubSkillRegistry());
+      fedSearch.addRegistry(new SkillsShRegistry());
+      if (this.federated) {
+        fedSearch.addRegistry(new GitHubSkillRegistry());
+      }
       try {
-        const fedResult = await fedSearch.search(this.query, { limit: parseInt(this.limit, 10) || 10 });
-        s.stop(`Found ${fedResult.total} external skill(s) from ${fedResult.registries.join(', ') || 'none'}`);
+        const fedResult = await fedSearch.search(this.query, {
+          limit: parseInt(this.limit, 10) || 10,
+        });
+        const sourceLabel = fedResult.registries.join(", ") || "none";
+        s.stop(`Found ${fedResult.total} skill(s) from ${sourceLabel}`);
 
         if (fedResult.skills.length > 0) {
-          console.log('');
-          console.log(colors.bold('External Skills (SKILL.md):'));
-          for (const skill of fedResult.skills) {
-            const stars = typeof skill.stars === 'number' ? colors.muted(` ★${skill.stars}`) : '';
-            const desc = skill.description
-              ? colors.muted(` - ${skill.description.slice(0, 50)}${skill.description.length > 50 ? '...' : ''}`)
-              : '';
-            console.log(`  ${colors.cyan(symbols.bullet)} ${colors.primary(skill.name)}${stars}${desc}`);
-            if (!this.quiet) {
-              console.log(`    ${colors.muted(skill.source)}`);
+          const skillsShResults = fedResult.skills.filter(
+            (sk) => sk.registry === "skills.sh",
+          );
+          const githubResults = fedResult.skills.filter(
+            (sk) => sk.registry !== "skills.sh",
+          );
+
+          if (skillsShResults.length > 0) {
+            console.log("");
+            console.log(colors.bold("Skills.sh Registry:"));
+            for (const skill of skillsShResults) {
+              const installs =
+                typeof skill.stars === "number" && skill.stars > 0
+                  ? colors.muted(
+                      ` ${this.formatInstalls(skill.stars)} installs`,
+                    )
+                  : "";
+              const desc = skill.description
+                ? colors.muted(
+                    ` - ${skill.description.slice(0, 50)}${skill.description.length > 50 ? "..." : ""}`,
+                  )
+                : "";
+              console.log(
+                `  ${colors.cyan(symbols.bullet)} ${colors.primary(skill.name)}${installs}${desc}`,
+              );
+              if (!this.quiet) {
+                const installSource =
+                  skill.description ||
+                  skill.source.replace("https://github.com/", "");
+                console.log(
+                  `    ${colors.muted(`skillkit install skills.sh/${installSource}/${skill.name}`)}`,
+                );
+              }
             }
           }
-          console.log('');
+
+          if (githubResults.length > 0) {
+            console.log("");
+            console.log(colors.bold("GitHub (SKILL.md):"));
+            for (const skill of githubResults) {
+              const stars =
+                typeof skill.stars === "number"
+                  ? colors.muted(` ★${skill.stars}`)
+                  : "";
+              const desc = skill.description
+                ? colors.muted(
+                    ` - ${skill.description.slice(0, 50)}${skill.description.length > 50 ? "..." : ""}`,
+                  )
+                : "";
+              console.log(
+                `  ${colors.cyan(symbols.bullet)} ${colors.primary(skill.name)}${stars}${desc}`,
+              );
+              if (!this.quiet) {
+                console.log(`    ${colors.muted(skill.source)}`);
+              }
+            }
+          }
+
+          console.log("");
         }
       } catch (err) {
         if (err instanceof RateLimitError) {
-          s.stop(colors.warning('Rate limited by GitHub API'));
-          console.log(colors.muted('Set GITHUB_TOKEN env var or wait before retrying.'));
+          s.stop(colors.warning("Rate limited by API"));
+          console.log(
+            colors.muted("Set GITHUB_TOKEN env var or wait before retrying."),
+          );
         } else {
-          s.stop(colors.warning('Federated search failed'));
+          s.stop(colors.warning("External search failed"));
         }
       }
     }
 
     if (results.length === 0) {
-      console.log(colors.muted('No skills found matching your search'));
-      console.log('');
-      console.log(colors.muted('Try:'));
-      console.log(colors.muted('  skillkit find --top       # Show featured skills'));
-      console.log(colors.muted('  skillkit find -f <query>  # Search external registries'));
-      console.log(colors.muted('  skillkit ui               # Browse in TUI'));
+      console.log(colors.muted("No skills found matching your search"));
+      console.log("");
+      console.log(colors.muted("Try:"));
+      console.log(
+        colors.muted("  skillkit find --top       # Show featured skills"),
+      );
+      console.log(
+        colors.muted(
+          "  skillkit find -f <query>  # Also search GitHub SKILL.md files",
+        ),
+      );
+      console.log(colors.muted("  skillkit ui               # Browse in TUI"));
       return 0;
     }
 
-    console.log('');
+    console.log("");
 
     for (const skill of results) {
       const desc = skill.description
-        ? colors.muted(` - ${skill.description.slice(0, 50)}${skill.description.length > 50 ? '...' : ''}`)
-        : '';
-      console.log(`  ${colors.success(symbols.bullet)} ${colors.primary(skill.name)}${desc}`);
+        ? colors.muted(
+            ` - ${skill.description.slice(0, 50)}${skill.description.length > 50 ? "..." : ""}`,
+          )
+        : "";
+      console.log(
+        `  ${colors.success(symbols.bullet)} ${colors.primary(skill.name)}${desc}`,
+      );
       if (!this.quiet && skill.source) {
         console.log(`    ${colors.muted(skill.source)}`);
       }
     }
 
-    console.log('');
-    console.log(colors.muted(`Showing ${results.length} of ${allSkills.length} skills`));
-    console.log('');
+    console.log("");
+    console.log(
+      colors.muted(`Showing ${results.length} of ${allSkills.length} skills`),
+    );
+    console.log("");
 
     if (this.install || (!this.query && !this.top && process.stdin.isTTY)) {
       const installResult = await select({
-        message: 'Install a skill?',
+        message: "Install a skill?",
         options: [
-          { value: 'none', label: 'No, just browsing' },
-          ...results.slice(0, 5).map(skill => ({
+          { value: "none", label: "No, just browsing" },
+          ...results.slice(0, 5).map((skill) => ({
             value: skill.source,
             label: skill.name,
             hint: skill.repoName,
           })),
         ],
-        initialValue: 'none',
+        initialValue: "none",
       });
 
-      if (!isCancel(installResult) && installResult !== 'none') {
-        console.log('');
-        console.log(colors.cyan('To install, run:'));
+      if (!isCancel(installResult) && installResult !== "none") {
+        console.log("");
+        console.log(colors.cyan("To install, run:"));
         console.log(`  ${colors.bold(`skillkit install ${installResult}`)}`);
       }
     } else {
-      console.log(colors.muted('To install: skillkit install <source>'));
+      console.log(colors.muted("To install: skillkit install <source>"));
     }
 
     return 0;
+  }
+
+  private formatInstalls(count: number): string {
+    if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
+    if (count >= 1_000) return `${(count / 1_000).toFixed(1)}K`;
+    return String(count);
   }
 }

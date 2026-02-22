@@ -10,7 +10,10 @@ export interface ExternalSkill {
 
 export interface ExternalRegistry {
   name: string;
-  search(query: string, options?: { limit?: number; timeoutMs?: number }): Promise<ExternalSkill[]>;
+  search(
+    query: string,
+    options?: { limit?: number; timeoutMs?: number },
+  ): Promise<ExternalSkill[]>;
 }
 
 export interface FederatedResult {
@@ -22,16 +25,21 @@ export interface FederatedResult {
 
 export class RateLimitError extends Error {
   constructor(registry: string) {
-    super(`Rate limited by ${registry} API. Authenticate with a token or wait before retrying.`);
-    this.name = 'RateLimitError';
+    super(
+      `Rate limited by ${registry} API. Authenticate with a token or wait before retrying.`,
+    );
+    this.name = "RateLimitError";
   }
 }
 
 export class GitHubSkillRegistry implements ExternalRegistry {
-  name = 'github';
-  private baseUrl = 'https://api.github.com';
+  name = "github";
+  private baseUrl = "https://api.github.com";
 
-  async search(query: string, options?: { limit?: number; timeoutMs?: number }): Promise<ExternalSkill[]> {
+  async search(
+    query: string,
+    options?: { limit?: number; timeoutMs?: number },
+  ): Promise<ExternalSkill[]> {
     const limit = options?.limit ?? 20;
     const timeoutMs = options?.timeoutMs ?? 10_000;
     const searchQuery = `SKILL.md ${query} in:path,file`;
@@ -41,8 +49,8 @@ export class GitHubSkillRegistry implements ExternalRegistry {
 
     try {
       const headers: Record<string, string> = {
-        Accept: 'application/vnd.github.v3+json',
-        'User-Agent': 'skillkit-cli',
+        Accept: "application/vnd.github.v3+json",
+        "User-Agent": "skillkit-cli",
       };
       const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
       if (token) {
@@ -89,15 +97,15 @@ export class GitHubSkillRegistry implements ExternalRegistry {
         if (seen.has(repo)) continue;
         seen.add(repo);
 
-        const pathParts = item.path.split('/');
+        const pathParts = item.path.split("/");
         const skillName =
           pathParts.length > 1
             ? pathParts[pathParts.length - 2]
-            : repo.split('/').pop() || repo;
+            : repo.split("/").pop() || repo;
 
         skills.push({
           name: skillName,
-          description: item.repository.description || '',
+          description: item.repository.description || "",
           source: item.repository.html_url,
           registry: this.name,
           path: item.path,
@@ -115,7 +123,9 @@ export class GitHubSkillRegistry implements ExternalRegistry {
   }
 }
 
-export { CommunityRegistry } from './community.js';
+export { CommunityRegistry } from "./community.js";
+export { SkillsShRegistry, resolveSkillsShUrl } from "./skills-sh.js";
+export type { SkillsShStats } from "./skills-sh.js";
 
 export class FederatedSearch {
   private registries: ExternalRegistry[] = [];
@@ -124,7 +134,10 @@ export class FederatedSearch {
     this.registries.push(registry);
   }
 
-  async search(query: string, options?: { limit?: number }): Promise<FederatedResult> {
+  async search(
+    query: string,
+    options?: { limit?: number },
+  ): Promise<FederatedResult> {
     const limit = options?.limit ?? 20;
     const results = await Promise.allSettled(
       this.registries.map((r) => r.search(query, { limit })),
@@ -135,10 +148,13 @@ export class FederatedSearch {
 
     for (let i = 0; i < results.length; i++) {
       const result = results[i];
-      if (result.status === 'fulfilled' && result.value.length > 0) {
+      if (result.status === "fulfilled" && result.value.length > 0) {
         allSkills.push(...result.value);
         activeRegistries.push(this.registries[i].name);
-      } else if (result.status === 'rejected' && result.reason instanceof RateLimitError) {
+      } else if (
+        result.status === "rejected" &&
+        result.reason instanceof RateLimitError
+      ) {
         throw result.reason;
       }
     }
