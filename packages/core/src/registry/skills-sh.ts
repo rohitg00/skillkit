@@ -56,7 +56,7 @@ export class SkillsShRegistry implements ExternalRegistry {
 
     for (let i = 0; i < skills.length; i++) {
       const skill = skills[i];
-      if (skill.name === skillName && skill.source.includes(source)) {
+      if (skill.name === skillName && skill.source.endsWith(`/${source}`)) {
         return {
           rank: i + 1,
           installs: skill.stars ?? 0,
@@ -86,7 +86,6 @@ export class SkillsShRegistry implements ExternalRegistry {
         },
         signal: controller.signal,
       });
-      clearTimeout(timer);
 
       if (!response.ok) return this.cache?.skills ?? [];
 
@@ -96,8 +95,9 @@ export class SkillsShRegistry implements ExternalRegistry {
       this.cache = { skills, fetchedAt: Date.now() };
       return skills;
     } catch {
-      clearTimeout(timer);
       return this.cache?.skills ?? [];
+    } finally {
+      clearTimeout(timer);
     }
   }
 
@@ -159,9 +159,9 @@ export class SkillsShRegistry implements ExternalRegistry {
   }
 }
 
-export function resolveSkillsShUrl(
+function parseSkillsShParts(
   source: string,
-): { owner: string; repo: string; skillName?: string } | null {
+): { owner: string; repo: string; rest?: string } | null {
   const cleaned = source
     .replace(/^https?:\/\//, "")
     .replace(/^skills\.sh\//, "");
@@ -172,6 +172,19 @@ export function resolveSkillsShUrl(
   return {
     owner: parts[0],
     repo: parts[1],
-    skillName: parts[2],
+    rest: parts.length > 2 ? parts.slice(2).join("/") : undefined,
+  };
+}
+
+export function resolveSkillsShUrl(
+  source: string,
+): { owner: string; repo: string; skillName?: string } | null {
+  const parsed = parseSkillsShParts(source);
+  if (!parsed) return null;
+
+  return {
+    owner: parsed.owner,
+    repo: parsed.repo,
+    skillName: parsed.rest,
   };
 }

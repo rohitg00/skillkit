@@ -30,7 +30,7 @@ import type { SkillsShStats } from "@skillkit/core";
 import type { SkillMetadata, GitProvider, AgentType } from "@skillkit/core";
 import { isPathInside } from "@skillkit/core";
 import { getAdapter, detectAgent, getAllAdapters } from "@skillkit/agents";
-import { getInstallDir, saveSkillMetadata } from "../helpers.js";
+import { getInstallDir, saveSkillMetadata, formatCount } from "../helpers.js";
 import {
   welcome,
   colors,
@@ -301,7 +301,15 @@ export class InstallCommand extends Command {
       let targetAgents: AgentType[];
 
       if (this.agent && this.agent.length > 0) {
-        // Explicitly specified agents
+        const allValid = getAllAdapters().map((a) => a.type);
+        const invalid = this.agent.filter(
+          (a) => !allValid.includes(a as AgentType),
+        );
+        if (invalid.length > 0) {
+          error(`Unknown agent(s): ${invalid.join(", ")}`);
+          console.log(colors.muted(`Available: ${allValid.join(", ")}`));
+          return 1;
+        }
         targetAgents = this.agent as AgentType[];
       } else if (isInteractive) {
         const allAgentTypes = getAllAdapters().map((a) => a.type);
@@ -498,7 +506,7 @@ export class InstallCommand extends Command {
                 s.stop(`Installed ${skillName} to ${adapter.name}`);
                 s.start(`Installing npm dependencies for ${skillName}...`);
                 try {
-                  await execFileAsync("npm", ["install", "--production"], {
+                  await execFileAsync("npm", ["install", "--omit=dev"], {
                     cwd: targetPath,
                   });
                   s.stop(`Installed dependencies for ${skillName}`);
@@ -644,6 +652,7 @@ export class InstallCommand extends Command {
     },
   ): Promise<void> {
     try {
+      if (provider.type === "local") return;
       const parsed = provider.parseSource(this.source);
       if (!parsed) return;
 
@@ -667,8 +676,7 @@ export class InstallCommand extends Command {
             s.rank <= 10
               ? colors.success(`#${s.rank}`)
               : colors.muted(`#${s.rank}`);
-          const installs =
-            s.installs > 0 ? this.formatCount(s.installs) : "n/a";
+          const installs = s.installs > 0 ? formatCount(s.installs) : "n/a";
           console.log(
             `  ${rank} ${colors.primary(s.skillName)} ${colors.muted(`(${installs} installs)`)}`,
           );
@@ -690,11 +698,5 @@ export class InstallCommand extends Command {
     const tip = tips[Math.floor(Math.random() * tips.length)];
     console.log("");
     console.log(colors.muted(`Pro tip: ${tip}`));
-  }
-
-  private formatCount(count: number): string {
-    if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
-    if (count >= 1_000) return `${(count / 1_000).toFixed(1)}K`;
-    return String(count);
   }
 }

@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, rmSync } from "node:fs";
-import { join, basename } from "node:path";
+import { join, basename, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
 import type { GitProviderAdapter, CloneOptions } from "./base.js";
@@ -80,6 +80,15 @@ export class SkillsShProvider implements GitProviderAdapter {
       });
 
       const searchDir = subpath ? join(tempDir, subpath) : tempDir;
+
+      if (!resolve(searchDir).startsWith(resolve(tempDir))) {
+        rmSync(tempDir, { recursive: true, force: true });
+        return {
+          success: false,
+          error: `Invalid subpath in source: ${source}`,
+        };
+      }
+
       const skills = discoverSkills(searchDir);
 
       return {

@@ -12,8 +12,8 @@ import {
   FederatedSearch,
   GitHubSkillRegistry,
   SkillsShRegistry,
-  RateLimitError,
 } from "@skillkit/core";
+import { formatCount } from "../helpers.js";
 
 interface SkillResult {
   name: string;
@@ -87,6 +87,7 @@ export class FindCommand extends Command {
     );
 
     let results: SkillResult[];
+    let searchTerm: string | undefined;
 
     if (this.top) {
       const featured = sourcesData.sources
@@ -106,6 +107,7 @@ export class FindCommand extends Command {
       }
     } else if (this.query) {
       const query = this.query.toLowerCase();
+      searchTerm = this.query;
 
       s.start("Searching...");
 
@@ -137,6 +139,7 @@ export class FindCommand extends Command {
       }
 
       const query = (searchResult as string).toLowerCase();
+      searchTerm = searchResult as string;
 
       if (query) {
         s.start("Searching...");
@@ -155,8 +158,7 @@ export class FindCommand extends Command {
       }
     }
 
-    // Always search skills.sh registry alongside marketplace
-    if (this.query) {
+    if (searchTerm) {
       s.start("Searching skills.sh + external registries...");
       const fedSearch = new FederatedSearch();
       fedSearch.addRegistry(new SkillsShRegistry());
@@ -164,7 +166,7 @@ export class FindCommand extends Command {
         fedSearch.addRegistry(new GitHubSkillRegistry());
       }
       try {
-        const fedResult = await fedSearch.search(this.query, {
+        const fedResult = await fedSearch.search(searchTerm, {
           limit: parseInt(this.limit, 10) || 10,
         });
         const sourceLabel = fedResult.registries.join(", ") || "none";
@@ -184,9 +186,7 @@ export class FindCommand extends Command {
             for (const skill of skillsShResults) {
               const installs =
                 typeof skill.stars === "number" && skill.stars > 0
-                  ? colors.muted(
-                      ` ${this.formatInstalls(skill.stars)} installs`,
-                    )
+                  ? colors.muted(` ${formatCount(skill.stars)} installs`)
                   : "";
               const desc = skill.description
                 ? colors.muted(
@@ -197,9 +197,10 @@ export class FindCommand extends Command {
                 `  ${colors.cyan(symbols.bullet)} ${colors.primary(skill.name)}${installs}${desc}`,
               );
               if (!this.quiet) {
-                const installSource =
-                  skill.description ||
-                  skill.source.replace("https://github.com/", "");
+                const installSource = skill.source.replace(
+                  "https://github.com/",
+                  "",
+                );
                 console.log(
                   `    ${colors.muted(`skillkit install skills.sh/${installSource}/${skill.name}`)}`,
                 );
@@ -231,15 +232,8 @@ export class FindCommand extends Command {
 
           console.log("");
         }
-      } catch (err) {
-        if (err instanceof RateLimitError) {
-          s.stop(colors.warning("Rate limited by API"));
-          console.log(
-            colors.muted("Set GITHUB_TOKEN env var or wait before retrying."),
-          );
-        } else {
-          s.stop(colors.warning("External search failed"));
-        }
+      } catch {
+        s.stop(colors.warning("External search unavailable"));
       }
     }
 
@@ -305,11 +299,5 @@ export class FindCommand extends Command {
     }
 
     return 0;
-  }
-
-  private formatInstalls(count: number): string {
-    if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
-    if (count >= 1_000) return `${(count / 1_000).toFixed(1)}K`;
-    return String(count);
   }
 }

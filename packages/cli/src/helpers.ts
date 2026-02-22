@@ -7,9 +7,9 @@ import {
   initProject as coreInitProject,
   loadSkillMetadata as coreLoadSkillMetadata,
   saveSkillMetadata as coreSaveSkillMetadata,
-} from '@skillkit/core';
-import { getAdapter, detectAgent } from '@skillkit/agents';
-import type { AgentType, AgentAdapterInfo } from '@skillkit/core';
+} from "@skillkit/core";
+import { getAdapter, detectAgent } from "@skillkit/agents";
+import type { AgentType, AgentAdapterInfo } from "@skillkit/core";
 
 // Re-export metadata functions directly (they don't need adapter bridging)
 export const loadSkillMetadata = coreLoadSkillMetadata;
@@ -61,4 +61,10 @@ export async function initProject(agentType?: AgentType): Promise<void> {
     configFile: adapter.configFile,
   };
   return coreInitProject(type, adapterInfo);
+}
+
+export function formatCount(count: number): string {
+  if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
+  if (count >= 1_000) return `${(count / 1_000).toFixed(1)}K`;
+  return String(count);
 }

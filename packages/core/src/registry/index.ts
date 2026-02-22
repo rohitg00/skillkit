@@ -136,11 +136,13 @@ export class FederatedSearch {
 
   async search(
     query: string,
-    options?: { limit?: number },
+    options?: { limit?: number; timeoutMs?: number },
   ): Promise<FederatedResult> {
     const limit = options?.limit ?? 20;
     const results = await Promise.allSettled(
-      this.registries.map((r) => r.search(query, { limit })),
+      this.registries.map((r) =>
+        r.search(query, { limit, timeoutMs: options?.timeoutMs }),
+      ),
     );
 
     const allSkills: ExternalSkill[] = [];
@@ -151,11 +153,6 @@ export class FederatedSearch {
       if (result.status === "fulfilled" && result.value.length > 0) {
         allSkills.push(...result.value);
         activeRegistries.push(this.registries[i].name);
-      } else if (
-        result.status === "rejected" &&
-        result.reason instanceof RateLimitError
-      ) {
-        throw result.reason;
       }
     }
 
