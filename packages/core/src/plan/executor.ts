@@ -494,6 +494,11 @@ export const dryRunExecutor: StepExecutor = async (step, task, _plan) => {
 
 /**
  * Shell step executor (runs commands)
+ *
+ * Uses execFileSync for simple commands (no shell metacharacters) to prevent
+ * injection. Falls back to sh -c for commands that require shell features
+ * like pipes, redirects, or subshells — these come from plan configs,
+ * not user input.
  */
 export const shellExecutor: StepExecutor = async (step, _task, _plan) => {
   if (!step.command) {
@@ -501,17 +506,26 @@ export const shellExecutor: StepExecutor = async (step, _task, _plan) => {
   }
 
   try {
-    const parts = splitCommand(step.command);
-    if (parts.length === 0) {
-      return { success: false, output: "", error: "Empty command" };
-    }
-    const [cmd, ...args] = parts;
-    const output = execFileSync(cmd, args, {
-      encoding: "utf-8",
-      timeout: 60000,
-    });
+    const needsShell = /[|><;`$(){}]/.test(step.command);
+    let output: string;
 
-    // Check expected output if provided
+    if (needsShell) {
+      output = execFileSync("sh", ["-c", step.command], {
+        encoding: "utf-8",
+        timeout: 60000,
+      });
+    } else {
+      const parts = splitCommand(step.command);
+      if (parts.length === 0) {
+        return { success: false, output: "", error: "Empty command" };
+      }
+      const [cmd, ...args] = parts;
+      output = execFileSync(cmd, args, {
+        encoding: "utf-8",
+        timeout: 60000,
+      });
+    }
+
     if (step.expectedOutput && !output.includes(step.expectedOutput)) {
       return {
         success: false,
