@@ -1,5 +1,5 @@
-import { Hono } from 'hono';
-import { ContentExtractor, SkillGenerator, AutoTagger } from '@skillkit/core';
+import { Hono } from "hono";
+import { ContentExtractor, SkillGenerator, AutoTagger } from "@skillkit/core";
 
 interface SaveRequest {
   url?: string;
@@ -10,25 +10,38 @@ interface SaveRequest {
 
 const MAX_TEXT_LENGTH = 500_000;
 
-const BLOCKED_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1', '0.0.0.0']);
+const BLOCKED_HOSTS = new Set([
+  "localhost",
+  "127.0.0.1",
+  "[::1]",
+  "::1",
+  "0.0.0.0",
+]);
 
 function isAllowedUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:")
+      return false;
 
     const hostname = parsed.hostname.toLowerCase();
-    const bare = hostname.replace(/^\[|\]$/g, '');
+    const bare = hostname.replace(/^\[|\]$/g, "");
 
     if (BLOCKED_HOSTS.has(hostname) || BLOCKED_HOSTS.has(bare)) return false;
-    if (bare.startsWith('::ffff:')) return isAllowedUrl(`http://${bare.slice(7)}`);
+    if (bare.startsWith("::ffff:"))
+      return isAllowedUrl(`http://${bare.slice(7)}`);
     if (/^127\./.test(bare) || /^0\./.test(bare)) return false;
-    if (bare.startsWith('10.') || bare.startsWith('192.168.')) return false;
+    if (bare.startsWith("10.") || bare.startsWith("192.168.")) return false;
     if (/^172\.(1[6-9]|2\d|3[01])\./.test(bare)) return false;
-    if (bare.startsWith('169.254.')) return false;
-    if (bare.startsWith('fe80:') || bare.startsWith('fc') || bare.startsWith('fd')) return false;
+    if (bare.startsWith("169.254.")) return false;
+    if (
+      bare.startsWith("fe80:") ||
+      bare.startsWith("fc") ||
+      bare.startsWith("fd")
+    )
+      return false;
     if (/^(22[4-9]|23\d|24\d|25[0-5])\./.test(bare)) return false;
-    if (bare.startsWith('ff')) return false;
+    if (bare.startsWith("ff")) return false;
     return true;
   } catch {
     return false;
@@ -41,12 +54,12 @@ export function saveRoutes() {
   const generator = new SkillGenerator();
   const tagger = new AutoTagger();
 
-  app.post('/save', async (c) => {
+  app.post("/save", async (c) => {
     let body: SaveRequest;
     try {
       body = await c.req.json();
     } catch {
-      return c.json({ error: 'Invalid JSON body' }, 400);
+      return c.json({ error: "Invalid JSON body" }, 400);
     }
 
     if (!body.url && !body.text) {
@@ -54,11 +67,26 @@ export function saveRoutes() {
     }
 
     if (body.url && !isAllowedUrl(body.url)) {
-      return c.json({ error: 'URL must be a public HTTP(S) address' }, 400);
+      return c.json({ error: "URL must be a public HTTP(S) address" }, 400);
+    }
+
+    if (body.name && !/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(body.name)) {
+      return c.json(
+        {
+          error:
+            "Name must be alphanumeric (hyphens, underscores, dots allowed)",
+        },
+        400,
+      );
     }
 
     if (body.text && body.text.length > MAX_TEXT_LENGTH) {
-      return c.json({ error: `Text exceeds maximum length of ${MAX_TEXT_LENGTH} characters` }, 400);
+      return c.json(
+        {
+          error: `Text exceeds maximum length of ${MAX_TEXT_LENGTH} characters`,
+        },
+        400,
+      );
     }
 
     try {
@@ -78,10 +106,11 @@ export function saveRoutes() {
         tags: tagger.detectTags(content),
       });
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
+      const message = err instanceof Error ? err.message : "Unknown error";
       const isTimeout =
-        (err instanceof DOMException && err.name === 'TimeoutError') ||
-        (err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError'));
+        (err instanceof DOMException && err.name === "TimeoutError") ||
+        (err instanceof Error &&
+          (err.name === "TimeoutError" || err.name === "AbortError"));
 
       if (isTimeout) {
         return c.json({ error: `Fetch timeout: ${message}` }, 504);

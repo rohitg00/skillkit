@@ -1,13 +1,31 @@
-import { existsSync, readFileSync, mkdirSync, writeFileSync, readdirSync, statSync } from 'node:fs';
-import { join, basename, dirname, resolve } from 'node:path';
-import chalk from 'chalk';
-import { Command, Option } from 'clipanion';
-import { generateWellKnownIndex, type WellKnownSkill, SkillScanner, formatSummary, Severity } from '@skillkit/core';
+import {
+  existsSync,
+  readFileSync,
+  mkdirSync,
+  writeFileSync,
+  readdirSync,
+  statSync,
+} from "node:fs";
+import { join, basename, dirname, resolve } from "node:path";
+import chalk from "chalk";
+import { Command, Option } from "clipanion";
+import {
+  generateWellKnownIndex,
+  type WellKnownSkill,
+  SkillScanner,
+  formatSummary,
+  Severity,
+} from "@skillkit/core";
 
 function sanitizeSkillName(name: string): string | null {
-  if (!name || typeof name !== 'string') return null;
+  if (!name || typeof name !== "string") return null;
   const base = basename(name);
-  if (base !== name || name.includes('..') || name.includes('/') || name.includes('\\')) {
+  if (
+    base !== name ||
+    name.includes("..") ||
+    name.includes("/") ||
+    name.includes("\\")
+  ) {
     return null;
   }
   if (!/^[a-zA-Z0-9._-]+$/.test(name)) {
@@ -24,10 +42,10 @@ interface SkillFrontmatter {
 }
 
 export class PublishCommand extends Command {
-  static override paths = [['publish']];
+  static override paths = [["publish"]];
 
   static override usage = Command.Usage({
-    description: 'Generate well-known skills structure for hosting',
+    description: "Generate well-known skills structure for hosting",
     details: `
       This command generates the RFC 8615 well-known URI structure for hosting skills.
 
@@ -38,59 +56,79 @@ export class PublishCommand extends Command {
       Users can then install skills via: skillkit add https://your-domain.com
     `,
     examples: [
-      ['Generate from current directory', '$0 publish'],
-      ['Generate from specific path', '$0 publish ./my-skills'],
-      ['Generate to custom output directory', '$0 publish --output ./public'],
-      ['Preview without writing', '$0 publish --dry-run'],
+      ["Generate from current directory", "$0 publish"],
+      ["Generate from specific path", "$0 publish ./my-skills"],
+      ["Generate to custom output directory", "$0 publish --output ./public"],
+      ["Preview without writing", "$0 publish --dry-run"],
     ],
   });
 
-  skillPath = Option.String({ required: false, name: 'path' });
+  skillPath = Option.String({ required: false, name: "path" });
 
-  output = Option.String('--output,-o', {
-    description: 'Output directory for well-known structure (default: current directory)',
+  output = Option.String("--output,-o", {
+    description:
+      "Output directory for well-known structure (default: current directory)",
   });
 
-  dryRun = Option.Boolean('--dry-run,-n', false, {
-    description: 'Show what would be generated without writing files',
+  dryRun = Option.Boolean("--dry-run,-n", false, {
+    description: "Show what would be generated without writing files",
   });
 
-  format = Option.String('--format', {
-    description: 'Output format: "standard" (default) or "mintlify" (.well-known/skills/default/skill.md)',
+  format = Option.String("--format", {
+    description:
+      'Output format: "standard" (default) or "mintlify" (.well-known/skills/default/skill.md)',
   });
 
   async execute(): Promise<number> {
     const basePath = this.skillPath || process.cwd();
     const outputDir = this.output || basePath;
 
-    console.log(chalk.cyan('Generating well-known skills structure...\n'));
+    console.log(chalk.cyan("Generating well-known skills structure...\n"));
 
     const discoveredSkills = this.discoverSkills(basePath);
 
     if (discoveredSkills.length === 0) {
-      console.error(chalk.red('No skills found'));
-      console.error(chalk.dim('Skills must contain a SKILL.md file with frontmatter'));
+      console.error(chalk.red("No skills found"));
+      console.error(
+        chalk.dim("Skills must contain a SKILL.md file with frontmatter"),
+      );
       return 1;
     }
 
     console.log(chalk.white(`Found ${discoveredSkills.length} skill(s):\n`));
 
     const wellKnownSkills: WellKnownSkill[] = [];
-    const validSkills: Array<{ name: string; safeName: string; description?: string; path: string }> = [];
+    const validSkills: Array<{
+      name: string;
+      safeName: string;
+      description?: string;
+      path: string;
+    }> = [];
 
     for (const skill of discoveredSkills) {
       const safeName = sanitizeSkillName(skill.name);
       if (!safeName) {
-        console.log(chalk.yellow(`  ${chalk.yellow('⚠')} Skipping "${skill.name}" (invalid name - must be alphanumeric with hyphens/underscores)`));
+        console.log(
+          chalk.yellow(
+            `  ${chalk.yellow("⚠")} Skipping "${skill.name}" (invalid name - must be alphanumeric with hyphens/underscores)`,
+          ),
+        );
         continue;
       }
 
       const files = this.getSkillFiles(skill.path);
-      console.log(chalk.dim(`  ${chalk.green('●')} ${safeName}`));
-      console.log(chalk.dim(`    Description: ${skill.description || 'No description'}`));
-      console.log(chalk.dim(`    Files: ${files.join(', ')}`));
+      console.log(chalk.dim(`  ${chalk.green("●")} ${safeName}`));
+      console.log(
+        chalk.dim(`    Description: ${skill.description || "No description"}`),
+      );
+      console.log(chalk.dim(`    Files: ${files.join(", ")}`));
 
-      validSkills.push({ name: skill.name, safeName, description: skill.description, path: skill.path });
+      validSkills.push({
+        name: skill.name,
+        safeName,
+        description: skill.description,
+        path: skill.path,
+      });
       wellKnownSkills.push({
         name: safeName,
         description: skill.description,
@@ -101,78 +139,115 @@ export class PublishCommand extends Command {
     const scanner = new SkillScanner({ failOnSeverity: Severity.HIGH });
     for (const skill of validSkills) {
       const scanResult = await scanner.scan(skill.path);
-      if (scanResult.verdict === 'fail') {
-        console.error(chalk.red(`\nSecurity scan FAILED for "${skill.safeName}"`));
+      if (scanResult.verdict === "fail") {
+        console.error(
+          chalk.red(`\nSecurity scan FAILED for "${skill.safeName}"`),
+        );
         console.error(formatSummary(scanResult));
-        console.error(chalk.dim('Fix security issues before publishing.'));
+        console.error(chalk.dim("Fix security issues before publishing."));
         return 1;
       }
-      if (scanResult.verdict === 'warn') {
-        console.log(chalk.yellow(`  Security warnings for "${skill.safeName}" (${scanResult.findings.length} findings)`));
+      if (scanResult.verdict === "warn") {
+        console.log(
+          chalk.yellow(
+            `  Security warnings for "${skill.safeName}" (${scanResult.findings.length} findings)`,
+          ),
+        );
       }
     }
 
     if (validSkills.length === 0) {
-      console.error(chalk.red('\nNo valid skills to publish'));
+      console.error(chalk.red("\nNo valid skills to publish"));
       return 1;
     }
 
-    console.log('');
+    console.log("");
 
-    if (this.format === 'mintlify') {
+    if (this.format === "mintlify") {
       if (this.dryRun) {
-        console.log(chalk.yellow('Dry run - not writing files\n'));
-        console.log(chalk.white('Would generate (Mintlify format):'));
+        console.log(chalk.yellow("Dry run - not writing files\n"));
+        console.log(chalk.white("Would generate (Mintlify format):"));
         for (const skill of validSkills) {
-          console.log(chalk.dim(`  ${outputDir}/.well-known/skills/${skill.safeName}/skill.md`));
+          console.log(
+            chalk.dim(
+              `  ${outputDir}/.well-known/skills/${skill.safeName}/skill.md`,
+            ),
+          );
         }
         return 0;
       }
 
       const resolvedOutput = resolve(outputDir);
       for (const skill of validSkills) {
-        const mintlifyDir = join(outputDir, '.well-known', 'skills', skill.safeName);
+        const mintlifyDir = join(
+          outputDir,
+          ".well-known",
+          "skills",
+          skill.safeName,
+        );
         const resolvedDir = resolve(mintlifyDir);
         if (!resolvedDir.startsWith(resolvedOutput)) {
-          console.log(chalk.red(`Skipping ${skill.safeName} (path traversal detected)`));
+          console.log(
+            chalk.red(`Skipping ${skill.safeName} (path traversal detected)`),
+          );
           continue;
         }
         mkdirSync(mintlifyDir, { recursive: true });
-        const skillMdPath = join(skill.path, 'SKILL.md');
+        const skillMdPath = join(skill.path, "SKILL.md");
         if (existsSync(skillMdPath)) {
-          const content = readFileSync(skillMdPath, 'utf-8');
-          writeFileSync(join(mintlifyDir, 'skill.md'), content);
+          const content = readFileSync(skillMdPath, "utf-8");
+          writeFileSync(join(mintlifyDir, "skill.md"), content);
         }
       }
 
-      console.log(chalk.green('Generated Mintlify well-known structure:\n'));
+      console.log(chalk.green("Generated Mintlify well-known structure:\n"));
       for (const skill of validSkills) {
-        console.log(chalk.dim(`  ${outputDir}/.well-known/skills/${skill.safeName}/skill.md`));
+        console.log(
+          chalk.dim(
+            `  ${outputDir}/.well-known/skills/${skill.safeName}/skill.md`,
+          ),
+        );
       }
-      console.log('');
-      console.log(chalk.cyan('Next steps:'));
-      console.log(chalk.dim('  1. Deploy the .well-known directory to your web server'));
-      console.log(chalk.dim('  2. Users can install via: skillkit install https://your-domain.com'));
-      console.log(chalk.dim('  3. Skills auto-discovered from /.well-known/skills/{name}/skill.md'));
+      console.log("");
+      console.log(chalk.cyan("Next steps:"));
+      console.log(
+        chalk.dim("  1. Deploy the .well-known directory to your web server"),
+      );
+      console.log(
+        chalk.dim(
+          "  2. Users can install via: skillkit install https://your-domain.com",
+        ),
+      );
+      console.log(
+        chalk.dim(
+          "  3. Skills auto-discovered from /.well-known/skills/{name}/skill.md",
+        ),
+      );
       return 0;
     }
 
     if (this.dryRun) {
-      console.log(chalk.yellow('Dry run - not writing files\n'));
-      console.log(chalk.white('Would generate:'));
+      console.log(chalk.yellow("Dry run - not writing files\n"));
+      console.log(chalk.white("Would generate:"));
       console.log(chalk.dim(`  ${outputDir}/.well-known/skills/index.json`));
       for (const skill of wellKnownSkills) {
         for (const file of skill.files) {
-          console.log(chalk.dim(`  ${outputDir}/.well-known/skills/${skill.name}/${file}`));
+          console.log(
+            chalk.dim(
+              `  ${outputDir}/.well-known/skills/${skill.name}/${file}`,
+            ),
+          );
         }
       }
-      console.log('');
-      console.log(chalk.white('index.json preview:'));
-      console.log(JSON.stringify(generateWellKnownIndex(wellKnownSkills), null, 2));
+      console.log("");
+      console.log(chalk.white("index.json preview:"));
+      console.log(
+        JSON.stringify(generateWellKnownIndex(wellKnownSkills), null, 2),
+      );
       return 0;
     }
 
-    const wellKnownDir = join(outputDir, '.well-known', 'skills');
+    const wellKnownDir = join(outputDir, ".well-known", "skills");
     mkdirSync(wellKnownDir, { recursive: true });
 
     for (const skill of validSkills) {
@@ -181,7 +256,9 @@ export class PublishCommand extends Command {
       const resolvedWellKnownDir = resolve(wellKnownDir);
 
       if (!resolvedSkillDir.startsWith(resolvedWellKnownDir)) {
-        console.log(chalk.yellow(`  Skipping "${skill.name}" (path traversal detected)`));
+        console.log(
+          chalk.yellow(`  Skipping "${skill.name}" (path traversal detected)`),
+        );
         continue;
       }
 
@@ -192,35 +269,51 @@ export class PublishCommand extends Command {
         const safeFile = basename(file);
         const sourcePath = join(skill.path, file);
         const destPath = join(skillDir, safeFile);
-        const content = readFileSync(sourcePath, 'utf-8');
+        const content = readFileSync(sourcePath, "utf-8");
         writeFileSync(destPath, content);
       }
     }
 
     const index = generateWellKnownIndex(wellKnownSkills);
-    writeFileSync(join(wellKnownDir, 'index.json'), JSON.stringify(index, null, 2));
+    writeFileSync(
+      join(wellKnownDir, "index.json"),
+      JSON.stringify(index, null, 2),
+    );
 
-    console.log(chalk.green('Generated well-known structure:\n'));
+    console.log(chalk.green("Generated well-known structure:\n"));
     console.log(chalk.dim(`  ${wellKnownDir}/index.json`));
     for (const skill of wellKnownSkills) {
       console.log(chalk.dim(`  ${wellKnownDir}/${skill.name}/`));
     }
 
-    console.log('');
-    console.log(chalk.cyan('Next steps:'));
-    console.log(chalk.dim('  1. Deploy the .well-known directory to your web server'));
-    console.log(chalk.dim('  2. Users can install via: skillkit add https://your-domain.com'));
-    console.log(chalk.dim('  3. Skills auto-discovered from /.well-known/skills/index.json'));
+    console.log("");
+    console.log(chalk.cyan("Next steps:"));
+    console.log(
+      chalk.dim("  1. Deploy the .well-known directory to your web server"),
+    );
+    console.log(
+      chalk.dim(
+        "  2. Users can install via: skillkit add https://your-domain.com",
+      ),
+    );
+    console.log(
+      chalk.dim(
+        "  3. Skills auto-discovered from /.well-known/skills/index.json",
+      ),
+    );
 
     return 0;
   }
 
-  private discoverSkills(basePath: string): Array<{ name: string; description?: string; path: string }> {
-    const skills: Array<{ name: string; description?: string; path: string }> = [];
+  private discoverSkills(
+    basePath: string,
+  ): Array<{ name: string; description?: string; path: string }> {
+    const skills: Array<{ name: string; description?: string; path: string }> =
+      [];
 
-    const skillMdPath = join(basePath, 'SKILL.md');
+    const skillMdPath = join(basePath, "SKILL.md");
     if (existsSync(skillMdPath)) {
-      const content = readFileSync(skillMdPath, 'utf-8');
+      const content = readFileSync(skillMdPath, "utf-8");
       const frontmatter = this.parseFrontmatter(content);
       skills.push({
         name: frontmatter.name || basename(basePath),
@@ -232,8 +325,8 @@ export class PublishCommand extends Command {
 
     const searchDirs = [
       basePath,
-      join(basePath, 'skills'),
-      join(basePath, '.claude', 'skills'),
+      join(basePath, "skills"),
+      join(basePath, ".claude", "skills"),
     ];
 
     for (const searchDir of searchDirs) {
@@ -244,9 +337,9 @@ export class PublishCommand extends Command {
         const entryPath = join(searchDir, entry);
         if (!statSync(entryPath).isDirectory()) continue;
 
-        const entrySkillMd = join(entryPath, 'SKILL.md');
+        const entrySkillMd = join(entryPath, "SKILL.md");
         if (existsSync(entrySkillMd)) {
-          const content = readFileSync(entrySkillMd, 'utf-8');
+          const content = readFileSync(entrySkillMd, "utf-8");
           const frontmatter = this.parseFrontmatter(content);
           skills.push({
             name: frontmatter.name || entry,
@@ -267,13 +360,14 @@ export class PublishCommand extends Command {
     for (const entry of entries) {
       const entryPath = join(skillPath, entry);
       if (statSync(entryPath).isFile()) {
-        if (entry.startsWith('.') || entry === '.skillkit-metadata.json') continue;
+        if (entry.startsWith(".") || entry === ".skillkit-metadata.json")
+          continue;
         files.push(entry);
       }
     }
 
-    if (!files.includes('SKILL.md')) {
-      files.unshift('SKILL.md');
+    if (!files.includes("SKILL.md")) {
+      files.unshift("SKILL.md");
     }
 
     return files;
@@ -292,37 +386,37 @@ export class PublishCommand extends Command {
         const tagMatch = line.match(/^\s*-\s*(.+)$/);
         if (tagMatch) {
           frontmatter.tags ??= [];
-          frontmatter.tags.push(tagMatch[1].trim().replace(/^["']|["']$/g, ''));
+          frontmatter.tags.push(tagMatch[1].trim().replace(/^["']|["']$/g, ""));
           continue;
         }
-        if (line.trim() === '') continue;
+        if (line.trim() === "") continue;
         inTagsList = false;
       }
 
-      const colonIdx = line.indexOf(':');
+      const colonIdx = line.indexOf(":");
       if (colonIdx === -1) continue;
 
       const key = line.slice(0, colonIdx).trim();
       const value = line.slice(colonIdx + 1).trim();
 
       switch (key) {
-        case 'name':
-          frontmatter.name = value.replace(/^["']|["']$/g, '');
+        case "name":
+          frontmatter.name = value.replace(/^["']|["']$/g, "");
           break;
-        case 'description':
-          frontmatter.description = value.replace(/^["']|["']$/g, '');
+        case "description":
+          frontmatter.description = value.replace(/^["']|["']$/g, "");
           break;
-        case 'version':
-          frontmatter.version = value.replace(/^["']|["']$/g, '');
+        case "version":
+          frontmatter.version = value.replace(/^["']|["']$/g, "");
           break;
-        case 'tags':
-          if (value.startsWith('[')) {
+        case "tags":
+          if (value.startsWith("[")) {
             frontmatter.tags = value
               .slice(1, -1)
-              .split(',')
-              .map(t => t.trim().replace(/^["']|["']$/g, ''))
-              .filter(t => t.length > 0);
-          } else if (value === '') {
+              .split(",")
+              .map((t) => t.trim().replace(/^["']|["']$/g, ""))
+              .filter((t) => t.length > 0);
+          } else if (value === "") {
             inTagsList = true;
             frontmatter.tags = [];
           }
@@ -335,24 +429,24 @@ export class PublishCommand extends Command {
 }
 
 export class PublishSubmitCommand extends Command {
-  static override paths = [['publish', 'submit']];
+  static override paths = [["publish", "submit"]];
 
   static override usage = Command.Usage({
-    description: 'Submit skill to SkillKit marketplace (requires review)',
+    description: "Submit skill to SkillKit marketplace (requires review)",
     examples: [
-      ['Submit skill from current directory', '$0 publish submit'],
-      ['Submit with custom name', '$0 publish submit --name my-skill'],
+      ["Submit skill from current directory", "$0 publish submit"],
+      ["Submit with custom name", "$0 publish submit --name my-skill"],
     ],
   });
 
-  skillPath = Option.String({ required: false, name: 'path' });
+  skillPath = Option.String({ required: false, name: "path" });
 
-  name = Option.String('--name,-n', {
-    description: 'Custom skill name',
+  name = Option.String("--name,-n", {
+    description: "Custom skill name",
   });
 
-  dryRun = Option.Boolean('--dry-run', false, {
-    description: 'Show what would be submitted',
+  dryRun = Option.Boolean("--dry-run", false, {
+    description: "Show what would be submitted",
   });
 
   async execute(): Promise<number> {
@@ -360,49 +454,58 @@ export class PublishSubmitCommand extends Command {
     const skillMdPath = this.findSkillMd(skillPath);
 
     if (!skillMdPath) {
-      console.error(chalk.red('No SKILL.md found'));
-      console.error(chalk.dim('Run this command from a directory containing SKILL.md'));
+      console.error(chalk.red("No SKILL.md found"));
+      console.error(
+        chalk.dim("Run this command from a directory containing SKILL.md"),
+      );
       return 1;
     }
 
-    console.log(chalk.cyan('Submitting skill to SkillKit marketplace...\n'));
+    console.log(chalk.cyan("Submitting skill to SkillKit marketplace...\n"));
 
-    const content = readFileSync(skillMdPath, 'utf-8');
+    const content = readFileSync(skillMdPath, "utf-8");
     const frontmatter = this.parseFrontmatter(content);
-    const skillName = this.name || frontmatter.name || basename(dirname(skillMdPath));
+    const skillName =
+      this.name || frontmatter.name || basename(dirname(skillMdPath));
 
     const repoInfo = this.getRepoInfo(dirname(skillMdPath));
     if (!repoInfo) {
-      console.error(chalk.red('Not a git repository or no remote configured'));
-      console.error(chalk.dim('Your skill must be in a git repository with a GitHub remote'));
+      console.error(chalk.red("Not a git repository or no remote configured"));
+      console.error(
+        chalk.dim(
+          "Your skill must be in a git repository with a GitHub remote",
+        ),
+      );
       return 1;
     }
 
     const skillSlug = this.slugify(skillName);
     if (!skillSlug) {
-      console.error(chalk.red('Skill name produces an empty slug.'));
-      console.error(chalk.dim('Please pass --name with letters or numbers.'));
+      console.error(chalk.red("Skill name produces an empty slug."));
+      console.error(chalk.dim("Please pass --name with letters or numbers."));
       return 1;
     }
 
     const skillEntry = {
       id: `${repoInfo.owner}/${repoInfo.repo}/${skillSlug}`,
       name: this.formatName(skillName),
-      description: frontmatter.description || `Best practices for ${this.formatName(skillName)}`,
+      description:
+        frontmatter.description ||
+        `Best practices for ${this.formatName(skillName)}`,
       source: `${repoInfo.owner}/${repoInfo.repo}`,
-      tags: frontmatter.tags || ['general'],
+      tags: frontmatter.tags || ["general"],
     };
 
-    console.log(chalk.white('Skill details:'));
+    console.log(chalk.white("Skill details:"));
     console.log(chalk.dim(`  ID: ${skillEntry.id}`));
     console.log(chalk.dim(`  Name: ${skillEntry.name}`));
     console.log(chalk.dim(`  Description: ${skillEntry.description}`));
     console.log(chalk.dim(`  Source: ${skillEntry.source}`));
-    console.log(chalk.dim(`  Tags: ${skillEntry.tags.join(', ')}`));
+    console.log(chalk.dim(`  Tags: ${skillEntry.tags.join(", ")}`));
     console.log();
 
     if (this.dryRun) {
-      console.log(chalk.yellow('Dry run - not submitting'));
+      console.log(chalk.yellow("Dry run - not submitting"));
       console.log(JSON.stringify(skillEntry, null, 2));
       return 0;
     }
@@ -412,23 +515,27 @@ export class PublishSubmitCommand extends Command {
     const issueBodyEncoded = encodeURIComponent(issueBody);
     const issueUrl = `https://github.com/rohitg00/skillkit/issues/new?title=${issueTitle}&body=${issueBodyEncoded}&labels=skill-submission,publish`;
 
-    console.log(chalk.green('Opening GitHub to submit your skill...\n'));
+    console.log(chalk.green("Opening GitHub to submit your skill...\n"));
 
     try {
-      const { execSync } = await import('node:child_process');
-      const openCmd =
-        process.platform === 'darwin'
-          ? `open "${issueUrl}"`
-          : process.platform === 'win32'
-            ? `cmd /c start "" "${issueUrl}"`
-            : `xdg-open "${issueUrl}"`;
-      execSync(openCmd, { stdio: 'ignore' });
+      const { execFileSync } = await import("node:child_process");
+      const cmd =
+        process.platform === "darwin"
+          ? "open"
+          : process.platform === "win32"
+            ? "cmd"
+            : "xdg-open";
+      const args =
+        process.platform === "win32"
+          ? ["/c", "start", "", issueUrl]
+          : [issueUrl];
+      execFileSync(cmd, args, { stdio: "ignore" });
 
-      console.log(chalk.green('GitHub issue page opened!'));
-      console.log(chalk.dim('Review and submit the issue.'));
+      console.log(chalk.green("GitHub issue page opened!"));
+      console.log(chalk.dim("Review and submit the issue."));
     } catch {
-      console.log(chalk.yellow('Could not open browser automatically.'));
-      console.log(chalk.dim('Please open this URL manually:\n'));
+      console.log(chalk.yellow("Could not open browser automatically."));
+      console.log(chalk.dim("Please open this URL manually:\n"));
       console.log(chalk.cyan(issueUrl));
     }
 
@@ -436,18 +543,18 @@ export class PublishSubmitCommand extends Command {
   }
 
   private findSkillMd(basePath: string): string | null {
-    if (basePath.endsWith('SKILL.md') && existsSync(basePath)) {
+    if (basePath.endsWith("SKILL.md") && existsSync(basePath)) {
       return basePath;
     }
 
-    const direct = join(basePath, 'SKILL.md');
+    const direct = join(basePath, "SKILL.md");
     if (existsSync(direct)) {
       return direct;
     }
 
     const locations = [
-      join(basePath, 'skills', 'SKILL.md'),
-      join(basePath, '.claude', 'skills', 'SKILL.md'),
+      join(basePath, "skills", "SKILL.md"),
+      join(basePath, ".claude", "skills", "SKILL.md"),
     ];
 
     for (const loc of locations) {
@@ -467,29 +574,29 @@ export class PublishSubmitCommand extends Command {
     const lines = match[1].split(/\r?\n/);
 
     for (const line of lines) {
-      const colonIdx = line.indexOf(':');
+      const colonIdx = line.indexOf(":");
       if (colonIdx === -1) continue;
 
       const key = line.slice(0, colonIdx).trim();
       const value = line.slice(colonIdx + 1).trim();
 
       switch (key) {
-        case 'name':
-          frontmatter.name = value.replace(/^["']|["']$/g, '');
+        case "name":
+          frontmatter.name = value.replace(/^["']|["']$/g, "");
           break;
-        case 'description':
-          frontmatter.description = value.replace(/^["']|["']$/g, '');
+        case "description":
+          frontmatter.description = value.replace(/^["']|["']$/g, "");
           break;
-        case 'version':
-          frontmatter.version = value.replace(/^["']|["']$/g, '');
+        case "version":
+          frontmatter.version = value.replace(/^["']|["']$/g, "");
           break;
-        case 'tags':
-          if (value.startsWith('[')) {
+        case "tags":
+          if (value.startsWith("[")) {
             frontmatter.tags = value
               .slice(1, -1)
-              .split(',')
-              .map(t => t.trim().replace(/^["']|["']$/g, ''))
-              .filter(t => t.length > 0);
+              .split(",")
+              .map((t) => t.trim().replace(/^["']|["']$/g, ""))
+              .filter((t) => t.length > 0);
           }
           break;
       }
@@ -502,17 +609,17 @@ export class PublishSubmitCommand extends Command {
     return name
       .toLowerCase()
       .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
   }
 
   private getRepoInfo(dir: string): { owner: string; repo: string } | null {
     try {
-      const { execSync } = require('node:child_process');
-      const remote = execSync('git remote get-url origin', {
+      const { execSync } = require("node:child_process");
+      const remote = execSync("git remote get-url origin", {
         cwd: dir,
-        encoding: 'utf-8',
-        stdio: ['pipe', 'pipe', 'ignore'],
+        encoding: "utf-8",
+        stdio: ["pipe", "pipe", "ignore"],
       }).trim();
 
       const match = remote.match(/github\.com[:/]([^/]+)\/(.+?)(?:\.git)?$/);
@@ -529,13 +636,17 @@ export class PublishSubmitCommand extends Command {
   private formatName(name: string): string {
     return name
       .split(/[-_]/)
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
   }
 
-  private createIssueBody(
-    skill: { id: string; name: string; description: string; source: string; tags: string[] }
-  ): string {
+  private createIssueBody(skill: {
+    id: string;
+    name: string;
+    description: string;
+    source: string;
+    tags: string[];
+  }): string {
     return `## Publish Skill Request
 
 ### Skill Details
@@ -543,7 +654,7 @@ export class PublishSubmitCommand extends Command {
 - **Name:** ${skill.name}
 - **Description:** ${skill.description}
 - **Source:** [${skill.source}](https://github.com/${skill.source})
-- **Tags:** ${skill.tags.map(t => `\`${t}\``).join(', ')}
+- **Tags:** ${skill.tags.map((t) => `\`${t}\``).join(", ")}
 
 ### JSON Entry
 \`\`\`json

@@ -1,31 +1,34 @@
-import { execSync } from 'node:child_process';
-import { existsSync, rmSync } from 'node:fs';
-import { join, basename } from 'node:path';
-import { tmpdir } from 'node:os';
-import { randomUUID } from 'node:crypto';
-import type { GitProviderAdapter, CloneOptions } from './base.js';
-import { parseShorthand, isGitUrl } from './base.js';
-import type { GitProvider, CloneResult } from '../core/types.js';
-import { discoverSkills } from '../core/skills.js';
+import { execFileSync } from "node:child_process";
+import { existsSync, rmSync } from "node:fs";
+import { join, basename } from "node:path";
+import { tmpdir } from "node:os";
+import { randomUUID } from "node:crypto";
+import type { GitProviderAdapter, CloneOptions } from "./base.js";
+import { parseShorthand, isGitUrl } from "./base.js";
+import type { GitProvider, CloneResult } from "../core/types.js";
+import { discoverSkills } from "../core/skills.js";
 
 export class GitHubProvider implements GitProviderAdapter {
-  readonly type: GitProvider = 'github';
-  readonly name = 'GitHub';
-  readonly baseUrl = 'https://github.com';
+  readonly type: GitProvider = "github";
+  readonly name = "GitHub";
+  readonly baseUrl = "https://github.com";
 
-  parseSource(source: string): { owner: string; repo: string; subpath?: string } | null {
-    
-    if (source.startsWith('https://github.com/')) {
-      const path = source.replace('https://github.com/', '').replace(/\.git$/, '');
+  parseSource(
+    source: string,
+  ): { owner: string; repo: string; subpath?: string } | null {
+    if (source.startsWith("https://github.com/")) {
+      const path = source
+        .replace("https://github.com/", "")
+        .replace(/\.git$/, "");
       return parseShorthand(path);
     }
 
-    if (source.startsWith('git@github.com:')) {
-      const path = source.replace('git@github.com:', '').replace(/\.git$/, '');
+    if (source.startsWith("git@github.com:")) {
+      const path = source.replace("git@github.com:", "").replace(/\.git$/, "");
       return parseShorthand(path);
     }
 
-    if (!isGitUrl(source) && !source.includes(':')) {
+    if (!isGitUrl(source) && !source.includes(":")) {
       return parseShorthand(source);
     }
 
@@ -34,10 +37,9 @@ export class GitHubProvider implements GitProviderAdapter {
 
   matches(source: string): boolean {
     return (
-      source.startsWith('https://github.com/') ||
-      source.startsWith('git@github.com:') ||
-      
-      (!isGitUrl(source) && !source.includes(':') && source.includes('/'))
+      source.startsWith("https://github.com/") ||
+      source.startsWith("git@github.com:") ||
+      (!isGitUrl(source) && !source.includes(":") && source.includes("/"))
     );
   }
 
@@ -49,31 +51,36 @@ export class GitHubProvider implements GitProviderAdapter {
     return `git@github.com:${owner}/${repo}.git`;
   }
 
-  async clone(source: string, _targetDir: string, options: CloneOptions = {}): Promise<CloneResult> {
+  async clone(
+    source: string,
+    _targetDir: string,
+    options: CloneOptions = {},
+  ): Promise<CloneResult> {
     const parsed = this.parseSource(source);
     if (!parsed) {
       return { success: false, error: `Invalid GitHub source: ${source}` };
     }
 
     const { owner, repo, subpath } = parsed;
-    const cloneUrl = options.ssh ? this.getSshUrl(owner, repo) : this.getCloneUrl(owner, repo);
+    const cloneUrl = options.ssh
+      ? this.getSshUrl(owner, repo)
+      : this.getCloneUrl(owner, repo);
 
     const tempDir = join(tmpdir(), `skillkit-${randomUUID()}`);
 
     try {
-      
-      const args = ['clone'];
+      const args = ["clone"];
       if (options.depth) {
-        args.push('--depth', String(options.depth));
+        args.push("--depth", String(options.depth));
       }
       if (options.branch) {
-        args.push('--branch', options.branch);
+        args.push("--branch", options.branch);
       }
       args.push(cloneUrl, tempDir);
 
-      execSync(`git ${args.join(' ')}`, {
-        stdio: ['pipe', 'pipe', 'pipe'],
-        encoding: 'utf-8',
+      execFileSync("git", args, {
+        stdio: ["pipe", "pipe", "pipe"],
+        encoding: "utf-8",
       });
 
       const searchDir = subpath ? join(tempDir, subpath) : tempDir;
@@ -81,17 +88,16 @@ export class GitHubProvider implements GitProviderAdapter {
 
       return {
         success: true,
-        path: searchDir, 
-        tempRoot: tempDir, 
-        skills: skills.map(s => s.name),
-        discoveredSkills: skills.map(s => ({
+        path: searchDir,
+        tempRoot: tempDir,
+        skills: skills.map((s) => s.name),
+        discoveredSkills: skills.map((s) => ({
           name: s.name,
           dirName: basename(s.path),
           path: s.path,
         })),
       };
     } catch (error) {
-      
       if (existsSync(tempDir)) {
         rmSync(tempDir, { recursive: true, force: true });
       }

@@ -1,11 +1,8 @@
-import {
-  generateKeyPairSync,
-  createHash,
-} from 'node:crypto';
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
-import { homedir } from 'node:os';
+import { generateKeyPairSync, createHash } from "node:crypto";
+import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+import { homedir } from "node:os";
 
 export interface TLSContextOptions {
   cert?: string;
@@ -31,26 +28,26 @@ export interface TLSConfig {
   rejectUnauthorized?: boolean;
 }
 
-const DEFAULT_CERT_PATH = join(homedir(), '.skillkit', 'mesh', 'certs');
+const DEFAULT_CERT_PATH = join(homedir(), ".skillkit", "mesh", "certs");
 
 function generateSelfSignedCertificate(
   hostId: string,
   hostName: string,
-  validDays: number = 365
+  validDays: number = 365,
 ): { cert: string; key: string } {
-  const { publicKey, privateKey } = generateKeyPairSync('rsa', {
+  const { publicKey, privateKey } = generateKeyPairSync("rsa", {
     modulusLength: 2048,
-    publicKeyEncoding: { type: 'spki', format: 'pem' },
-    privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+    publicKeyEncoding: { type: "spki", format: "pem" },
+    privateKeyEncoding: { type: "pkcs8", format: "pem" },
   });
 
   const notBefore = new Date();
   const notAfter = new Date();
   notAfter.setDate(notAfter.getDate() + validDays);
 
-  const serialNumber = createHash('sha256')
+  const serialNumber = createHash("sha256")
     .update(hostId + Date.now().toString())
-    .digest('hex')
+    .digest("hex")
     .slice(0, 16);
 
   const certPem = createSimpleCert({
@@ -61,7 +58,7 @@ function generateSelfSignedCertificate(
     serialNumber,
     notBefore,
     notAfter,
-    altNames: ['localhost', '127.0.0.1', hostName],
+    altNames: ["localhost", "127.0.0.1", hostName],
   });
 
   return {
@@ -83,15 +80,15 @@ interface CertParams {
 
 function createSimpleCert(params: CertParams): string {
   const base64Encode = (str: string): string =>
-    Buffer.from(str).toString('base64');
+    Buffer.from(str).toString("base64");
 
   const formatDate = (date: Date): string => {
     const y = date.getUTCFullYear().toString().slice(-2);
-    const m = (date.getUTCMonth() + 1).toString().padStart(2, '0');
-    const d = date.getUTCDate().toString().padStart(2, '0');
-    const h = date.getUTCHours().toString().padStart(2, '0');
-    const min = date.getUTCMinutes().toString().padStart(2, '0');
-    const s = date.getUTCSeconds().toString().padStart(2, '0');
+    const m = (date.getUTCMonth() + 1).toString().padStart(2, "0");
+    const d = date.getUTCDate().toString().padStart(2, "0");
+    const h = date.getUTCHours().toString().padStart(2, "0");
+    const min = date.getUTCMinutes().toString().padStart(2, "0");
+    const s = date.getUTCSeconds().toString().padStart(2, "0");
     return `${y}${m}${d}${h}${min}${s}Z`;
   };
 
@@ -109,13 +106,13 @@ function createSimpleCert(params: CertParams): string {
   const certData = JSON.stringify(certInfo);
   const certBase64 = base64Encode(certData);
 
-  const lines: string[] = ['-----BEGIN CERTIFICATE-----'];
+  const lines: string[] = ["-----BEGIN CERTIFICATE-----"];
   for (let i = 0; i < certBase64.length; i += 64) {
     lines.push(certBase64.slice(i, i + 64));
   }
-  lines.push('-----END CERTIFICATE-----');
+  lines.push("-----END CERTIFICATE-----");
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 export class TLSManager {
@@ -133,15 +130,15 @@ export class TLSManager {
 
   async generateCertificate(
     hostId: string,
-    hostName: string = 'localhost',
-    validDays: number = 365
+    hostName: string = "localhost",
+    validDays: number = 365,
   ): Promise<CertificateInfo> {
     await this.ensureDirectory();
 
     const { cert, key } = generateSelfSignedCertificate(
       hostId,
       hostName,
-      validDays
+      validDays,
     );
 
     const certFile = join(this.certPath, `${hostId}.crt`);
@@ -150,7 +147,7 @@ export class TLSManager {
     await writeFile(certFile, cert, { mode: 0o644 });
     await writeFile(keyFile, key, { mode: 0o600 });
 
-    const fingerprint = createHash('sha256').update(cert).digest('hex');
+    const fingerprint = createHash("sha256").update(cert).digest("hex");
     const notBefore = new Date();
     const notAfter = new Date();
     notAfter.setDate(notAfter.getDate() + validDays);
@@ -173,9 +170,9 @@ export class TLSManager {
       return null;
     }
 
-    const cert = await readFile(certFile, 'utf-8');
-    const key = await readFile(keyFile, 'utf-8');
-    const fingerprint = createHash('sha256').update(cert).digest('hex');
+    const cert = await readFile(certFile, "utf-8");
+    const key = await readFile(keyFile, "utf-8");
+    const fingerprint = createHash("sha256").update(cert).digest("hex");
 
     return {
       cert,
@@ -189,7 +186,7 @@ export class TLSManager {
 
   async loadOrCreateCertificate(
     hostId: string,
-    hostName: string = 'localhost'
+    hostName: string = "localhost",
   ): Promise<CertificateInfo> {
     const existing = await this.loadCertificate(hostId);
     if (existing) {
@@ -212,13 +209,17 @@ export class TLSManager {
 
   createServerContext(
     certInfo: CertificateInfo,
-    options?: { requestClientCert?: boolean; trustedCAs?: string[] }
+    options?: {
+      requestClientCert?: boolean;
+      trustedCAs?: string[];
+      allowSelfSigned?: boolean;
+    },
   ): TLSContextOptions {
     const context: TLSContextOptions = {
       cert: certInfo.cert,
       key: certInfo.key,
       requestCert: options?.requestClientCert ?? false,
-      rejectUnauthorized: false,
+      rejectUnauthorized: !options?.allowSelfSigned,
     };
 
     if (options?.trustedCAs?.length) {
@@ -231,10 +232,14 @@ export class TLSManager {
 
   createClientContext(
     certInfo?: CertificateInfo,
-    options?: { serverFingerprint?: string; trustedCAs?: string[] }
+    options?: {
+      serverFingerprint?: string;
+      trustedCAs?: string[];
+      allowSelfSigned?: boolean;
+    },
   ): TLSContextOptions {
     const context: TLSContextOptions = {
-      rejectUnauthorized: false,
+      rejectUnauthorized: !options?.allowSelfSigned,
     };
 
     if (certInfo) {
@@ -250,12 +255,12 @@ export class TLSManager {
   }
 
   static computeCertFingerprint(cert: string): string {
-    return createHash('sha256').update(cert).digest('hex');
+    return createHash("sha256").update(cert).digest("hex");
   }
 
   static verifyCertFingerprint(
     cert: string,
-    expectedFingerprint: string
+    expectedFingerprint: string,
   ): boolean {
     const actual = TLSManager.computeCertFingerprint(cert);
     return actual.toLowerCase() === expectedFingerprint.toLowerCase();

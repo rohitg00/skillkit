@@ -1,7 +1,7 @@
-import got from 'got';
-import type { Host, HealthCheckResult, HostStatus } from '../types.js';
-import { HEALTH_CHECK_TIMEOUT } from '../types.js';
-import { getKnownHosts, updateKnownHost } from '../config/hosts-config.js';
+import got from "got";
+import type { Host, HealthCheckResult, HostStatus } from "../types.js";
+import { HEALTH_CHECK_TIMEOUT } from "../types.js";
+import { getKnownHosts, updateKnownHost } from "../config/hosts-config.js";
 
 export interface HealthCheckOptions {
   timeout?: number;
@@ -10,7 +10,7 @@ export interface HealthCheckOptions {
 
 export async function checkHostHealth(
   host: Host,
-  options: HealthCheckOptions = {}
+  options: HealthCheckOptions = {},
 ): Promise<HealthCheckResult> {
   const timeout = options.timeout ?? HEALTH_CHECK_TIMEOUT;
   const startTime = Date.now();
@@ -19,13 +19,14 @@ export async function checkHostHealth(
     hostId: host.id,
     address: host.address,
     port: host.port,
-    status: 'unknown',
+    status: "unknown",
     latencyMs: 0,
     checkedAt: new Date().toISOString(),
   };
 
   try {
-    const url = `http://${host.address}:${host.port}/health`;
+    const protocol = (host as Host & { tls?: boolean }).tls ? "https" : "http";
+    const url = `${protocol}://${host.address}:${host.port}/health`;
 
     const response = await got.get(url, {
       timeout: { request: timeout },
@@ -36,21 +37,21 @@ export async function checkHostHealth(
     result.latencyMs = Date.now() - startTime;
 
     if (response.statusCode === 200) {
-      result.status = 'online';
+      result.status = "online";
     } else {
-      result.status = 'offline';
+      result.status = "offline";
       result.error = `HTTP ${response.statusCode}`;
     }
   } catch (err: any) {
     result.latencyMs = Date.now() - startTime;
-    result.status = 'offline';
-    result.error = err.code || err.message || 'Connection failed';
+    result.status = "offline";
+    result.error = err.code || err.message || "Connection failed";
   }
 
   if (options.updateStatus !== false) {
     await updateKnownHost(host.id, {
       status: result.status,
-      lastSeen: result.status === 'online' ? result.checkedAt : host.lastSeen,
+      lastSeen: result.status === "online" ? result.checkedAt : host.lastSeen,
     });
   }
 
@@ -58,44 +59,46 @@ export async function checkHostHealth(
 }
 
 export async function checkAllHostsHealth(
-  options: HealthCheckOptions = {}
+  options: HealthCheckOptions = {},
 ): Promise<HealthCheckResult[]> {
   const hosts = await getKnownHosts();
 
-  const results = await Promise.all(hosts.map(host => checkHostHealth(host, options)));
+  const results = await Promise.all(
+    hosts.map((host) => checkHostHealth(host, options)),
+  );
 
   return results;
 }
 
 export async function getOnlineHosts(): Promise<Host[]> {
   const hosts = await getKnownHosts();
-  return hosts.filter(h => h.status === 'online');
+  return hosts.filter((h) => h.status === "online");
 }
 
 export async function getOfflineHosts(): Promise<Host[]> {
   const hosts = await getKnownHosts();
-  return hosts.filter(h => h.status === 'offline');
+  return hosts.filter((h) => h.status === "offline");
 }
 
 export async function waitForHost(
   host: Host,
   maxWaitMs = 30000,
-  intervalMs = 1000
+  intervalMs = 1000,
 ): Promise<boolean> {
   const deadline = Date.now() + maxWaitMs;
 
   while (Date.now() < deadline) {
     const result = await checkHostHealth(host, { updateStatus: false });
 
-    if (result.status === 'online') {
+    if (result.status === "online") {
       await updateKnownHost(host.id, {
-        status: 'online',
+        status: "online",
         lastSeen: new Date().toISOString(),
       });
       return true;
     }
 
-    await new Promise(resolve => setTimeout(resolve, intervalMs));
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
   }
 
   return false;
@@ -105,9 +108,21 @@ export class HealthMonitor {
   private interval: NodeJS.Timeout | null = null;
   private running = false;
   private checking = false;
-  private onStatusChange?: (host: Host, oldStatus: HostStatus, newStatus: HostStatus) => void;
+  private onStatusChange?: (
+    host: Host,
+    oldStatus: HostStatus,
+    newStatus: HostStatus,
+  ) => void;
 
-  constructor(options: { onStatusChange?: (host: Host, oldStatus: HostStatus, newStatus: HostStatus) => void } = {}) {
+  constructor(
+    options: {
+      onStatusChange?: (
+        host: Host,
+        oldStatus: HostStatus,
+        newStatus: HostStatus,
+      ) => void;
+    } = {},
+  ) {
     this.onStatusChange = options.onStatusChange;
   }
 

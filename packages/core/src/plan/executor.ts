@@ -13,7 +13,7 @@ import type {
   PlanExecutionResult,
   PlanEvent,
   PlanEventListener,
-} from './types.js';
+} from "./types.js";
 
 /**
  * Step executor function type
@@ -21,7 +21,7 @@ import type {
 export type StepExecutor = (
   step: TaskStep,
   task: PlanTask,
-  plan: StructuredPlan
+  plan: StructuredPlan,
 ) => Promise<{ success: boolean; output: string; error?: string }>;
 
 /**
@@ -49,7 +49,10 @@ export class PlanExecutor {
   /**
    * Execute a plan
    */
-  async execute(plan: StructuredPlan, options?: PlanExecutionOptions): Promise<PlanExecutionResult> {
+  async execute(
+    plan: StructuredPlan,
+    options?: PlanExecutionOptions,
+  ): Promise<PlanExecutionResult> {
     const startTime = Date.now();
     let aborted = false;
     const result: PlanExecutionResult = {
@@ -66,8 +69,8 @@ export class PlanExecutor {
     this.isPaused = false;
 
     // Update plan status
-    plan.status = 'executing';
-    this.emit('plan:execution_started', plan);
+    plan.status = "executing";
+    this.emit("plan:execution_started", plan);
 
     try {
       // Build dependency graph
@@ -82,7 +85,7 @@ export class PlanExecutor {
         if (this.abortController.signal.aborted) {
           aborted = true;
           result.success = false;
-          result.errors = [...(result.errors ?? []), 'Execution cancelled'];
+          result.errors = [...(result.errors ?? []), "Execution cancelled"];
           break;
         }
 
@@ -93,7 +96,7 @@ export class PlanExecutor {
         if (this.abortController.signal.aborted) {
           aborted = true;
           result.success = false;
-          result.errors = [...(result.errors ?? []), 'Execution cancelled'];
+          result.errors = [...(result.errors ?? []), "Execution cancelled"];
           break;
         }
 
@@ -103,7 +106,7 @@ export class PlanExecutor {
         // Check if dependencies completed
         const depsCompleted = this.checkDependencies(task, result);
         if (!depsCompleted) {
-          task.status = 'skipped';
+          task.status = "skipped";
           result.skippedTasks.push(taskId);
           continue;
         }
@@ -113,23 +116,27 @@ export class PlanExecutor {
         result.taskResults.set(taskId, taskResult);
 
         if (taskResult.success) {
-          task.status = 'completed';
+          task.status = "completed";
           task.result = taskResult;
           result.completedTasks.push(taskId);
-          this.emit('plan:task_completed', plan, task, taskResult);
+          this.emit("plan:task_completed", plan, task, taskResult);
         } else {
-          task.status = 'failed';
+          task.status = "failed";
           task.result = taskResult;
           result.failedTasks.push(taskId);
           result.success = false;
-          this.emit('plan:task_failed', plan, task, taskResult);
+          this.emit("plan:task_failed", plan, task, taskResult);
 
           if (options?.stopOnError) {
             // Mark remaining tasks as skipped
-            for (const remainingId of executionOrder.slice(executionOrder.indexOf(taskId) + 1)) {
-              const remainingTask = plan.tasks.find((t) => t.id === remainingId);
+            for (const remainingId of executionOrder.slice(
+              executionOrder.indexOf(taskId) + 1,
+            )) {
+              const remainingTask = plan.tasks.find(
+                (t) => t.id === remainingId,
+              );
               if (remainingTask) {
-                remainingTask.status = 'skipped';
+                remainingTask.status = "skipped";
                 result.skippedTasks.push(remainingId);
               }
             }
@@ -139,28 +146,32 @@ export class PlanExecutor {
       }
 
       // Update plan status
-      plan.status = aborted ? 'cancelled' : result.success ? 'completed' : 'failed';
+      plan.status = aborted
+        ? "cancelled"
+        : result.success
+          ? "completed"
+          : "failed";
       plan.updatedAt = new Date();
 
       result.durationMs = Date.now() - startTime;
 
       // Emit appropriate event
       if (aborted) {
-        this.emit('plan:execution_cancelled', plan);
+        this.emit("plan:execution_cancelled", plan);
       } else if (result.success) {
-        this.emit('plan:execution_completed', plan);
+        this.emit("plan:execution_completed", plan);
       } else {
-        this.emit('plan:execution_failed', plan);
+        this.emit("plan:execution_failed", plan);
       }
 
       return result;
     } catch (error) {
-      plan.status = 'failed';
+      plan.status = "failed";
       result.success = false;
       result.durationMs = Date.now() - startTime;
       result.errors = [(error as Error).message];
 
-      this.emit('plan:execution_failed', plan);
+      this.emit("plan:execution_failed", plan);
       return result;
     } finally {
       // Reset executor state
@@ -177,18 +188,18 @@ export class PlanExecutor {
   private async executeTask(
     task: PlanTask,
     plan: StructuredPlan,
-    options?: PlanExecutionOptions
+    options?: PlanExecutionOptions,
   ): Promise<PlanTaskResult> {
     const startTime = Date.now();
     const errors: string[] = [];
     const filesCreated: string[] = [];
     const filesModified: string[] = [];
 
-    task.status = 'in_progress';
-    this.emit('plan:task_started', plan, task);
+    task.status = "in_progress";
+    this.emit("plan:task_started", plan, task);
 
     // Report progress
-    options?.onProgress?.(task.id, 0, 'starting');
+    options?.onProgress?.(task.id, 0, "starting");
 
     // Execute steps
     for (let i = 0; i < task.steps.length; i++) {
@@ -196,7 +207,7 @@ export class PlanExecutor {
 
       // Check if aborted
       if (this.abortController?.signal.aborted) {
-        errors.push('Execution aborted');
+        errors.push("Execution aborted");
         break;
       }
 
@@ -205,17 +216,23 @@ export class PlanExecutor {
 
       // Re-check if aborted after resuming from pause
       if (this.abortController?.signal.aborted) {
-        errors.push('Execution aborted');
+        errors.push("Execution aborted");
         break;
       }
 
       // Report progress
-      options?.onProgress?.(task.id, step.number, `executing step ${step.number}`);
+      options?.onProgress?.(
+        task.id,
+        step.number,
+        `executing step ${step.number}`,
+      );
 
       // Execute step
       if (options?.dryRun) {
         // Dry run - just log
-        console.log(`[DRY RUN] Task ${task.id}, Step ${step.number}: ${step.description}`);
+        console.log(
+          `[DRY RUN] Task ${task.id}, Step ${step.number}: ${step.description}`,
+        );
         if (step.command) {
           console.log(`  Command: ${step.command}`);
         }
@@ -226,11 +243,11 @@ export class PlanExecutor {
         try {
           const stepResult = await this.executeWithTimeout(
             this.stepExecutor(step, task, plan),
-            options?.taskTimeout || 60000
+            options?.taskTimeout || 60000,
           );
 
           if (!stepResult.success) {
-            errors.push(`Step ${step.number}: ${stepResult.error || 'Failed'}`);
+            errors.push(`Step ${step.number}: ${stepResult.error || "Failed"}`);
 
             if (step.critical) {
               break;
@@ -245,7 +262,7 @@ export class PlanExecutor {
         }
       } else {
         // No step executor configured - fail fast
-        errors.push('No step executor configured');
+        errors.push("No step executor configured");
         break;
       }
     }
@@ -256,7 +273,10 @@ export class PlanExecutor {
 
     const result: PlanTaskResult = {
       success: errors.length === 0,
-      output: errors.length === 0 ? `Task ${task.id} completed successfully` : `Task ${task.id} failed`,
+      output:
+        errors.length === 0
+          ? `Task ${task.id} completed successfully`
+          : `Task ${task.id} failed`,
       filesCreated: filesCreated.length > 0 ? filesCreated : undefined,
       filesModified: filesModified.length > 0 ? filesModified : undefined,
       errors: errors.length > 0 ? errors : undefined,
@@ -273,10 +293,15 @@ export class PlanExecutor {
   /**
    * Execute with timeout
    */
-  private async executeWithTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  private async executeWithTimeout<T>(
+    promise: Promise<T>,
+    timeoutMs: number,
+  ): Promise<T> {
     return Promise.race([
       promise,
-      new Promise<T>((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeoutMs)),
+      new Promise<T>((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout")), timeoutMs),
+      ),
     ]);
   }
 
@@ -296,7 +321,10 @@ export class PlanExecutor {
   /**
    * Get execution order using topological sort
    */
-  private getExecutionOrder(plan: StructuredPlan, graph: Map<number, number[]>): number[] {
+  private getExecutionOrder(
+    plan: StructuredPlan,
+    graph: Map<number, number[]>,
+  ): number[] {
     const order: number[] = [];
     const visited = new Set<number>();
     const temp = new Set<number>();
@@ -331,12 +359,17 @@ export class PlanExecutor {
   /**
    * Check if dependencies are completed
    */
-  private checkDependencies(task: PlanTask, result: PlanExecutionResult): boolean {
+  private checkDependencies(
+    task: PlanTask,
+    result: PlanExecutionResult,
+  ): boolean {
     if (!task.dependencies || task.dependencies.length === 0) {
       return true;
     }
 
-    return task.dependencies.every((depId) => result.completedTasks.includes(depId));
+    return task.dependencies.every((depId) =>
+      result.completedTasks.includes(depId),
+    );
   }
 
   /**
@@ -348,7 +381,7 @@ export class PlanExecutor {
       this.resumePromise = new Promise((resolve) => {
         this.resumeResolve = resolve;
       });
-      this.emit('plan:paused', {} as StructuredPlan);
+      this.emit("plan:paused", {} as StructuredPlan);
     }
   }
 
@@ -361,7 +394,7 @@ export class PlanExecutor {
       this.resumeResolve();
       this.resumeResolve = undefined;
       this.resumePromise = undefined;
-      this.emit('plan:resumed', {} as StructuredPlan);
+      this.emit("plan:resumed", {} as StructuredPlan);
     }
   }
 
@@ -406,7 +439,12 @@ export class PlanExecutor {
   /**
    * Emit event
    */
-  private emit(event: PlanEvent, plan: StructuredPlan, task?: PlanTask, result?: PlanTaskResult): void {
+  private emit(
+    event: PlanEvent,
+    plan: StructuredPlan,
+    task?: PlanTask,
+    result?: PlanTaskResult,
+  ): void {
     for (const listener of this.listeners) {
       try {
         listener(event, plan, task, result);
@@ -420,7 +458,9 @@ export class PlanExecutor {
    * Check if currently executing
    */
   isExecuting(): boolean {
-    return this.abortController !== undefined && !this.abortController.signal.aborted;
+    return (
+      this.abortController !== undefined && !this.abortController.signal.aborted
+    );
   }
 
   /**
@@ -434,7 +474,9 @@ export class PlanExecutor {
 /**
  * Create a PlanExecutor instance
  */
-export function createPlanExecutor(options?: { stepExecutor?: StepExecutor }): PlanExecutor {
+export function createPlanExecutor(options?: {
+  stepExecutor?: StepExecutor;
+}): PlanExecutor {
   return new PlanExecutor(options);
 }
 
@@ -442,8 +484,10 @@ export function createPlanExecutor(options?: { stepExecutor?: StepExecutor }): P
  * Default step executor (dry run)
  */
 export const dryRunExecutor: StepExecutor = async (step, task, _plan) => {
-  console.log(`[DRY RUN] Task ${task.id}, Step ${step.number}: ${step.description}`);
-  return { success: true, output: 'Dry run completed' };
+  console.log(
+    `[DRY RUN] Task ${task.id}, Step ${step.number}: ${step.description}`,
+  );
+  return { success: true, output: "Dry run completed" };
 };
 
 /**
@@ -451,12 +495,21 @@ export const dryRunExecutor: StepExecutor = async (step, task, _plan) => {
  */
 export const shellExecutor: StepExecutor = async (step, _task, _plan) => {
   if (!step.command) {
-    return { success: true, output: 'No command to execute' };
+    return { success: true, output: "No command to execute" };
   }
 
   try {
-    const { execSync } = await import('node:child_process');
-    const output = execSync(step.command, { encoding: 'utf-8', timeout: 60000 });
+    const { execFileSync } = await import("node:child_process");
+    const parts = step.command.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) || [];
+    if (parts.length === 0) {
+      return { success: false, output: "", error: "Empty command" };
+    }
+    const [cmd, ...rawArgs] = parts as [string, ...string[]];
+    const args = rawArgs.map((a) => a.replace(/^["']|["']$/g, ""));
+    const output = execFileSync(cmd, args, {
+      encoding: "utf-8",
+      timeout: 60000,
+    });
 
     // Check expected output if provided
     if (step.expectedOutput && !output.includes(step.expectedOutput)) {
@@ -471,7 +524,7 @@ export const shellExecutor: StepExecutor = async (step, _task, _plan) => {
   } catch (error) {
     return {
       success: false,
-      output: '',
+      output: "",
       error: (error as Error).message,
     };
   }

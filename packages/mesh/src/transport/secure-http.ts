@@ -1,18 +1,18 @@
-import got, { type Got } from 'got';
-import { randomUUID } from 'node:crypto';
+import got, { type Got } from "got";
+import { randomUUID } from "node:crypto";
 import type {
   TransportMessage,
   SecureTransportMessage,
   Host,
-} from '../types.js';
-import { HEALTH_CHECK_TIMEOUT } from '../types.js';
-import { PeerIdentity } from '../crypto/identity.js';
+} from "../types.js";
+import { HEALTH_CHECK_TIMEOUT } from "../types.js";
+import { PeerIdentity } from "../crypto/identity.js";
+import { AuthManager, createBearerHeader } from "../security/auth.js";
 import {
-  AuthManager,
-  createBearerHeader,
-} from '../security/auth.js';
-import { type MeshSecurityConfig, DEFAULT_SECURITY_CONFIG } from '../security/config.js';
-import { SecureKeystore } from '../crypto/keystore.js';
+  type MeshSecurityConfig,
+  DEFAULT_SECURITY_CONFIG,
+} from "../security/config.js";
+import { SecureKeystore } from "../crypto/keystore.js";
 
 export interface SecureHttpTransportOptions {
   timeout?: number;
@@ -48,8 +48,7 @@ export class SecureHttpTransport {
     this.authToken = options.authToken ?? null;
     this.security = options.security ?? DEFAULT_SECURITY_CONFIG;
 
-    const protocol =
-      this.security.transport.tls !== 'none' ? 'https' : 'http';
+    const protocol = this.security.transport.tls !== "none" ? "https" : "http";
     const baseUrl = `${protocol}://${host.address}:${host.port}`;
 
     this.client = got.extend({
@@ -60,11 +59,12 @@ export class SecureHttpTransport {
         calculateDelay: () => this.options.retryDelay!,
       },
       https: {
-        rejectUnauthorized: false,
+        rejectUnauthorized:
+          this.security.transport.tls === "self-signed" ? false : true,
       },
       headers: {
-        'Content-Type': 'application/json',
-        'X-SkillKit-Transport': 'secure-http',
+        "Content-Type": "application/json",
+        "X-SkillKit-Transport": "secure-http",
         ...this.options.headers,
       },
     });
@@ -88,11 +88,11 @@ export class SecureHttpTransport {
     const headers: Record<string, string> = {};
 
     if (this.authToken) {
-      headers['Authorization'] = createBearerHeader(this.authToken);
+      headers["Authorization"] = createBearerHeader(this.authToken);
     }
 
     if (this.identity) {
-      headers['X-SkillKit-Fingerprint'] = this.identity.fingerprint;
+      headers["X-SkillKit-Fingerprint"] = this.identity.fingerprint;
     }
 
     return headers;
@@ -105,8 +105,8 @@ export class SecureHttpTransport {
 
     const message: TransportMessage = {
       id: randomUUID(),
-      type: 'request',
-      from: this.identity?.fingerprint ?? 'local',
+      type: "request",
+      from: this.identity?.fingerprint ?? "local",
       to: path,
       payload,
       timestamp: new Date().toISOString(),
@@ -138,9 +138,9 @@ export class SecureHttpTransport {
   async sendMessage(
     to: string,
     type: string,
-    payload: unknown
+    payload: unknown,
   ): Promise<TransportMessage> {
-    return this.send('message', {
+    return this.send("message", {
       to,
       type,
       payload,
@@ -148,7 +148,7 @@ export class SecureHttpTransport {
   }
 
   async registerPeer(registration: unknown): Promise<TransportMessage> {
-    return this.send('peer/register', registration);
+    return this.send("peer/register", registration);
   }
 
   async getPeers(): Promise<TransportMessage> {
@@ -158,7 +158,7 @@ export class SecureHttpTransport {
 
     const secureHeaders = await this.getSecureHeaders();
 
-    const response = await this.client.get('peers', {
+    const response = await this.client.get("peers", {
       headers: secureHeaders,
     });
 
@@ -167,7 +167,7 @@ export class SecureHttpTransport {
 
   async healthCheck(): Promise<boolean> {
     try {
-      const response = await this.client.get('health', {
+      const response = await this.client.get("health", {
         headers: await this.getSecureHeaders(),
       });
       return response.statusCode === 200;
@@ -189,7 +189,7 @@ export async function sendToHostSecure(
   host: Host,
   path: string,
   payload: unknown,
-  options: SecureHttpTransportOptions = {}
+  options: SecureHttpTransportOptions = {},
 ): Promise<TransportMessage> {
   const transport = new SecureHttpTransport(host, options);
   await transport.initialize();
@@ -200,7 +200,7 @@ export async function broadcastToHostsSecure(
   hosts: Host[],
   path: string,
   payload: unknown,
-  options: SecureHttpTransportOptions = {}
+  options: SecureHttpTransportOptions = {},
 ): Promise<Map<string, TransportMessage | Error>> {
   const results = new Map<string, TransportMessage | Error>();
 
@@ -212,25 +212,30 @@ export async function broadcastToHostsSecure(
       } catch (err) {
         results.set(host.id, err as Error);
       }
-    })
+    }),
   );
 
   return results;
 }
 
-export function verifySecureMessage(
-  message: SecureTransportMessage
-): { valid: boolean; error?: string } {
-  if (!message.signature || !message.senderPublicKey || !message.senderFingerprint) {
-    return { valid: false, error: 'Missing signature fields' };
+export function verifySecureMessage(message: SecureTransportMessage): {
+  valid: boolean;
+  error?: string;
+} {
+  if (
+    !message.signature ||
+    !message.senderPublicKey ||
+    !message.senderFingerprint
+  ) {
+    return { valid: false, error: "Missing signature fields" };
   }
 
   const computedFingerprint = PeerIdentity.computeFingerprint(
-    Buffer.from(message.senderPublicKey, 'hex')
+    Buffer.from(message.senderPublicKey, "hex"),
   );
 
   if (computedFingerprint !== message.senderFingerprint) {
-    return { valid: false, error: 'Fingerprint mismatch' };
+    return { valid: false, error: "Fingerprint mismatch" };
   }
 
   return { valid: true };

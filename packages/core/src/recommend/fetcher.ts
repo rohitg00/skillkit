@@ -1,24 +1,42 @@
-import { execSync } from 'node:child_process';
-import { existsSync, rmSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import { join } from 'node:path';
-import { tmpdir, homedir } from 'node:os';
-import { randomUUID } from 'node:crypto';
-import type { SkillIndex, SkillSummary, IndexSource } from './types.js';
-import { discoverSkills, extractFrontmatter } from '../skills.js';
+import { execFileSync } from "node:child_process";
+import {
+  existsSync,
+  rmSync,
+  readFileSync,
+  writeFileSync,
+  mkdirSync,
+} from "node:fs";
+import { join } from "node:path";
+import { tmpdir, homedir } from "node:os";
+import { randomUUID } from "node:crypto";
+import type { SkillIndex, SkillSummary, IndexSource } from "./types.js";
+import { discoverSkills, extractFrontmatter } from "../skills.js";
 
 /**
  * Known skill repositories to index
  */
 export const KNOWN_SKILL_REPOS = [
-  { owner: 'anthropics', repo: 'courses', description: 'Anthropic official courses and skills' },
-  { owner: 'vercel-labs', repo: 'ai-sdk-preview-internal-knowledge-base', description: 'Vercel AI SDK skills' },
-  { owner: 'composioHQ', repo: 'awesome-claude-skills', description: 'Curated Claude Code skills' },
+  {
+    owner: "anthropics",
+    repo: "courses",
+    description: "Anthropic official courses and skills",
+  },
+  {
+    owner: "vercel-labs",
+    repo: "ai-sdk-preview-internal-knowledge-base",
+    description: "Vercel AI SDK skills",
+  },
+  {
+    owner: "composioHQ",
+    repo: "awesome-claude-skills",
+    description: "Curated Claude Code skills",
+  },
 ] as const;
 
 /**
  * Index file path
  */
-export const INDEX_PATH = join(homedir(), '.skillkit', 'index.json');
+export const INDEX_PATH = join(homedir(), ".skillkit", "index.json");
 export const INDEX_CACHE_HOURS = 24;
 
 /**
@@ -26,17 +44,17 @@ export const INDEX_CACHE_HOURS = 24;
  */
 export async function fetchSkillsFromRepo(
   owner: string,
-  repo: string
+  repo: string,
 ): Promise<{ skills: SkillSummary[]; error?: string }> {
   const cloneUrl = `https://github.com/${owner}/${repo}.git`;
   const tempDir = join(tmpdir(), `skillkit-fetch-${randomUUID()}`);
 
   try {
     // Shallow clone for speed
-    execSync(`git clone --depth 1 ${cloneUrl} ${tempDir}`, {
-      stdio: ['pipe', 'pipe', 'pipe'],
-      encoding: 'utf-8',
-      timeout: 60000, // 60 second timeout
+    execFileSync("git", ["clone", "--depth", "1", cloneUrl, tempDir], {
+      stdio: ["pipe", "pipe", "pipe"],
+      encoding: "utf-8",
+      timeout: 60000,
     });
 
     // Discover skills in the cloned repo
@@ -44,27 +62,36 @@ export async function fetchSkillsFromRepo(
     const skills: SkillSummary[] = [];
 
     for (const skill of discoveredSkills) {
-      const skillMdPath = join(skill.path, 'SKILL.md');
+      const skillMdPath = join(skill.path, "SKILL.md");
       if (!existsSync(skillMdPath)) continue;
 
       try {
-        const content = readFileSync(skillMdPath, 'utf-8');
+        const content = readFileSync(skillMdPath, "utf-8");
         const frontmatter = extractFrontmatter(content);
 
         const summary: SkillSummary = {
           name: skill.name,
-          description: skill.description || frontmatter?.description as string || 'No description',
+          description:
+            skill.description ||
+            (frontmatter?.description as string) ||
+            "No description",
           source: `${owner}/${repo}`,
           tags: (frontmatter?.tags as string[]) || [],
           compatibility: {
-            frameworks: (frontmatter?.compatibility as Record<string, unknown>)?.frameworks as string[] || [],
-            languages: (frontmatter?.compatibility as Record<string, unknown>)?.languages as string[] || [],
-            libraries: (frontmatter?.compatibility as Record<string, unknown>)?.libraries as string[] || [],
+            frameworks:
+              ((frontmatter?.compatibility as Record<string, unknown>)
+                ?.frameworks as string[]) || [],
+            languages:
+              ((frontmatter?.compatibility as Record<string, unknown>)
+                ?.languages as string[]) || [],
+            libraries:
+              ((frontmatter?.compatibility as Record<string, unknown>)
+                ?.libraries as string[]) || [],
           },
           popularity: 0,
           quality: 50,
           lastUpdated: new Date().toISOString(),
-          verified: owner === 'anthropics' || owner === 'vercel-labs',
+          verified: owner === "anthropics" || owner === "vercel-labs",
         };
 
         skills.push(summary);
@@ -76,7 +103,10 @@ export async function fetchSkillsFromRepo(
     return { skills };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { skills: [], error: `Failed to fetch ${owner}/${repo}: ${message}` };
+    return {
+      skills: [],
+      error: `Failed to fetch ${owner}/${repo}: ${message}`,
+    };
   } finally {
     // Clean up temp directory
     if (existsSync(tempDir)) {
@@ -94,7 +124,7 @@ export async function fetchSkillsFromRepo(
  */
 export async function buildSkillIndex(
   repos: typeof KNOWN_SKILL_REPOS = KNOWN_SKILL_REPOS,
-  onProgress?: (message: string) => void
+  onProgress?: (message: string) => void,
 ): Promise<{ index: SkillIndex; errors: string[] }> {
   const allSkills: SkillSummary[] = [];
   const sources: IndexSource[] = [];
@@ -125,11 +155,11 @@ export async function buildSkillIndex(
 
   // Add fallback sample skills if no repos could be fetched
   if (allSkills.length === 0) {
-    onProgress?.('No skills fetched, using sample index...');
+    onProgress?.("No skills fetched, using sample index...");
     allSkills.push(...getSampleSkills());
     sources.push({
-      name: 'built-in',
-      url: 'https://github.com/rohitg00/skillkit',
+      name: "built-in",
+      url: "https://github.com/rohitg00/skillkit",
       lastFetched: new Date().toISOString(),
       skillCount: allSkills.length,
     });
@@ -149,7 +179,7 @@ export async function buildSkillIndex(
  * Save skill index to cache
  */
 export function saveIndex(index: SkillIndex): void {
-  const indexDir = join(homedir(), '.skillkit');
+  const indexDir = join(homedir(), ".skillkit");
   if (!existsSync(indexDir)) {
     mkdirSync(indexDir, { recursive: true });
   }
@@ -165,7 +195,7 @@ export function loadIndex(): SkillIndex | null {
   }
 
   try {
-    const content = readFileSync(INDEX_PATH, 'utf-8');
+    const content = readFileSync(INDEX_PATH, "utf-8");
     return JSON.parse(content) as SkillIndex;
   } catch {
     return null;
@@ -177,17 +207,18 @@ export function loadIndex(): SkillIndex | null {
  */
 export function isIndexStale(index: SkillIndex): boolean {
   const lastUpdated = new Date(index.lastUpdated);
-  const hoursSinceUpdate = (Date.now() - lastUpdated.getTime()) / (1000 * 60 * 60);
+  const hoursSinceUpdate =
+    (Date.now() - lastUpdated.getTime()) / (1000 * 60 * 60);
   return hoursSinceUpdate > INDEX_CACHE_HOURS;
 }
 
 /**
  * Get index status
  */
-export function getIndexStatus(): 'missing' | 'stale' | 'fresh' {
+export function getIndexStatus(): "missing" | "stale" | "fresh" {
   const index = loadIndex();
-  if (!index) return 'missing';
-  return isIndexStale(index) ? 'stale' : 'fresh';
+  if (!index) return "missing";
+  return isIndexStale(index) ? "stale" : "fresh";
 }
 
 /**
@@ -196,13 +227,14 @@ export function getIndexStatus(): 'missing' | 'stale' | 'fresh' {
 function getSampleSkills(): SkillSummary[] {
   return [
     {
-      name: 'react-best-practices',
-      description: 'Modern React patterns including Server Components, hooks best practices, and performance optimization',
-      source: 'built-in',
-      tags: ['react', 'frontend', 'typescript', 'nextjs', 'performance'],
+      name: "react-best-practices",
+      description:
+        "Modern React patterns including Server Components, hooks best practices, and performance optimization",
+      source: "built-in",
+      tags: ["react", "frontend", "typescript", "nextjs", "performance"],
       compatibility: {
-        frameworks: ['react', 'nextjs'],
-        languages: ['typescript', 'javascript'],
+        frameworks: ["react", "nextjs"],
+        languages: ["typescript", "javascript"],
         libraries: [],
       },
       popularity: 1500,
@@ -211,14 +243,15 @@ function getSampleSkills(): SkillSummary[] {
       verified: true,
     },
     {
-      name: 'tailwind-patterns',
-      description: 'Tailwind CSS utility patterns, responsive design, and component styling best practices',
-      source: 'built-in',
-      tags: ['tailwind', 'css', 'styling', 'frontend', 'responsive'],
+      name: "tailwind-patterns",
+      description:
+        "Tailwind CSS utility patterns, responsive design, and component styling best practices",
+      source: "built-in",
+      tags: ["tailwind", "css", "styling", "frontend", "responsive"],
       compatibility: {
         frameworks: [],
-        languages: ['typescript', 'javascript'],
-        libraries: ['tailwindcss'],
+        languages: ["typescript", "javascript"],
+        libraries: ["tailwindcss"],
       },
       popularity: 1200,
       quality: 92,
@@ -226,13 +259,14 @@ function getSampleSkills(): SkillSummary[] {
       verified: true,
     },
     {
-      name: 'typescript-strict-patterns',
-      description: 'TypeScript strict mode patterns, type safety, and advanced type utilities',
-      source: 'built-in',
-      tags: ['typescript', 'types', 'safety', 'patterns'],
+      name: "typescript-strict-patterns",
+      description:
+        "TypeScript strict mode patterns, type safety, and advanced type utilities",
+      source: "built-in",
+      tags: ["typescript", "types", "safety", "patterns"],
       compatibility: {
         frameworks: [],
-        languages: ['typescript'],
+        languages: ["typescript"],
         libraries: [],
       },
       popularity: 900,
@@ -241,13 +275,14 @@ function getSampleSkills(): SkillSummary[] {
       verified: true,
     },
     {
-      name: 'security-best-practices',
-      description: 'Security patterns for web applications including XSS prevention, CSRF, and secure headers',
-      source: 'built-in',
-      tags: ['security', 'xss', 'csrf', 'headers', 'owasp'],
+      name: "security-best-practices",
+      description:
+        "Security patterns for web applications including XSS prevention, CSRF, and secure headers",
+      source: "built-in",
+      tags: ["security", "xss", "csrf", "headers", "owasp"],
       compatibility: {
         frameworks: [],
-        languages: ['typescript', 'javascript', 'python'],
+        languages: ["typescript", "javascript", "python"],
         libraries: [],
       },
       popularity: 600,
@@ -256,14 +291,15 @@ function getSampleSkills(): SkillSummary[] {
       verified: true,
     },
     {
-      name: 'testing-patterns',
-      description: 'Testing patterns with Vitest/Jest including mocking, assertions, and test organization',
-      source: 'built-in',
-      tags: ['vitest', 'jest', 'testing', 'typescript', 'mocking', 'tdd'],
+      name: "testing-patterns",
+      description:
+        "Testing patterns with Vitest/Jest including mocking, assertions, and test organization",
+      source: "built-in",
+      tags: ["vitest", "jest", "testing", "typescript", "mocking", "tdd"],
       compatibility: {
         frameworks: [],
-        languages: ['typescript', 'javascript'],
-        libraries: ['vitest', 'jest'],
+        languages: ["typescript", "javascript"],
+        libraries: ["vitest", "jest"],
       },
       popularity: 700,
       quality: 86,

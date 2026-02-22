@@ -1,19 +1,29 @@
-import WebSocket, { WebSocketServer } from 'ws';
-import { createServer as createHttpsServer, type Server as HttpsServer } from 'node:https';
-import { randomUUID } from 'node:crypto';
+import WebSocket, { WebSocketServer } from "ws";
+import {
+  createServer as createHttpsServer,
+  type Server as HttpsServer,
+} from "node:https";
+import { randomUUID } from "node:crypto";
 import type {
   TransportMessage,
   SecureTransportMessage,
   Host,
-} from '../types.js';
-import { DEFAULT_PORT } from '../types.js';
-import { PeerIdentity } from '../crypto/identity.js';
-import { MessageEncryption } from '../crypto/encryption.js';
-import { AuthManager, type AuthChallengeRequest, type AuthChallengeResponse } from '../security/auth.js';
-import { TLSManager, type CertificateInfo } from '../security/tls.js';
-import { type MeshSecurityConfig, DEFAULT_SECURITY_CONFIG } from '../security/config.js';
-import { SecureKeystore } from '../crypto/keystore.js';
-import { hexToBytes } from '@noble/hashes/utils';
+} from "../types.js";
+import { DEFAULT_PORT } from "../types.js";
+import { PeerIdentity } from "../crypto/identity.js";
+import { MessageEncryption } from "../crypto/encryption.js";
+import {
+  AuthManager,
+  type AuthChallengeRequest,
+  type AuthChallengeResponse,
+} from "../security/auth.js";
+import { TLSManager, type CertificateInfo } from "../security/tls.js";
+import {
+  type MeshSecurityConfig,
+  DEFAULT_SECURITY_CONFIG,
+} from "../security/config.js";
+import { SecureKeystore } from "../crypto/keystore.js";
+import { hexToBytes } from "@noble/hashes/utils";
 
 export interface SecureWebSocketOptions {
   timeout?: number;
@@ -28,7 +38,7 @@ export interface SecureWebSocketOptions {
 export type SecureMessageHandler = (
   message: TransportMessage,
   socket: WebSocket,
-  senderFingerprint?: string
+  senderFingerprint?: string,
 ) => void;
 
 interface AuthenticatedClient {
@@ -41,7 +51,9 @@ interface AuthenticatedClient {
 export class SecureWebSocketTransport {
   private socket: WebSocket | null = null;
   private host: Host;
-  private options: Required<Omit<SecureWebSocketOptions, 'identity' | 'keystore'>>;
+  private options: Required<
+    Omit<SecureWebSocketOptions, "identity" | "keystore">
+  >;
   private identity: PeerIdentity | null = null;
   private keystore: SecureKeystore | null = null;
   private authManager: AuthManager | null = null;
@@ -77,7 +89,7 @@ export class SecureWebSocketTransport {
 
   private getUrl(): string {
     const protocol =
-      this.options.security.transport.tls !== 'none' ? 'wss' : 'ws';
+      this.options.security.transport.tls !== "none" ? "wss" : "ws";
     return `${protocol}://${this.host.address}:${this.host.port}/ws`;
   }
 
@@ -90,17 +102,18 @@ export class SecureWebSocketTransport {
       const url = this.getUrl();
       const wsOptions: WebSocket.ClientOptions = {
         handshakeTimeout: this.options.timeout,
-        rejectUnauthorized: false,
+        rejectUnauthorized:
+          this.options.security.transport.tls === "self-signed" ? false : true,
       };
 
       this.socket = new WebSocket(url, wsOptions);
 
       const timeout = setTimeout(() => {
         this.socket?.close();
-        reject(new Error('Connection timeout'));
+        reject(new Error("Connection timeout"));
       }, this.options.timeout);
 
-      this.socket.on('open', async () => {
+      this.socket.on("open", async () => {
         clearTimeout(timeout);
         this.connected = true;
         this.reconnectAttempts = 0;
@@ -121,11 +134,11 @@ export class SecureWebSocketTransport {
         resolve();
       });
 
-      this.socket.on('message', async (data) => {
+      this.socket.on("message", async (data) => {
         try {
           const raw = JSON.parse(data.toString());
 
-          if (raw.type === 'auth:challenge') {
+          if (raw.type === "auth:challenge") {
             return;
           }
 
@@ -133,10 +146,12 @@ export class SecureWebSocketTransport {
           let senderFingerprint: string | undefined;
 
           if (this.encryption && raw.ciphertext) {
-            const decrypted = this.encryption.decryptToObject<TransportMessage>({
-              nonce: raw.nonce,
-              ciphertext: raw.ciphertext,
-            });
+            const decrypted = this.encryption.decryptToObject<TransportMessage>(
+              {
+                nonce: raw.nonce,
+                ciphertext: raw.ciphertext,
+              },
+            );
             message = decrypted;
             senderFingerprint = raw.senderFingerprint;
           } else if (raw.signature) {
@@ -155,13 +170,12 @@ export class SecureWebSocketTransport {
           }
 
           this.messageHandlers.forEach((handler) =>
-            handler(message, this.socket!, senderFingerprint)
+            handler(message, this.socket!, senderFingerprint),
           );
-        } catch {
-        }
+        } catch {}
       });
 
-      this.socket.on('close', () => {
+      this.socket.on("close", () => {
         this.connected = false;
         this.authenticated = false;
         if (this.options.reconnect) {
@@ -169,7 +183,7 @@ export class SecureWebSocketTransport {
         }
       });
 
-      this.socket.on('error', (err) => {
+      this.socket.on("error", (err) => {
         clearTimeout(timeout);
         if (!this.connected) {
           reject(err);
@@ -183,43 +197,45 @@ export class SecureWebSocketTransport {
       const handleChallenge = async (data: WebSocket.Data) => {
         try {
           const msg = JSON.parse(data.toString());
-          if (msg.type === 'auth:challenge') {
+          if (msg.type === "auth:challenge") {
             const challenge: AuthChallengeRequest = {
               challenge: msg.challenge,
               timestamp: msg.timestamp,
             };
 
-            const response = await this.authManager!.respondToChallenge(challenge);
+            const response =
+              await this.authManager!.respondToChallenge(challenge);
             this.socket!.send(
               JSON.stringify({
-                type: 'auth:response',
+                type: "auth:response",
                 ...response,
-              })
+              }),
             );
-          } else if (msg.type === 'auth:success') {
-            this.socket!.off('message', handleChallenge);
+          } else if (msg.type === "auth:success") {
+            this.socket!.off("message", handleChallenge);
 
             if (msg.serverPublicKey) {
               const serverPubKey = hexToBytes(msg.serverPublicKey);
-              const sharedSecret = this.identity!.deriveSharedSecret(serverPubKey);
+              const sharedSecret =
+                this.identity!.deriveSharedSecret(serverPubKey);
               this.encryption = new MessageEncryption(sharedSecret);
             }
 
             resolve();
-          } else if (msg.type === 'auth:failed') {
-            this.socket!.off('message', handleChallenge);
-            reject(new Error(msg.error || 'Authentication failed'));
+          } else if (msg.type === "auth:failed") {
+            this.socket!.off("message", handleChallenge);
+            reject(new Error(msg.error || "Authentication failed"));
           }
         } catch (err) {
           reject(err);
         }
       };
 
-      this.socket!.on('message', handleChallenge);
+      this.socket!.on("message", handleChallenge);
 
       setTimeout(() => {
-        this.socket!.off('message', handleChallenge);
-        reject(new Error('Authentication timeout'));
+        this.socket!.off("message", handleChallenge);
+        reject(new Error("Authentication timeout"));
       }, this.options.timeout);
     });
   }
@@ -241,14 +257,14 @@ export class SecureWebSocketTransport {
   }
 
   async send(
-    message: Omit<TransportMessage, 'id' | 'timestamp'>
+    message: Omit<TransportMessage, "id" | "timestamp">,
   ): Promise<void> {
     if (!this.socket || !this.connected) {
-      throw new Error('Not connected');
+      throw new Error("Not connected");
     }
 
     if (!this.authenticated) {
-      throw new Error('Not authenticated');
+      throw new Error("Not authenticated");
     }
 
     const fullMessage: TransportMessage = {
@@ -261,7 +277,7 @@ export class SecureWebSocketTransport {
 
     if (
       this.encryption &&
-      this.options.security.transport.encryption === 'required'
+      this.options.security.transport.encryption === "required"
     ) {
       const encrypted = this.encryption.encryptObject(fullMessage);
       dataToSend = JSON.stringify({
@@ -348,7 +364,7 @@ export class SecureWebSocketServer {
       identity?: PeerIdentity;
       keystore?: SecureKeystore;
       hostId?: string;
-    } = {}
+    } = {},
   ) {
     this.port = port;
     this.security = options.security ?? DEFAULT_SECURITY_CONFIG;
@@ -366,11 +382,11 @@ export class SecureWebSocketServer {
     }
     this.authManager = new AuthManager(this.identity);
 
-    if (this.security.transport.tls !== 'none') {
+    if (this.security.transport.tls !== "none") {
       this.tlsManager = new TLSManager();
       this.certInfo = await this.tlsManager.loadOrCreateCertificate(
         this.hostId,
-        'localhost'
+        "localhost",
       );
     }
   }
@@ -381,7 +397,7 @@ export class SecureWebSocketServer {
     await this.initialize();
 
     return new Promise((resolve, reject) => {
-      if (this.security.transport.tls !== 'none' && this.certInfo) {
+      if (this.security.transport.tls !== "none" && this.certInfo) {
         this.httpsServer = createHttpsServer({
           cert: this.certInfo.cert,
           key: this.certInfo.key,
@@ -389,7 +405,7 @@ export class SecureWebSocketServer {
 
         this.wss = new WebSocketServer({
           server: this.httpsServer,
-          path: '/ws',
+          path: "/ws",
         });
 
         this.httpsServer.listen(this.port, () => {
@@ -397,19 +413,19 @@ export class SecureWebSocketServer {
           resolve();
         });
 
-        this.httpsServer.on('error', reject);
+        this.httpsServer.on("error", reject);
       } else {
-        this.wss = new WebSocketServer({ port: this.port, path: '/ws' });
+        this.wss = new WebSocketServer({ port: this.port, path: "/ws" });
 
-        this.wss.on('listening', () => {
+        this.wss.on("listening", () => {
           this.running = true;
           resolve();
         });
 
-        this.wss.on('error', reject);
+        this.wss.on("error", reject);
       }
 
-      this.wss.on('connection', (socket) => {
+      this.wss.on("connection", (socket) => {
         this.handleConnection(socket);
       });
     });
@@ -427,16 +443,16 @@ export class SecureWebSocketServer {
     } else {
       this.clients.set(socket, {
         socket,
-        fingerprint: 'anonymous',
-        publicKey: '',
+        fingerprint: "anonymous",
+        publicKey: "",
       });
     }
 
-    socket.on('message', async (data) => {
+    socket.on("message", async (data) => {
       try {
         const raw = JSON.parse(data.toString());
 
-        if (raw.type === 'auth:response') {
+        if (raw.type === "auth:response") {
           return;
         }
 
@@ -447,10 +463,12 @@ export class SecureWebSocketServer {
         let senderFingerprint: string | undefined = client.fingerprint;
 
         if (client.encryption && raw.ciphertext) {
-          const decrypted = client.encryption.decryptToObject<TransportMessage>({
-            nonce: raw.nonce,
-            ciphertext: raw.ciphertext,
-          });
+          const decrypted = client.encryption.decryptToObject<TransportMessage>(
+            {
+              nonce: raw.nonce,
+              ciphertext: raw.ciphertext,
+            },
+          );
           message = decrypted;
         } else if (raw.signature) {
           const secure = raw as SecureTransportMessage;
@@ -468,41 +486,40 @@ export class SecureWebSocketServer {
         }
 
         this.messageHandlers.forEach((handler) =>
-          handler(message, socket, senderFingerprint)
+          handler(message, socket, senderFingerprint),
         );
-      } catch {
-      }
+      } catch {}
     });
 
-    socket.on('close', () => {
+    socket.on("close", () => {
       this.clients.delete(socket);
     });
   }
 
   private async performServerHandshake(
-    socket: WebSocket
+    socket: WebSocket,
   ): Promise<AuthenticatedClient> {
     return new Promise((resolve, reject) => {
       const challenge = this.authManager!.createChallenge();
 
       socket.send(
         JSON.stringify({
-          type: 'auth:challenge',
+          type: "auth:challenge",
           ...challenge,
-        })
+        }),
       );
 
       const timeout = setTimeout(() => {
-        socket.off('message', handleResponse);
-        reject(new Error('Handshake timeout'));
+        socket.off("message", handleResponse);
+        reject(new Error("Handshake timeout"));
       }, 10000);
 
       const handleResponse = async (data: WebSocket.Data) => {
         try {
           const msg = JSON.parse(data.toString());
-          if (msg.type === 'auth:response') {
+          if (msg.type === "auth:response") {
             clearTimeout(timeout);
-            socket.off('message', handleResponse);
+            socket.off("message", handleResponse);
 
             const response: AuthChallengeResponse = {
               challenge: msg.challenge,
@@ -518,41 +535,44 @@ export class SecureWebSocketServer {
             if (!result.authenticated) {
               socket.send(
                 JSON.stringify({
-                  type: 'auth:failed',
+                  type: "auth:failed",
                   error: result.error,
-                })
+                }),
               );
               reject(new Error(result.error));
               return;
             }
 
             if (this.keystore) {
-              const isRevoked = await this.keystore.isRevoked(result.fingerprint!);
+              const isRevoked = await this.keystore.isRevoked(
+                result.fingerprint!,
+              );
               if (isRevoked) {
                 socket.send(
                   JSON.stringify({
-                    type: 'auth:failed',
-                    error: 'Peer is revoked',
-                  })
+                    type: "auth:failed",
+                    error: "Peer is revoked",
+                  }),
                 );
-                reject(new Error('Peer is revoked'));
+                reject(new Error("Peer is revoked"));
                 return;
               }
             }
 
             let encryption: MessageEncryption | undefined;
-            if (this.security.transport.encryption === 'required') {
+            if (this.security.transport.encryption === "required") {
               const clientPubKey = hexToBytes(response.publicKey);
-              const sharedSecret = this.identity!.deriveSharedSecret(clientPubKey);
+              const sharedSecret =
+                this.identity!.deriveSharedSecret(clientPubKey);
               encryption = new MessageEncryption(sharedSecret);
             }
 
             socket.send(
               JSON.stringify({
-                type: 'auth:success',
+                type: "auth:success",
                 serverFingerprint: this.identity!.fingerprint,
                 serverPublicKey: this.identity!.publicKeyHex,
-              })
+              }),
             );
 
             resolve({
@@ -568,7 +588,7 @@ export class SecureWebSocketServer {
         }
       };
 
-      socket.on('message', handleResponse);
+      socket.on("message", handleResponse);
     });
   }
 
@@ -588,7 +608,7 @@ export class SecureWebSocketServer {
   }
 
   async broadcast(
-    message: Omit<TransportMessage, 'id' | 'timestamp'>
+    message: Omit<TransportMessage, "id" | "timestamp">,
   ): Promise<void> {
     const fullMessage: TransportMessage = {
       ...message,
@@ -630,7 +650,7 @@ export class SecureWebSocketServer {
 
   async sendTo(
     socket: WebSocket,
-    message: Omit<TransportMessage, 'id' | 'timestamp'>
+    message: Omit<TransportMessage, "id" | "timestamp">,
   ): Promise<void> {
     if (socket.readyState !== WebSocket.OPEN) return;
 

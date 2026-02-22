@@ -1,15 +1,15 @@
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { MemoryCache } from '@skillkit/core';
-import { rateLimiter } from './middleware/rate-limit.js';
-import { healthRoutes } from './routes/health.js';
-import { searchRoutes } from './routes/search.js';
-import { skillRoutes } from './routes/skills.js';
-import { trendingRoutes } from './routes/trending.js';
-import { categoryRoutes } from './routes/categories.js';
-import { docsRoutes } from './routes/docs.js';
-import { saveRoutes } from './routes/save.js';
-import type { ApiSkill, SearchResponse } from './types.js';
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { MemoryCache } from "@skillkit/core";
+import { rateLimiter } from "./middleware/rate-limit.js";
+import { healthRoutes } from "./routes/health.js";
+import { searchRoutes } from "./routes/search.js";
+import { skillRoutes } from "./routes/skills.js";
+import { trendingRoutes } from "./routes/trending.js";
+import { categoryRoutes } from "./routes/categories.js";
+import { docsRoutes } from "./routes/docs.js";
+import { saveRoutes } from "./routes/save.js";
+import type { ApiSkill, SearchResponse } from "./types.js";
 
 export interface ServerOptions {
   port?: number;
@@ -29,26 +29,36 @@ export function createApp(options: ServerOptions = {}) {
 
   const app = new Hono();
 
-  app.use('*', cors({ origin: options.corsOrigin || '*' }));
-  app.use('*', rateLimiter(options.rateLimitMax ?? 60));
+  app.use("*", cors({ origin: options.corsOrigin || "*" }));
+  app.use("*", async (c, next) => {
+    await next();
+    c.header("X-Content-Type-Options", "nosniff");
+    c.header("X-Frame-Options", "DENY");
+    c.header(
+      "Content-Security-Policy",
+      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'",
+    );
+    c.header("Referrer-Policy", "strict-origin-when-cross-origin");
+  });
+  app.use("*", rateLimiter(options.rateLimitMax ?? 60));
 
-  app.route('/', healthRoutes(skills.length, cache));
-  app.route('/', searchRoutes(skills, cache));
-  app.route('/', skillRoutes(skills));
-  app.route('/', trendingRoutes(skills));
-  app.route('/', categoryRoutes(skills));
-  app.route('/', docsRoutes());
-  app.route('/', saveRoutes());
+  app.route("/", healthRoutes(skills.length, cache));
+  app.route("/", searchRoutes(skills, cache));
+  app.route("/", skillRoutes(skills));
+  app.route("/", trendingRoutes(skills));
+  app.route("/", categoryRoutes(skills));
+  app.route("/", docsRoutes());
+  app.route("/", saveRoutes());
 
   return { app, cache };
 }
 
 export async function startServer(options: ServerOptions = {}) {
   const port = options.port ?? 3737;
-  const host = options.host ?? '0.0.0.0';
+  const host = options.host ?? "127.0.0.1";
   const { app, cache } = createApp(options);
 
-  const { serve } = await import('@hono/node-server');
+  const { serve } = await import("@hono/node-server");
 
   const server = serve({ fetch: app.fetch, port, hostname: host }, () => {
     console.log(`SkillKit API server running at http://${host}:${port}`);

@@ -26,6 +26,8 @@ npm-debug.log*
 .env
 .env.local
 .env.*.local
+**/.env.local
+**/.env.*.local
 
 # Package manager
 yarn.lock

@@ -4,8 +4,8 @@
  * Executes skills with task-based orchestration, verification, and state management.
  */
 
-import { execSync } from 'node:child_process';
-import { randomUUID } from 'node:crypto';
+import { execFileSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import type {
   ExecutableSkill,
   ExecutableTask,
@@ -15,20 +15,25 @@ import type {
   CheckpointHandler,
   CheckpointResponse,
   ExecutionTaskStatus,
-} from './types.js';
-import { SessionManager } from '../session/manager.js';
-import type { SessionTask } from '../session/types.js';
+} from "./types.js";
+import { SessionManager } from "../session/manager.js";
+import type { SessionTask } from "../session/types.js";
 
 /**
  * Progress event for execution
  */
 export interface ExecutionProgressEvent {
-  type: 'task_start' | 'task_complete' | 'checkpoint' | 'verification' | 'complete';
+  type:
+    | "task_start"
+    | "task_complete"
+    | "checkpoint"
+    | "verification"
+    | "complete";
   taskId?: string;
   taskName?: string;
   taskIndex?: number;
   totalTasks?: number;
-  status?: ExecutionTaskStatus | 'paused' | 'cancelled';
+  status?: ExecutionTaskStatus | "paused" | "cancelled";
   message?: string;
   error?: string;
 }
@@ -52,7 +57,7 @@ export class SkillExecutionEngine {
     options?: {
       checkpointHandler?: CheckpointHandler;
       onProgress?: ExecutionProgressCallback;
-    }
+    },
   ) {
     this.projectPath = projectPath;
     this.sessionManager = new SessionManager(projectPath);
@@ -65,7 +70,7 @@ export class SkillExecutionEngine {
    */
   async execute(
     skill: ExecutableSkill,
-    options: ExecutionOptions = {}
+    options: ExecutionOptions = {},
   ): Promise<SkillExecutionResult> {
     const startTime = new Date();
     const tasks = skill.tasks || [];
@@ -78,23 +83,26 @@ export class SkillExecutionEngine {
     // Check if there's an existing paused execution for this skill
     const existingState = this.sessionManager.get();
     if (existingState?.currentExecution?.skillName === skill.name) {
-      if (existingState.currentExecution.status === 'paused') {
+      if (existingState.currentExecution.status === "paused") {
         // Resume from paused state
         return this.resumeExecution(skill, options);
       }
     }
 
     // Start new execution
-    const sessionTasks: Omit<SessionTask, 'status'>[] = tasks.map((task, index) => ({
-      id: task.id || `task-${index}`,
-      name: task.name,
-      type: task.type === 'auto' ? 'auto' : task.type,
-    }));
+    const sessionTasks: Omit<SessionTask, "status">[] = tasks.map(
+      (task, index) => ({
+        id: task.id || `task-${index}`,
+        name: task.name,
+        type: task.type === "auto" ? "auto" : task.type,
+      }),
+    );
 
     this.sessionManager.startExecution(skill.name, skill.source, sessionTasks);
 
     const taskResults: TaskExecutionResult[] = [];
-    let overallStatus: 'completed' | 'failed' | 'cancelled' | 'paused' = 'completed';
+    let overallStatus: "completed" | "failed" | "cancelled" | "paused" =
+      "completed";
     let overallError: string | undefined;
 
     // Execute tasks
@@ -102,7 +110,7 @@ export class SkillExecutionEngine {
       const task = tasks[i];
 
       this.onProgress?.({
-        type: 'task_start',
+        type: "task_start",
         taskId: task.id,
         taskName: task.name,
         taskIndex: i,
@@ -110,7 +118,7 @@ export class SkillExecutionEngine {
       });
 
       // Handle checkpoints
-      if (task.type !== 'auto') {
+      if (task.type !== "auto") {
         const checkpointResult = await this.handleCheckpoint(task, {
           skillName: skill.name,
           taskIndex: i,
@@ -118,17 +126,20 @@ export class SkillExecutionEngine {
         });
 
         if (!checkpointResult.continue) {
-          overallStatus = 'paused';
+          overallStatus = "paused";
           this.sessionManager.pause();
           break;
         }
 
         // For decision checkpoints, record the decision
-        if (task.type === 'checkpoint:decision' && checkpointResult.selectedOption) {
+        if (
+          task.type === "checkpoint:decision" &&
+          checkpointResult.selectedOption
+        ) {
           this.sessionManager.recordDecision(
             `${skill.name}:${task.id}`,
             checkpointResult.selectedOption,
-            skill.name
+            skill.name,
           );
         }
       }
@@ -138,7 +149,7 @@ export class SkillExecutionEngine {
       taskResults.push(taskResult);
 
       this.sessionManager.updateTask(task.id || `task-${i}`, {
-        status: taskResult.status === 'completed' ? 'completed' : 'failed',
+        status: taskResult.status === "completed" ? "completed" : "failed",
         output: taskResult.output,
         error: taskResult.error,
         filesModified: taskResult.filesModified,
@@ -146,7 +157,7 @@ export class SkillExecutionEngine {
       });
 
       this.onProgress?.({
-        type: 'task_complete',
+        type: "task_complete",
         taskId: task.id,
         taskName: task.name,
         taskIndex: i,
@@ -156,9 +167,9 @@ export class SkillExecutionEngine {
       });
 
       // Handle task failure
-      if (taskResult.status === 'failed') {
+      if (taskResult.status === "failed") {
         if (!options.continueOnError) {
-          overallStatus = 'failed';
+          overallStatus = "failed";
           overallError = taskResult.error;
           break;
         }
@@ -168,8 +179,8 @@ export class SkillExecutionEngine {
       if (options.verify && task.verify) {
         const verificationPassed = await this.runVerification(task, taskResult);
         if (!verificationPassed && !options.continueOnError) {
-          overallStatus = 'failed';
-          overallError = 'Verification failed';
+          overallStatus = "failed";
+          overallError = "Verification failed";
           break;
         }
       }
@@ -178,7 +189,7 @@ export class SkillExecutionEngine {
     const endTime = new Date();
 
     // Complete the execution
-    if (overallStatus !== 'paused') {
+    if (overallStatus !== "paused") {
       this.sessionManager.completeExecution(overallStatus, overallError);
     }
 
@@ -190,20 +201,27 @@ export class SkillExecutionEngine {
       completedAt: endTime.toISOString(),
       durationMs: endTime.getTime() - startTime.getTime(),
       tasks: taskResults,
-      filesModified: Array.from(new Set(taskResults.flatMap((t) => t.filesModified || []))),
-      commits: taskResults.map((t) => t.commitSha).filter((sha): sha is string => !!sha),
+      filesModified: Array.from(
+        new Set(taskResults.flatMap((t) => t.filesModified || [])),
+      ),
+      commits: taskResults
+        .map((t) => t.commitSha)
+        .filter((sha): sha is string => !!sha),
       error: overallError,
     };
 
-    const statusMessages: Record<'completed' | 'failed' | 'cancelled' | 'paused', string> = {
-      completed: 'Skill execution completed',
-      paused: 'Skill execution paused',
-      failed: overallError || 'Skill execution failed',
-      cancelled: 'Skill execution cancelled',
+    const statusMessages: Record<
+      "completed" | "failed" | "cancelled" | "paused",
+      string
+    > = {
+      completed: "Skill execution completed",
+      paused: "Skill execution paused",
+      failed: overallError || "Skill execution failed",
+      cancelled: "Skill execution cancelled",
     };
 
     this.onProgress?.({
-      type: 'complete',
+      type: "complete",
       status: overallStatus,
       message: statusMessages[overallStatus],
     });
@@ -216,11 +234,11 @@ export class SkillExecutionEngine {
    */
   private async resumeExecution(
     skill: ExecutableSkill,
-    options: ExecutionOptions
+    options: ExecutionOptions,
   ): Promise<SkillExecutionResult> {
     const state = this.sessionManager.get();
     if (!state?.currentExecution) {
-      throw new Error('No execution to resume');
+      throw new Error("No execution to resume");
     }
 
     this.sessionManager.resume();
@@ -228,7 +246,8 @@ export class SkillExecutionEngine {
     const tasks = skill.tasks || [];
 
     const taskResults: TaskExecutionResult[] = [];
-    let overallStatus: 'completed' | 'failed' | 'cancelled' | 'paused' = 'completed';
+    let overallStatus: "completed" | "failed" | "cancelled" | "paused" =
+      "completed";
     let overallError: string | undefined;
 
     // Find where to resume from
@@ -238,7 +257,7 @@ export class SkillExecutionEngine {
       const task = tasks[i];
 
       this.onProgress?.({
-        type: 'task_start',
+        type: "task_start",
         taskId: task.id,
         taskName: task.name,
         taskIndex: i,
@@ -246,7 +265,7 @@ export class SkillExecutionEngine {
       });
 
       // Handle checkpoints (same as in execute)
-      if (task.type !== 'auto') {
+      if (task.type !== "auto") {
         const checkpointResult = await this.handleCheckpoint(task, {
           skillName: skill.name,
           taskIndex: i,
@@ -254,17 +273,20 @@ export class SkillExecutionEngine {
         });
 
         if (!checkpointResult.continue) {
-          overallStatus = 'paused';
+          overallStatus = "paused";
           this.sessionManager.pause();
           break;
         }
 
         // For decision checkpoints, record the decision
-        if (task.type === 'checkpoint:decision' && checkpointResult.selectedOption) {
+        if (
+          task.type === "checkpoint:decision" &&
+          checkpointResult.selectedOption
+        ) {
           this.sessionManager.recordDecision(
             `${skill.name}:${task.id}`,
             checkpointResult.selectedOption,
-            skill.name
+            skill.name,
           );
         }
       }
@@ -273,7 +295,7 @@ export class SkillExecutionEngine {
       taskResults.push(taskResult);
 
       this.sessionManager.updateTask(task.id || `task-${i}`, {
-        status: taskResult.status === 'completed' ? 'completed' : 'failed',
+        status: taskResult.status === "completed" ? "completed" : "failed",
         output: taskResult.output,
         error: taskResult.error,
         filesModified: taskResult.filesModified,
@@ -282,7 +304,7 @@ export class SkillExecutionEngine {
 
       // Emit task_complete progress event (matching execute behavior)
       this.onProgress?.({
-        type: 'task_complete',
+        type: "task_complete",
         taskId: task.id,
         taskName: task.name,
         taskIndex: i,
@@ -292,9 +314,9 @@ export class SkillExecutionEngine {
       });
 
       // Handle task failure
-      if (taskResult.status === 'failed') {
+      if (taskResult.status === "failed") {
         if (!options.continueOnError) {
-          overallStatus = 'failed';
+          overallStatus = "failed";
           overallError = taskResult.error;
           break;
         }
@@ -304,15 +326,15 @@ export class SkillExecutionEngine {
       if (options.verify && task.verify) {
         const verificationPassed = await this.runVerification(task, taskResult);
         if (!verificationPassed && !options.continueOnError) {
-          overallStatus = 'failed';
-          overallError = 'Verification failed';
+          overallStatus = "failed";
+          overallError = "Verification failed";
           break;
         }
       }
     }
 
     // Only complete execution if not paused
-    if (overallStatus !== 'paused') {
+    if (overallStatus !== "paused") {
       this.sessionManager.completeExecution(overallStatus, overallError);
     }
 
@@ -324,8 +346,12 @@ export class SkillExecutionEngine {
       completedAt: new Date().toISOString(),
       durationMs: Date.now() - new Date(execution.startedAt).getTime(),
       tasks: taskResults,
-      filesModified: Array.from(new Set(taskResults.flatMap((t) => t.filesModified || []))),
-      commits: taskResults.map((t) => t.commitSha).filter((sha): sha is string => !!sha),
+      filesModified: Array.from(
+        new Set(taskResults.flatMap((t) => t.filesModified || [])),
+      ),
+      commits: taskResults
+        .map((t) => t.commitSha)
+        .filter((sha): sha is string => !!sha),
       error: overallError,
     };
   }
@@ -336,7 +362,7 @@ export class SkillExecutionEngine {
   private async executeTask(
     task: ExecutableTask,
     _skill: ExecutableSkill,
-    _options: ExecutionOptions
+    _options: ExecutionOptions,
   ): Promise<TaskExecutionResult> {
     const startTime = new Date();
     const taskId = task.id || randomUUID();
@@ -354,7 +380,7 @@ export class SkillExecutionEngine {
       return {
         taskId,
         taskName: task.name,
-        status: 'completed',
+        status: "completed",
         startedAt: startTime.toISOString(),
         completedAt: endTime.toISOString(),
         durationMs: endTime.getTime() - startTime.getTime(),
@@ -367,7 +393,7 @@ export class SkillExecutionEngine {
       return {
         taskId,
         taskName: task.name,
-        status: 'failed',
+        status: "failed",
         startedAt: startTime.toISOString(),
         completedAt: endTime.toISOString(),
         durationMs: endTime.getTime() - startTime.getTime(),
@@ -381,10 +407,10 @@ export class SkillExecutionEngine {
    */
   private async handleCheckpoint(
     task: ExecutableTask,
-    context: { skillName: string; taskIndex: number; totalTasks: number }
+    context: { skillName: string; taskIndex: number; totalTasks: number },
   ): Promise<CheckpointResponse> {
     this.onProgress?.({
-      type: 'checkpoint',
+      type: "checkpoint",
       taskId: task.id,
       taskName: task.name,
       taskIndex: context.taskIndex,
@@ -397,7 +423,7 @@ export class SkillExecutionEngine {
     }
 
     // Default: auto-continue for non-decision checkpoints
-    if (task.type === 'checkpoint:decision') {
+    if (task.type === "checkpoint:decision") {
       // Use first option if no handler
       return {
         continue: true,
@@ -447,7 +473,11 @@ export class SkillExecutionEngine {
    * This method validates patterns before execution to prevent catastrophic backtracking.
    * Note: This cannot guarantee protection against all ReDoS patterns, but catches common ones.
    */
-  private safeRegexTest(pattern: string, input: string, _timeoutMs = 1000): boolean {
+  private safeRegexTest(
+    pattern: string,
+    input: string,
+    _timeoutMs = 1000,
+  ): boolean {
     // Strict length limits to prevent excessive processing
     if (pattern.length > 200 || input.length > 50000) {
       console.warn(`Regex test skipped: pattern or input too long`);
@@ -456,7 +486,9 @@ export class SkillExecutionEngine {
 
     // Reject patterns known to cause ReDoS
     if (this.isUnsafeRegexPattern(pattern)) {
-      console.warn(`Regex pattern rejected as potentially unsafe: ${pattern.slice(0, 50)}...`);
+      console.warn(
+        `Regex pattern rejected as potentially unsafe: ${pattern.slice(0, 50)}...`,
+      );
       return false;
     }
 
@@ -478,7 +510,7 @@ export class SkillExecutionEngine {
    */
   private async runVerification(
     task: ExecutableTask,
-    result: TaskExecutionResult
+    result: TaskExecutionResult,
   ): Promise<boolean> {
     if (!task.verify) {
       return true;
@@ -494,21 +526,27 @@ export class SkillExecutionEngine {
       for (const rule of task.verify.automated) {
         if (rule.command) {
           try {
-            // SECURITY: Commands are from skill config - only run trusted skills
-            const output = execSync(rule.command, {
+            const cmdParts =
+              rule.command.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) || [];
+            if (cmdParts.length === 0) return false;
+            const [cmd, ...cmdArgs] = cmdParts as [string, ...string[]];
+            const sanitizedArgs = cmdArgs.map((a) =>
+              a.replace(/^["']|["']$/g, ""),
+            );
+            const output = execFileSync(cmd, sanitizedArgs, {
               cwd: this.projectPath,
-              encoding: 'utf-8',
+              encoding: "utf-8",
               timeout: 30000,
             });
 
             let passed = true;
             if (rule.expect) {
-              if (rule.expect === 'success') {
+              if (rule.expect === "success") {
                 passed = true;
-              } else if (rule.expect.startsWith('contains:')) {
+              } else if (rule.expect.startsWith("contains:")) {
                 const expected = rule.expect.slice(9);
                 passed = output.includes(expected);
-              } else if (rule.expect.startsWith('matches:')) {
+              } else if (rule.expect.startsWith("matches:")) {
                 const pattern = rule.expect.slice(8);
                 // Use safe regex test to prevent ReDoS
                 passed = this.safeRegexTest(pattern, output);
@@ -522,10 +560,10 @@ export class SkillExecutionEngine {
             });
 
             this.onProgress?.({
-              type: 'verification',
+              type: "verification",
               taskId: task.id,
               taskName: task.name,
-              message: `Verification ${passed ? 'passed' : 'failed'}: ${rule.command}`,
+              message: `Verification ${passed ? "passed" : "failed"}: ${rule.command}`,
             });
 
             if (!passed) {
@@ -557,18 +595,18 @@ export class SkillExecutionEngine {
     return {
       skillName: skill.name,
       skillSource: skill.source,
-      status: 'completed',
+      status: "completed",
       startedAt: new Date().toISOString(),
       completedAt: new Date().toISOString(),
       durationMs: 0,
       tasks: tasks.map((task) => ({
         taskId: task.id || randomUUID(),
         taskName: task.name,
-        status: 'skipped' as ExecutionTaskStatus,
+        status: "skipped" as ExecutionTaskStatus,
         startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
         durationMs: 0,
-        output: '[Dry run - not executed]',
+        output: "[Dry run - not executed]",
       })),
       filesModified: [],
       commits: [],
@@ -605,7 +643,7 @@ export function createExecutionEngine(
   options?: {
     checkpointHandler?: CheckpointHandler;
     onProgress?: ExecutionProgressCallback;
-  }
+  },
 ): SkillExecutionEngine {
   return new SkillExecutionEngine(projectPath, options);
 }
