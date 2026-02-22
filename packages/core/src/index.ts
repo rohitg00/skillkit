@@ -132,3 +132,6 @@ export * from './agents-md/index.js';
 
 // Save (Content Extraction & Skill Generation)
 export * from './save/index.js';
+
+// Utilities
+export { splitCommand } from './utils/shell.js';

@@ -14,6 +14,8 @@ import type {
   PlanEvent,
   PlanEventListener,
 } from "./types.js";
+import { execFileSync } from "node:child_process";
+import { splitCommand } from "../utils/shell.js";
 
 /**
  * Step executor function type
@@ -499,13 +501,11 @@ export const shellExecutor: StepExecutor = async (step, _task, _plan) => {
   }
 
   try {
-    const { execFileSync } = await import("node:child_process");
-    const parts = step.command.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) || [];
+    const parts = splitCommand(step.command);
     if (parts.length === 0) {
       return { success: false, output: "", error: "Empty command" };
     }
-    const [cmd, ...rawArgs] = parts as [string, ...string[]];
-    const args = rawArgs.map((a) => a.replace(/^["']|["']$/g, ""));
+    const [cmd, ...args] = parts;
     const output = execFileSync(cmd, args, {
       encoding: "utf-8",
       timeout: 60000,

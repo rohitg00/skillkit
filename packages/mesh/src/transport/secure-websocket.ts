@@ -172,7 +172,9 @@ export class SecureWebSocketTransport {
           this.messageHandlers.forEach((handler) =>
             handler(message, this.socket!, senderFingerprint),
           );
-        } catch {}
+        } catch (err) {
+          console.error("[SecureWebSocket] client message handler error:", err);
+        }
       });
 
       this.socket.on("close", () => {
@@ -213,6 +215,7 @@ export class SecureWebSocketTransport {
             );
           } else if (msg.type === "auth:success") {
             this.socket!.off("message", handleChallenge);
+            clearTimeout(authTimeout);
 
             if (msg.serverPublicKey) {
               const serverPubKey = hexToBytes(msg.serverPublicKey);
@@ -224,16 +227,19 @@ export class SecureWebSocketTransport {
             resolve();
           } else if (msg.type === "auth:failed") {
             this.socket!.off("message", handleChallenge);
+            clearTimeout(authTimeout);
             reject(new Error(msg.error || "Authentication failed"));
           }
         } catch (err) {
+          this.socket!.off("message", handleChallenge);
+          clearTimeout(authTimeout);
           reject(err);
         }
       };
 
       this.socket!.on("message", handleChallenge);
 
-      setTimeout(() => {
+      const authTimeout = setTimeout(() => {
         this.socket!.off("message", handleChallenge);
         reject(new Error("Authentication timeout"));
       }, this.options.timeout);
@@ -397,7 +403,15 @@ export class SecureWebSocketServer {
     await this.initialize();
 
     return new Promise((resolve, reject) => {
-      if (this.security.transport.tls !== "none" && this.certInfo) {
+      if (this.security.transport.tls !== "none") {
+        if (!this.certInfo) {
+          reject(
+            new Error(
+              "TLS is configured but certificate is not available; refusing to start in plaintext",
+            ),
+          );
+          return;
+        }
         this.httpsServer = createHttpsServer({
           cert: this.certInfo.cert,
           key: this.certInfo.key,
@@ -488,7 +502,13 @@ export class SecureWebSocketServer {
         this.messageHandlers.forEach((handler) =>
           handler(message, socket, senderFingerprint),
         );
-      } catch {}
+      } catch (err) {
+        console.error("[SecureWebSocket] server message handler error:", err);
+      }
+    });
+
+    socket.on("error", (err) => {
+      console.error("[SecureWebSocket] socket error:", err);
     });
 
     socket.on("close", () => {
@@ -616,6 +636,19 @@ export class SecureWebSocketServer {
       timestamp: new Date().toISOString(),
     };
 
+    let sharedSignedData: string | null = null;
+    if (this.identity) {
+      const signature = await this.identity.signObject(fullMessage);
+      const secureMessage: SecureTransportMessage = {
+        ...fullMessage,
+        signature,
+        senderFingerprint: this.identity.fingerprint,
+        senderPublicKey: this.identity.publicKeyHex,
+        nonce: randomUUID(),
+      };
+      sharedSignedData = JSON.stringify(secureMessage);
+    }
+
     for (const [socket, client] of this.clients) {
       if (socket.readyState !== WebSocket.OPEN) continue;
 
@@ -630,21 +663,16 @@ export class SecureWebSocketServer {
           ciphertext: encrypted.ciphertext,
           timestamp: fullMessage.timestamp,
         });
-      } else if (this.identity) {
-        const signature = await this.identity.signObject(fullMessage);
-        const secureMessage: SecureTransportMessage = {
-          ...fullMessage,
-          signature,
-          senderFingerprint: this.identity.fingerprint,
-          senderPublicKey: this.identity.publicKeyHex,
-          nonce: randomUUID(),
-        };
-        dataToSend = JSON.stringify(secureMessage);
+      } else if (sharedSignedData) {
+        dataToSend = sharedSignedData;
       } else {
         dataToSend = JSON.stringify(fullMessage);
       }
 
-      socket.send(dataToSend);
+      socket.send(dataToSend, (err) => {
+        if (err)
+          console.error("[SecureWebSocketServer] broadcast send error:", err);
+      });
     }
   }
 
@@ -688,7 +716,9 @@ export class SecureWebSocketServer {
       dataToSend = JSON.stringify(fullMessage);
     }
 
-    socket.send(dataToSend);
+    socket.send(dataToSend, (err) => {
+      if (err) console.error("[SecureWebSocketServer] sendTo error:", err);
+    });
   }
 
   onMessage(handler: SecureMessageHandler): () => void {

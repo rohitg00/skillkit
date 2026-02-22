@@ -6,6 +6,7 @@
 
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { splitCommand } from "../utils/shell.js";
 import type {
   ExecutableSkill,
   ExecutableTask,
@@ -526,13 +527,9 @@ export class SkillExecutionEngine {
       for (const rule of task.verify.automated) {
         if (rule.command) {
           try {
-            const cmdParts =
-              rule.command.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) || [];
+            const cmdParts = splitCommand(rule.command);
             if (cmdParts.length === 0) return false;
-            const [cmd, ...cmdArgs] = cmdParts as [string, ...string[]];
-            const sanitizedArgs = cmdArgs.map((a) =>
-              a.replace(/^["']|["']$/g, ""),
-            );
+            const [cmd, ...sanitizedArgs] = cmdParts;
             const output = execFileSync(cmd, sanitizedArgs, {
               cwd: this.projectPath,
               encoding: "utf-8",

@@ -5,6 +5,7 @@ export interface RemoteTransportOptions {
   timeout?: number;
   retries?: number;
   useHttps?: boolean;
+  rejectUnauthorized?: boolean;
 }
 
 export class RemoteTransport {
@@ -15,11 +16,8 @@ export class RemoteTransport {
       timeout: options.timeout ?? 10000,
       retries: options.retries ?? 2,
       useHttps: options.useHttps ?? false,
+      rejectUnauthorized: options.rejectUnauthorized ?? true,
     };
-  }
-
-  private get useHttps(): boolean {
-    return this.options.useHttps;
   }
 
   private getProtocol(hostAddress: string): string {
@@ -27,7 +25,13 @@ export class RemoteTransport {
       hostAddress === "localhost" ||
       hostAddress === "127.0.0.1" ||
       hostAddress === "::1";
-    return this.useHttps && !isLocalhost ? "https" : "http";
+    return this.options.useHttps && !isLocalhost ? "https" : "http";
+  }
+
+  private formatHost(hostAddress: string): string {
+    return hostAddress.includes(":") && !hostAddress.startsWith("[")
+      ? `[${hostAddress}]`
+      : hostAddress;
   }
 
   async deliver(
@@ -35,7 +39,7 @@ export class RemoteTransport {
     hostAddress: string,
     hostPort: number,
   ): Promise<MessageDeliveryResult> {
-    const url = `${this.getProtocol(hostAddress)}://${hostAddress}:${hostPort}/message`;
+    const url = `${this.getProtocol(hostAddress)}://${this.formatHost(hostAddress)}:${hostPort}/message`;
 
     try {
       const response = await got.post(url, {
@@ -43,6 +47,9 @@ export class RemoteTransport {
         timeout: { request: this.options.timeout },
         retry: { limit: this.options.retries },
         throwHttpErrors: false,
+        ...(this.options.useHttps && {
+          https: { rejectUnauthorized: this.options.rejectUnauthorized },
+        }),
       });
 
       if (response.statusCode === 200 || response.statusCode === 201) {
@@ -85,7 +92,9 @@ export class RemoteTransport {
     }
 
     const [, hostPart] = parts;
-    const [host, portStr] = hostPart.split(":");
+    const lastColon = hostPart.lastIndexOf(":");
+    const host = lastColon > 0 ? hostPart.slice(0, lastColon) : hostPart;
+    const portStr = lastColon > 0 ? hostPart.slice(lastColon + 1) : undefined;
     const port = portStr ? parseInt(portStr, 10) : 9876;
 
     return this.deliver(message, host, port);
@@ -108,13 +117,16 @@ export class RemoteTransport {
   }
 
   async ping(hostAddress: string, hostPort: number): Promise<boolean> {
-    const url = `${this.getProtocol(hostAddress)}://${hostAddress}:${hostPort}/health`;
+    const url = `${this.getProtocol(hostAddress)}://${this.formatHost(hostAddress)}:${hostPort}/health`;
 
     try {
       const response = await got.get(url, {
         timeout: { request: 5000 },
         retry: { limit: 0 },
         throwHttpErrors: false,
+        ...(this.options.useHttps && {
+          https: { rejectUnauthorized: this.options.rejectUnauthorized },
+        }),
       });
 
       return response.statusCode === 200;

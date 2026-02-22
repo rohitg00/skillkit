@@ -25,13 +25,16 @@ export async function checkHostHealth(
   };
 
   try {
-    const protocol = (host as Host & { tls?: boolean }).tls ? "https" : "http";
+    const protocol = host.tls ? "https" : "http";
     const url = `${protocol}://${host.address}:${host.port}/health`;
 
     const response = await got.get(url, {
       timeout: { request: timeout },
       retry: { limit: 0 },
       throwHttpErrors: false,
+      ...(host.tls && host.tlsAllowSelfSigned
+        ? { https: { rejectUnauthorized: false } }
+        : {}),
     });
 
     result.latencyMs = Date.now() - startTime;

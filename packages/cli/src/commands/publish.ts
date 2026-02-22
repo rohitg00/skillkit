@@ -6,7 +6,7 @@ import {
   readdirSync,
   statSync,
 } from "node:fs";
-import { join, basename, dirname, resolve } from "node:path";
+import { join, basename, dirname, resolve, sep } from "node:path";
 import chalk from "chalk";
 import { Command, Option } from "clipanion";
 import {
@@ -39,6 +39,59 @@ interface SkillFrontmatter {
   description?: string;
   tags?: string[];
   version?: string;
+}
+
+function parseSkillFrontmatter(content: string): SkillFrontmatter {
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!match) return {};
+
+  const frontmatter: SkillFrontmatter = {};
+  const lines = match[1].split(/\r?\n/);
+  let inTagsList = false;
+
+  for (const line of lines) {
+    if (inTagsList) {
+      const tagMatch = line.match(/^\s*-\s*(.+)$/);
+      if (tagMatch) {
+        frontmatter.tags ??= [];
+        frontmatter.tags.push(tagMatch[1].trim().replace(/^["']|["']$/g, ""));
+        continue;
+      }
+      if (line.trim() === "") continue;
+      inTagsList = false;
+    }
+
+    const colonIdx = line.indexOf(":");
+    if (colonIdx === -1) continue;
+
+    const key = line.slice(0, colonIdx).trim();
+    const value = line.slice(colonIdx + 1).trim();
+
+    switch (key) {
+      case "name":
+        frontmatter.name = value.replace(/^["']|["']$/g, "");
+        break;
+      case "description":
+        frontmatter.description = value.replace(/^["']|["']$/g, "");
+        break;
+      case "version":
+        frontmatter.version = value.replace(/^["']|["']$/g, "");
+        break;
+      case "tags":
+        if (value.startsWith("[")) {
+          frontmatter.tags = value
+            .slice(1, -1)
+            .split(",")
+            .map((t) => t.trim().replace(/^["']|["']$/g, ""))
+            .filter((t) => t.length > 0);
+        } else if (value === "") {
+          inTagsList = true;
+          frontmatter.tags = [];
+        }
+        break;
+    }
+  }
+  return frontmatter;
 }
 
 export class PublishCommand extends Command {
@@ -186,7 +239,7 @@ export class PublishCommand extends Command {
           skill.safeName,
         );
         const resolvedDir = resolve(mintlifyDir);
-        if (!resolvedDir.startsWith(resolvedOutput)) {
+        if (!resolvedDir.startsWith(resolvedOutput + sep)) {
           console.log(
             chalk.red(`Skipping ${skill.safeName} (path traversal detected)`),
           );
@@ -255,7 +308,7 @@ export class PublishCommand extends Command {
       const resolvedSkillDir = resolve(skillDir);
       const resolvedWellKnownDir = resolve(wellKnownDir);
 
-      if (!resolvedSkillDir.startsWith(resolvedWellKnownDir)) {
+      if (!resolvedSkillDir.startsWith(resolvedWellKnownDir + sep)) {
         console.log(
           chalk.yellow(`  Skipping "${skill.name}" (path traversal detected)`),
         );
@@ -360,8 +413,7 @@ export class PublishCommand extends Command {
     for (const entry of entries) {
       const entryPath = join(skillPath, entry);
       if (statSync(entryPath).isFile()) {
-        if (entry.startsWith(".") || entry === ".skillkit-metadata.json")
-          continue;
+        if (entry.startsWith(".")) continue;
         files.push(entry);
       }
     }
@@ -374,57 +426,7 @@ export class PublishCommand extends Command {
   }
 
   private parseFrontmatter(content: string): SkillFrontmatter {
-    const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-    if (!match) return {};
-
-    const frontmatter: SkillFrontmatter = {};
-    const lines = match[1].split(/\r?\n/);
-    let inTagsList = false;
-
-    for (const line of lines) {
-      if (inTagsList) {
-        const tagMatch = line.match(/^\s*-\s*(.+)$/);
-        if (tagMatch) {
-          frontmatter.tags ??= [];
-          frontmatter.tags.push(tagMatch[1].trim().replace(/^["']|["']$/g, ""));
-          continue;
-        }
-        if (line.trim() === "") continue;
-        inTagsList = false;
-      }
-
-      const colonIdx = line.indexOf(":");
-      if (colonIdx === -1) continue;
-
-      const key = line.slice(0, colonIdx).trim();
-      const value = line.slice(colonIdx + 1).trim();
-
-      switch (key) {
-        case "name":
-          frontmatter.name = value.replace(/^["']|["']$/g, "");
-          break;
-        case "description":
-          frontmatter.description = value.replace(/^["']|["']$/g, "");
-          break;
-        case "version":
-          frontmatter.version = value.replace(/^["']|["']$/g, "");
-          break;
-        case "tags":
-          if (value.startsWith("[")) {
-            frontmatter.tags = value
-              .slice(1, -1)
-              .split(",")
-              .map((t) => t.trim().replace(/^["']|["']$/g, ""))
-              .filter((t) => t.length > 0);
-          } else if (value === "") {
-            inTagsList = true;
-            frontmatter.tags = [];
-          }
-          break;
-      }
-    }
-
-    return frontmatter;
+    return parseSkillFrontmatter(content);
   }
 }
 
@@ -468,7 +470,7 @@ export class PublishSubmitCommand extends Command {
     const skillName =
       this.name || frontmatter.name || basename(dirname(skillMdPath));
 
-    const repoInfo = this.getRepoInfo(dirname(skillMdPath));
+    const repoInfo = await this.getRepoInfo(dirname(skillMdPath));
     if (!repoInfo) {
       console.error(chalk.red("Not a git repository or no remote configured"));
       console.error(
@@ -567,42 +569,7 @@ export class PublishSubmitCommand extends Command {
   }
 
   private parseFrontmatter(content: string): SkillFrontmatter {
-    const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-    if (!match) return {};
-
-    const frontmatter: SkillFrontmatter = {};
-    const lines = match[1].split(/\r?\n/);
-
-    for (const line of lines) {
-      const colonIdx = line.indexOf(":");
-      if (colonIdx === -1) continue;
-
-      const key = line.slice(0, colonIdx).trim();
-      const value = line.slice(colonIdx + 1).trim();
-
-      switch (key) {
-        case "name":
-          frontmatter.name = value.replace(/^["']|["']$/g, "");
-          break;
-        case "description":
-          frontmatter.description = value.replace(/^["']|["']$/g, "");
-          break;
-        case "version":
-          frontmatter.version = value.replace(/^["']|["']$/g, "");
-          break;
-        case "tags":
-          if (value.startsWith("[")) {
-            frontmatter.tags = value
-              .slice(1, -1)
-              .split(",")
-              .map((t) => t.trim().replace(/^["']|["']$/g, ""))
-              .filter((t) => t.length > 0);
-          }
-          break;
-      }
-    }
-
-    return frontmatter;
+    return parseSkillFrontmatter(content);
   }
 
   private slugify(name: string): string {
@@ -613,10 +580,12 @@ export class PublishSubmitCommand extends Command {
       .replace(/^-+|-+$/g, "");
   }
 
-  private getRepoInfo(dir: string): { owner: string; repo: string } | null {
+  private async getRepoInfo(
+    dir: string,
+  ): Promise<{ owner: string; repo: string } | null> {
     try {
-      const { execSync } = require("node:child_process");
-      const remote = execSync("git remote get-url origin", {
+      const { execFileSync } = await import("node:child_process");
+      const remote = execFileSync("git", ["remote", "get-url", "origin"], {
         cwd: dir,
         encoding: "utf-8",
         stdio: ["pipe", "pipe", "ignore"],

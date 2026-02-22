@@ -18,11 +18,12 @@ export function rateLimiter(maxRequests = 60, windowMs = 60_000) {
   }, windowMs).unref();
 
   return async (c: Context, next: Next): Promise<Response | void> => {
+    const xRealIp = c.req.header("x-real-ip");
     const forwarded = c.req.header("x-forwarded-for");
-    const ip =
-      forwarded?.split(",")[0]?.trim() ||
-      c.req.header("x-real-ip") ||
-      "unknown";
+    const forwardedIp = forwarded
+      ? forwarded.split(",").at(-1)?.trim()
+      : undefined;
+    const ip = xRealIp || forwardedIp || "unknown";
     const now = Date.now();
 
     let entry = windows.get(ip);

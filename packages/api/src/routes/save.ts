@@ -34,14 +34,16 @@ function isAllowedUrl(url: string): boolean {
     if (bare.startsWith("10.") || bare.startsWith("192.168.")) return false;
     if (/^172\.(1[6-9]|2\d|3[01])\./.test(bare)) return false;
     if (bare.startsWith("169.254.")) return false;
-    if (
-      bare.startsWith("fe80:") ||
-      bare.startsWith("fc") ||
-      bare.startsWith("fd")
-    )
-      return false;
+    if (bare.includes(":")) {
+      if (
+        bare.startsWith("fe80:") ||
+        bare.startsWith("fc") ||
+        bare.startsWith("fd")
+      )
+        return false;
+      if (bare.startsWith("ff")) return false;
+    }
     if (/^(22[4-9]|23\d|24\d|25[0-5])\./.test(bare)) return false;
-    if (bare.startsWith("ff")) return false;
     return true;
   } catch {
     return false;
@@ -106,17 +108,17 @@ export function saveRoutes() {
         tags: tagger.detectTags(content),
       });
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Unknown error";
+      console.error("Save extraction failed:", err);
       const isTimeout =
         (err instanceof DOMException && err.name === "TimeoutError") ||
         (err instanceof Error &&
           (err.name === "TimeoutError" || err.name === "AbortError"));
 
       if (isTimeout) {
-        return c.json({ error: `Fetch timeout: ${message}` }, 504);
+        return c.json({ error: "Fetch timed out" }, 504);
       }
 
-      return c.json({ error: `Extraction failed: ${message}` }, 422);
+      return c.json({ error: "Extraction failed" }, 422);
     }
   });
 

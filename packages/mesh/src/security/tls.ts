@@ -207,6 +207,11 @@ export class TLSManager {
     };
   }
 
+  /**
+   * @param options.allowSelfSigned - WARNING: disables certificate validation
+   *   (rejectUnauthorized=false). Only safe for local development/testing.
+   *   Defaults to true since the mesh system generates self-signed certs.
+   */
   createServerContext(
     certInfo: CertificateInfo,
     options?: {
@@ -215,11 +220,12 @@ export class TLSManager {
       allowSelfSigned?: boolean;
     },
   ): TLSContextOptions {
+    const allowSelfSigned = options?.allowSelfSigned ?? true;
     const context: TLSContextOptions = {
       cert: certInfo.cert,
       key: certInfo.key,
       requestCert: options?.requestClientCert ?? false,
-      rejectUnauthorized: !options?.allowSelfSigned,
+      rejectUnauthorized: !allowSelfSigned,
     };
 
     if (options?.trustedCAs?.length) {
@@ -238,8 +244,9 @@ export class TLSManager {
       allowSelfSigned?: boolean;
     },
   ): TLSContextOptions {
+    const allowSelfSigned = options?.allowSelfSigned ?? true;
     const context: TLSContextOptions = {
-      rejectUnauthorized: !options?.allowSelfSigned,
+      rejectUnauthorized: !allowSelfSigned,
     };
 
     if (certInfo) {
@@ -249,6 +256,7 @@ export class TLSManager {
 
     if (options?.trustedCAs?.length) {
       context.ca = options.trustedCAs;
+      context.rejectUnauthorized = true;
     }
 
     return context;

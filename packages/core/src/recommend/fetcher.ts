@@ -6,7 +6,7 @@ import {
   writeFileSync,
   mkdirSync,
 } from "node:fs";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
 import { tmpdir, homedir } from "node:os";
 import { randomUUID } from "node:crypto";
 import type { SkillIndex, SkillSummary, IndexSource } from "./types.js";
@@ -46,6 +46,13 @@ export async function fetchSkillsFromRepo(
   owner: string,
   repo: string,
 ): Promise<{ skills: SkillSummary[]; error?: string }> {
+  if (!/^[\w.-]+$/.test(owner) || !/^[\w.-]+$/.test(repo)) {
+    return {
+      skills: [],
+      error: `Invalid owner or repo name: ${owner}/${repo}`,
+    };
+  }
+
   const cloneUrl = `https://github.com/${owner}/${repo}.git`;
   const tempDir = join(tmpdir(), `skillkit-fetch-${randomUUID()}`);
 
@@ -179,7 +186,7 @@ export async function buildSkillIndex(
  * Save skill index to cache
  */
 export function saveIndex(index: SkillIndex): void {
-  const indexDir = join(homedir(), ".skillkit");
+  const indexDir = dirname(INDEX_PATH);
   if (!existsSync(indexDir)) {
     mkdirSync(indexDir, { recursive: true });
   }

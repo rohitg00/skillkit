@@ -1,4 +1,4 @@
-export type HostStatus = 'online' | 'offline' | 'unknown';
+export type HostStatus = "online" | "offline" | "unknown";
 
 export interface Host {
   id: string;
@@ -10,6 +10,8 @@ export interface Host {
   lastSeen: string;
   version?: string;
   metadata?: Record<string, unknown>;
+  tls?: boolean;
+  tlsAllowSelfSigned?: boolean;
 }
 
 export interface Peer {
@@ -46,7 +48,7 @@ export interface HostsFile {
 }
 
 export interface DiscoveryMessage {
-  type: 'announce' | 'query' | 'response';
+  type: "announce" | "query" | "response";
   hostId: string;
   hostName: string;
   address: string;
@@ -121,4 +123,4 @@ export const DEFAULT_PORT = 9876;
 export const DEFAULT_DISCOVERY_PORT = 9877;
 export const HEALTH_CHECK_TIMEOUT = 5000;
 export const DISCOVERY_INTERVAL = 30000;
-export const MESH_VERSION = '1.7.11';
+export const MESH_VERSION = "1.7.11";

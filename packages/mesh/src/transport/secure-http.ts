@@ -59,8 +59,9 @@ export class SecureHttpTransport {
         calculateDelay: () => this.options.retryDelay!,
       },
       https: {
-        rejectUnauthorized:
-          this.security.transport.tls === "self-signed" ? false : true,
+        // MITM risk: disabling verification for self-signed mode.
+        // Ideally supply the CA cert via the `ca` option instead.
+        rejectUnauthorized: this.security.transport.tls !== "self-signed",
       },
       headers: {
         "Content-Type": "application/json",
@@ -218,10 +219,12 @@ export async function broadcastToHostsSecure(
   return results;
 }
 
-export function verifySecureMessage(message: SecureTransportMessage): {
+export async function verifySecureMessage(
+  message: SecureTransportMessage,
+): Promise<{
   valid: boolean;
   error?: string;
-} {
+}> {
   if (
     !message.signature ||
     !message.senderPublicKey ||
@@ -236,6 +239,23 @@ export function verifySecureMessage(message: SecureTransportMessage): {
 
   if (computedFingerprint !== message.senderFingerprint) {
     return { valid: false, error: "Fingerprint mismatch" };
+  }
+
+  const {
+    signature,
+    senderFingerprint,
+    senderPublicKey,
+    nonce,
+    ...baseMessage
+  } = message;
+  const messageJson = JSON.stringify(baseMessage);
+  const isValidSignature = await PeerIdentity.verifyHex(
+    signature,
+    Buffer.from(messageJson).toString("hex"),
+    senderPublicKey,
+  );
+  if (!isValidSignature) {
+    return { valid: false, error: "Invalid signature" };
   }
 
   return { valid: true };
