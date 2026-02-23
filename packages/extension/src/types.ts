@@ -10,5 +10,11 @@ export interface ErrorResponse {
 }
 
 export type ExtensionMessage =
-  | { type: 'SAVE_PAGE'; payload: { url: string; title: string; name?: string } }
-  | { type: 'SAVE_SELECTION'; payload: { text: string; url: string; name?: string } };
+  | {
+      type: "SAVE_PAGE";
+      payload: { url: string; title: string; name?: string; tabId: number };
+    }
+  | {
+      type: "SAVE_SELECTION";
+      payload: { text: string; url: string; name?: string };
+    };
