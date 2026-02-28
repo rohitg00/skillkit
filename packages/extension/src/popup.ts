@@ -1,4 +1,5 @@
 import type { ExtensionMessage, SaveResponse, ErrorResponse } from "./types";
+import { isRestricted } from "./constants";
 
 const pageTitle = document.getElementById("page-title")!;
 const pageUrl = document.getElementById("page-url")!;
@@ -26,12 +27,7 @@ async function init() {
   currentTitle = tab.title || "";
   currentTabId = tab.id;
 
-  const isRestricted =
-    !currentUrl ||
-    currentUrl.startsWith("chrome://") ||
-    currentUrl.startsWith("chrome-extension://") ||
-    currentUrl.startsWith("about:");
-  if (isRestricted) {
+  if (isRestricted(currentUrl)) {
     saveBtn.setAttribute("disabled", "");
     setStatus("error", "Cannot save skills from this page");
     return;

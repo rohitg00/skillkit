@@ -1,11 +1,5 @@
 import type { SaveResponse, ErrorResponse, ExtensionMessage } from "./types";
-
-const RESTRICTED_PREFIXES = [
-  "chrome://",
-  "chrome-extension://",
-  "https://chromewebstore.google.com",
-  "about:",
-];
+import { isRestricted } from "./constants";
 
 const TECH_KEYWORDS: Record<string, string[]> = {
   react: ["react", "jsx", "tsx", "usestate", "useeffect", "nextjs", "next.js"],
@@ -125,11 +119,6 @@ chrome.runtime.onMessage.addListener(
   },
 );
 
-function isRestricted(url: string): boolean {
-  if (!url) return true;
-  return RESTRICTED_PREFIXES.some((p) => url.startsWith(p));
-}
-
 interface PageContent {
   title: string;
   metaDescription: string;
@@ -192,9 +181,11 @@ function detectTags(
   for (const [tag, keywords] of Object.entries(TECH_KEYWORDS)) {
     let score = 0;
     for (const kw of keywords) {
-      if (urlLower.includes(kw)) score += 3;
-      if (headingsLower.includes(kw)) score += 2;
-      if (bodyLower.includes(kw)) score += 1;
+      const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const re = new RegExp(`\\b${escaped}\\b`, "i");
+      if (re.test(urlLower)) score += 3;
+      if (re.test(headingsLower)) score += 2;
+      if (re.test(bodyLower)) score += 1;
     }
     if (score > 0) scores[tag] = score;
   }
@@ -232,7 +223,7 @@ function buildPageSkill(
 
   let skillMd =
     `---\n` +
-    `name: ${skillName}\n` +
+    `name: ${yamlEscape(skillName)}\n` +
     `description: ${yamlEscape(description)}\n` +
     `version: 1.0.0\n`;
 
@@ -293,7 +284,7 @@ function buildSelectionSkill(
 
   const skillMd =
     `---\n` +
-    `name: ${skillName}\n` +
+    `name: ${yamlEscape(skillName)}\n` +
     `description: Selected text saved as skill\n` +
     `metadata:\n` +
     (url ? `  source: ${yamlEscape(url)}\n` : "") +
@@ -310,12 +301,17 @@ function buildSelectionSkill(
   };
 }
 
+const YAML_BARE_SCALARS = /^(true|false|yes|no|on|off|null|~)$/i;
+const YAML_NUMERIC = /^-?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/;
+
 function yamlEscape(value: string): string {
   const singleLine = value.replace(/\r?\n/g, " ").trim();
   if (
     /[:#{}[\],&*?|>!%@`]/.test(singleLine) ||
     singleLine.startsWith("'") ||
-    singleLine.startsWith('"')
+    singleLine.startsWith('"') ||
+    YAML_BARE_SCALARS.test(singleLine) ||
+    YAML_NUMERIC.test(singleLine)
   ) {
     return `"${singleLine.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
   }
@@ -341,6 +337,12 @@ function downloadSkill(name: string, skillMd: string): void {
       saveAs: false,
     },
     () => {
+      if (chrome.runtime.lastError) {
+        console.error(
+          `[SkillKit] Download failed for skillkit-skills/${name}/SKILL.md:`,
+          chrome.runtime.lastError.message,
+        );
+      }
       URL.revokeObjectURL(blobUrl);
     },
   );
