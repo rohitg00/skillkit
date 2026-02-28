@@ -95,7 +95,7 @@ function computeDefaultQuality(skill: Skill): number {
 function main(): void {
   const skillsPath = join(__dirname, '../marketplace/skills.json');
 
-  console.log('Reading skills.json...');
+  // console.log('Reading skills.json...');
 
   let data: SkillsIndex;
   try {
@@ -107,11 +107,11 @@ function main(): void {
   }
 
   if (!data.skills || data.skills.length === 0) {
-    console.log('No skills found in skills.json');
+    // console.log('No skills found in skills.json');
     return;
   }
 
-  console.log(`Processing ${data.skills.length} skills...`);
+  // console.log(`Processing ${data.skills.length} skills...`);
 
   let updated = 0;
   let verified = 0;
@@ -129,17 +129,17 @@ function main(): void {
 
   data.updatedAt = new Date().toISOString().split('T')[0];
 
-  console.log(`Updated ${updated} skills with quality scores`);
-  console.log(`Verified sources: ${verified} skills (quality >= 85)`);
+  // console.log(`Updated ${updated} skills with quality scores`);
+  // console.log(`Verified sources: ${verified} skills (quality >= 85)`);
 
   const averageQuality = Math.round(
     data.skills.reduce((sum, s) => sum + (s.quality ?? 70), 0) / data.skills.length
   );
-  console.log(`Average quality: ${averageQuality}`);
+  // console.log(`Average quality: ${averageQuality}`);
 
   try {
     writeFileSync(skillsPath, JSON.stringify(data, null, 2) + '\n');
-    console.log('Saved skills.json');
+    // console.log('Saved skills.json');
   } catch (err) {
     console.error(`Failed to write skills.json: ${err instanceof Error ? err.message : String(err)}`);
     process.exit(1);
