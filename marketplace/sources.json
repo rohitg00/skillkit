@@ -1,7 +1,7 @@
 {
   "$schema": "./sources-schema.json",
   "version": 1,
-  "updatedAt": "2026-01-26",
+  "updatedAt": "2026-02-28",
   "description": "Curated skill repository sources - THE SINGLE SOURCE OF TRUTH",
   "sources": [
     { "source": "anthropics/skills", "name": "Anthropic Official", "official": true },
@@ -35,6 +35,8 @@
     { "source": "giuseppe-trisciuoglio/developer-kit", "name": "Shadcn / Radix" },
     { "source": "openrouterteam/agent-skills", "name": "OpenRouter SDK" },
     { "source": "intellectronica/agent-skills", "name": "Context7" },
+    { "source": "muratcankoylan/Agent-Skills-for-Context-Engineering", "name": "Context Engineering" },
+    { "source": "sickn33/antigravity-awesome-skills", "name": "Antigravity Awesome Skills" },
     { "source": "skills.sh", "name": "Skills.sh Leaderboard", "official": true, "registry": "skills-sh" }
   ]
 }

@@ -1,9 +1,9 @@
 {
   "$schema": "./schema.json",
   "version": 1,
-  "updatedAt": "2026-02-02",
-  "totalSkills": 15065,
-  "curatedCollections": 31,
+  "updatedAt": "2026-02-28",
+  "totalSkills": 15136,
+  "curatedCollections": 33,
   "skills": [
     {
       "id": "anthropics/skills/collection",
@@ -23413,9 +23413,9 @@
       ]
     },
     {
-      "id": "ceeon/videocut-skills/videocut:剪口播",
-      "name": "Videocut:剪口播",
-      "description": "Best practices and patterns for Videocut:剪口播",
+      "id": "ceeon/videocut-skills/videocut:\u526a\u53e3\u64ad",
+      "name": "Videocut:\u526a\u53e3\u64ad",
+      "description": "Best practices and patterns for Videocut:\u526a\u53e3\u64ad",
       "source": "ceeon/videocut-skills",
       "tags": [
         "video"
@@ -32800,9 +32800,9 @@
       "tags": []
     },
     {
-      "id": "ceeon/videocut-skills/videocut:安装",
-      "name": "Videocut:安装",
-      "description": "Best practices and patterns for Videocut:安装",
+      "id": "ceeon/videocut-skills/videocut:\u5b89\u88c5",
+      "name": "Videocut:\u5b89\u88c5",
+      "description": "Best practices and patterns for Videocut:\u5b89\u88c5",
       "source": "ceeon/videocut-skills",
       "tags": [
         "video"
@@ -35568,9 +35568,9 @@
       ]
     },
     {
-      "id": "ceeon/videocut-skills/videocut:剪辑",
-      "name": "Videocut:剪辑",
-      "description": "Best practices and patterns for Videocut:剪辑",
+      "id": "ceeon/videocut-skills/videocut:\u526a\u8f91",
+      "name": "Videocut:\u526a\u8f91",
+      "description": "Best practices and patterns for Videocut:\u526a\u8f91",
       "source": "ceeon/videocut-skills",
       "tags": [
         "video"
@@ -43458,9 +43458,9 @@
       "tags": []
     },
     {
-      "id": "nicepkg/ai-workflow/股票分析",
-      "name": "股票分析",
-      "description": "Best practices and patterns for 股票分析",
+      "id": "nicepkg/ai-workflow/\u80a1\u7968\u5206\u6790",
+      "name": "\u80a1\u7968\u5206\u6790",
+      "description": "Best practices and patterns for \u80a1\u7968\u5206\u6790",
       "source": "nicepkg/ai-workflow",
       "tags": [
         "ai"
@@ -57754,9 +57754,9 @@
       ]
     },
     {
-      "id": "bear2u/my-skills/메타-프롬프트-생성기",
-      "name": "메타 프롬프트 생성기",
-      "description": "Best practices and patterns for 메타 프롬프트 생성기",
+      "id": "bear2u/my-skills/\uba54\ud0c0-\ud504\ub86c\ud504\ud2b8-\uc0dd\uc131\uae30",
+      "name": "\uba54\ud0c0 \ud504\ub86c\ud504\ud2b8 \uc0dd\uc131\uae30",
+      "description": "Best practices and patterns for \uba54\ud0c0 \ud504\ub86c\ud504\ud2b8 \uc0dd\uc131\uae30",
       "source": "bear2u/my-skills",
       "tags": []
     },
@@ -90243,9 +90243,9 @@
       "tags": []
     },
     {
-      "id": "wwwzhouhui/skills_collection/公众号封面生成器",
-      "name": "公众号封面生成器",
-      "description": "Best practices and patterns for 公众号封面生成器",
+      "id": "wwwzhouhui/skills_collection/\u516c\u4f17\u53f7\u5c01\u9762\u751f\u6210\u5668",
+      "name": "\u516c\u4f17\u53f7\u5c01\u9762\u751f\u6210\u5668",
+      "description": "Best practices and patterns for \u516c\u4f17\u53f7\u5c01\u9762\u751f\u6210\u5668",
       "source": "wwwzhouhui/skills_collection",
       "tags": [
         "frontend"
@@ -92075,9 +92075,9 @@
       ]
     },
     {
-      "id": "shunsukehayashi/miyabi-claude-plugins/tmux-×-iterm2-integration",
-      "name": "Tmux × iterm2 integration",
-      "description": "Best practices and patterns for Tmux × Iterm2 Integration",
+      "id": "shunsukehayashi/miyabi-claude-plugins/tmux-\u00d7-iterm2-integration",
+      "name": "Tmux \u00d7 iterm2 integration",
+      "description": "Best practices and patterns for Tmux \u00d7 Iterm2 Integration",
       "source": "shunsukehayashi/miyabi-claude-plugins",
       "tags": [
         "frontend"
@@ -92535,9 +92535,9 @@
       "tags": []
     },
     {
-      "id": "jackspace/claudeskillz/哔哩哔哩字幕获取器",
-      "name": "哔哩哔哩字幕获取器",
-      "description": "Best practices and patterns for 哔哩哔哩字幕获取器",
+      "id": "jackspace/claudeskillz/\u54d4\u54e9\u54d4\u54e9\u5b57\u5e55\u83b7\u53d6\u5668",
+      "name": "\u54d4\u54e9\u54d4\u54e9\u5b57\u5e55\u83b7\u53d6\u5668",
+      "description": "Best practices and patterns for \u54d4\u54e9\u54d4\u54e9\u5b57\u5e55\u83b7\u53d6\u5668",
       "source": "jackspace/claudeskillz",
       "tags": []
     },
@@ -109100,9 +109100,9 @@
       "tags": []
     },
     {
-      "id": "microck/ordinary-claude-skills/hinduism-vedic-wisdom-🕉️",
-      "name": "Hinduism vedic wisdom 🕉️",
-      "description": "Best practices and patterns for Hinduism Vedic Wisdom 🕉️",
+      "id": "microck/ordinary-claude-skills/hinduism-vedic-wisdom-\ud83d\udd49\ufe0f",
+      "name": "Hinduism vedic wisdom \ud83d\udd49\ufe0f",
+      "description": "Best practices and patterns for Hinduism Vedic Wisdom \ud83d\udd49\ufe0f",
       "source": "microck/ordinary-claude-skills",
       "tags": [
         "frontend"
@@ -110087,9 +110087,9 @@
       "tags": []
     },
     {
-      "id": "microck/ordinary-claude-skills/jainism-ahimsa-navigation-🕉️",
-      "name": "Jainism ahimsa navigation 🕉️",
-      "description": "Best practices and patterns for Jainism Ahimsa Navigation 🕉️",
+      "id": "microck/ordinary-claude-skills/jainism-ahimsa-navigation-\ud83d\udd49\ufe0f",
+      "name": "Jainism ahimsa navigation \ud83d\udd49\ufe0f",
+      "description": "Best practices and patterns for Jainism Ahimsa Navigation \ud83d\udd49\ufe0f",
       "source": "microck/ordinary-claude-skills",
       "tags": [
         "ai"
@@ -111615,9 +111615,9 @@
       ]
     },
     {
-      "id": "69049ed6x/ppt-skill-antigravity/ai-无损-ppt-架构师",
-      "name": "Ai 无损 ppt 架构师",
-      "description": "Best practices and patterns for Ai 无损 Ppt 架构师",
+      "id": "69049ed6x/ppt-skill-antigravity/ai-\u65e0\u635f-ppt-\u67b6\u6784\u5e08",
+      "name": "Ai \u65e0\u635f ppt \u67b6\u6784\u5e08",
+      "description": "Best practices and patterns for Ai \u65e0\u635f Ppt \u67b6\u6784\u5e08",
       "source": "69049ed6x/ppt-skill-antigravity",
       "tags": [
         "ai"
@@ -116238,9 +116238,9 @@
       "tags": []
     },
     {
-      "id": "opentiny/agent-skills/tinyvue-组件库开发助手",
-      "name": "Tinyvue 组件库开发助手",
-      "description": "Best practices and patterns for Tinyvue 组件库开发助手",
+      "id": "opentiny/agent-skills/tinyvue-\u7ec4\u4ef6\u5e93\u5f00\u53d1\u52a9\u624b",
+      "name": "Tinyvue \u7ec4\u4ef6\u5e93\u5f00\u53d1\u52a9\u624b",
+      "description": "Best practices and patterns for Tinyvue \u7ec4\u4ef6\u5e93\u5f00\u53d1\u52a9\u624b",
       "source": "opentiny/agent-skills",
       "tags": [
         "vue",
@@ -125600,6 +125600,805 @@
       "description": "Best practices and patterns for Lottie",
       "source": "mindrally/skills",
       "tags": []
+    },
+    {
+      "id": "muratcankoylan/Agent-Skills-for-Context-Engineering/collection",
+      "name": "Context Engineering",
+      "description": "13 agent skills for context engineering - curating what goes into an LLM's context window. Cited in Peking University paper on Meta Context Engineering.",
+      "source": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+      "tags": [
+        "context-engineering",
+        "agents",
+        "collection"
+      ],
+      "type": "collection"
+    },
+    {
+      "id": "muratcankoylan/Agent-Skills-for-Context-Engineering/context-fundamentals",
+      "name": "Context Fundamentals",
+      "description": "Anatomy of context windows, attention budgets, progressive disclosure, and context quality principles for LLM agents",
+      "source": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+      "tags": [
+        "context-engineering",
+        "fundamentals",
+        "llm",
+        "agents"
+      ]
+    },
+    {
+      "id": "muratcankoylan/Agent-Skills-for-Context-Engineering/context-degradation",
+      "name": "Context Degradation",
+      "description": "Diagnose lost-in-middle, context poisoning, distraction, confusion, and clash patterns in LLM agents",
+      "source": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+      "tags": [
+        "context-engineering",
+        "debugging",
+        "degradation",
+        "agents"
+      ]
+    },
+    {
+      "id": "muratcankoylan/Agent-Skills-for-Context-Engineering/context-compression",
+      "name": "Context Compression",
+      "description": "Anchored iterative summarization, regenerative summaries, opaque compression, and tokens-per-task metrics",
+      "source": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+      "tags": [
+        "context-engineering",
+        "compression",
+        "summarization",
+        "tokens"
+      ]
+    },
+    {
+      "id": "muratcankoylan/Agent-Skills-for-Context-Engineering/context-optimization",
+      "name": "Context Optimization",
+      "description": "Compaction strategies, observation masking, KV-cache optimization, and context partitioning for token efficiency",
+      "source": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+      "tags": [
+        "context-engineering",
+        "optimization",
+        "kv-cache",
+        "tokens"
+      ]
+    },
+    {
+      "id": "muratcankoylan/Agent-Skills-for-Context-Engineering/multi-agent-patterns",
+      "name": "Multi-Agent Patterns",
+      "description": "Supervisor, peer-to-peer swarm, and hierarchical patterns with context isolation and consensus protocols",
+      "source": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+      "tags": [
+        "multi-agent",
+        "patterns",
+        "orchestration",
+        "swarm"
+      ]
+    },
+    {
+      "id": "muratcankoylan/Agent-Skills-for-Context-Engineering/memory-systems",
+      "name": "Memory Systems",
+      "description": "Framework comparison (Mem0, Zep, Letta, Cognee, LangMem) with retrieval strategies and anti-patterns",
+      "source": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+      "tags": [
+        "memory",
+        "knowledge-graph",
+        "retrieval",
+        "agents"
+      ]
+    },
+    {
+      "id": "muratcankoylan/Agent-Skills-for-Context-Engineering/tool-design",
+      "name": "Tool Design",
+      "description": "Consolidation principle, architectural reduction (17 tools to 2), MCP naming, and tool description optimization",
+      "source": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+      "tags": [
+        "tools",
+        "mcp",
+        "design",
+        "agents"
+      ]
+    },
+    {
+      "id": "muratcankoylan/Agent-Skills-for-Context-Engineering/filesystem-context",
+      "name": "Filesystem Context",
+      "description": "Scratch pads, plan persistence, sub-agent communication, dynamic skill loading via filesystem",
+      "source": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+      "tags": [
+        "filesystem",
+        "context",
+        "scratch-pad",
+        "agents"
+      ]
+    },
+    {
+      "id": "muratcankoylan/Agent-Skills-for-Context-Engineering/hosted-agents",
+      "name": "Hosted Agents",
+      "description": "Background agents, sandboxed execution, warm pools, snapshot/restore, multiplayer, and self-spawning patterns",
+      "source": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+      "tags": [
+        "hosted",
+        "sandbox",
+        "infrastructure",
+        "agents"
+      ]
+    },
+    {
+      "id": "muratcankoylan/Agent-Skills-for-Context-Engineering/evaluation",
+      "name": "Agent Evaluation",
+      "description": "Multi-dimensional rubrics, LLM-as-judge, degradation testing, and continuous evaluation pipelines",
+      "source": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+      "tags": [
+        "evaluation",
+        "testing",
+        "quality",
+        "agents"
+      ]
+    },
+    {
+      "id": "muratcankoylan/Agent-Skills-for-Context-Engineering/advanced-evaluation",
+      "name": "Advanced Evaluation",
+      "description": "LLM-as-judge with bias mitigation (position, length, self-enhancement), pairwise comparison, and confidence calibration",
+      "source": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+      "tags": [
+        "evaluation",
+        "llm-judge",
+        "bias",
+        "pairwise"
+      ]
+    },
+    {
+      "id": "muratcankoylan/Agent-Skills-for-Context-Engineering/project-development",
+      "name": "Project Development",
+      "description": "Task-model fit assessment, batch pipeline architecture, filesystem as state machine, and structured output design",
+      "source": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+      "tags": [
+        "project",
+        "pipeline",
+        "development",
+        "batch"
+      ]
+    },
+    {
+      "id": "muratcankoylan/Agent-Skills-for-Context-Engineering/bdi-mental-states",
+      "name": "BDI Mental States",
+      "description": "Belief-Desire-Intention cognitive architecture, T2B2T paradigm, RDF knowledge graphs, and SPARQL validation",
+      "source": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+      "tags": [
+        "bdi",
+        "cognitive",
+        "ontology",
+        "knowledge-graph"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/collection",
+      "name": "Antigravity Awesome Skills",
+      "description": "954+ agentic skills for Claude Code, Gemini CLI, Cursor, Copilot and more. The ultimate community skill registry.",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "agents",
+        "skills",
+        "collection",
+        "community"
+      ],
+      "type": "collection"
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/architecture",
+      "name": "Architecture",
+      "description": "Architectural decision-making: requirements, trade-offs, ADR documentation",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "architecture",
+        "design",
+        "adr"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/domain-driven-design",
+      "name": "Domain-Driven Design",
+      "description": "DDD strategic and tactical patterns: bounded contexts, aggregates, repositories",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "ddd",
+        "architecture",
+        "design"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/multi-agent-patterns",
+      "name": "Multi-Agent Patterns",
+      "description": "Orchestrator, peer-to-peer, and hierarchical multi-agent architectures",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "multi-agent",
+        "orchestration",
+        "swarm"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/tool-design",
+      "name": "Tool Design",
+      "description": "Build tools that agents can use effectively with consolidation principle",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "tools",
+        "agents",
+        "mcp"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/event-sourcing-architect",
+      "name": "Event Sourcing Architect",
+      "description": "Event sourcing, CQRS, and event-driven architecture patterns",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "event-sourcing",
+        "cqrs",
+        "architecture"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/monorepo-architect",
+      "name": "Monorepo Architect",
+      "description": "Nx, Turborepo, dependency management at scale",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "monorepo",
+        "nx",
+        "turborepo"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/prompt-engineering",
+      "name": "Prompt Engineering",
+      "description": "Prompt engineering patterns, best practices, optimization",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "prompts",
+        "llm",
+        "engineering"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/ethical-hacking-methodology",
+      "name": "Ethical Hacking Methodology",
+      "description": "Full ethical hacking lifecycle framework for authorized testing",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "security",
+        "pentest",
+        "hacking"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/vulnerability-scanner",
+      "name": "Vulnerability Scanner",
+      "description": "OWASP 2025, supply chain security, attack surface mapping",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "security",
+        "owasp",
+        "scanning"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/threat-modeling-expert",
+      "name": "Threat Modeling Expert",
+      "description": "Threat modeling methodologies and security architecture review",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "security",
+        "threat-modeling",
+        "architecture"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/api-security-best-practices",
+      "name": "API Security Best Practices",
+      "description": "Authentication, authorization, input validation, rate limiting for APIs",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "security",
+        "api",
+        "auth"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/k8s-security-policies",
+      "name": "K8s Security Policies",
+      "description": "Kubernetes NetworkPolicy, PodSecurityPolicy, RBAC hardening",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "kubernetes",
+        "security",
+        "rbac"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/secrets-management",
+      "name": "Secrets Management",
+      "description": "Vault, AWS Secrets Manager, native CI/CD secrets management",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "security",
+        "secrets",
+        "vault"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/kubernetes-architect",
+      "name": "Kubernetes Architect",
+      "description": "Cloud-native infrastructure, advanced GitOps patterns",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "kubernetes",
+        "gitops",
+        "infrastructure"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/terraform-infrastructure",
+      "name": "Terraform Infrastructure",
+      "description": "Terraform IaC for cloud provisioning across AWS, Azure, GCP",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "terraform",
+        "iac",
+        "cloud"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/docker-expert",
+      "name": "Docker Expert",
+      "description": "Multi-stage builds, image optimization, containerization best practices",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "docker",
+        "containers",
+        "devops"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/cloud-architect",
+      "name": "Cloud Architect",
+      "description": "AWS/Azure/GCP multi-cloud infrastructure design",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "cloud",
+        "aws",
+        "azure",
+        "gcp"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/github-actions-templates",
+      "name": "GitHub Actions Templates",
+      "description": "Production-ready GitHub Actions CI/CD workflows",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "github-actions",
+        "cicd",
+        "automation"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/observability-engineer",
+      "name": "Observability Engineer",
+      "description": "Monitoring, logging, tracing systems for production",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "observability",
+        "monitoring",
+        "tracing"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/istio-traffic-management",
+      "name": "Istio Traffic Management",
+      "description": "Istio routing, load balancing, circuit breakers, canary deployments",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "istio",
+        "service-mesh",
+        "kubernetes"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/ai-engineer",
+      "name": "AI Engineer",
+      "description": "Production-ready LLM applications, advanced RAG, intelligent agents",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "ai",
+        "llm",
+        "rag",
+        "agents"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/rag-engineer",
+      "name": "RAG Engineer",
+      "description": "RAG systems: embedding models, vector databases, retrieval optimization",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "rag",
+        "embeddings",
+        "vector-db"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/langgraph",
+      "name": "LangGraph",
+      "description": "Stateful multi-actor AI applications with LangGraph",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "langgraph",
+        "agents",
+        "ai"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/voice-ai-development",
+      "name": "Voice AI Development",
+      "description": "Real-time voice agents and voice-enabled applications",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "voice",
+        "ai",
+        "real-time"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/computer-vision-expert",
+      "name": "Computer Vision Expert",
+      "description": "YOLO, SAM 3, Vision Language Models (2026 SOTA)",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "cv",
+        "yolo",
+        "vlm"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/data-scientist",
+      "name": "Data Scientist",
+      "description": "Advanced analytics, ML, statistical modeling",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "data-science",
+        "ml",
+        "analytics"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/embedding-strategies",
+      "name": "Embedding Strategies",
+      "description": "Select and optimize embedding models for semantic search and RAG",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "embeddings",
+        "search",
+        "rag"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/react-best-practices",
+      "name": "React Best Practices",
+      "description": "React and Next.js performance optimization from Vercel Engineering",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "react",
+        "nextjs",
+        "performance"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/typescript-pro",
+      "name": "TypeScript Pro",
+      "description": "TypeScript with strict type safety and advanced patterns",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "typescript",
+        "types",
+        "javascript"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/python-pro",
+      "name": "Python Pro",
+      "description": "Python 3.12+ with modern features, async, performance",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "python",
+        "async",
+        "performance"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/golang-pro",
+      "name": "Golang Pro",
+      "description": "Go 1.21+ with modern patterns, concurrency, performance",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "go",
+        "concurrency",
+        "performance"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/rust-pro",
+      "name": "Rust Pro",
+      "description": "Rust 1.75+ with modern async, advanced type system",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "rust",
+        "async",
+        "systems"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/nextjs-app-router-patterns",
+      "name": "Next.js App Router Patterns",
+      "description": "Next.js 14+ App Router, Server Components, streaming",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "nextjs",
+        "react",
+        "server-components"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/fastapi-pro",
+      "name": "FastAPI Pro",
+      "description": "High-performance async APIs with FastAPI, SQLAlchemy 2.0, Pydantic V2",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "fastapi",
+        "python",
+        "api"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/django-pro",
+      "name": "Django Pro",
+      "description": "Django 5.x with async views, DRF, Celery, Channels",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "django",
+        "python",
+        "backend"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/flutter-expert",
+      "name": "Flutter Expert",
+      "description": "Dart 3, advanced widgets, multi-platform Flutter",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "flutter",
+        "dart",
+        "mobile"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/ios-developer",
+      "name": "iOS Developer",
+      "description": "Native iOS with Swift/SwiftUI, iOS 18, Core frameworks",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "ios",
+        "swift",
+        "swiftui"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/shopify-development",
+      "name": "Shopify Development",
+      "description": "Shopify extensions, themes, Liquid, Shopify CLI",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "shopify",
+        "ecommerce",
+        "liquid"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/tdd-orchestrator",
+      "name": "TDD Orchestrator",
+      "description": "Master TDD orchestrator: red-green-refactor discipline",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "tdd",
+        "testing",
+        "workflow"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/playwright-skill",
+      "name": "Playwright Skill",
+      "description": "Complete browser automation: detects dev servers, writes clean tests",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "playwright",
+        "e2e",
+        "testing"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/systematic-debugging",
+      "name": "Systematic Debugging",
+      "description": "Systematic debugging before proposing fixes",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "debugging",
+        "testing",
+        "diagnostics"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/crewai",
+      "name": "CrewAI",
+      "description": "Role-based multi-agent framework used by 60% of Fortune 500",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "crewai",
+        "multi-agent",
+        "automation"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/jira-automation",
+      "name": "Jira Automation",
+      "description": "Jira issues, projects, sprints, boards automation via Composio",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "jira",
+        "automation",
+        "project-management"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/linear-automation",
+      "name": "Linear Automation",
+      "description": "Linear issues, projects, cycles, teams automation",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "linear",
+        "automation",
+        "project-management"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/slack-automation",
+      "name": "Notion Automation",
+      "description": "Notion pages, databases, blocks, comments automation",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "notion",
+        "automation",
+        "productivity"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/seo-fundamentals",
+      "name": "SEO Fundamentals",
+      "description": "E-E-A-T, Core Web Vitals, technical SEO foundations",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "seo",
+        "marketing",
+        "web"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/startup-analyst",
+      "name": "Startup Analyst",
+      "description": "Market sizing, financial modeling, competitive analysis",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "startup",
+        "analysis",
+        "business"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/copywriting",
+      "name": "Copywriting",
+      "description": "Conversion-focused marketing copy for landing pages and emails",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "copywriting",
+        "marketing",
+        "content"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/context-fundamentals",
+      "name": "Context Fundamentals",
+      "description": "What context is and why it matters in agent systems",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "context",
+        "agents",
+        "fundamentals"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/context-compression",
+      "name": "Context Compression",
+      "description": "Compression strategies for long-running agent sessions",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "context",
+        "compression",
+        "tokens"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/memory-systems",
+      "name": "Memory Systems",
+      "description": "Design short-term, long-term, and graph-based memory architectures for agents",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "memory",
+        "agents",
+        "knowledge-graph"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/mcp-builder",
+      "name": "MCP Builder",
+      "description": "Create high-quality MCP servers for LLM interactions",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "mcp",
+        "servers",
+        "llm"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/claude-code-guide",
+      "name": "Claude Code Guide",
+      "description": "Master guide for using Claude Code effectively",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "claude-code",
+        "guide",
+        "workflow"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/app-builder",
+      "name": "App Builder",
+      "description": "Full-stack application builder orchestrator with 13 templates",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "fullstack",
+        "builder",
+        "templates"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/loki-mode",
+      "name": "Loki Mode",
+      "description": "Multi-agent autonomous startup system with 100+ specialists",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "multi-agent",
+        "startup",
+        "autonomous"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/skill-creator",
+      "name": "Skill Creator",
+      "description": "Create new custom skills following best practices",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "skills",
+        "meta",
+        "creation"
+      ]
     }
   ]
 }
