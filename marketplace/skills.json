@@ -2,7 +2,7 @@
   "$schema": "./schema.json",
   "version": 1,
   "updatedAt": "2026-02-28",
-  "totalSkills": 15136,
+  "totalSkills": 15120,
   "curatedCollections": 33,
   "skills": [
     {
@@ -2708,15 +2708,6 @@
       ]
     },
     {
-      "id": "sickn33/antigravity-awesome-skills/playwright-skill",
-      "name": "Playwright Skill",
-      "description": "Best practices and patterns for Playwright Skill",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "testing"
-      ]
-    },
-    {
       "id": "wshobson/agents/dependency-upgrade",
       "name": "Dependency Upgrade",
       "description": "Best practices and patterns for Dependency Upgrade",
@@ -2799,15 +2790,6 @@
       "source": "cloudai-x/threejs-skills",
       "tags": [
         "ai"
-      ]
-    },
-    {
-      "id": "sickn33/antigravity-awesome-skills/docker-expert",
-      "name": "Docker Expert",
-      "description": "Best practices and patterns for Docker Expert",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "devops"
       ]
     },
     {
@@ -4040,13 +4022,6 @@
       ]
     },
     {
-      "id": "sickn33/antigravity-awesome-skills/prompt-engineering",
-      "name": "Prompt Engineering",
-      "description": "Best practices and patterns for Prompt Engineering",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": []
-    },
-    {
       "id": "trailofbits/skills/codeql",
       "name": "Codeql",
       "description": "Best practices and patterns for Codeql",
@@ -4334,13 +4309,6 @@
       ]
     },
     {
-      "id": "sickn33/antigravity-awesome-skills/architecture",
-      "name": "Architecture",
-      "description": "Best practices and patterns for Architecture",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": []
-    },
-    {
       "id": "sickn33/antigravity-awesome-skills/react-ui-patterns",
       "name": "React Ui Patterns",
       "description": "Best practices and patterns for React Ui Patterns",
@@ -4441,13 +4409,6 @@
       "tags": []
     },
     {
-      "id": "sickn33/antigravity-awesome-skills/shopify-development",
-      "name": "Shopify Development",
-      "description": "Best practices and patterns for Shopify Development",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": []
-    },
-    {
       "id": "composiohq/awesome-claude-skills/invoice-organizer",
       "name": "Invoice Organizer",
       "description": "Best practices and patterns for Invoice Organizer",
@@ -4499,15 +4460,6 @@
       "source": "stripe/ai",
       "tags": [
         "ai"
-      ]
-    },
-    {
-      "id": "sickn33/antigravity-awesome-skills/seo-fundamentals",
-      "name": "Seo Fundamentals",
-      "description": "Best practices and patterns for Seo Fundamentals",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "marketing"
       ]
     },
     {
@@ -4578,13 +4530,6 @@
       "name": "Pr Creator",
       "description": "Best practices and patterns for Pr Creator",
       "source": "google-gemini/gemini-cli",
-      "tags": []
-    },
-    {
-      "id": "sickn33/antigravity-awesome-skills/vulnerability-scanner",
-      "name": "Vulnerability Scanner",
-      "description": "Best practices and patterns for Vulnerability Scanner",
-      "source": "sickn33/antigravity-awesome-skills",
       "tags": []
     },
     {
@@ -4807,15 +4752,6 @@
       "tags": []
     },
     {
-      "id": "sickn33/antigravity-awesome-skills/app-builder",
-      "name": "App Builder",
-      "description": "Best practices and patterns for App Builder",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "frontend"
-      ]
-    },
-    {
       "id": "waynesutton/convexskills/convex-security-check",
       "name": "Convex security check",
       "description": "Best practices and patterns for Convex Security Check",
@@ -5000,15 +4936,6 @@
       "tags": []
     },
     {
-      "id": "sickn33/antigravity-awesome-skills/claude-code-guide",
-      "name": "Claude code guide",
-      "description": "Best practices and patterns for Claude Code Guide",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "frontend"
-      ]
-    },
-    {
       "id": "mrgoonie/claudekit-skills/debugging",
       "name": "Debugging",
       "description": "Best practices and patterns for Debugging",
@@ -5024,13 +4951,6 @@
         "typescript",
         "ai"
       ]
-    },
-    {
-      "id": "sickn33/antigravity-awesome-skills/langgraph",
-      "name": "Langgraph",
-      "description": "Best practices and patterns for Langgraph",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": []
     },
     {
       "id": "davila7/claude-code-templates/ux-researcher-designer",
@@ -5533,16 +5453,6 @@
       "tags": []
     },
     {
-      "id": "sickn33/antigravity-awesome-skills/api-security-best-practices",
-      "name": "Api Security Best Practices",
-      "description": "Best practices and patterns for Api Security Best Practices",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "backend",
-        "security"
-      ]
-    },
-    {
       "id": "sickn33/antigravity-awesome-skills/autonomous-agents",
       "name": "Autonomous Agents",
       "description": "Best practices and patterns for Autonomous Agents",
@@ -5603,13 +5513,6 @@
       "id": "sickn33/antigravity-awesome-skills/red-team-tactics",
       "name": "Red Team Tactics",
       "description": "Best practices and patterns for Red Team Tactics",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": []
-    },
-    {
-      "id": "sickn33/antigravity-awesome-skills/rag-engineer",
-      "name": "Rag Engineer",
-      "description": "Best practices and patterns for Rag Engineer",
       "source": "sickn33/antigravity-awesome-skills",
       "tags": []
     },
@@ -5751,15 +5654,6 @@
       "description": "Best practices and patterns for Hono Routing",
       "source": "jezweb/claude-skills",
       "tags": []
-    },
-    {
-      "id": "sickn33/antigravity-awesome-skills/voice-ai-development",
-      "name": "Voice Ai Development",
-      "description": "Best practices and patterns for Voice Ai Development",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "ai"
-      ]
     },
     {
       "id": "sickn33/antigravity-awesome-skills/aws-serverless",
@@ -6078,13 +5972,6 @@
       ]
     },
     {
-      "id": "sickn33/antigravity-awesome-skills/ethical-hacking-methodology",
-      "name": "Ethical hacking methodology",
-      "description": "Best practices and patterns for Ethical Hacking Methodology",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": []
-    },
-    {
       "id": "jezweb/claude-skills/cloudflare-d1",
       "name": "Cloudflare D1",
       "description": "Best practices and patterns for Cloudflare D1",
@@ -6107,15 +5994,6 @@
       "source": "sickn33/antigravity-awesome-skills",
       "tags": [
         "devops",
-        "ai"
-      ]
-    },
-    {
-      "id": "sickn33/antigravity-awesome-skills/crewai",
-      "name": "Crewai",
-      "description": "Best practices and patterns for Crewai",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
         "ai"
       ]
     },
@@ -6259,13 +6137,6 @@
       "name": "Tanstack table",
       "description": "Best practices and patterns for Tanstack Table",
       "source": "jezweb/claude-skills",
-      "tags": []
-    },
-    {
-      "id": "sickn33/antigravity-awesome-skills/loki-mode",
-      "name": "Loki Mode",
-      "description": "Best practices and patterns for Loki Mode",
-      "source": "sickn33/antigravity-awesome-skills",
       "tags": []
     },
     {
@@ -125783,17 +125654,6 @@
       "type": "collection"
     },
     {
-      "id": "sickn33/antigravity-awesome-skills/architecture",
-      "name": "Architecture",
-      "description": "Architectural decision-making: requirements, trade-offs, ADR documentation",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "architecture",
-        "design",
-        "adr"
-      ]
-    },
-    {
       "id": "sickn33/antigravity-awesome-skills/domain-driven-design",
       "name": "Domain-Driven Design",
       "description": "DDD strategic and tactical patterns: bounded contexts, aggregates, repositories",
@@ -125849,39 +125709,6 @@
       ]
     },
     {
-      "id": "sickn33/antigravity-awesome-skills/prompt-engineering",
-      "name": "Prompt Engineering",
-      "description": "Prompt engineering patterns, best practices, optimization",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "prompts",
-        "llm",
-        "engineering"
-      ]
-    },
-    {
-      "id": "sickn33/antigravity-awesome-skills/ethical-hacking-methodology",
-      "name": "Ethical Hacking Methodology",
-      "description": "Full ethical hacking lifecycle framework for authorized testing",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "security",
-        "pentest",
-        "hacking"
-      ]
-    },
-    {
-      "id": "sickn33/antigravity-awesome-skills/vulnerability-scanner",
-      "name": "Vulnerability Scanner",
-      "description": "OWASP 2025, supply chain security, attack surface mapping",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "security",
-        "owasp",
-        "scanning"
-      ]
-    },
-    {
       "id": "sickn33/antigravity-awesome-skills/threat-modeling-expert",
       "name": "Threat Modeling Expert",
       "description": "Threat modeling methodologies and security architecture review",
@@ -125890,17 +125717,6 @@
         "security",
         "threat-modeling",
         "architecture"
-      ]
-    },
-    {
-      "id": "sickn33/antigravity-awesome-skills/api-security-best-practices",
-      "name": "API Security Best Practices",
-      "description": "Authentication, authorization, input validation, rate limiting for APIs",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "security",
-        "api",
-        "auth"
       ]
     },
     {
@@ -125945,17 +125761,6 @@
         "terraform",
         "iac",
         "cloud"
-      ]
-    },
-    {
-      "id": "sickn33/antigravity-awesome-skills/docker-expert",
-      "name": "Docker Expert",
-      "description": "Multi-stage builds, image optimization, containerization best practices",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "docker",
-        "containers",
-        "devops"
       ]
     },
     {
@@ -126013,39 +125818,6 @@
         "llm",
         "rag",
         "agents"
-      ]
-    },
-    {
-      "id": "sickn33/antigravity-awesome-skills/rag-engineer",
-      "name": "RAG Engineer",
-      "description": "RAG systems: embedding models, vector databases, retrieval optimization",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "rag",
-        "embeddings",
-        "vector-db"
-      ]
-    },
-    {
-      "id": "sickn33/antigravity-awesome-skills/langgraph",
-      "name": "LangGraph",
-      "description": "Stateful multi-actor AI applications with LangGraph",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "langgraph",
-        "agents",
-        "ai"
-      ]
-    },
-    {
-      "id": "sickn33/antigravity-awesome-skills/voice-ai-development",
-      "name": "Voice AI Development",
-      "description": "Real-time voice agents and voice-enabled applications",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "voice",
-        "ai",
-        "real-time"
       ]
     },
     {
@@ -126192,17 +125964,6 @@
       ]
     },
     {
-      "id": "sickn33/antigravity-awesome-skills/shopify-development",
-      "name": "Shopify Development",
-      "description": "Shopify extensions, themes, Liquid, Shopify CLI",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "shopify",
-        "ecommerce",
-        "liquid"
-      ]
-    },
-    {
       "id": "sickn33/antigravity-awesome-skills/tdd-orchestrator",
       "name": "TDD Orchestrator",
       "description": "Master TDD orchestrator: red-green-refactor discipline",
@@ -126214,17 +125975,6 @@
       ]
     },
     {
-      "id": "sickn33/antigravity-awesome-skills/playwright-skill",
-      "name": "Playwright Skill",
-      "description": "Complete browser automation: detects dev servers, writes clean tests",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "playwright",
-        "e2e",
-        "testing"
-      ]
-    },
-    {
       "id": "sickn33/antigravity-awesome-skills/systematic-debugging",
       "name": "Systematic Debugging",
       "description": "Systematic debugging before proposing fixes",
@@ -126233,17 +125983,6 @@
         "debugging",
         "testing",
         "diagnostics"
-      ]
-    },
-    {
-      "id": "sickn33/antigravity-awesome-skills/crewai",
-      "name": "CrewAI",
-      "description": "Role-based multi-agent framework used by 60% of Fortune 500",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "crewai",
-        "multi-agent",
-        "automation"
       ]
     },
     {
@@ -126269,7 +126008,7 @@
       ]
     },
     {
-      "id": "sickn33/antigravity-awesome-skills/slack-automation",
+      "id": "sickn33/antigravity-awesome-skills/notion-automation",
       "name": "Notion Automation",
       "description": "Notion pages, databases, blocks, comments automation",
       "source": "sickn33/antigravity-awesome-skills",
@@ -126277,17 +126016,6 @@
         "notion",
         "automation",
         "productivity"
-      ]
-    },
-    {
-      "id": "sickn33/antigravity-awesome-skills/seo-fundamentals",
-      "name": "SEO Fundamentals",
-      "description": "E-E-A-T, Core Web Vitals, technical SEO foundations",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "seo",
-        "marketing",
-        "web"
       ]
     },
     {
@@ -126357,14 +126085,91 @@
       ]
     },
     {
-      "id": "sickn33/antigravity-awesome-skills/claude-code-guide",
-      "name": "Claude Code Guide",
-      "description": "Master guide for using Claude Code effectively",
+      "id": "sickn33/antigravity-awesome-skills/skill-creator",
+      "name": "Skill Creator",
+      "description": "Create new custom skills following best practices",
       "source": "sickn33/antigravity-awesome-skills",
       "tags": [
-        "claude-code",
-        "guide",
-        "workflow"
+        "skills",
+        "meta",
+        "creation"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/playwright-skill",
+      "name": "Playwright Skill",
+      "description": "Complete browser automation: detects dev servers, writes clean tests",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "playwright",
+        "e2e",
+        "testing"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/docker-expert",
+      "name": "Docker Expert",
+      "description": "Multi-stage builds, image optimization, containerization best practices",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "docker",
+        "containers",
+        "devops"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/prompt-engineering",
+      "name": "Prompt Engineering",
+      "description": "Prompt engineering patterns, best practices, optimization",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "prompts",
+        "llm",
+        "engineering"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/architecture",
+      "name": "Architecture",
+      "description": "Architectural decision-making: requirements, trade-offs, ADR documentation",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "architecture",
+        "design",
+        "adr"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/shopify-development",
+      "name": "Shopify Development",
+      "description": "Shopify extensions, themes, Liquid, Shopify CLI",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "shopify",
+        "ecommerce",
+        "liquid"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/seo-fundamentals",
+      "name": "SEO Fundamentals",
+      "description": "E-E-A-T, Core Web Vitals, technical SEO foundations",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "seo",
+        "marketing",
+        "web"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/vulnerability-scanner",
+      "name": "Vulnerability Scanner",
+      "description": "OWASP 2025, supply chain security, attack surface mapping",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "security",
+        "owasp",
+        "scanning"
       ]
     },
     {
@@ -126379,6 +126184,83 @@
       ]
     },
     {
+      "id": "sickn33/antigravity-awesome-skills/claude-code-guide",
+      "name": "Claude Code Guide",
+      "description": "Master guide for using Claude Code effectively",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "claude-code",
+        "guide",
+        "workflow"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/langgraph",
+      "name": "LangGraph",
+      "description": "Stateful multi-actor AI applications with LangGraph",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "langgraph",
+        "agents",
+        "ai"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/api-security-best-practices",
+      "name": "API Security Best Practices",
+      "description": "Authentication, authorization, input validation, rate limiting for APIs",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "security",
+        "api",
+        "auth"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/rag-engineer",
+      "name": "RAG Engineer",
+      "description": "RAG systems: embedding models, vector databases, retrieval optimization",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "rag",
+        "embeddings",
+        "vector-db"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/voice-ai-development",
+      "name": "Voice AI Development",
+      "description": "Real-time voice agents and voice-enabled applications",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "voice",
+        "ai",
+        "real-time"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/ethical-hacking-methodology",
+      "name": "Ethical Hacking Methodology",
+      "description": "Full ethical hacking lifecycle framework for authorized testing",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "security",
+        "pentest",
+        "hacking"
+      ]
+    },
+    {
+      "id": "sickn33/antigravity-awesome-skills/crewai",
+      "name": "CrewAI",
+      "description": "Role-based multi-agent framework used by 60% of Fortune 500",
+      "source": "sickn33/antigravity-awesome-skills",
+      "tags": [
+        "crewai",
+        "multi-agent",
+        "automation"
+      ]
+    },
+    {
       "id": "sickn33/antigravity-awesome-skills/loki-mode",
       "name": "Loki Mode",
       "description": "Multi-agent autonomous startup system with 100+ specialists",
@@ -126387,17 +126269,6 @@
         "multi-agent",
         "startup",
         "autonomous"
-      ]
-    },
-    {
-      "id": "sickn33/antigravity-awesome-skills/skill-creator",
-      "name": "Skill Creator",
-      "description": "Create new custom skills following best practices",
-      "source": "sickn33/antigravity-awesome-skills",
-      "tags": [
-        "skills",
-        "meta",
-        "creation"
       ]
     }
   ]
