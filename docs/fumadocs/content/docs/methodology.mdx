@@ -1,0 +1,93 @@
+---
+title: Methodology Packs
+description: Curated skill packs for debugging, testing, planning, and collaboration
+---
+
+# Methodology Packs
+
+Methodology packs are curated collections of skills that guide AI agents through structured workflows. Each pack bundles related skills around a domain — debugging, testing, planning, or collaboration.
+
+## Available Packs
+
+| Pack | Skills | Description |
+|------|--------|-------------|
+| **debugging** | root-cause-analysis, trace-and-isolate, hypothesis-testing | Systematic bug investigation |
+| **testing** | red-green-refactor, test-patterns, anti-patterns | Test-driven development |
+| **planning** | design-first, task-decomposition, verification-gates | Design and decomposition |
+| **collaboration** | structured-review, parallel-investigation, handoff-protocols | Code review and handoffs |
+| **meta** | skill-authoring | Writing effective skills |
+
+## Commands
+
+```bash
+skillkit methodology list                    # List available packs
+skillkit methodology install debugging       # Install a pack
+skillkit methodology apply testing           # Apply pack to current project
+skillkit methodology validate planning       # Validate pack skills
+skillkit methodology load collaboration      # Load pack into agent context
+```
+
+## Pack Structure
+
+Each pack lives under `packages/core/src/methodology/packs/` with this structure:
+
+```
+packs/
+  debugging/
+    pack.json           # Pack manifest (name, skills, tags)
+    root-cause-analysis/
+      SKILL.md          # Skill content
+    trace-and-isolate/
+      SKILL.md
+    hypothesis-testing/
+      SKILL.md
+```
+
+## Skills Reference
+
+### Debugging
+
+- **root-cause-analysis** — Five Whys method, structured investigation phases, evidence collection, causal chain verification
+- **trace-and-isolate** — Binary search debugging, git bisect, strategic logging, component isolation, minimal reproduction
+- **hypothesis-testing** — Scientific method for debugging: observe, hypothesize, predict, test, conclude
+
+### Testing
+
+- **red-green-refactor** — Write a failing test, make it pass with minimal code, then refactor while green
+- **test-patterns** — AAA, Given-When-Then, Test Data Builders, Object Mother, parameterized tests, fixtures, spies
+- **anti-patterns** — Flaky tests, over-mocking, brittle assertions, test interdependency, hidden logic
+
+### Planning
+
+- **design-first** — Technical design documents before code: architecture, data models, API definitions, trade-off analysis
+- **task-decomposition** — Vertical slicing, horizontal layering, workflow and component decomposition
+- **verification-gates** — Validation checkpoints between phases with checklists and approval criteria
+
+### Collaboration
+
+- **structured-review** — Five-stage code review: requirements, correctness, quality, testing, security
+- **parallel-investigation** — Coordinate multiple investigation threads with sync points and convergence decisions
+- **handoff-protocols** — Structured work transitions: planned, unplanned, and partial handoffs
+
+### Meta
+
+- **skill-authoring** — Guidelines for writing SKILL.md files: frontmatter, triggers, directive language, content patterns
+
+## Using with Agents
+
+Once installed, methodology skills activate automatically based on trigger phrases. For example:
+
+```
+You: "I need to debug this failing API endpoint"
+Agent: [Activates root-cause-analysis skill]
+
+You: "Let's write tests first for this feature"
+Agent: [Activates red-green-refactor skill]
+
+You: "Break down this feature into tasks"
+Agent: [Activates task-decomposition skill]
+```
+
+## TUI Integration
+
+Access methodology packs from the TUI by pressing `o` (Methodology screen). Browse, install, and apply packs interactively.

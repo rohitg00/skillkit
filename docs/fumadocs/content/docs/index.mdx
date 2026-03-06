@@ -31,9 +31,10 @@ Four commands. Your agents now have skills for PDF processing, code review, and 
 ### Install skills from anywhere
 
 ```bash
-skillkit install anthropics/skills          # GitHub
-skillkit install gitlab:team/skills         # GitLab
-skillkit install ./my-local-skills          # Local
+skillkit install anthropics/skills              # GitHub
+skillkit install skills.sh/owner/repo/skill     # skills.sh registry
+skillkit install gitlab:team/skills             # GitLab
+skillkit install ./my-local-skills              # Local
 ```
 
 ### Translate between agents
@@ -167,10 +168,11 @@ Team members run `skillkit manifest install` and they're in sync.
 
 - [Installation](/docs/installation) — Install and configure
 - [Quick Start](/docs/quickstart) — First project setup
+- [Methodology Packs](/docs/methodology) — Debugging, testing, planning skills
 - [Security Scanner](/docs/security) — Threat detection for skills
 - [Commands](/docs/commands) — Full CLI reference
 - [REST API](/docs/rest-api) — Runtime discovery server
 - [MCP Server](/docs/mcp-server) — Agent-native discovery
 - [Python Client](/docs/python-client) — Python SDK
 
-**Current version:** v1.18.0 | [npm](https://www.npmjs.com/package/skillkit) | [GitHub](https://github.com/rohitg00/skillkit) | Apache-2.0
+**Current version:** v1.19.2 | [npm](https://www.npmjs.com/package/skillkit) | [GitHub](https://github.com/rohitg00/skillkit) | Apache-2.0

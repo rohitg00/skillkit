@@ -17,16 +17,19 @@ const SHORTCUTS = [
     { key: 'r', desc: 'Recommendations' },
     { key: 'i', desc: 'Installed skills' },
     { key: 's', desc: 'Sync settings' },
-    { key: 'f', desc: 'Find skills' },
   ]},
   { section: 'Actions', items: [
     { key: 't', desc: 'Translate skills' },
     { key: 'w', desc: 'Workflows' },
     { key: 'x', desc: 'Execute' },
     { key: 'n', desc: 'Plan' },
-    { key: 'v', desc: 'Validate' },
     { key: 'u', desc: 'Publish' },
     { key: 'z', desc: 'Security scan' },
+  ]},
+  { section: 'Session', items: [
+    { key: 'l', desc: 'Timeline' },
+    { key: 'v', desc: 'Lineage' },
+    { key: 'f', desc: 'Handoff' },
   ]},
   { section: 'Team & Config', items: [
     { key: 'a', desc: 'Team settings' },
