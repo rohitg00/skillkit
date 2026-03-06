@@ -1,6 +1,6 @@
 ---
-name: Parallel Investigation
-description: Coordinate multiple investigation threads for complex problems
+name: parallel-investigation
+description: Coordinates parallel investigation threads to simultaneously explore multiple hypotheses or root causes across different system areas. Use when debugging production incidents, slow API performance, multi-system integration failures, or complex bugs where the root cause is unclear and multiple plausible theories exist; when serial troubleshooting is too slow; or when multiple investigators can divide root-cause analysis work. Provides structured phases for problem decomposition, thread assignment, sync points with Continue/Pivot/Converge decisions, and final report synthesis.
 version: 1.0.0
 triggers:
   - investigate in parallel
@@ -22,28 +22,13 @@ relatedSkills:
 
 # Parallel Investigation
 
-You are coordinating parallel investigation threads to explore multiple hypotheses or approaches simultaneously. This is effective for complex problems where the root cause is unclear.
+Coordinate parallel investigation threads to explore multiple hypotheses simultaneously. Most effective for production incidents, performance regressions, or integration failures where the root cause is unclear.
 
 ## Core Principle
 
 **When uncertain, explore multiple paths in parallel. Converge when evidence points to an answer.**
 
-Parallel investigation reduces time-to-solution for complex problems by eliminating serial bottlenecks.
-
-## When to Use Parallel Investigation
-
-Use this methodology when:
-
-- Root cause is unknown with multiple plausible theories
-- Problem is complex with many interacting components
-- Time pressure requires faster resolution
-- Multiple team members are available
-- Initial investigation hasn't narrowed down the cause
-
-Don't use when:
-- Problem is straightforward
-- Only one likely cause
-- Resources are constrained
+Parallel investigation reduces time-to-solution by eliminating serial bottlenecks.
 
 ## Investigation Structure
 
@@ -65,10 +50,7 @@ Investigation Threads:
     └── Check third-party API response times
 ```
 
-Each thread should be:
-- Independent (can be investigated without blocking others)
-- Focused (clear scope and success criteria)
-- Time-boxed (defined duration before sync)
+Each thread should be independent (no blocking dependencies), focused (clear scope), and time-boxed.
 
 ### Phase 2: Thread Assignment
 
@@ -83,22 +65,16 @@ Assign threads with clear ownership:
 - Index utilization
 - Connection pool metrics
 **Report Format:** Summary + evidence
-
-## Thread B: Application Code
-**Investigator:** [Name/Agent B]
-...
 ```
 
 ### Phase 3: Parallel Execution
 
 Each thread follows this pattern:
 
-```
 1. Gather evidence specific to thread scope
 2. Document findings as you go
-3. Identify if thread is leading to answer or dead end
+3. Identify if thread is a lead or dead end
 4. Prepare summary for sync point
-```
 
 **Thread Log Template:**
 ```markdown
@@ -106,11 +82,10 @@ Each thread follows this pattern:
 **Start:** [Time]
 
 ### Findings
-- [Timestamp] [Finding 1]
-- [Timestamp] [Finding 2]
+- [Timestamp] [Finding]
 
 ### Evidence
-- [Screenshot/Log/Metric]
+- [Log/Metric/Screenshot]
 
 ### Preliminary Conclusion
 [What this thread suggests about the problem]
@@ -122,73 +97,29 @@ Regular convergence to share findings:
 
 ```
 Sync Point Agenda:
-1. Thread A report (2 min)
-2. Thread B report (2 min)
-3. Thread C report (2 min)
-4. Thread D report (2 min)
-5. Discussion & correlation (5 min)
-6. Decision: Continue, pivot, or converge (3 min)
+1. Each thread report (2 min each)
+2. Discussion & correlation (5 min)
+3. Decision: Continue, Pivot, or Converge (3 min)
 ```
 
 **Sync Point Decisions:**
-- **Continue**: Threads are progressing, continue parallel
+- **Continue**: Threads are progressing, maintain parallel execution
 - **Pivot**: Redirect threads based on new evidence
-- **Converge**: One thread found the answer, others join
+- **Converge**: One thread found the answer, others join to validate
 
 ### Phase 5: Convergence
 
 When a thread identifies the likely cause:
 
-1. **Validate** - Other threads verify the finding
-2. **Deep dive** - Focused investigation on identified cause
-3. **Document** - Compile findings from all threads
+1. **Validate** — Other threads verify the finding
+2. **Deep dive** — Focused investigation on identified cause
+3. **Document** — Compile findings from all threads
 
 ## Coordination Patterns
 
-### Hub and Spoke
+**Hub and Spoke**: One coordinator assigns threads, tracks progress, calls sync points, and makes convergence decisions. Best when one person has the most context.
 
-One coordinator, multiple investigators:
-
-```
-        ┌─────────┐
-        │  Hub    │
-        │(Coord)  │
-        └────┬────┘
-             │
-    ┌────────┼────────┐
-    ▼        ▼        ▼
-┌───────┐┌───────┐┌───────┐
-│Thread ││Thread ││Thread │
-│   A   ││   B   ││   C   │
-└───────┘└───────┘└───────┘
-```
-
-Coordinator responsibilities:
-- Assigns threads
-- Tracks progress
-- Calls sync points
-- Makes convergence decisions
-
-### Peer Network
-
-Equal investigators sharing findings:
-
-```
-┌───────┐     ┌───────┐
-│Thread │◄───▶│Thread │
-│   A   │     │   B   │
-└───┬───┘     └───┬───┘
-    │             │
-    ▼             ▼
-    ◄─────────────►
-         Shared
-         Channel
-```
-
-Each investigator:
-- Posts findings to shared channel
-- Reviews others' findings
-- Volunteers to converge when pattern emerges
+**Peer Network**: Equal investigators post findings to a shared channel and self-organize convergence when a pattern emerges. Best when investigators have similar expertise.
 
 ## Communication Protocol
 
@@ -209,13 +140,11 @@ Each investigator:
 
 **Status:** Hot Lead
 **Key Finding:** Missing index on orders.user_id
-**Evidence:** Query taking 3.2s, explain shows table scan
-**Recommendation:** This is likely the cause, suggest converge
+**Evidence:** Query taking 3.2s, explain shows full table scan
+**Recommendation:** Likely root cause — suggest converge
 ```
 
 ## Decision Framework
-
-At each sync point:
 
 | Thread Status | Action |
 |---------------|--------|
@@ -227,19 +156,17 @@ At each sync point:
 
 ## Time Management
 
-```
-Hour 1:
-├── 0:00 - Problem decomposition
-├── 0:10 - Thread assignment
-├── 0:15 - Parallel investigation begins
-├── 0:45 - Sync point #1
-├── 0:50 - Continue/pivot/converge decision
+A typical two-hour investigation:
 
-Hour 2 (if needed):
-├── 1:00 - Continue investigation
-├── 1:30 - Sync point #2
-├── 1:35 - Final convergence
 ```
+0:00  Problem decomposition & thread assignment
+0:15  Parallel investigation begins
+0:45  Sync point #1 → Continue/Pivot/Converge decision
+1:30  Sync point #2 (if continuing)
+1:35  Final convergence & documentation
+```
+
+Adjust sync point cadence based on incident severity — every 20 minutes for critical outages, every 45 minutes for lower-urgency investigations.
 
 ## Documentation
 
@@ -256,10 +183,7 @@ Hour 2 (if needed):
 ### Thread A: [Area]
 - Investigator: [Name]
 - Findings: [Summary]
-- Outcome: [Lead/Dead End/Root Cause]
-
-### Thread B: [Area]
-...
+- Outcome: [Lead / Dead End / Root Cause]
 
 ## Root Cause
 [Detailed explanation of what was found]
@@ -273,11 +197,10 @@ Hour 2 (if needed):
 
 ## Lessons Learned
 - [Learning 1]
-- [Learning 2]
 ```
 
 ## Integration with Other Skills
 
 - **debugging/root-cause-analysis**: Each thread follows RCA principles
 - **debugging/hypothesis-testing**: Threads test specific hypotheses
-- **handoff-protocols**: When passing thread to another person
+- **handoff-protocols**: When passing a thread to another person

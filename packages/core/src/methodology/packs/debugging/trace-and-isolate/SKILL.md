@@ -1,6 +1,6 @@
 ---
-name: Trace and Isolate
-description: Techniques for tracing code execution and isolating problematic components
+name: trace-and-isolate
+description: Applies systematic tracing and isolation techniques to pinpoint exactly where a bug originates in code. Use when a bug is hard to locate, code is not working as expected, an error or crash appears with unclear cause, a regression was introduced between recent commits, or you need to narrow down which component, function, or line is faulty. Covers binary search debugging, git bisect for regressions, strategic logging with [TRACE] patterns, data and control flow tracing, component isolation, minimal reproduction cases, conditional breakpoints, and watch expressions across TypeScript, SQL, and bash.
 version: 1.0.0
 triggers:
   - trace execution
@@ -24,9 +24,16 @@ relatedSkills:
 
 You are using systematic tracing and isolation techniques to narrow down where a bug originates. The goal is to find the exact location in code where behavior diverges from expectation.
 
-## Core Principle
+## Quick Reference
 
-**Divide and conquer. Systematically narrow the search space until you find the exact point of failure.**
+| Scenario | Technique |
+|---|---|
+| Large codebase / complex flow | Binary search debugging |
+| Bug appeared between commits | `git bisect` |
+| Unclear data transformation | Strategic `[TRACE]` logging |
+| Which component is faulty? | Component isolation + mocks |
+| Bug hard to reproduce | Minimal reproduction case |
+| Conditional or intermittent bug | Conditional breakpoints / watch expressions |
 
 ## Binary Search Debugging
 

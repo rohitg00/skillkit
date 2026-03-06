@@ -1,6 +1,6 @@
 ---
-name: Task Decomposition
-description: Break down complex tasks into small, manageable, atomic units
+name: task-decomposition
+description: Breaks down complex software, writing, or research tasks into small, atomic, independently completable units with dependency graphs and milestone breakdowns. Use when the user asks to plan a project, decompose a feature, create subtasks, split up work, or needs help organizing a large piece of work into a step-by-step plan. Triggered by phrases like "break down", "decompose", "where do I start", "too big", "split into tasks", "work breakdown", or "task list".
 version: 1.0.0
 triggers:
   - break down
@@ -29,49 +29,20 @@ You are breaking down a complex task into smaller, atomic units. Each unit shoul
 
 **If a task feels too big, it is too big. Break it down until each piece is obvious.**
 
-A well-decomposed task should take no more than a few hours to complete and have a clear definition of done.
-
-## What Makes a Good Atomic Task
-
-A properly decomposed task is:
-
-- **Small** - Completable in one focused session
-- **Independent** - Can be done without blocking on other tasks
-- **Testable** - Has clear success criteria
-- **Valuable** - Delivers some increment of value
-- **Estimatable** - Scope is clear enough to estimate
-
-**Task Size Targets:**
-- Ideal: 1-2 hours of focused work
-- Maximum: Half a day
-- If larger: Break it down further
+A well-decomposed task should take no more than a few hours to complete and have a clear definition of done. Aim for tasks that are small, independent, testable, and clearly scoped.
 
 ## Decomposition Techniques
 
 ### 1. Vertical Slicing
 
-Break by user-visible functionality:
+Break by user-visible functionality (each slice is deployable and testable independently):
 
 ```
 Feature: User Registration
-
-Slice 1: Email/password signup
-- Form renders with email and password fields
-- Validation shows errors for invalid input
-- Success creates account and shows confirmation
-
-Slice 2: Email verification
-- Sends verification email on signup
-- Clicking link verifies email
-- Shows different UI for unverified accounts
-
-Slice 3: Social login (OAuth)
-- "Sign in with Google" button
-- OAuth flow completes
-- Account linked to Google ID
+  Slice 1: Email/password signup — form, validation, account creation
+  Slice 2: Email verification — send email, verify link, UI state
+  Slice 3: Social login (OAuth) — Google button, OAuth flow, account link
 ```
-
-Each slice is deployable and testable independently.
 
 ### 2. Horizontal Layering
 
@@ -79,31 +50,11 @@ Break by system layer:
 
 ```
 Feature: Order Processing
-
-Layer 1: Data Model
-- Create Order entity
-- Create OrderItem entity
-- Add database migrations
-
-Layer 2: Repository/Data Access
-- Create OrderRepository
-- Implement CRUD operations
-- Add query methods
-
-Layer 3: Business Logic
-- Create OrderService
-- Implement order creation flow
-- Add validation rules
-
-Layer 4: API Endpoints
-- Create POST /orders endpoint
-- Create GET /orders/:id endpoint
-- Add error handling
-
-Layer 5: Frontend Integration
-- Create order form component
-- Add API client methods
-- Handle loading and error states
+  Layer 1: Data Model       — entities, migrations
+  Layer 2: Data Access      — repository, CRUD, queries
+  Layer 3: Business Logic   — service, validation rules
+  Layer 4: API Endpoints    — routes, error handling
+  Layer 5: Frontend         — form, API client, loading/error states
 ```
 
 ### 3. Workflow Decomposition
@@ -111,27 +62,11 @@ Layer 5: Frontend Integration
 Break by process steps:
 
 ```
-Task: Implement checkout flow
-
-Step 1: Cart validation
-- Verify items are in stock
-- Validate quantities
-- Calculate totals
-
-Step 2: Payment processing
-- Collect payment details
-- Validate payment method
-- Process transaction
-
-Step 3: Order creation
-- Create order record
-- Associate with payment
-- Update inventory
-
-Step 4: Confirmation
-- Send confirmation email
-- Display success page
-- Generate invoice
+Task: Checkout flow
+  Step 1: Cart validation   — stock check, quantities, totals
+  Step 2: Payment           — collect details, validate, process
+  Step 3: Order creation    — record, payment link, inventory update
+  Step 4: Confirmation      — email, success page, invoice
 ```
 
 ### 4. Component Decomposition
@@ -139,26 +74,14 @@ Step 4: Confirmation
 Break by UI or system component:
 
 ```
-Task: Build dashboard page
-
-Component 1: Header section
-- Logo and navigation
-- User menu dropdown
-
-Component 2: Stats cards row
-- Revenue card
-- Orders card
-- Customers card
-
-Component 3: Chart section
-- Sales trend chart
-- Data fetching and transformation
-
-Component 4: Recent orders table
-- Table with sorting
-- Pagination
-- Row actions
+Task: Dashboard page
+  Component 1: Header       — logo, nav, user menu
+  Component 2: Stats cards  — revenue, orders, customers
+  Component 3: Chart        — sales trend, data fetch/transform
+  Component 4: Orders table — sort, pagination, row actions
 ```
+
+> For more detailed worked examples of each technique, see `EXAMPLES.md`.
 
 ## Task Template
 
@@ -235,97 +158,11 @@ Phase 3 (Depends on Phase 2):
 
 For each task, verify:
 
-- [ ] **Atomic?** - Can be done without interruption
-- [ ] **Clear?** - Scope is unambiguous
-- [ ] **Testable?** - Know when it's done
-- [ ] **Independent?** - Minimal dependencies
-- [ ] **Small?** - Less than half a day
-
-## Signs of Poor Decomposition
-
-- "This task keeps growing"
-- "I'm not sure where to start"
-- "It depends on too many things"
-- "I can't test it yet"
-- "This is taking longer than expected"
-
-When you see these signs, stop and re-decompose.
-
-## Example: Full Decomposition
-
-```markdown
-# Feature: Password Reset
-
-## Epic Overview
-Users can reset their forgotten password via email link.
-
----
-
-## Task 1: Password Reset Request API
-
-**Description:** Create endpoint to request password reset.
-
-**Files:**
-- [ ] src/api/auth/reset-request.ts
-- [ ] src/services/email/templates/reset.html
-
-**Steps:**
-1. Create POST /auth/reset-password endpoint
-2. Validate email exists in database
-3. Generate secure reset token
-4. Store token with expiry (1 hour)
-5. Send email with reset link
-
-**Done When:**
-- [ ] Endpoint returns 200 for valid email
-- [ ] Endpoint returns 200 for invalid email (no leak)
-- [ ] Email sent with valid token
-- [ ] Token stored in database
-
----
-
-## Task 2: Password Reset Form UI
-
-**Description:** Create form for entering new password.
-
-**Files:**
-- [ ] src/pages/reset-password.tsx
-- [ ] src/components/PasswordResetForm.tsx
-
-**Steps:**
-1. Create page component at /reset-password?token=X
-2. Build form with password and confirm fields
-3. Add password strength validation
-4. Show loading state during submission
-
-**Done When:**
-- [ ] Form renders with token in URL
-- [ ] Validation shows for weak passwords
-- [ ] Form submits to API
-
----
-
-## Task 3: Password Reset Complete API
-
-**Description:** Create endpoint to set new password.
-
-**Files:**
-- [ ] src/api/auth/reset-complete.ts
-
-**Steps:**
-1. Create POST /auth/reset-password/complete endpoint
-2. Validate token is valid and not expired
-3. Hash new password
-4. Update user record
-5. Invalidate token
-6. Return success
-
-**Done When:**
-- [ ] Valid token + new password updates user
-- [ ] Expired token returns error
-- [ ] Invalid token returns error
-- [ ] Token cannot be reused
-```
+- [ ] **Atomic?** — Can be done without interruption
+- [ ] **Clear?** — Scope is unambiguous
+- [ ] **Testable?** — Know when it's done
+- [ ] **Independent?** — Minimal dependencies
+- [ ] **Small?** — Less than half a day
 
 ## Integration with Other Skills
 

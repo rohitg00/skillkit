@@ -1,6 +1,6 @@
 ---
-name: Verification Gates
-description: Define checkpoints to validate work before proceeding to next phase
+name: verification-gates
+description: Creates explicit validation checkpoints (verification gates) between project phases to catch errors early and ensure quality before proceeding. Use when the user asks about quality gates, milestone checks, phase transitions, approval steps, go/no-go decision points, or preventing cascading errors across a multi-step workflow. Produces acceptance criteria checklists, automated CI gate configurations, manual sign-off requirements, and conditional review rules for scenarios such as security changes, API changes, or database migrations.
 version: 1.0.0
 triggers:
   - verify before
@@ -30,24 +30,6 @@ You are implementing verification gates - explicit checkpoints where work is val
 **Never proceed to the next phase with unverified assumptions from the previous phase.**
 
 A verification gate is a deliberate pause to confirm that prerequisites are met before continuing.
-
-## Why Verification Gates Matter
-
-Without gates:
-```
-Phase 1 → Phase 2 → Phase 3 → Phase 4
-   ↑
-   └── Error discovered at Phase 4
-       Must redo Phases 2, 3, 4
-```
-
-With gates:
-```
-Phase 1 → [Gate] → Phase 2 → [Gate] → Phase 3 → [Gate] → Phase 4
-             ↑
-             └── Error caught immediately
-                 Only redo Phase 1
-```
 
 ## Standard Verification Gates
 
@@ -244,34 +226,9 @@ Task Complete
 **Approver:** [Who can approve passage]
 ```
 
-## Common Gate Failures
-
-### "Just this once" Syndrome
-- **Problem:** Skipping gates for urgent work
-- **Fix:** Urgent work gets simpler gates, not no gates
-
-### Gate Inflation
-- **Problem:** Too many gates slow everything down
-- **Fix:** Only gates that catch real issues
-
-### Rubber Stamp Gates
-- **Problem:** Gates passed without real verification
-- **Fix:** Specific checklists, evidence requirements
-
 ## Gate Metrics
 
-Track gate effectiveness:
-
-```
-Gate Effectiveness = Issues caught at gate / Total issues
-Gate Overhead = Time spent at gates / Total development time
-Gate Value = (Cost of issue caught early) / (Gate overhead cost)
-```
-
-Good gates have:
-- High effectiveness (catch most issues)
-- Low overhead (quick to pass)
-- High value (prevent expensive fixes)
+Good gates have high effectiveness (catch most issues), low overhead (quick to pass), and high value (prevent expensive downstream fixes). Track which gate caught an issue and how much time was spent at each gate to tune your process over time.
 
 ## Integration with CI/CD
 

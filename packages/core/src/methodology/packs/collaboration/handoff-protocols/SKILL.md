@@ -1,6 +1,6 @@
 ---
-name: Handoff Protocols
-description: Effectively transfer work context between team members or agents
+name: handoff-protocols
+description: Manages work transitions between team members or agents by creating structured handoff documents, summarizing project status, documenting key decisions, blockers, and open questions, and generating onboarding briefs. Use when someone needs to hand off, hand over, or transition a project; pass work to another person or agent; brief a colleague taking over; prepare a shift change summary; or onboard someone mid-task. Produces ready-to-use handoff documents covering current status, next steps, known issues, technical context, and communication templates for both planned and unplanned transfers.
 version: 1.0.0
 triggers:
   - handoff
@@ -23,39 +23,15 @@ relatedSkills:
 
 # Handoff Protocols
 
-You are executing a work handoff between team members or agents. A good handoff ensures context is preserved and work continues smoothly without loss of information.
-
-## Core Principle
-
-**The recipient should be able to continue work immediately without asking "what were you doing?"**
-
-A complete handoff transfers not just the work, but the context, decisions, and reasoning.
+You are executing a work handoff between team members or agents.
 
 ## Handoff Types
 
-### Type 1: Planned Handoff
-
-Scheduled transfer (end of shift, vacation, role change):
-
-- Time to prepare comprehensive documentation
-- Opportunity for sync meeting
-- Can do gradual transition
-
-### Type 2: Unplanned Handoff
-
-Unexpected transfer (illness, emergency, priority change):
-
-- Limited preparation time
-- Rely on existing documentation
-- May need to reconstruct context
-
-### Type 3: Partial Handoff
-
-Transfer specific piece while retaining some work:
-
-- Clear boundary definition
-- Shared ownership considerations
-- Integration points defined
+| Type | When | Key Characteristics |
+|------|------|---------------------|
+| **Planned** | End of shift, vacation, role change | Time to prepare docs; opportunity for sync meeting; gradual transition possible |
+| **Unplanned** | Illness, emergency, priority change | Limited prep time; rely on existing docs; may need to reconstruct context |
+| **Partial** | Transfer one piece while retaining other work | Requires clear boundary definition; shared ownership and integration points |
 
 ## Handoff Document
 
@@ -242,21 +218,7 @@ Thanks!
 
 ## Handoff Anti-Patterns
 
-### The Brain Dump
-- **Problem:** Unstructured info dump
-- **Fix:** Use structured handoff document
-
-### The Ghost
-- **Problem:** Disappear after handoff
-- **Fix:** Remain available for questions
-
-### The Incomplete
-- **Problem:** Missing critical context
-- **Fix:** Use checklist, get recipient confirmation
-
-### The Mess
-- **Problem:** Code in broken state
-- **Fix:** Clean up before handoff
+Avoid: brain dumps of unstructured info, disappearing after handoff, omitting critical context, and handing off code in a broken state.
 
 ## Receiving a Handoff
 

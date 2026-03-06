@@ -1,6 +1,6 @@
 ---
-name: Root Cause Analysis
-description: Systematic approach to finding the true source of bugs, not just symptoms
+name: root-cause-analysis
+description: Performs systematic root cause analysis to identify the true source of bugs, errors, and unexpected behavior through structured investigation phases — not just treating symptoms. Use when a user reports a bug, crash, error, or broken behavior and needs to debug, troubleshoot, or investigate why something is not working; especially for complex or intermittent issues across multiple components. Applies the Five Whys method, hypothesis-driven testing, stack trace analysis, git blame/log evidence gathering, and causal chain documentation to isolate and confirm root causes before applying any fix.
 version: 1.0.0
 triggers:
   - root cause
@@ -29,22 +29,13 @@ You are performing systematic root cause analysis to find the true source of a b
 
 **Never fix a symptom. Always find and fix the root cause.**
 
-A root cause is the earliest point in the causal chain where intervention could prevent the defect.
-
 ## The Five Whys Method
 
 Ask "Why?" repeatedly to drill down to the root cause:
 
-1. **Why** did the API return an error?
-   → The database query failed
-2. **Why** did the database query fail?
-   → The connection timed out
-3. **Why** did the connection time out?
-   → The connection pool was exhausted
-4. **Why** was the connection pool exhausted?
-   → Connections weren't being released
-5. **Why** weren't connections being released?
-   → **ROOT CAUSE:** Missing `finally` block to close connections
+1. **Why** did the API return an error? → The database query failed
+2. **Why** did the database query fail? → The connection pool was exhausted
+3. **Why** was the pool exhausted? → **ROOT CAUSE:** Missing `finally` block to close connections
 
 ## Investigation Phases
 
@@ -66,15 +57,12 @@ Questions to answer:
 
 Collect information before forming theories:
 
-```
-Evidence Types:
-├── Error messages and stack traces
-├── Log files (application, system, database)
-├── Recent code changes (git log, blame)
-├── User reports and reproduction steps
-├── Monitoring data (metrics, APM)
-└── Related issues (search issue tracker)
-```
+- Error messages and stack traces
+- Log files (application, system, database)
+- Recent code changes (git log, blame)
+- User reports and reproduction steps
+- Monitoring data (metrics, APM)
+- Related issues (search issue tracker)
 
 Do NOT:
 - Make changes while gathering evidence
@@ -121,30 +109,10 @@ Before declaring root cause found:
 
 ## Common Root Cause Categories
 
-### Code Defects
-- Logic errors
-- Boundary conditions
-- Race conditions
-- Resource leaks
-- Null/undefined handling
-
-### Design Issues
-- Missing error handling
-- Inadequate validation
-- Poor state management
-- Coupling issues
-
-### Environment
-- Configuration errors
-- Resource constraints
-- Version mismatches
-- Network issues
-
-### Data Issues
-- Invalid input data
-- Data corruption
-- Schema mismatches
-- Encoding problems
+- **Code Defects:** logic errors, boundary conditions, race conditions, resource leaks, null/undefined handling
+- **Design Issues:** missing error handling, inadequate validation, poor state management, coupling
+- **Environment:** configuration errors, resource constraints, version mismatches, network issues
+- **Data Issues:** invalid input, data corruption, schema mismatches, encoding problems
 
 ## Evidence Collection Commands
 

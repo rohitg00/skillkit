@@ -1,6 +1,6 @@
 ---
-name: Structured Code Review
-description: Multi-stage code review process for thorough and constructive feedback
+name: structured-code-review
+description: Performs a structured five-stage code review covering requirements compliance, correctness, code quality, testing, and security/performance. Each stage uses targeted checklists and categorized feedback (Blocker/Major/Minor/Nit) with actionable suggestions and rationale. Use when the user asks for code review, PR feedback, pull request review, or wants their code checked for bugs, style issues, or vulnerabilities — triggered by phrases like "review my code", "check this PR", "review my changes", "pull request review", or "code feedback".
 version: 1.0.0
 triggers:
   - code review
@@ -36,12 +36,6 @@ A structured review catches more issues and provides better feedback than an uns
 
 First, verify the code meets its requirements.
 
-**Questions to Answer:**
-- Does this implement what was requested?
-- Are all acceptance criteria met?
-- Are edge cases handled?
-- Is scope appropriate (not too little, not too much)?
-
 **Checklist:**
 - [ ] Implements stated requirements
 - [ ] Handles specified edge cases
@@ -57,12 +51,6 @@ First, verify the code meets its requirements.
 
 Next, verify the code works correctly.
 
-**Questions to Answer:**
-- Is the logic correct?
-- Are there bugs or errors?
-- Are error conditions handled?
-- Is the code complete?
-
 **Checklist:**
 - [ ] Logic is sound
 - [ ] No obvious bugs
@@ -77,12 +65,6 @@ Next, verify the code works correctly.
 ### Stage 3: Code Quality
 
 Then, evaluate code quality and maintainability.
-
-**Questions to Answer:**
-- Is the code readable?
-- Does it follow conventions?
-- Is it appropriately simple?
-- Is it maintainable?
 
 **Checklist:**
 - [ ] Clear naming
@@ -100,11 +82,6 @@ Then, evaluate code quality and maintainability.
 
 Evaluate test coverage and quality.
 
-**Questions to Answer:**
-- Is there adequate test coverage?
-- Do tests verify the right things?
-- Are tests maintainable?
-
 **Checklist:**
 - [ ] New code has tests
 - [ ] Tests cover main paths and edge cases
@@ -119,11 +96,6 @@ Evaluate test coverage and quality.
 ### Stage 5: Security & Performance
 
 Finally, check for security and performance concerns.
-
-**Questions to Answer:**
-- Are there security vulnerabilities?
-- Are there performance issues?
-- Is data handled appropriately?
 
 **Checklist:**
 - [ ] No SQL injection, XSS, etc.
@@ -167,40 +139,6 @@ Example:
 **Suggestion:** Add `if (!user) return null;` before accessing properties
 ```
 
-### Feedback Anti-Patterns
-
-**Don't:**
-- "This is wrong" (not actionable)
-- "I would have done it differently" (without explanation)
-- "Why didn't you...?" (sounds accusatory)
-- Nitpicking on preferences (not conventions)
-
-**Do:**
-- Be specific about the issue
-- Explain the impact
-- Offer a solution or alternative
-- Ask questions to understand intent
-
-## Review Conversation
-
-### Responding to Feedback
-
-When receiving review comments:
-
-1. **Acknowledge** - Confirm you've read and understood
-2. **Clarify** if needed - Ask questions if unclear
-3. **Address** - Make changes or explain why not
-4. **Resolve** - Mark as resolved when done
-
-### Disagreeing Constructively
-
-If you disagree with feedback:
-
-```
-I see your point about [X]. In this case, I chose [Y] because [reason].
-Would you like to discuss further, or is this approach acceptable?
-```
-
 ## Review Checklist Summary
 
 ```markdown
@@ -231,18 +169,6 @@ Would you like to discuss further, or is this approach acceptable?
 
 ### Verdict: [ ] Approve [ ] Request Changes [ ] Comment
 ```
-
-## Time Management
-
-For different PR sizes:
-
-| Size | Expected Time | Approach |
-|------|---------------|----------|
-| Small (< 100 lines) | 10-15 minutes | Full structured review |
-| Medium (100-300 lines) | 20-30 minutes | Full structured review |
-| Large (300+ lines) | 45-60 minutes | Consider splitting PR |
-
-If PR is too large, request it be split before review.
 
 ## Integration with Other Skills
 

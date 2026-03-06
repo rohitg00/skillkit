@@ -1,6 +1,6 @@
 ---
-name: Testing Anti-Patterns
-description: Common testing mistakes to avoid for reliable, maintainable tests
+name: testing-anti-patterns
+description: Reviews test code to identify and fix common testing anti-patterns including flaky tests, over-mocking, brittle assertions, test interdependency, and hidden test logic. Flags bad patterns, explains the specific defect, and provides corrected implementations. Use when reviewing test code, debugging intermittent or unreliable test failures, or when the user mentions flaky tests, test smells, brittle tests, test isolation issues, mock overuse, slow tests, or test maintenance problems.
 version: 1.0.0
 triggers:
   - test anti-patterns
@@ -22,7 +22,16 @@ relatedSkills:
 
 # Testing Anti-Patterns
 
-You are identifying and avoiding common testing anti-patterns. These patterns lead to unreliable tests, false confidence, and maintenance burden.
+You are identifying and avoiding common testing anti-patterns.
+
+## Review Workflow
+
+Follow these steps when reviewing test code:
+
+1. **Run tests in isolation** — Verify each test passes independently (no shared state, no ordering dependency).
+2. **Check for patterns below** — Scan for each anti-pattern in the checklist; flag every match with the specific defect.
+3. **Apply refactoring strategy** — Use the refactoring strategies section to select and apply the appropriate fix.
+4. **Verify the test still fails when code breaks** — After fixing, confirm the corrected test catches real regressions (remove or stub the implementation to confirm a failure occurs).
 
 ## Critical Anti-Patterns
 

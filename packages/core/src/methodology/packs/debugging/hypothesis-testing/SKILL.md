@@ -1,6 +1,6 @@
 ---
-name: Hypothesis Testing
-description: Scientific approach to debugging with hypothesis formation and testing
+name: hypothesis-testing
+description: Applies the scientific method to debugging by helping users form specific, testable hypotheses, design targeted experiments, and systematically confirm or reject theories to find root causes. Use when a user says their code isn't working, they're getting an error, something broke, they want to troubleshoot a bug, or they're trying to figure out what's causing an issue. Concrete actions include isolating failing components, forming and testing hypotheses, analyzing error messages, tracing execution paths, and interpreting test results to narrow down root causes.
 version: 1.0.0
 triggers:
   - hypothesis
@@ -51,26 +51,13 @@ Observations:
 
 ### 2. Hypothesize - Form Testable Theories
 
-A good hypothesis is:
-- **Specific** - Points to a particular cause
-- **Testable** - Can be proven true or false
-- **Falsifiable** - Possible to prove wrong
-
-**Bad hypotheses:**
-- "Something is wrong with the network"
-- "There might be a race condition"
-- "The code is buggy"
-
-**Good hypotheses:**
-- "The inventory service connection pool is exhausted when processing orders with >10 items"
-- "The order processing timeout (5s) is insufficient for large orders"
-- "The new inventory service endpoint (v2) returns different response format"
+**Examples (bad → good):**
+- ~~"Something is wrong with the network"~~ → "The inventory service connection pool is exhausted when processing orders with >10 items"
+- ~~"There might be a race condition"~~ → "The order processing timeout (5s) is insufficient for large orders"
 
 ### 3. Predict - Define Expected Results
 
-For each hypothesis, define:
-- If true, what should we observe?
-- If false, what should we observe?
+For each hypothesis, define what you expect to observe if it is true versus false:
 
 ```
 Hypothesis: Connection pool exhausted for large orders
@@ -163,30 +150,6 @@ New hypothesis: Large orders make multiple inventory calls per item
 ...
 ```
 
-## Common Debugging Hypotheses
-
-### Performance Issues
-- "Query missing index on column X"
-- "N+1 query problem in relationship Y"
-- "Memory leak in component Z"
-- "Inefficient algorithm (O(n²)) in function F"
-
-### Data Issues
-- "Invalid data in field X for certain records"
-- "Character encoding mismatch (UTF-8 vs Latin-1)"
-- "Stale cache serving outdated data"
-- "Race condition corrupting shared state"
-
-### Configuration Issues
-- "Environment variable X not set in production"
-- "Timeout value too low for operation Y"
-- "Feature flag F enabled in wrong environment"
-
-### Integration Issues
-- "API response format changed in version V"
-- "Certificate expired for service S"
-- "Rate limiting triggered by usage pattern P"
-
 ## Testing Techniques by Hypothesis Type
 
 ### Testing Timing Hypotheses
@@ -220,23 +183,6 @@ if (stateBefore !== stateAfter) {
   console.log('State changed:', diff(stateBefore, stateAfter));
 }
 ```
-
-## Avoiding Hypothesis Bias
-
-### Confirmation Bias
-- Don't only look for evidence supporting your favorite theory
-- Actively try to disprove your hypothesis
-- Give equal weight to contradicting evidence
-
-### Anchoring Bias
-- Don't get stuck on first hypothesis
-- Be willing to abandon theories that don't fit evidence
-- Consider alternatives even when one seems likely
-
-### Premature Closure
-- Don't stop at first plausible explanation
-- Verify the hypothesis completely before declaring victory
-- Consider if there might be multiple causes
 
 ## Decision Tree
 

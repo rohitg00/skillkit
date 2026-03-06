@@ -1,6 +1,6 @@
 ---
-name: Test Patterns
-description: Effective patterns for writing maintainable, reliable tests
+name: test-patterns
+description: Applies proven testing patterns — Arrange-Act-Assert (AAA), Given-When-Then, Test Data Builders, Object Mother, parameterized tests, fixtures, spies, and test doubles — to help write maintainable, reliable, and readable test suites. Use when the user asks about writing unit tests, integration tests, or end-to-end tests; structuring test cases or test suites; applying TDD or BDD practices; working with mocks, stubs, spies, or fakes; improving test coverage or reducing flakiness; or needs guidance on test organization, naming conventions, or assertions in frameworks like Jest, Vitest, pytest, or similar.
 version: 1.0.0
 triggers:
   - test patterns
@@ -23,6 +23,39 @@ relatedSkills:
 # Test Patterns
 
 You are applying proven testing patterns to write maintainable, reliable tests. These patterns help ensure tests are readable, focused, and trustworthy.
+
+## Pattern Selection Guide
+
+Use this to choose the right pattern for your situation:
+
+- **Structuring a single test?** → Arrange-Act-Assert (AAA) or Given-When-Then
+- **Writing behavior/feature specs?** → Given-When-Then (BDD style)
+- **Repeating test setup data?** → Test Data Builders
+- **Many variations of complex objects?** → Object Mother
+- **Testing same logic with many inputs?** → Parameterized Tests
+- **Shared setup/teardown across tests?** → Test Fixtures
+- **Verifying a dependency was called?** → Spy
+- **Replacing an external dependency?** → Test Doubles (Stub / Mock / Fake)
+
+---
+
+## Pattern Combination Workflows
+
+Patterns rarely stand alone — here's how to combine them for common scenarios:
+
+**Unit tests (isolated logic):**
+Fixtures for setup → AAA structure → Stubs/Mocks for dependencies → Parameterized Tests for multiple input cases
+
+**Integration tests (service + external dependencies):**
+Fixtures for setup → AAA structure → Fakes for external services (e.g. in-memory DB) → Spies to verify interaction points
+
+**BDD / feature specs:**
+Given-When-Then → Object Mother or Test Data Builders for scenario data → Fakes for infrastructure
+
+**High-variation logic (validators, calculators, formatters):**
+Parameterized Tests → Test Data Builders to construct each case → AAA structure within each case
+
+---
 
 ## Core Pattern: Arrange-Act-Assert (AAA)
 
@@ -88,11 +121,6 @@ function createTestOrder(overrides = {}) {
 const completedOrder = createTestOrder({ status: 'completed', total: 99.99 });
 const emptyOrder = createTestOrder({ items: [] });
 ```
-
-Benefits:
-- Reduces test setup boilerplate
-- Makes test intent clearer
-- Easy to create variations
 
 ## Pattern: Object Mother
 
@@ -186,12 +214,12 @@ it('should send notification on order completion', async () => {
 
 Choose the right type:
 
-| Type | Purpose | When to Use |
-|------|---------|-------------|
-| **Stub** | Returns canned data | Need predictable inputs |
-| **Mock** | Verifies interactions | Testing side effects |
-| **Spy** | Records calls | Partial mocking |
-| **Fake** | Working implementation | Need realistic behavior |
+| Type | When to Use |
+|------|-------------|
+| **Stub** | Need predictable, canned return values |
+| **Mock** | Need to assert a dependency was called correctly |
+| **Spy** | Partial mocking — observe calls on a real object |
+| **Fake** | Need a working lightweight substitute (e.g. in-memory DB) |
 
 ## Pattern: Test Isolation
 

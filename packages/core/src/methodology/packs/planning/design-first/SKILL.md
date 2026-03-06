@@ -1,6 +1,6 @@
 ---
-name: Design First
-description: Think before coding - design the solution before implementing
+name: design-first
+description: Guides the creation of technical design documents before writing code, producing architecture diagrams, data models, API interface definitions, implementation plans, and multi-option trade-off analyses. Use when the user asks to plan a feature, architect a system, design an API, explore implementation approaches, or requests a technical design or spec before coding — especially for complex features involving multiple components, ambiguous requirements, or significant architectural changes.
 version: 1.0.0
 triggers:
   - design first
@@ -22,13 +22,11 @@ relatedSkills:
 
 # Design First Methodology
 
-You are following a design-first approach. Before writing any code, design the solution. This prevents costly rewrites and ensures the implementation meets requirements.
+You are following a design-first approach. Before writing any code, design the solution.
 
 ## Core Principle
 
-**Think first, code second. A good design makes implementation straightforward.**
-
-The cost of changing a design is 10x lower than changing code. Invest time in design to save time overall.
+**Think first, code second.**
 
 ## When to Use Design First
 
@@ -158,50 +156,19 @@ Before implementing, validate:
 
 ## Design Document Template
 
-```markdown
-# Design: [Feature Name]
+Use `DESIGN_TEMPLATE.md` as the standard artifact for each feature. It covers:
 
-## Overview
-[One paragraph summary of what we're building and why]
+- **Overview** — one-paragraph summary of what is being built and why
+- **Requirements** — functional and non-functional (performance, security)
+- **Architecture** — component diagram and explanation
+- **Data Model** — entity definitions and relationships
+- **API Design** — interface definitions
+- **Key Decisions** — decision table with options considered, choice made, and rationale
+- **Implementation Plan** — ordered steps
+- **Testing Strategy** — unit and integration test scope
+- **Open Questions** — unresolved items
 
-## Requirements
-### Functional
-- [Requirement 1]
-- [Requirement 2]
-
-### Non-Functional
-- [Performance requirement]
-- [Security requirement]
-
-## Design
-
-### Architecture
-[Diagram and explanation of components]
-
-### Data Model
-[Entity definitions and relationships]
-
-### API Design
-[Interface definitions]
-
-### Key Decisions
-| Decision | Options Considered | Choice | Rationale |
-|----------|-------------------|--------|-----------|
-| Database | PostgreSQL, MongoDB | PostgreSQL | Need ACID transactions |
-
-## Implementation Plan
-1. [First step]
-2. [Second step]
-...
-
-## Testing Strategy
-- Unit tests for [X]
-- Integration tests for [Y]
-
-## Open Questions
-- [Question 1]
-- [Question 2]
-```
+Create this file at the start of each design session and keep it updated as the design evolves.
 
 ## Design Levels
 
@@ -225,20 +192,11 @@ Before implementing, validate:
 
 ## Anti-Patterns to Avoid
 
-### Big Design Up Front (BDUF)
-- Don't over-design every detail
-- Design enough to start, refine as you learn
-- Balance planning with doing
-
-### Analysis Paralysis
-- Set a time limit for design phase
-- Make decisions with 70% confidence
-- Plan to iterate
-
-### Design in Isolation
-- Consider existing patterns in codebase
-- Align with team conventions
-- Don't reinvent existing solutions
+| Anti-Pattern | Mitigation |
+|---|---|
+| Big Design Up Front (BDUF) | Design enough to start; refine as you learn |
+| Analysis Paralysis | Time-box the design phase; decide at 70% confidence |
+| Design in Isolation | Align with existing codebase patterns and team conventions |
 
 ## Integration with Implementation
 
@@ -249,7 +207,7 @@ After design is approved:
 3. **Implement incrementally** - verify design assumptions as you code
 4. **Update design** if you discover issues during implementation
 
-The design document is living - update it as you learn.
+The design document is living — update it as you learn.
 
 ## Signals You Need More Design
 
