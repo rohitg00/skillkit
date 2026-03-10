@@ -1,7 +1,7 @@
 import type { ChatMessage } from '../../ai/providers/types.js';
 
 function escapeXmlTags(text: string): string {
-  return text.replace(/<\/skill_content>/gi, '&lt;/skill_content&gt;');
+  return text.replace(/<\/skill_content\s*>/gi, '&lt;/skill_content&gt;');
 }
 
 function sampleContent(content: string, maxTotal: number = 8000): string {

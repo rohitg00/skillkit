@@ -111,6 +111,8 @@ export class EvalCommand extends Command {
       }
     }
 
+    const parsedTimeout = this.timeout ? parseInt(this.timeout, 10) : NaN;
+
     const options: EvalOptions = {
       tiers,
       provider: this.provider,
@@ -118,7 +120,7 @@ export class EvalCommand extends Command {
       format: this.format as 'summary' | 'json' | 'table',
       verbose: this.verbose,
       sandboxImage: this.sandboxImage,
-      timeout: this.timeout && !isNaN(parseInt(this.timeout, 10)) ? parseInt(this.timeout, 10) : undefined,
+      timeout: !isNaN(parsedTimeout) ? parsedTimeout : undefined,
     };
 
     const engine = createEvalEngine();

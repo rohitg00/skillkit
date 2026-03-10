@@ -129,7 +129,9 @@ function sampleSkills(skills: MarketplaceSkill[]): MarketplaceSkill[] {
   return shuffled.slice(0, MAX_SAMPLE_SIZE);
 }
 
-function buildStatsFromMarketplace(marketplacePath: string): CachedStats | null {
+const BATCH_SIZE = 50;
+
+async function buildStatsFromMarketplace(marketplacePath: string): Promise<CachedStats | null> {
   try {
     const raw = readFileSync(marketplacePath, 'utf-8');
     const data: MarketplaceData = JSON.parse(raw);
@@ -143,7 +145,8 @@ function buildStatsFromMarketplace(marketplacePath: string): CachedStats | null 
       specificity: [],
     };
 
-    for (const skill of sampled) {
+    for (let i = 0; i < sampled.length; i++) {
+      const skill = sampled[i];
       const content = skill.description || skill.name || '';
       if (content.length < 5) continue;
       try {
@@ -154,6 +157,9 @@ function buildStatsFromMarketplace(marketplacePath: string): CachedStats | null 
         categories.specificity.push(quality.specificity.score);
       } catch {
         continue;
+      }
+      if ((i + 1) % BATCH_SIZE === 0) {
+        await new Promise<void>((resolve) => setTimeout(resolve, 0));
       }
     }
 
@@ -206,7 +212,7 @@ export class DynamicBenchmarkEvaluator implements TierEvaluator {
       cacheUsed = false;
       const marketplacePath = findMarketplacePath();
       if (marketplacePath) {
-        stats = buildStatsFromMarketplace(marketplacePath);
+        stats = await buildStatsFromMarketplace(marketplacePath);
         if (stats) {
           saveCache(stats);
         }
@@ -262,12 +268,12 @@ export class DynamicBenchmarkEvaluator implements TierEvaluator {
 }
 
 function estimatePercentile(stats: CategoryStats, value: number): number {
-  if (value >= stats.p90) return 90 + Math.min(10, Math.round((value - stats.p90) / 2));
+  if (value >= stats.p90) return Math.min(100, 90 + Math.min(10, Math.round((value - stats.p90) / 2)));
   if (value >= stats.median) {
     const range = stats.p90 - stats.median;
     if (range === 0) return 70;
-    return 50 + Math.round(((value - stats.median) / range) * 40);
+    return Math.min(100, 50 + Math.round(((value - stats.median) / range) * 40));
   }
   if (stats.median === 0) return 50;
-  return Math.max(0, Math.round((value / stats.median) * 50));
+  return Math.max(0, Math.min(100, Math.round((value / stats.median) * 50)));
 }
