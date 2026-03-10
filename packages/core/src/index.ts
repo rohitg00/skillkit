@@ -127,6 +127,9 @@ export * from './scanner/index.js';
 // Spec Validation
 export * from './validation/index.js';
 
+// Evaluation Engine (Multi-Tier Skill Assessment)
+export * from './eval/index.js';
+
 // AGENTS.md generator
 export * from './agents-md/index.js';
 
