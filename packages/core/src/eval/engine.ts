@@ -64,9 +64,10 @@ export class EvalEngine {
 
     const results = await Promise.all(tierPromises);
     const tiers = results.filter((r): r is TierResult => r !== null);
+    const scorableTiers = tiers.filter((t) => t.score >= 0);
 
-    const overallScore = tiers.length > 0
-      ? Math.round(tiers.reduce((sum, t) => sum + t.score, 0) / tiers.length)
+    const overallScore = scorableTiers.length > 0
+      ? Math.round(scorableTiers.reduce((sum, t) => sum + t.score, 0) / scorableTiers.length)
       : 0;
 
     const duration = Math.round(performance.now() - start);

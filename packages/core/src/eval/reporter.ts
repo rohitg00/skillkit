@@ -121,6 +121,10 @@ function formatCommunityDetails(details: Record<string, unknown>): string[] {
 
 function formatSandboxDetails(details: Record<string, unknown>): string[] {
   const lines: string[] = [];
+  if (details.dockerAvailable === false) {
+    lines.push(`      ${DIM}Docker unavailable — sandbox tests skipped${RESET}`);
+    return lines;
+  }
   const results = details.results as Array<{ testCase: string; passed: boolean; output?: string }> | undefined;
   if (!results || results.length === 0) {
     lines.push(`      ${DIM}No sandbox tests executed${RESET}`);

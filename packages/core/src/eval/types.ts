@@ -51,6 +51,7 @@ export interface SandboxTestCase {
 export interface SandboxResult {
   testCase: string;
   passed: boolean;
+  score: number;
   duration: number;
   output?: string;
   error?: string;

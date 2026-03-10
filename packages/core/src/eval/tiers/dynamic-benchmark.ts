@@ -81,7 +81,9 @@ function loadCache(): CachedStats | null {
     if (!existsSync(cachePath)) return null;
     const raw = readFileSync(cachePath, 'utf-8');
     const cached: CachedStats = JSON.parse(raw);
-    const age = Date.now() - new Date(cached.timestamp).getTime();
+    const ts = new Date(cached.timestamp).getTime();
+    if (!Number.isFinite(ts)) return null;
+    const age = Date.now() - ts;
     if (age > CACHE_TTL_MS) return null;
     return cached;
   } catch {

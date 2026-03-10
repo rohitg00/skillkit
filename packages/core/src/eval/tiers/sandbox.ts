@@ -167,7 +167,7 @@ function gradeDeterministic(
     return { passed: true, score: 100 };
   }
   if (cleanExit && hasOutput) {
-    return { passed: true, score: 75 };
+    return { passed: false, score: 50 };
   }
   if (hasOutput) {
     return { passed: false, score: 30 };
@@ -231,7 +231,7 @@ export class SandboxEvaluator implements TierEvaluator {
       return {
         tier: 4,
         name: this.name,
-        score: 0,
+        score: -1,
         grade: 'F',
         duration,
         details: {
@@ -269,6 +269,7 @@ export class SandboxEvaluator implements TierEvaluator {
         results.push({
           testCase: testCase.name,
           passed: gradeResult.passed,
+          score: gradeResult.score,
           duration: caseDuration,
           output: stdout.slice(0, 2000) || undefined,
           error: stderr.slice(0, 1000) || undefined,
@@ -277,6 +278,7 @@ export class SandboxEvaluator implements TierEvaluator {
         results.push({
           testCase: testCase.name,
           passed: false,
+          score: 0,
           duration: 0,
           error: err instanceof Error ? err.message : String(err),
         });
@@ -289,7 +291,9 @@ export class SandboxEvaluator implements TierEvaluator {
       ? Math.round(results.reduce((sum, r) => sum + r.duration, 0) / results.length)
       : 0;
 
-    const score = Math.round(passRate * 100);
+    const score = results.length > 0
+      ? Math.round(results.reduce((sum, r) => sum + r.score, 0) / results.length)
+      : 0;
     const duration = Math.round(performance.now() - start);
 
     return {

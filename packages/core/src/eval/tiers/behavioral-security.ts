@@ -9,6 +9,27 @@ import { securityPrompt } from '../prompts/security-prompt.js';
 import { createProvider } from '../../ai/providers/factory.js';
 import type { ProviderName } from '../../ai/providers/types.js';
 
+function extractBalancedJsonArray(raw: string): string | null {
+  const start = raw.indexOf('[');
+  if (start === -1) return null;
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+  for (let i = start; i < raw.length; i++) {
+    const ch = raw[i];
+    if (escape) { escape = false; continue; }
+    if (ch === '\\' && inString) { escape = true; continue; }
+    if (ch === '"' && !escape) { inString = !inString; continue; }
+    if (inString) continue;
+    if (ch === '[') depth++;
+    else if (ch === ']') {
+      depth--;
+      if (depth === 0) return raw.slice(start, i + 1);
+    }
+  }
+  return null;
+}
+
 const DANGEROUS_PATTERNS = [
   { pattern: /\beval\s*\(/, label: 'eval()' },
   { pattern: /\bnew\s+Function\s*\(/, label: 'new Function()' },
@@ -25,7 +46,7 @@ const DANGEROUS_PATTERNS = [
 const SUSPICIOUS_FETCH = /fetch\s*\(\s*['"`]https?:\/\/(?!localhost|127\.0\.0\.1)/;
 
 const OBFUSCATION_PATTERNS = [
-  { pattern: /[A-Za-z0-9+/]{40,}={0,2}/, label: 'base64-encoded string' },
+  { pattern: /(?:[A-Za-z0-9+/]{4}){10,}={0,2}/, label: 'base64-encoded string' },
   { pattern: /\\x[0-9a-fA-F]{2}(?:\\x[0-9a-fA-F]{2}){4,}/, label: 'hex-encoded string' },
   { pattern: /String\.fromCharCode\s*\(/, label: 'String.fromCharCode chain' },
 ];
@@ -195,12 +216,12 @@ async function runLLMAnalysis(
     const messages = securityPrompt(content);
     const response = await provider.chat(messages);
 
-    const jsonMatch = response.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) {
+    const jsonStr = extractBalancedJsonArray(response);
+    if (!jsonStr) {
       return [];
     }
 
-    const parsed = JSON.parse(jsonMatch[0]);
+    const parsed = JSON.parse(jsonStr);
     if (!Array.isArray(parsed)) {
       return [];
     }
@@ -277,10 +298,10 @@ function crossValidate(findings: SecurityFinding[]): {
     }
   });
 
-  Array.from(grouped.entries()).forEach(([, engines]) => {
-    const uniqueEngines = new Set(engines.map((f) => f.engine));
+  Array.from(grouped.entries()).forEach(([, group]) => {
+    const uniqueEngines = new Set(group.map((f) => f.engine));
     if (uniqueEngines.size >= 2) {
-      crossValidatedCount = Math.max(crossValidatedCount, uniqueEngines.size);
+      crossValidatedCount += uniqueEngines.size;
     }
   });
 
@@ -335,7 +356,7 @@ export class BehavioralSecurityEvaluator implements TierEvaluator {
     let llmFindings: SecurityFinding[] = [];
     if (options.provider || options.model) {
       llmFindings = await runLLMAnalysis(content, options);
-      if (llmFindings.length > 0 || options.provider || options.model) {
+      if (llmFindings.length > 0) {
         engines.push('llm');
       }
     }
