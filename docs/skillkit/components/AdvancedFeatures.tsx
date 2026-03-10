@@ -15,7 +15,7 @@ const ADVANCED_FEATURES: AdvancedFeature[] = [
     id: 'generate',
     title: 'AI Generate',
     subtitle: 'Create Skills from Natural Language',
-    description: 'Generate skills from plain English with multi-source context. Pulls from documentation (Context7), your codebase patterns, 15,000+ marketplace skills, and your corrections. Works with any LLM: Claude, GPT-4, Gemini, Ollama, or OpenRouter.',
+    description: 'Generate skills from plain English with multi-source context. Pulls from documentation (Context7), your codebase patterns, 400K+ marketplace skills, and your corrections. Works with any LLM: Claude, GPT-4, Gemini, Ollama, or OpenRouter.',
     highlight: 'Multi-provider AI with 4 context sources',
     icon: (
       <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -148,9 +148,9 @@ export function Hero({ version, stars }: HeroProps): React.ReactElement {
             </h1>
 
             <p className="text-sm text-zinc-400 mb-5 max-w-lg font-mono leading-relaxed">
-              The open source package manager that aggregates 31+ skill sources,
-              auto-translates to 44 agent formats, and adds memory, security scanning,
-              and team workflows. No account required. Everything runs locally.
+              The open source package manager that aggregates 34+ skill sources,
+              scans 400K+ skills from registries, auto-translates to 44 agent formats,
+              and adds memory, security scanning, and team workflows. Everything runs locally.
             </p>
 
             <div className="flex flex-wrap items-center gap-2 mb-4">

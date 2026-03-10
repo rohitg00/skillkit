@@ -13,14 +13,14 @@ const CATEGORIES = [
 ] as const;
 
 const TRENDING_SKILLS = [
-  'anthropics/skills/claude-code-guide',
-  'anthropics/skills/claude-code-setup',
-  'obra/superpowers/tdd',
-  'vercel-labs/agent-skills/nextjs',
-  'trailofbits/skills/security-review',
-  'expo/skills/react-native',
-  'remotion-dev/skills/video',
-  'supabase/agent-skills/database',
+  'anthropics/skills/frontend-design',
+  'anthropics/skills/typescript-best-practices',
+  'obra/superpowers/test-driven-development',
+  'vercel-labs/agent-skills/vercel-react-best-practices',
+  'trailofbits/skills/semgrep',
+  'expo/skills/building-native-ui',
+  'sickn33/antigravity-awesome-skills/senior-architect',
+  'supabase/agent-skills/supabase-postgres-best-practices',
 ];
 
 function getTrendingSkills(): IndexedSkill[] {

@@ -1,34 +1,15 @@
 import React from 'react';
+import sourcesData from '../../../marketplace/sources.json';
 
-const OFFICIAL_SOURCES = [
-  { repo: 'anthropics/skills', name: 'Anthropic' },
-  { repo: 'vercel-labs/agent-skills', name: 'Vercel' },
-  { repo: 'expo/skills', name: 'Expo' },
-  { repo: 'remotion-dev/skills', name: 'Remotion' },
-  { repo: 'supabase/agent-skills', name: 'Supabase' },
-  { repo: 'stripe/ai', name: 'Stripe' },
-];
+interface Source {
+  source: string;
+  name: string;
+  official?: boolean;
+  registry?: string;
+}
 
-const COMMUNITY_SOURCES = [
-  'trailofbits/skills',
-  'obra/superpowers',
-  'wshobson/agents',
-  'ComposioHQ/awesome-claude-skills',
-  'travisvn/awesome-claude-skills',
-  'mhattingpete/claude-skills-marketplace',
-  'langgenius/dify',
-  'better-auth/skills',
-  'onmax/nuxt-skills',
-  'elysiajs/skills',
-  'kadajett/agent-nestjs-skills',
-  'cloudai-x/threejs-skills',
-  'dimillian/skills',
-  'waynesutton/convexskills',
-  'kepano/obsidian-skills',
-  'giuseppe-trisciuoglio/developer-kit',
-  'openrouterteam/agent-skills',
-  'intellectronica/agent-skills',
-];
+const OFFICIAL_SOURCES = (sourcesData.sources as Source[]).filter(s => s.official);
+const COMMUNITY_SOURCES = (sourcesData.sources as Source[]).filter(s => !s.official && s.source !== 'skills.sh');
 
 export function Attribution(): React.ReactElement {
   return (
@@ -37,19 +18,19 @@ export function Attribution(): React.ReactElement {
         <div className="text-center mb-8">
           <h2 className="text-xl font-bold text-white mb-2 font-mono">Skill Sources</h2>
           <p className="text-zinc-500 font-mono text-xs">
-            Skills aggregated from open source repositories
+            {sourcesData.sources.length} sources aggregated from open source repositories and registries
           </p>
         </div>
 
         <div className="mb-8">
           <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-4">
-            Official
+            Official ({OFFICIAL_SOURCES.length})
           </div>
           <div className="flex flex-wrap gap-2">
             {OFFICIAL_SOURCES.map(source => (
               <a
-                key={source.repo}
-                href={`https://github.com/${source.repo}`}
+                key={source.source}
+                href={source.registry ? `https://${source.source}` : `https://github.com/${source.source}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-3 py-2 hover:border-zinc-600 hover:text-white transition-colors text-zinc-400 font-mono text-xs"
@@ -65,18 +46,18 @@ export function Attribution(): React.ReactElement {
 
         <div className="mb-8">
           <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-4">
-            Community
+            Community ({COMMUNITY_SOURCES.length})
           </div>
           <div className="flex flex-wrap gap-1.5">
-            {COMMUNITY_SOURCES.map(repo => (
+            {COMMUNITY_SOURCES.map(source => (
               <a
-                key={repo}
-                href={`https://github.com/${repo}`}
+                key={source.source}
+                href={`https://github.com/${source.source}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-zinc-600 hover:text-white transition-colors font-mono text-[11px] px-2 py-1 bg-zinc-900/50 border border-zinc-800/50 hover:border-zinc-700"
               >
-                {repo}
+                {source.source}
               </a>
             ))}
           </div>

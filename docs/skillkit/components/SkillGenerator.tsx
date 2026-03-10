@@ -31,7 +31,7 @@ export function SkillGenerator(): React.ReactElement {
       <div className="text-center mb-8">
         <h2 className="text-xl font-bold text-white mb-2 font-mono">Find Skills</h2>
         <p className="text-zinc-500 font-mono text-xs">
-          Search 15,000+ skills from the marketplace
+          Search 400K+ skills across registries
         </p>
       </div>
 

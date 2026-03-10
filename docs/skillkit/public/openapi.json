@@ -3,7 +3,7 @@
   "info": {
     "title": "SkillKit",
     "version": "1.12.0",
-    "description": "Skills shouldn't require pre-installation. This API lets any agent, framework, or tool discover and retrieve skills on demand.\n\n15,000+ skills across 44 AI coding agents. Results ranked by a multi-signal scoring system (content 40pts, query match 30pts, popularity 15pts, references 15pts).\n\n## Quick Start\n\n```bash\nnpx skillkit serve\n```\n\nThe API is now running at http://localhost:3737\n\n## MCP Server\n\nFor agent-native discovery (Claude Desktop, Cursor):\n\n```json\n{\n  \"mcpServers\": {\n    \"skillkit\": { \"command\": \"npx\", \"args\": [\"@skillkit/mcp\"] }\n  }\n}\n```\n\n## Python Client\n\n```bash\npip install skillkit-client\n```",
+    "description": "Skills shouldn't require pre-installation. This API lets any agent, framework, or tool discover and retrieve skills on demand.\n\n400K+ skills across 44 AI coding agents. Results ranked by a multi-signal scoring system (content 40pts, query match 30pts, popularity 15pts, references 15pts).\n\n## Quick Start\n\n```bash\nnpx skillkit serve\n```\n\nThe API is now running at http://localhost:3737\n\n## MCP Server\n\nFor agent-native discovery (Claude Desktop, Cursor):\n\n```json\n{\n  \"mcpServers\": {\n    \"skillkit\": { \"command\": \"npx\", \"args\": [\"@skillkit/mcp\"] }\n  }\n}\n```\n\n## Python Client\n\n```bash\npip install skillkit-client\n```",
     "license": {
       "name": "Apache-2.0",
       "url": "https://opensource.org/licenses/Apache-2.0"

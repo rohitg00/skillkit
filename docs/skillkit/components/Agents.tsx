@@ -293,6 +293,123 @@ const AGENTS: Agent[] = [
       </svg>
     )
   },
+  {
+    name: "Devin",
+    url: "https://devin.ai",
+    icon: (
+      <svg viewBox="0 0 100 100" className="w-8 h-8" fill="currentColor">
+        <path d="M35 35h10c8.284 0 15 6.716 15 15s-6.716 15-15 15H35V35zm6 6v18h4c4.97 0 9-4.03 9-9s-4.03-9-9-9h-4z"/>
+      </svg>
+    )
+  },
+  {
+    name: "Aider",
+    url: "https://aider.chat",
+    icon: (
+      <svg viewBox="0 0 100 100" className="w-8 h-8" fill="currentColor">
+        <path d="M50 33l-17 34h8l3-6h12l3 6h8L50 33zm0 12l4 10h-8l4-10z"/>
+      </svg>
+    )
+  },
+  {
+    name: "Cody",
+    url: "https://sourcegraph.com/cody",
+    icon: (
+      <svg viewBox="0 0 100 100" className="w-8 h-8" fill="currentColor">
+        <path d="M50 33c-9.389 0-17 7.611-17 17s7.611 17 17 17 17-7.611 17-17-7.611-17-17-17zm-7 21l-3-4 3-4 3 4-3 4zm7 5l-3-4 3-4 3 4-3 4zm7-5l-3-4 3-4 3 4-3 4z"/>
+      </svg>
+    )
+  },
+  {
+    name: "Amazon Q",
+    url: "https://aws.amazon.com/q",
+    icon: (
+      <svg viewBox="0 0 100 100" className="w-8 h-8" fill="currentColor">
+        <path d="M50 33c-9.389 0-17 7.611-17 17s7.611 17 17 17c3.144 0 6.09-.855 8.618-2.343l4.725 4.725 4.243-4.243-4.725-4.725A16.928 16.928 0 0067 50c0-9.389-7.611-17-17-17zm0 6c6.075 0 11 4.925 11 11s-4.925 11-11 11-11-4.925-11-11 4.925-11 11-11z"/>
+      </svg>
+    )
+  },
+  {
+    name: "Augment",
+    url: "https://augmentcode.com",
+    icon: (
+      <svg viewBox="0 0 100 100" className="w-8 h-8" fill="currentColor">
+        <path d="M50 33c-9.389 0-17 7.611-17 17s7.611 17 17 17 17-7.611 17-17-7.611-17-17-17zm0 6v8h-8v6h8v8h6v-8h8v-6h-8v-8h-6z"/>
+      </svg>
+    )
+  },
+  {
+    name: "Replit",
+    url: "https://replit.com",
+    icon: (
+      <svg viewBox="0 0 100 100" className="w-8 h-8" fill="currentColor">
+        <path d="M40 33c-2.761 0-5 2.239-5 5v8h15c2.761 0 5 2.239 5 5s-2.239 5-5 5H35v8c0 2.761 2.239 5 5 5h20c2.761 0 5-2.239 5-5V38c0-2.761-2.239-5-5-5H40z"/>
+      </svg>
+    )
+  },
+  {
+    name: "Bolt",
+    url: "https://bolt.new",
+    icon: (
+      <svg viewBox="0 0 100 100" className="w-8 h-8" fill="currentColor">
+        <path d="M55 33H40l-5 20h10l-5 14 20-20H50l5-14z"/>
+      </svg>
+    )
+  },
+  {
+    name: "Lovable",
+    url: "https://lovable.dev",
+    icon: (
+      <svg viewBox="0 0 100 100" className="w-8 h-8" fill="currentColor">
+        <path d="M50 62l-12.728-12.728c-3.515-3.515-3.515-9.213 0-12.728 3.514-3.515 9.213-3.515 12.728 0 3.515-3.515 9.214-3.515 12.728 0 3.515 3.515 3.515 9.213 0 12.728L50 62z"/>
+      </svg>
+    )
+  },
+  {
+    name: "Tabby",
+    url: "https://tabby.tabbyml.com",
+    icon: (
+      <svg viewBox="0 0 100 100" className="w-8 h-8" fill="currentColor">
+        <path d="M35 45l5-12h6l-5 12h-6zm14 0l5-12h6l-5 12h-6zM33 48v17h34V48H33zm6 6h6v5h-6v-5zm10 0h6v5h-6v-5zm10 0h6v5h-6v-5z"/>
+      </svg>
+    )
+  },
+  {
+    name: "Tabnine",
+    url: "https://tabnine.com",
+    icon: (
+      <svg viewBox="0 0 100 100" className="w-8 h-8" fill="currentColor">
+        <path d="M38 35v6h9v24h6V41h9v-6H38z"/>
+      </svg>
+    )
+  },
+  {
+    name: "CodeGPT",
+    url: "https://codegpt.co",
+    icon: (
+      <svg viewBox="0 0 100 100" className="w-8 h-8" fill="currentColor">
+        <path d="M42 40l-9 10 9 10 4-4-6-6 6-6-4-4zm16 0l-4 4 6 6-6 6 4 4 9-10-9-10z"/>
+      </svg>
+    )
+  },
+  {
+    name: "PlayCode",
+    url: "https://playcode.io",
+    icon: (
+      <svg viewBox="0 0 100 100" className="w-8 h-8" fill="currentColor">
+        <path d="M38 33v34l28-17-28-17z"/>
+      </svg>
+    )
+  },
+  {
+    name: "Universal",
+    url: "https://github.com/rohitg00/skillkit",
+    icon: (
+      <svg viewBox="0 0 100 100" className="w-8 h-8" fill="currentColor">
+        <path d="M50 33c-9.389 0-17 7.611-17 17s7.611 17 17 17 17-7.611 17-17-7.611-17-17-17zm0 6c6.075 0 11 4.925 11 11s-4.925 11-11 11-11-4.925-11-11 4.925-11 11-11zm0 4c-3.866 0-7 3.134-7 7s3.134 7 7 7 7-3.134 7-7-3.134-7-7-7z"/>
+      </svg>
+    )
+  },
 ];
 
 const SCROLL_ANIMATION_STYLES = `
@@ -301,7 +418,7 @@ const SCROLL_ANIMATION_STYLES = `
     100% { transform: translateX(-50%); }
   }
   .animate-scroll {
-    animation: scroll 35s linear infinite;
+    animation: scroll 45s linear infinite;
   }
 `;
 

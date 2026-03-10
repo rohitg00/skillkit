@@ -24,7 +24,7 @@ export class GenerateCommand extends Command {
 
       - Documentation (Context7)
       - Local codebase patterns
-      - Marketplace skills (15,000+)
+      - Marketplace skills (400K+)
       - Memory observations and learnings
 
       Supports multiple LLM providers: Claude, GPT-4, Gemini, Ollama, OpenRouter
@@ -243,7 +243,7 @@ Or use Ollama for local models (no API key needed)`,
     const sourceOptions = [
       { value: 'docs', label: 'Documentation (Context7)', hint: 'Library docs & guides' },
       { value: 'codebase', label: 'Codebase (local)', hint: 'Project patterns & configs' },
-      { value: 'skills', label: 'Marketplace Skills', hint: '15,000+ skills' },
+      { value: 'skills', label: 'Marketplace Skills', hint: '400K+ skills' },
       { value: 'memory', label: 'Memory & Learnings', hint: 'Your corrections & patterns' },
     ];
 

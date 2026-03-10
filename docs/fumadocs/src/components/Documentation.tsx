@@ -48,7 +48,7 @@ const sections: DocSection[] = [
         </p>
         <h3 className="text-lg font-semibold text-white mt-6">Core Capabilities</h3>
         <ul className="list-disc list-inside space-y-2 text-zinc-400">
-          <li><span className="text-white">Skill Discovery</span> - Browse 15,000+ skills from marketplace with AI-powered recommendations</li>
+          <li><span className="text-white">Skill Discovery</span> - Browse 400K+ skills from registries with AI-powered recommendations</li>
           <li><span className="text-white">Cross-Agent Translation</span> - Automatically convert skills between 44 agent-specific formats</li>
           <li><span className="text-white">Team Collaboration</span> - Share skills via .skills manifest files and publish to marketplace</li>
         </ul>

@@ -357,7 +357,7 @@
     {
       "id": "rohitg00/skillkit/find-skills",
       "name": "Find Skills",
-      "description": "Universal skill discovery across all AI agent marketplaces. Search 15K+ skills and install with one command.",
+      "description": "Universal skill discovery across all AI agent marketplaces. Search 400K+ skills and install with one command.",
       "source": "rohitg00/skillkit",
       "tags": [
         "meta",

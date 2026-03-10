@@ -1,6 +1,6 @@
 ---
 name: "find-skills"
-description: "Discovers, searches, and installs skills from multiple AI agent skill marketplaces (15,000+ skills) using the SkillKit CLI. Supports browsing official partner collections (Anthropic, Vercel, Supabase, Stripe, and more) and community repositories, searching by domain or technology, and installing specific skills from GitHub. Use when the user wants to find, browse, or install new agent skills, plugins, extensions, or add-ons; asks 'is there a skill for X' or 'find a skill for X'; wants to explore a skill store or marketplace; needs to extend agent capabilities in areas like React, testing, DevOps, security, or APIs; or says 'browse skills', 'search skill marketplace', 'install a skill', or 'what skills are available'."
+description: "Discovers, searches, and installs skills from multiple AI agent skill marketplaces (400K+ skills) using the SkillKit CLI. Supports browsing official partner collections (Anthropic, Vercel, Supabase, Stripe, and more) and community repositories, searching by domain or technology, and installing specific skills from GitHub. Use when the user wants to find, browse, or install new agent skills, plugins, extensions, or add-ons; asks 'is there a skill for X' or 'find a skill for X'; wants to explore a skill store or marketplace; needs to extend agent capabilities in areas like React, testing, DevOps, security, or APIs; or says 'browse skills', 'search skill marketplace', 'install a skill', or 'what skills are available'."
 version: "1.0.0"
 tags: ["meta", "discovery", "marketplace", "skills"]
 ---
@@ -36,7 +36,7 @@ npx skillkit@latest list
 npx skillkit@latest recommend
 ```
 
-## Skill Sources (15,000+ skills)
+## Skill Sources (400K+ skills)
 
 ### Official Partners
 | Source | Install |

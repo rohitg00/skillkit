@@ -114,7 +114,7 @@ export function WhySkillKit(): React.ReactElement {
           </h3>
           <p className="text-zinc-400 font-mono text-xs sm:text-sm mb-6">
             SkillKit doesn't compete with skill sources &mdash; it aggregates them.
-            Install from 31+ curated repositories, any GitHub/GitLab repo, or local paths.
+            Install from 34+ curated repositories, any GitHub/GitLab repo, or local paths.
             Everything runs locally. No accounts, no tracking, no lock-in.
           </p>
 
@@ -134,7 +134,7 @@ export function WhySkillKit(): React.ReactElement {
               </a>
             ))}
             <div className="flex items-center gap-2 px-3 py-2 border border-dashed border-zinc-800 text-zinc-600 text-xs font-mono">
-              + 19 more community sources
+              + 22 more community sources
             </div>
           </div>
         </div>

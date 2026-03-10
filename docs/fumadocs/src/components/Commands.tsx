@@ -18,7 +18,7 @@ const COMMAND_GROUPS: CommandGroup[] = [
   {
     name: 'Discovery',
     commands: [
-      { cmd: 'find', desc: 'Search marketplace (15K+ skills)' },
+      { cmd: 'find', desc: 'Search marketplace (400K+ skills)' },
       { cmd: 'recommend', desc: 'AI-powered suggestions' },
       { cmd: 'check', desc: 'Dry-run update check' },
       { cmd: 'list', desc: 'View installed skills' },

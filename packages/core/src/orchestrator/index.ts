@@ -10,7 +10,7 @@
  * - Plan approval workflow
  * - Review stages (spec-compliance, code-quality)
  * - Inter-agent messaging (direct + broadcast)
- * - Universal agent support (32 agents)
+ * - Universal agent support (44 agents)
  */
 
 // Team Orchestrator

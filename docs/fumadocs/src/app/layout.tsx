@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     default: 'SkillKit - Universal Skills for AI Coding Agents',
     template: '%s | SkillKit',
   },
-  description: 'One CLI to install, sync, and manage skills across Claude Code, Cursor, Windsurf, Copilot, and 28 more agents. 15,000+ skills ready to use.',
+  description: 'One CLI to install, sync, and manage skills across Claude Code, Cursor, Windsurf, Copilot, and 40 more agents. 400K+ skills ready to use.',
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },

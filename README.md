@@ -15,7 +15,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/rohitg00/skillkit?style=flat-square)](https://github.com/rohitg00/skillkit/stargazers)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
 
-**SkillKit** is the open source package manager for AI agent skills. Write a skill once, deploy it to **44 agents** — Claude, Cursor, Copilot, Windsurf, Devin, Codex, and 38 more. No rewrites. 15,000+ skills in the marketplace.
+**SkillKit** is the open source package manager for AI agent skills. Write a skill once, deploy it to **44 agents** — Claude, Cursor, Copilot, Windsurf, Devin, Codex, and 38 more. No rewrites. 400K+ skills across registries.
 
 [Website](https://skillkit.sh) &middot; [Docs](https://skillkit.sh/docs) &middot; [API Explorer](https://skillkit.sh/api) &middot; [Chrome Extension](https://github.com/rohitg00/skillkit/tree/main/packages/extension#readme) &middot; [npm](https://www.npmjs.com/package/skillkit)
 
@@ -34,7 +34,7 @@ Skills make AI coding agents smarter. But every agent uses a different format:
 
 You end up rewriting the same skill for each agent, or locking into one platform.
 
-**SkillKit fixes this.** Install from 15,000+ skills, auto-translate between formats, persist learnings with Memory. Works with Claude, Cursor, Windsurf, Copilot, and 40 more.
+**SkillKit fixes this.** Install from 400K+ skills across registries, auto-translate between formats, persist learnings with Memory. Works with Claude, Cursor, Windsurf, Copilot, and 40 more.
 
 ```bash
 npx skillkit@latest
@@ -154,7 +154,7 @@ skillkit generate
 # Interactive wizard with 4 context sources:
 # - Documentation (via Context7)
 # - Your codebase patterns
-# - 15,000+ marketplace skills
+# - 400K+ marketplace skills
 # - Memory (your corrections)
 ```
 
