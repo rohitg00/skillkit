@@ -46,7 +46,7 @@ function extractTestCases(content: string): SandboxTestCase[] {
   if (exampleBlocks.length > 0) {
     const block = exampleBlocks[0];
     cases.push({
-      name: `${skillName}: code example execution`,
+      name: `${skillName}: code block content validation`,
       prompt: `Follow this skill instruction and execute the first code example:\n\n${block}`,
       expectedOutcome: 'exit code 0',
       graderType: 'deterministic',

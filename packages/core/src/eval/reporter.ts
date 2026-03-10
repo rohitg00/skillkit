@@ -121,7 +121,7 @@ function formatCommunityDetails(details: Record<string, unknown>): string[] {
 
 function formatSandboxDetails(details: Record<string, unknown>): string[] {
   const lines: string[] = [];
-  const results = details.results as Array<{ name: string; passed: boolean; output?: string }> | undefined;
+  const results = details.results as Array<{ testCase: string; passed: boolean; output?: string }> | undefined;
   if (!results || results.length === 0) {
     lines.push(`      ${DIM}No sandbox tests executed${RESET}`);
     return lines;
@@ -129,7 +129,7 @@ function formatSandboxDetails(details: Record<string, unknown>): string[] {
 
   for (const r of results) {
     const icon = r.passed ? `${GREEN}PASS` : `${RED}FAIL`;
-    lines.push(`      ${icon}${RESET} ${r.name}`);
+    lines.push(`      ${icon}${RESET} ${r.testCase}`);
     if (!r.passed && r.output) {
       lines.push(`        ${DIM}${r.output.slice(0, 200)}${RESET}`);
     }

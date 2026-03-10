@@ -249,7 +249,7 @@ function deduplicateFindings(findings: ContradictionFinding[]): ContradictionFin
 }
 
 function parseSemanticFindings(raw: string): ContradictionFinding[] {
-  const jsonMatch = raw.match(/\[[\s\S]*\]/);
+  const jsonMatch = raw.match(/\[[\s\S]*?\]/);
   if (!jsonMatch) return [];
 
   try {

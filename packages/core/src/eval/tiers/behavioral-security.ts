@@ -74,9 +74,10 @@ function extractCodeBlocks(content: string): { code: string; lang: string; index
 function runCodeBlockAnalysis(content: string): SecurityFinding[] {
   const findings: SecurityFinding[] = [];
   const codeBlocks = extractCodeBlocks(content);
-  const searchTargets = codeBlocks.length > 0
-    ? codeBlocks.map((b) => ({ text: b.code, location: `code block (${b.lang})` }))
-    : [{ text: content, location: 'skill content' }];
+  const searchTargets = [
+    ...codeBlocks.map((b) => ({ text: b.code, location: `code block (${b.lang})` })),
+    { text: content, location: 'skill content' },
+  ];
 
   for (const target of searchTargets) {
     for (const { pattern, label } of DANGEROUS_PATTERNS) {
@@ -122,7 +123,13 @@ function runCodeBlockAnalysis(content: string): SecurityFinding[] {
     }
   }
 
-  return findings;
+  const seen = new Set<string>();
+  return findings.filter((f) => {
+    const key = `${f.description}::${f.snippet}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 function runTaintTracking(content: string): SecurityFinding[] {

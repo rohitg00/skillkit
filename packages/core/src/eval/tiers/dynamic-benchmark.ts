@@ -26,7 +26,7 @@ interface CachedStats {
 interface MarketplaceSkill {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   source?: string;
   tags?: string[];
   type?: string;
