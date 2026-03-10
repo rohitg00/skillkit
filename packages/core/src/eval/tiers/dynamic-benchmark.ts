@@ -231,7 +231,7 @@ export class DynamicBenchmarkEvaluator implements TierEvaluator {
       comparisons.push({
         category,
         percentile,
-        sampleSize: sorted.length || 200,
+        sampleSize: sorted.length,
         mean: catStats.mean,
         median: catStats.median,
         p90: catStats.p90,

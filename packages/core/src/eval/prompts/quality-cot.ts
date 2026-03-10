@@ -1,5 +1,12 @@
 import type { ChatMessage } from '../../ai/providers/types.js';
 
+const CONTENT_LIMIT = 6000;
+
+function truncateContent(content: string): string {
+  if (content.length <= CONTENT_LIMIT) return content;
+  return content.slice(0, CONTENT_LIMIT) + `\n\n[... truncated, ${content.length - CONTENT_LIMIT} characters omitted ...]`;
+}
+
 function systemMessage(dimension: string): string {
   return `You are evaluating the ${dimension} of an AI agent skill instruction. Analyze the provided skill content carefully using chain-of-thought reasoning, then output your evaluation as a single JSON object with exactly these fields:
 - "score": integer 0-100
@@ -34,7 +41,7 @@ Scoring guide:
 
 Skill content:
 ---
-${content.slice(0, 6000)}
+${truncateContent(content)}
 ---
 
 Respond with JSON only: { "score": <0-100>, "reasoning": "<explanation>", "confidence": <0.0-1.0> }`,
@@ -67,7 +74,7 @@ Scoring guide:
 
 Skill content:
 ---
-${content.slice(0, 6000)}
+${truncateContent(content)}
 ---
 
 Respond with JSON only: { "score": <0-100>, "reasoning": "<explanation>", "confidence": <0.0-1.0> }`,
@@ -101,7 +108,7 @@ Scoring guide:
 
 Skill content:
 ---
-${content.slice(0, 6000)}
+${truncateContent(content)}
 ---
 
 Respond with JSON only: { "score": <0-100>, "reasoning": "<explanation>", "confidence": <0.0-1.0> }`,
@@ -135,7 +142,7 @@ Scoring guide:
 
 Skill content:
 ---
-${content.slice(0, 6000)}
+${truncateContent(content)}
 ---
 
 Respond with JSON only: { "score": <0-100>, "reasoning": "<explanation>", "confidence": <0.0-1.0> }`,
@@ -168,7 +175,7 @@ Scoring guide:
 
 Skill content:
 ---
-${content.slice(0, 6000)}
+${truncateContent(content)}
 ---
 
 Respond with JSON only: { "score": <0-100>, "reasoning": "<explanation>", "confidence": <0.0-1.0> }`,
@@ -202,7 +209,7 @@ Scoring guide:
 
 Skill content:
 ---
-${content.slice(0, 6000)}
+${truncateContent(content)}
 ---
 
 Respond with JSON only: { "score": <0-100>, "reasoning": "<explanation>", "confidence": <0.0-1.0> }`,

@@ -119,11 +119,31 @@ function formatCommunityDetails(details: Record<string, unknown>): string[] {
   return lines;
 }
 
+function formatSandboxDetails(details: Record<string, unknown>): string[] {
+  const lines: string[] = [];
+  const results = details.results as Array<{ name: string; passed: boolean; output?: string }> | undefined;
+  if (!results || results.length === 0) {
+    lines.push(`      ${DIM}No sandbox tests executed${RESET}`);
+    return lines;
+  }
+
+  for (const r of results) {
+    const icon = r.passed ? `${GREEN}PASS` : `${RED}FAIL`;
+    lines.push(`      ${icon}${RESET} ${r.name}`);
+    if (!r.passed && r.output) {
+      lines.push(`        ${DIM}${r.output.slice(0, 200)}${RESET}`);
+    }
+  }
+
+  return lines;
+}
+
 function getTierDetailFormatter(tier: number): ((details: Record<string, unknown>) => string[]) | null {
   switch (tier) {
     case 1: return formatQualityDetails;
     case 2: return formatContradictionDetails;
     case 3: return formatSecurityDetails;
+    case 4: return formatSandboxDetails;
     case 5: return formatBenchmarkDetails;
     case 6: return formatCommunityDetails;
     default: return null;

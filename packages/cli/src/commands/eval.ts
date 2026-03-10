@@ -103,6 +103,14 @@ export class EvalCommand extends Command {
       }
     }
 
+    if (this.minScore) {
+      const threshold = parseInt(this.minScore, 10);
+      if (isNaN(threshold)) {
+        this.context.stderr.write(`Invalid --min-score value: "${this.minScore}". Must be a number.\n`);
+        return 1;
+      }
+    }
+
     const options: EvalOptions = {
       tiers,
       provider: this.provider,
@@ -128,10 +136,6 @@ export class EvalCommand extends Command {
 
     if (this.minScore) {
       const threshold = parseInt(this.minScore, 10);
-      if (isNaN(threshold)) {
-        this.context.stderr.write(`Invalid --min-score value: "${this.minScore}". Must be a number.\n`);
-        return 1;
-      }
       if (result.overallScore < threshold) {
         this.context.stderr.write(`Score ${result.overallScore} is below minimum ${threshold}\n`);
         return 1;

@@ -27,6 +27,7 @@ function buildBoundaryPairs(content: string): BoundaryPair[] {
   }
   const pairs: BoundaryPair[] = [];
   for (const term of terms) {
+    if (term.length > 100) continue;
     const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     pairs.push({
       positive: new RegExp(`\\balways\\s+${escaped}\\b`, 'i'),
@@ -121,6 +122,7 @@ function findToolPermissionConflicts(content: string): ContradictionFinding[] {
   const bodyOffset = fmEnd >= 0 ? fmEnd + 3 : 0;
 
   for (const tool of tools) {
+    if (tool.length > 100) continue;
     const escaped = tool.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const denyRe = new RegExp(
       `\\b(?:never|don'?t|do not|must not|avoid)\\s+(?:use\\s+)?(?:the\\s+)?${escaped}\\b`,
