@@ -92,7 +92,7 @@ function scoreContentSize(content: string): number {
   if (len < CONTENT_SIZE_OPTIMAL_MIN) {
     if (len < 100) return 20;
     if (len < 200) return 40;
-    return 60 + Math.round((len / CONTENT_SIZE_OPTIMAL_MIN) * 40);
+    return Math.min(99, 60 + Math.round((len / CONTENT_SIZE_OPTIMAL_MIN) * 40));
   }
   if (len <= 8000) return 80;
   if (len <= 12000) return 60;

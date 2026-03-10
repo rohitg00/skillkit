@@ -93,10 +93,14 @@ export class EvalCommand extends Command {
       tiers = this.tier.split(',').map((s) => {
         const n = parseInt(s.trim(), 10);
         if (isNaN(n) || n < 1 || n > 6) {
-          throw new Error(`Invalid tier: ${s}. Must be 1-6.`);
+          return null;
         }
         return n as EvalTier;
-      });
+      }).filter((n): n is EvalTier => n !== null);
+      if (tiers.length === 0) {
+        this.context.stderr.write(`Invalid --tier value: "${this.tier}". Must be comma-separated numbers 1-6.\n`);
+        return 1;
+      }
     }
 
     const options: EvalOptions = {
@@ -106,7 +110,7 @@ export class EvalCommand extends Command {
       format: this.format as 'summary' | 'json' | 'table',
       verbose: this.verbose,
       sandboxImage: this.sandboxImage,
-      timeout: this.timeout ? parseInt(this.timeout, 10) : undefined,
+      timeout: this.timeout && !isNaN(parseInt(this.timeout, 10)) ? parseInt(this.timeout, 10) : undefined,
     };
 
     const engine = createEvalEngine();
@@ -124,7 +128,11 @@ export class EvalCommand extends Command {
 
     if (this.minScore) {
       const threshold = parseInt(this.minScore, 10);
-      if (typeof threshold === 'number' && Number.isFinite(threshold) && result.overallScore < threshold) {
+      if (isNaN(threshold)) {
+        this.context.stderr.write(`Invalid --min-score value: "${this.minScore}". Must be a number.\n`);
+        return 1;
+      }
+      if (result.overallScore < threshold) {
         this.context.stderr.write(`Score ${result.overallScore} is below minimum ${threshold}\n`);
         return 1;
       }
