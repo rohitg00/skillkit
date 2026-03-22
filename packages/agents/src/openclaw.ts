@@ -6,11 +6,26 @@ import { createSkillXml } from './base.js';
 import type { Skill, AgentType } from '@skillkit/core';
 import { AGENT_CONFIG } from '@skillkit/core';
 
-const config = AGENT_CONFIG.clawdbot;
+const config = AGENT_CONFIG.openclaw;
 
-export class ClawdbotAdapter implements AgentAdapter {
-  readonly type: AgentType = 'clawdbot';
-  readonly name = 'Clawdbot';
+/**
+ * OpenClaw Agent Adapter
+ *
+ * OpenClaw (formerly Clawdbot) is a local-first AI agent framework with a
+ * persistent gateway daemon. Skills use an extended YAML frontmatter schema
+ * with `permissions`, `triggers`, and `metadata.openclaw.requires` fields.
+ *
+ * Key differences from Claude Code:
+ * - Skills dir: `skills/` (not `.claude/skills/`)
+ * - Global skills: `~/.openclaw/skills/`
+ * - Config: `~/.openclaw/openclaw.json`
+ * - SKILL.md frontmatter includes: permissions, triggers, metadata.openclaw
+ * - Gateway loads skills contextually per-agent at runtime
+ * - Skills are organized by department: skills/<dept>/<name>/SKILL.md
+ */
+export class OpenClawAdapter implements AgentAdapter {
+  readonly type: AgentType = 'openclaw';
+  readonly name = 'OpenClaw';
   readonly skillsDir = config.skillsDir;
   readonly configFile = config.configFile;
 
@@ -69,9 +84,21 @@ ${skillsXml}
   }
 
   async isDetected(): Promise<boolean> {
+    // OpenClaw workspace: skills/ dir at project root
+    const projectSkills = join(process.cwd(), 'skills');
+    // OpenClaw global config
+    const globalOpenClaw = join(homedir(), '.openclaw');
+    // OpenClaw config file
+    const openclawConfig = join(process.cwd(), 'openclaw.json');
+    // Legacy clawdbot paths
     const globalClawdbot = join(homedir(), '.clawdbot');
     const clawdbotConfig = join(process.cwd(), 'clawdbot.json');
 
-    return existsSync(globalClawdbot) || existsSync(clawdbotConfig);
+    return (
+      (existsSync(projectSkills) && existsSync(globalOpenClaw)) ||
+      existsSync(openclawConfig) ||
+      existsSync(globalClawdbot) ||
+      existsSync(clawdbotConfig)
+    );
   }
 }

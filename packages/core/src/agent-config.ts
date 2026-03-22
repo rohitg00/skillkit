@@ -111,13 +111,33 @@ export const AGENT_CONFIG: Record<AgentType, AgentDirectoryConfig> = {
     supportsAutoDiscovery: true,
   },
 
-  // Clawdbot
+  // Clawdbot (legacy name for OpenClaw)
   clawdbot: {
-    skillsDir: '.clawdbot/skills',
-    configFile: 'AGENTS.md',
-    altSkillsDirs: ['skills'],
+    skillsDir: 'skills',
+    configFile: 'CLAUDE.md',
+    altSkillsDirs: ['.clawdbot/skills', '~/.openclaw/skills'],
+    globalSkillsDir: '~/.openclaw/skills',
     configFormat: 'xml',
     usesFrontmatter: true,
+    frontmatterFields: [
+      'name', 'description', 'version', 'scan_exempt',
+      'permissions', 'triggers', 'metadata',
+    ],
+    supportsAutoDiscovery: true,
+  },
+
+  // OpenClaw (same as clawdbot — rebranded)
+  openclaw: {
+    skillsDir: 'skills',
+    configFile: 'CLAUDE.md',
+    altSkillsDirs: ['~/.openclaw/skills'],
+    globalSkillsDir: '~/.openclaw/skills',
+    configFormat: 'xml',
+    usesFrontmatter: true,
+    frontmatterFields: [
+      'name', 'description', 'version', 'scan_exempt',
+      'permissions', 'triggers', 'metadata',
+    ],
     supportsAutoDiscovery: true,
   },
 

@@ -9,6 +9,7 @@ export const AgentType = z.enum([
   "gemini-cli",
   "amp",
   "clawdbot",
+  "openclaw",
   "droid",
   "github-copilot",
   "goose",

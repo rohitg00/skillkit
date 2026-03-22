@@ -8,6 +8,7 @@ import { OpenCodeAdapter } from './opencode.js';
 import { AntigravityAdapter } from './antigravity.js';
 import { AmpAdapter } from './amp.js';
 import { ClawdbotAdapter } from './clawdbot.js';
+import { OpenClawAdapter } from './openclaw.js';
 import { DroidAdapter } from './droid.js';
 import { FactoryAdapter } from './factory.js';
 import { GitHubCopilotAdapter } from './github-copilot.js';
@@ -29,6 +30,7 @@ export * from './opencode.js';
 export * from './antigravity.js';
 export * from './amp.js';
 export * from './clawdbot.js';
+export * from './openclaw.js';
 export * from './droid.js';
 export * from './factory.js';
 export * from './github-copilot.js';
@@ -53,6 +55,7 @@ const adapters: Record<AgentType, AgentAdapter> = {
   antigravity: new AntigravityAdapter(),
   amp: new AmpAdapter(),
   clawdbot: new ClawdbotAdapter(),
+  openclaw: new OpenClawAdapter(),
   droid: new DroidAdapter(),
   'github-copilot': new GitHubCopilotAdapter(),
   goose: new GooseAdapter(),
@@ -120,6 +123,7 @@ export async function detectAgent(): Promise<AgentType> {
     'opencode',
     'antigravity',
     'amp',
+    'openclaw',
     'clawdbot',
     'droid',
     'github-copilot',

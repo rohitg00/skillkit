@@ -21,6 +21,7 @@ export const AGENT_FORMAT_MAP: Record<AgentType, FormatCategory> = {
   'antigravity': 'skill-md',
   'amp': 'skill-md',
   'clawdbot': 'skill-md',
+  'openclaw': 'skill-md',
   'droid': 'skill-md',
   'goose': 'skill-md',
   'kilo': 'skill-md',
