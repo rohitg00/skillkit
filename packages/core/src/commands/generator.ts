@@ -73,6 +73,13 @@ const AGENT_FORMATS: Record<AgentType, AgentCommandFormat> = {
     supportsSlashCommands: true,
     supportsCommandFiles: true,
   },
+  openclaw: {
+    agent: 'openclaw',
+    extension: '.md',
+    directory: '.claude/commands',
+    supportsSlashCommands: true,
+    supportsCommandFiles: true,
+  },
   droid: {
     agent: 'droid',
     extension: '.md',
