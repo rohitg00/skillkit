@@ -278,6 +278,7 @@ export const ALL_AGENT_DISCOVERY_PATHS = [
   '.cline/agents',
   '.clawdbot/agents',
   '.codebuddy/agents',
+  '.openclaw/agents',
   '.codex/agents',
   '.commandcode/agents',
   '.continue/agents',
