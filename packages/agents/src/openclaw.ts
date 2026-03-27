@@ -90,15 +90,10 @@ ${skillsXml}
     const globalOpenClaw = join(homedir(), '.openclaw');
     // OpenClaw config file
     const openclawConfig = join(process.cwd(), 'openclaw.json');
-    // Legacy clawdbot paths
-    const globalClawdbot = join(homedir(), '.clawdbot');
-    const clawdbotConfig = join(process.cwd(), 'clawdbot.json');
 
     return (
       (existsSync(projectSkills) && existsSync(globalOpenClaw)) ||
-      existsSync(openclawConfig) ||
-      existsSync(globalClawdbot) ||
-      existsSync(clawdbotConfig)
+      existsSync(openclawConfig)
     );
   }
 }
