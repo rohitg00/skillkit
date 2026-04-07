@@ -35,10 +35,10 @@ const ALL_AGENTS = AgentType.options;
 
 describe('Agent Adapters', () => {
   describe('getAllAdapters', () => {
-    it('should return all 44 registered adapters', () => {
+    it('should return all 45 registered adapters', () => {
       const adapters = getAllAdapters();
       expect(adapters).toBeInstanceOf(Array);
-      expect(adapters.length).toBe(44);
+      expect(adapters.length).toBe(45);
     });
 
     it('should include common agents', () => {
