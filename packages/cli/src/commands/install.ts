@@ -40,6 +40,7 @@ import {
   isCancel,
   spinner,
   quickAgentSelect,
+  select,
   skillMultiselect,
   selectInstallMethod,
   confirm,
@@ -276,20 +277,43 @@ export class InstallCommand extends Command {
         // Interactive skill selection
         step(`Source: ${colors.cyan(this.source)}`);
 
-        const skillResult = await skillMultiselect({
-          message: "Select skills to install",
-          skills: discoveredSkills.map((s) => ({ name: s.name })),
-          initialValues: discoveredSkills.map((s) => s.name),
+        const selectionMode = await select<string>({
+          message: `Found ${discoveredSkills.length} skills — how would you like to install?`,
+          options: [
+            {
+              value: "all",
+              label: "Install all skills",
+              hint: `${discoveredSkills.length} skills`,
+            },
+            {
+              value: "select",
+              label: "Select specific skills",
+              hint: "Choose manually",
+            },
+          ],
         });
 
-        if (isCancel(skillResult)) {
+        if (isCancel(selectionMode)) {
           cancel("Installation cancelled");
           return 0;
         }
 
-        skillsToInstall = discoveredSkills.filter((s) =>
-          (skillResult as string[]).includes(s.name),
-        );
+        if (selectionMode === "select") {
+          const skillResult = await skillMultiselect({
+            message: "Select skills to install",
+            skills: discoveredSkills.map((s) => ({ name: s.name })),
+            initialValues: [],
+          });
+
+          if (isCancel(skillResult)) {
+            cancel("Installation cancelled");
+            return 0;
+          }
+
+          skillsToInstall = discoveredSkills.filter((s) =>
+            (skillResult as string[]).includes(s.name),
+          );
+        }
       }
 
       if (skillsToInstall.length === 0) {
