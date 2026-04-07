@@ -10,9 +10,9 @@ const config = AGENT_CONFIG.clawdbot;
 
 export class ClawdbotAdapter implements AgentAdapter {
   readonly type: AgentType = 'clawdbot';
-  readonly name = 'Clawdbot';
-  readonly skillsDir = config.skillsDir;
-  readonly configFile = config.configFile;
+  readonly name: string = 'Clawdbot';
+  readonly skillsDir: string = config.skillsDir;
+  readonly configFile: string = config.configFile;
 
   generateConfig(skills: Skill[]): string {
     const enabledSkills = skills.filter(s => s.enabled);

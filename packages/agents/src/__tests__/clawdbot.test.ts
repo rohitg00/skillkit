@@ -236,16 +236,6 @@ describe('ClawdbotAdapter', () => {
   });
 
   describe('isDetected', () => {
-    it('should detect Clawdbot from workspace skills directory', async () => {
-      mockExistsSync.mockImplementation((path) => {
-        return path === join(process.cwd(), 'skills');
-      });
-
-      const detected = await adapter.isDetected();
-
-      expect(detected).toBe(true);
-    });
-
     it('should detect Clawdbot from global directory', async () => {
       mockExistsSync.mockImplementation((path) => {
         return path === join(homedir(), '.clawdbot');
@@ -287,7 +277,6 @@ describe('ClawdbotAdapter', () => {
 
       await adapter.isDetected();
 
-      expect(mockExistsSync).toHaveBeenCalledWith(join(process.cwd(), 'skills'));
       expect(mockExistsSync).toHaveBeenCalledWith(join(homedir(), '.clawdbot'));
       expect(mockExistsSync).toHaveBeenCalledWith(join(process.cwd(), 'clawdbot.json'));
     });
