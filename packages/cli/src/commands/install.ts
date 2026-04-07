@@ -40,8 +40,7 @@ import {
   isCancel,
   spinner,
   quickAgentSelect,
-  select,
-  skillMultiselect,
+  quickSkillSelect,
   selectInstallMethod,
   confirm,
   outro,
@@ -274,46 +273,21 @@ export class InstallCommand extends Command {
       } else if (this.all || this.yes) {
         skillsToInstall = discoveredSkills;
       } else if (isInteractive && discoveredSkills.length > 1) {
-        // Interactive skill selection
         step(`Source: ${colors.cyan(this.source)}`);
 
-        const selectionMode = await select<string>({
-          message: `Found ${discoveredSkills.length} skills — how would you like to install?`,
-          options: [
-            {
-              value: "all",
-              label: "Install all skills",
-              hint: `${discoveredSkills.length} skills`,
-            },
-            {
-              value: "select",
-              label: "Select specific skills",
-              hint: "Choose manually",
-            },
-          ],
+        const skillResult = await quickSkillSelect({
+          skills: discoveredSkills.map((s) => ({ name: s.name })),
         });
 
-        if (isCancel(selectionMode)) {
+        if (isCancel(skillResult)) {
           cancel("Installation cancelled");
           return 0;
         }
 
-        if (selectionMode === "select") {
-          const skillResult = await skillMultiselect({
-            message: "Select skills to install",
-            skills: discoveredSkills.map((s) => ({ name: s.name })),
-            initialValues: [],
-          });
-
-          if (isCancel(skillResult)) {
-            cancel("Installation cancelled");
-            return 0;
-          }
-
-          skillsToInstall = discoveredSkills.filter((s) =>
-            (skillResult as string[]).includes(s.name),
-          );
-        }
+        const selected = (skillResult as { skills: string[] }).skills;
+        skillsToInstall = discoveredSkills.filter((s) =>
+          selected.includes(s.name),
+        );
       }
 
       if (skillsToInstall.length === 0) {

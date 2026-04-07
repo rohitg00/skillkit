@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { Cli, Builtins } from 'clipanion';
 import { setVersion, setAgentCount } from '@skillkit/cli';
-import { getAllAdapters } from '@skillkit/agents';
+import { getAdapterCount } from '@skillkit/agents';
 import {
   InstallCommand,
   SyncCommand,
@@ -133,7 +133,7 @@ const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
 const version = packageJson.version || '1.2.0';
 
 setVersion(version);
-setAgentCount(getAllAdapters().length);
+setAgentCount(getAdapterCount());
 
 const cli = new Cli({
   binaryLabel: 'skillkit',

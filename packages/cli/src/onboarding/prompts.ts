@@ -213,6 +213,43 @@ export async function skillMultiselect(options: {
   });
 }
 
+export async function quickSkillSelect(options: {
+  message?: string;
+  skills: SkillOption[];
+}): Promise<{ skills: string[]; method: 'all' | 'select' } | symbol> {
+  const { skills } = options;
+
+  const result = await clack.select({
+    message: options.message || `Found ${skills.length} skills — how would you like to install?`,
+    options: [
+      { value: 'all' as const, label: 'Install all skills', hint: `${skills.length} skills` },
+      { value: 'select' as const, label: 'Select specific skills', hint: 'Choose manually' },
+    ],
+  });
+
+  if (clack.isCancel(result)) {
+    return result;
+  }
+
+  const method = result as 'all' | 'select';
+
+  if (method === 'all') {
+    return { skills: skills.map(s => s.name), method };
+  }
+
+  const selected = await skillMultiselect({
+    message: 'Select skills to install',
+    skills,
+    initialValues: [],
+  });
+
+  if (clack.isCancel(selected)) {
+    return selected;
+  }
+
+  return { skills: selected as string[], method };
+}
+
 export async function groupMultiselect<T extends string>(options: {
   message: string;
   options: Record<string, Array<{ value: T; label: string; hint?: string }>>;

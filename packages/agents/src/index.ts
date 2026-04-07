@@ -107,6 +107,10 @@ export function getAllAdapters(): AgentAdapterWithType[] {
   }));
 }
 
+export function getAdapterCount(): number {
+  return Object.keys(adapters).length;
+}
+
 export async function detectAgent(): Promise<AgentType> {
   const checkOrder: AgentType[] = [
     'claude-code',

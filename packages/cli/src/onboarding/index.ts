@@ -42,6 +42,7 @@ export {
   select,
   agentMultiselect,
   quickAgentSelect,
+  quickSkillSelect,
   skillMultiselect,
   groupMultiselect,
   stepTrail,
@@ -165,35 +166,16 @@ export async function runInstallFlow(options: InstallFlowOptions): Promise<Insta
   let selectedSkills: string[];
 
   if (discoveredSkills.length > 1) {
-    const selectionMode = await prompts.select<string>({
-      message: `Found ${discoveredSkills.length} skills — how would you like to install?`,
-      options: [
-        { value: 'all', label: 'Install all skills', hint: `${discoveredSkills.length} skills` },
-        { value: 'select', label: 'Select specific skills', hint: 'Choose manually' },
-      ],
+    const skillResult = await prompts.quickSkillSelect({
+      skills: discoveredSkills.map(s => ({ name: s.name })),
     });
 
-    if (prompts.isCancel(selectionMode)) {
+    if (prompts.isCancel(skillResult)) {
       prompts.cancel('Installation cancelled');
       return { selectedSkills: [], selectedAgents: [], installMethod: 'symlink', cancelled: true };
     }
 
-    if (selectionMode === 'select') {
-      const skillResult = await prompts.skillMultiselect({
-        message: 'Select skills to install',
-        skills: discoveredSkills.map(s => ({ name: s.name })),
-        initialValues: [],
-      });
-
-      if (prompts.isCancel(skillResult)) {
-        prompts.cancel('Installation cancelled');
-        return { selectedSkills: [], selectedAgents: [], installMethod: 'symlink', cancelled: true };
-      }
-
-      selectedSkills = skillResult as string[];
-    } else {
-      selectedSkills = discoveredSkills.map(s => s.name);
-    }
+    selectedSkills = (skillResult as { skills: string[] }).skills;
   } else {
     selectedSkills = discoveredSkills.map(s => s.name);
   }
