@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="84" height="28" viewBox="0 0 84 28" role="img">
+  <clipPath id="c"><rect width="84" height="28" rx="4" ry="4"/></clipPath>
+  <g clip-path="url(#c)">
+    <rect width="42" height="28" fill="#18181b"/>
+    <rect x="42" width="42" height="28" fill="#09090b"/>
+    <rect x="0.5" y="0.5" width="83" height="27" fill="none" stroke="#3f3f46" rx="4" ry="4"/>
+    <text x="21" y="18" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="500" fill="#a1a1aa" letter-spacing="0.3">node</text>
+    <text x="63" y="18" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700" fill="#fafafa" letter-spacing="0.3">>=18</text>
+  </g>
+</svg>

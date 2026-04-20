@@ -1,6 +1,6 @@
 {
   "name": "@skillkit/api",
-  "version": "1.22.1",
+  "version": "1.23.0",
   "description": "REST API server for SkillKit skill discovery",
   "type": "module",
   "main": "./dist/index.js",
