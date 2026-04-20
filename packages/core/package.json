@@ -1,6 +1,6 @@
 {
   "name": "@skillkit/core",
-  "version": "1.22.1",
+  "version": "1.23.0",
   "description": "Core functionality for SkillKit - skill discovery, parsing, and translation",
   "type": "module",
   "main": "./dist/index.js",
@@ -60,12 +60,8 @@
     "zod": "^3.24.1"
   },
   "optionalDependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
-    "@google/genai": "^1.0.0",
     "better-sqlite3": "^12.0.0",
     "node-llama-cpp": "^3.15.0",
-    "ollama": "^0.5.0",
-    "openai": "^4.0.0",
     "sqlite-vec": "^0.1.6"
   },
   "devDependencies": {
