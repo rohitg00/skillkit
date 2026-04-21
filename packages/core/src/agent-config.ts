@@ -121,10 +121,10 @@ export const AGENT_CONFIG: Record<AgentType, AgentDirectoryConfig> = {
   },
 
   openclaw: {
-    skillsDir: 'skills',
-    configFile: 'CLAUDE.md',
-    altSkillsDirs: ['~/.openclaw/skills'],
-    globalSkillsDir: '~/.openclaw/skills',
+    skillsDir: '.openclaw/skills',
+    configFile: 'AGENTS.md',
+    altSkillsDirs: ['skills', '~/.openclaw/workspace/skills'],
+    globalSkillsDir: '~/.openclaw/workspace/skills',
     configFormat: 'xml',
     usesFrontmatter: true,
     frontmatterFields: [

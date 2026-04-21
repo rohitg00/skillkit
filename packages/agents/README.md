@@ -23,7 +23,7 @@ npm install @skillkit/agents
 | Antigravity | SKILL.md | `.antigravity/skills/` | - |
 | Amp | SKILL.md | `.amp/skills/` | - |
 | Clawdbot | SKILL.md | `.clawdbot/skills/` | - |
-| OpenClaw | SKILL.md | `skills/` | - |
+| OpenClaw | SKILL.md | `.openclaw/skills/` | `~/.openclaw/workspace/skills/` |
 | Cline | SKILL.md | `.cline/skills/` | - |
 | CodeBuddy | SKILL.md | `.codebuddy/skills/` | - |
 | CodeGPT | SKILL.md | `.codegpt/skills/` | - |

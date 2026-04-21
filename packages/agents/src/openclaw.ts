@@ -14,9 +14,12 @@ export class OpenClawAdapter extends ClawdbotAdapter {
   override readonly configFile = config.configFile;
 
   override async isDetected(): Promise<boolean> {
+    const projectOpenClaw = join(process.cwd(), '.openclaw');
     const globalOpenClaw = join(homedir(), '.openclaw');
+    const globalWorkspace = join(homedir(), '.openclaw', 'workspace');
     const openclawConfig = join(process.cwd(), 'openclaw.json');
 
-    return existsSync(globalOpenClaw) || existsSync(openclawConfig);
+    return existsSync(projectOpenClaw) || existsSync(globalOpenClaw) ||
+           existsSync(globalWorkspace) || existsSync(openclawConfig);
   }
 }

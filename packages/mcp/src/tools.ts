@@ -185,7 +185,7 @@ const AGENT_DIR_MAP: Record<string, string[]> = {
   'claude-code': ['.claude/skills'], 'cursor': ['.cursor/skills'], 'codex': ['.codex/skills'],
   'gemini-cli': ['.gemini/skills'], 'opencode': ['.opencode/skills', '.config/opencode/skills'],
   'antigravity': ['.antigravity/skills'], 'amp': ['.amp/skills'], 'clawdbot': ['.clawdbot/skills'],
-  'openclaw': ['skills'], 'github-copilot': ['.github/skills'], 'goose': ['.goose/skills'],
+  'openclaw': ['.openclaw/skills', 'skills'], 'github-copilot': ['.github/skills'], 'goose': ['.goose/skills'],
   'kilo': ['.kilocode/skills'], 'kiro-cli': ['.kiro/skills'], 'roo': ['.roo/skills'],
   'trae': ['.trae/skills'], 'windsurf': ['.windsurf/skills', '.codeium/windsurf/skills'],
   'universal': ['skills'], 'droid': ['.factory/skills'], 'factory': ['.factory/skills'],
