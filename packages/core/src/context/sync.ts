@@ -55,8 +55,11 @@ export class ContextSync {
       const skillsPath = join(this.projectPath, config.skillsDir);
       const configPath = join(this.projectPath, config.configFile);
 
-      // Check if either skills directory or config file exists
-      if (existsSync(skillsPath) || existsSync(configPath)) {
+      const altConfigExists = (config.altConfigFiles ?? []).some((alt) =>
+        existsSync(join(this.projectPath, alt))
+      );
+
+      if (existsSync(skillsPath) || existsSync(configPath) || altConfigExists) {
         detected.push(agent as AgentType);
       }
     }

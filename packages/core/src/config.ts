@@ -4,6 +4,7 @@ import { homedir } from 'node:os';
 import { createHash } from 'node:crypto';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import { SkillkitConfig, LockFile, type AgentType, type SkillMetadata, type AgentAdapterInfo, type LockEntry } from './types.js';
+import { AGENT_CONFIG } from './agent-config.js';
 
 const CONFIG_FILE = 'skillkit.yaml';
 const METADATA_FILE = '.skillkit.json';
@@ -99,7 +100,16 @@ export function getSearchDirs(adapter: AgentAdapterInfo): string[] {
 
   dirs.push(join(process.cwd(), adapter.skillsDir));
   dirs.push(join(process.cwd(), '.agent', 'skills'));
-  dirs.push(join(homedir(), adapter.skillsDir));
+
+  const globalDir = AGENT_CONFIG[adapter.type]?.globalSkillsDir;
+  if (globalDir) {
+    const resolved = globalDir.startsWith('~/')
+      ? join(homedir(), globalDir.slice(2))
+      : globalDir;
+    dirs.push(resolved);
+  } else {
+    dirs.push(join(homedir(), adapter.skillsDir));
+  }
   dirs.push(join(homedir(), '.agent', 'skills'));
 
   return dirs;

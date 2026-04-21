@@ -15,6 +15,8 @@ export interface AgentDirectoryConfig {
   skillsDir: string;
   /** Config file that references skills */
   configFile: string;
+  /** Alternative config files that also mark this agent as present */
+  altConfigFiles?: string[];
   /** Alternative skills directories */
   altSkillsDirs?: string[];
   /** Global skills directory */
@@ -123,6 +125,7 @@ export const AGENT_CONFIG: Record<AgentType, AgentDirectoryConfig> = {
   openclaw: {
     skillsDir: '.openclaw/skills',
     configFile: 'AGENTS.md',
+    altConfigFiles: ['openclaw.json'],
     altSkillsDirs: ['skills', '~/.openclaw/workspace/skills'],
     globalSkillsDir: '~/.openclaw/workspace/skills',
     configFormat: 'xml',

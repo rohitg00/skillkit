@@ -41,6 +41,7 @@ export const SKILL_DISCOVERY_PATHS = [
   '.mux/skills',
   '.neovate/skills',
   '.opencode/skills',
+  '.openclaw/skills',
   '.openhands/skills',
   '.pi/skills',
   '.playcode/skills',
