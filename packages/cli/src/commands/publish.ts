@@ -25,6 +25,7 @@ import {
   formatSummary,
   Severity,
   evaluateSkillDirectory,
+  computeSkillIntegrity,
 } from "@skillkit/core";
 import { formatCount, timeAgo, fetchGitHubActivity } from "../helpers.js";
 
@@ -194,10 +195,21 @@ export class PublishCommand extends Command {
         description: skill.description,
         path: skill.path,
       });
+      let integritySri: string | undefined;
+      try {
+        integritySri = computeSkillIntegrity(skill.path).sri;
+      } catch {
+        integritySri = undefined;
+      }
+      if (integritySri) {
+        console.log(colors.muted(`    Integrity: ${integritySri}`));
+      }
+
       wellKnownSkills.push({
         name: safeName,
         description: skill.description,
         files,
+        integrity: integritySri,
       });
     }
 

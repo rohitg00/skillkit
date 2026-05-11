@@ -347,6 +347,9 @@ skillkit marketplace             # browse
 skillkit tree                    # taxonomy
 skillkit find <query>            # quick search
 skillkit scan <path>             # security scan
+skillkit verify <path>           # SHA-256 integrity (SRI)
+skillkit verify <path> --expected sha256-...   # verify against published digest
+skillkit verify <path> --against-lock          # verify against ~/.skillkit/lock.json
 ```
 </details>
 

@@ -29,6 +29,7 @@ import {
   TrustScorer,
   readSkillContent,
   computeSkillChecksum,
+  computeSkillIntegrity,
   addSkillToLock,
 } from "@skillkit/core";
 import type { SkillsShStats } from "@skillkit/core";
@@ -617,11 +618,17 @@ export class InstallCommand extends Command {
         const actualPath = isStandalone
           ? join(firstAgentInstallDir, skillName.endsWith(".md") ? skillName : `${skillName}.md`)
           : join(firstAgentInstallDir, skillName);
+        let integritySri: string | undefined;
+        try {
+          integritySri = computeSkillIntegrity(actualPath).sri;
+        } catch {
+          integritySri = undefined;
+        }
         addSkillToLock(skillName, {
           source: this.source,
           sourceType: providerAdapter!.type,
           installedAt: new Date().toISOString(),
-          checksum: computeSkillChecksum(actualPath),
+          checksum: integritySri ?? computeSkillChecksum(actualPath),
           agents: installedAgents,
           path: actualPath,
         });

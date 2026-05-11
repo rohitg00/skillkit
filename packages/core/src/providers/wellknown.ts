@@ -34,6 +34,7 @@ export interface WellKnownSkill {
   name: string;
   description?: string;
   files: string[];
+  integrity?: string;
 }
 
 export interface WellKnownIndex {
@@ -280,14 +281,18 @@ export function calculateBaseSkillsUrl(foundUrl: string): string {
     : foundUrl.replace('/skills.json', '/skills');
 }
 
-export function generateWellKnownIndex(skills: Array<{ name: string; description?: string; files: string[] }>): WellKnownIndex {
+export function generateWellKnownIndex(skills: Array<{ name: string; description?: string; files: string[]; integrity?: string }>): WellKnownIndex {
   return {
     version: '1.0',
-    skills: skills.map(s => ({
-      name: s.name,
-      description: s.description,
-      files: s.files,
-    })),
+    skills: skills.map(s => {
+      const entry: WellKnownSkill = {
+        name: s.name,
+        description: s.description,
+        files: s.files,
+      };
+      if (s.integrity) entry.integrity = s.integrity;
+      return entry;
+    }),
   };
 }
 

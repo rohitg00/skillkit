@@ -573,6 +573,23 @@ Skills are automatically scanned during `skillkit install`. Use `--no-scan` to s
 - `table` - tabular format
 - `sarif` - SARIF v2.1 for GitHub Code Scanning / IDE integration
 
+## Integrity Verification
+
+```bash
+skillkit verify <path>                              # Print SRI digest (sha256-<base64>)
+skillkit verify <path> --files                      # Show per-file digests
+skillkit verify <path> --format hex                 # Print raw 64-char hex digest
+skillkit verify <path> --json                       # Machine-readable JSON
+skillkit verify <path> --expected sha256-...        # Verify against a known publisher digest
+skillkit verify <path> --against-lock               # Verify against ~/.skillkit/lock.json
+```
+
+`skillkit verify` computes a deterministic SHA-256 over every file in the skill (excluding `.skillkit.json` metadata, VCS artifacts, and editor noise) and emits a [Subresource Integrity](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity) string. The digest matches the `integrity` field that `skillkit publish` writes into `.well-known/skills/index.json`, so a downstream consumer can detect tampering between publish and install.
+
+`skillkit install` and `skillkit update` automatically record the full SRI digest into `~/.skillkit/lock.json`, enabling `--against-lock` audits in CI pipelines and supply-chain workflows.
+
+**Exit codes:** `0` on match, `1` on mismatch, missing path, or malformed `--expected` value.
+
 ## Interactive TUI
 
 ```bash
