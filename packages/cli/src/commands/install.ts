@@ -36,6 +36,7 @@ import type { SkillMetadata, GitProvider, AgentType } from "@skillkit/core";
 import { isPathInside } from "@skillkit/core";
 import { getAdapter, detectAgent, getAllAdapters } from "@skillkit/agents";
 import { getInstallDir, saveSkillMetadata, formatCount } from "../helpers.js";
+import skillsData from "../../../../marketplace/skills.json" with { type: "json" };
 import {
   welcome,
   colors,
@@ -209,6 +210,18 @@ export class InstallCommand extends Command {
       discoveredSkills?: Array<{ name: string; dirName: string; path: string }>;
     } | null;
   }> {
+    if (!detectProvider(this.source) && !this.provider && !this.source.startsWith("http") && !this.source.startsWith("./") && !this.source.startsWith("~") && !this.source.startsWith("/")) {
+      const match = (skillsData.skills || []).find(
+        (e: { name?: string; id?: string; source?: string }) =>
+          (e.name && e.name.toLowerCase() === this.source.toLowerCase()) ||
+          (e.id && e.id.toLowerCase() === this.source.toLowerCase()),
+      );
+      if (match?.source) {
+        console.log(colors.muted(`Resolved "${this.source}" to ${match.source} via marketplace catalog`));
+        this.source = match.source;
+      }
+    }
+
     let providerAdapter = detectProvider(this.source);
     let result: {
       success: boolean;
