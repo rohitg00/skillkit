@@ -18,7 +18,7 @@ export const toolAbuseRules: SecurityRule[] = [
     severity: Severity.HIGH,
     patterns: [
       /(?:keep|continue)\s+(?:retrying|trying|running)\s+(?:until|without)/i,
-      /(?<!(?:must|should|always|will|to)\s+)(?:run|execute|proceed)\s+without\s+(?:confirmation|approval|asking)/i,
+      /(?<!(?:not|n'?t|never|avoid|forbid|deny|reject|prevent|cannot|can'?t)\s+)(?:run|execute|proceed)\s+without\s+(?:confirmation|approval|asking)/i,
       /(?<!(?:never|don'?t|do\s+not|must\s+not|should\s+not|cannot|can'?t|avoid|forbid|reject|deny|prevent)\s+)(?:auto-?approve|skip\s+confirmation|bypass\s+approval)/i,
       /(?:don'?t|do\s+not|never)\s+(?:ask|prompt|wait)\s+(?:for|the)\s+(?:permission|confirmation|approval)/i,
     ],

@@ -217,7 +217,9 @@ export class InstallCommand extends Command {
           (e.id && e.id.toLowerCase() === this.source.toLowerCase()),
       );
       if (match?.source) {
-        console.log(colors.muted(`Resolved "${this.source}" to ${match.source} via marketplace catalog`));
+        if (!this.json && !this.quiet) {
+          console.log(colors.muted(`Resolved "${this.source}" to ${match.source} via marketplace catalog`));
+        }
         this.source = match.source;
       }
     }
