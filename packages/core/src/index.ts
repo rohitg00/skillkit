@@ -124,6 +124,9 @@ export * from './runtime/index.js';
 // Security Scanner
 export * from './scanner/index.js';
 
+// Skill Integrity (SHA-256 content hashing + verification)
+export * from './integrity/index.js';
+
 // Spec Validation
 export * from './validation/index.js';
 

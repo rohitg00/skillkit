@@ -125,6 +125,7 @@ export { SkillMdValidateCommand, SkillMdInitCommand, SkillMdCheckCommand } from 
 // API server
 export { ServeCommand } from './serve.js';
 export { ScanCommand } from './scan.js';
+export { VerifyCommand } from './verify.js';
 export { EvalCommand } from './eval.js';
 export { IssuePlanCommand, IssueListCommand } from './issue.js';
 export { DoctorCommand } from './doctor.js';

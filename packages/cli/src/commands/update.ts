@@ -1,7 +1,15 @@
 import { existsSync, rmSync, cpSync } from 'node:fs';
 import { join } from 'node:path';
 import { Command, Option } from 'clipanion';
-import { findAllSkills, findSkill, detectProvider, isLocalPath, computeSkillChecksum, addSkillToLock } from '@skillkit/core';
+import { findAllSkills, findSkill, detectProvider, isLocalPath, computeSkillChecksum, computeSkillIntegrity, addSkillToLock } from '@skillkit/core';
+
+function safeIntegrity(path: string): string | undefined {
+  try {
+    return computeSkillIntegrity(path).sri;
+  } catch {
+    return undefined;
+  }
+}
 import { getSearchDirs, loadSkillMetadata, saveSkillMetadata, fetchGitHubActivity } from '../helpers.js';
 import { colors, spinner, warn, step } from '../onboarding/index.js';
 
@@ -102,7 +110,7 @@ export class UpdateCommand extends Command {
             sourceType: metadata.sourceType,
             installedAt: metadata.installedAt,
             updatedAt: metadata.updatedAt,
-            checksum: metadata.checksum,
+            checksum: safeIntegrity(skill.path) ?? metadata.checksum,
             agents: [],
             path: skill.path,
           });
@@ -170,7 +178,7 @@ export class UpdateCommand extends Command {
             sourceType: metadata.sourceType,
             installedAt: metadata.installedAt,
             updatedAt: metadata.updatedAt,
-            checksum: metadata.checksum,
+            checksum: safeIntegrity(skill.path) ?? metadata.checksum,
             agents: [],
             path: skill.path,
           });

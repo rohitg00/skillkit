@@ -1,11 +1,16 @@
 ---
-title: Security Scanner
-description: Detect malicious patterns, secrets, and vulnerabilities in AI agent skills
+title: Security & Integrity
+description: Scan skills for malicious patterns, verify content integrity, and lock against supply-chain tampering
 ---
 
-# Security Scanner
+# Security & Integrity
 
-SkillKit includes a built-in security scanner that analyzes skills for prompt injection, command injection, data exfiltration, hardcoded secrets, and other threats before installation.
+SkillKit ships two complementary supply-chain defenses:
+
+1. **`skillkit scan`** — static security scanner detecting prompt injection, command injection, data exfiltration, hardcoded secrets, tool abuse, and unicode steganography (46+ rules).
+2. **`skillkit verify`** — SHA-256 content-integrity check that compares the locally installed skill against the publisher's recorded digest (full SRI, recorded automatically in `~/.skillkit/lock.json`).
+
+Run `scan` to ask _"is this skill dangerous?"_. Run `verify` to ask _"is this skill what the publisher actually shipped?"_.
 
 ## Quick Start
 
@@ -279,3 +284,42 @@ To skip specific rules:
 ```bash
 skillkit scan . --skip-rules UC001,UC002,MF004
 ```
+
+## Integrity Verification (`skillkit verify`)
+
+`skillkit verify` is the supply-chain counterpart to `skillkit scan`. The scanner answers _"is this skill dangerous?"_; `verify` answers _"is this skill what the publisher actually shipped?"_.
+
+```bash
+skillkit verify ./my-skill                              # Print SRI digest
+skillkit verify ./my-skill --expected sha256-iQo/...    # Compare against publisher digest
+skillkit verify ./my-skill --against-lock               # Compare against ~/.skillkit/lock.json
+skillkit verify ./my-skill --json                       # JSON for CI pipelines
+```
+
+### How the digest is computed
+
+`verify` walks every file in the skill in deterministic alphabetical order, computes SHA-256 per file, and rolls those file hashes (plus their POSIX-normalized relative paths) into a single SHA-256 digest, emitted as a [Subresource Integrity](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity) string of the form `sha256-<base64>`. Skipped: `.skillkit.json`, `.DS_Store`, `.git`, `node_modules`, `dist`, `.turbo`, and any `*.skillkit.json` sidecar.
+
+Because file _paths_ feed the hash alongside _content_, renaming, adding, or removing a file all change the digest — not just edits to file bodies.
+
+### Publish, install, and lock integration
+
+- `skillkit publish` writes the digest into the `integrity` field of `.well-known/skills/index.json` for every published skill.
+- `skillkit install` records the full SRI digest into `~/.skillkit/lock.json` (falling back to the legacy short checksum only if integrity computation fails).
+- `skillkit update` refreshes the lock entry on successful update.
+
+### CI usage
+
+```yaml
+- name: Verify all installed skills
+  run: |
+    for skill in .claude/skills/*/; do
+      npx skillkit verify "$skill" --against-lock --json
+    done
+```
+
+Exit codes: `0` on match, `1` on mismatch, missing path, or malformed `--expected` value. Reason codes in JSON output: `mismatch`, `invalid-expected-format`, `missing-expected`, `no-lock-entry`.
+
+### Roadmap
+
+Cryptographic skill signing (ed25519 publisher keys + verified-publisher registry) is tracked separately as Phase 2 of [#90](https://github.com/rohitg00/skillkit/issues/90). Phase 1 (content integrity) is shipping now in response to the ClawHavoc supply-chain campaign and OWASP Agentic Skills Top 10 guidance.

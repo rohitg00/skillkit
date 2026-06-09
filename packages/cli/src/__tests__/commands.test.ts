@@ -30,6 +30,8 @@ describe('CLI Commands', () => {
       expect(commands.SessionSnapshotListCommand).toBeDefined();
       expect(commands.SessionSnapshotDeleteCommand).toBeDefined();
       expect(commands.SessionExplainCommand).toBeDefined();
+      expect(commands.VerifyCommand).toBeDefined();
+      expect(commands.ScanCommand).toBeDefined();
     });
   });
 });
