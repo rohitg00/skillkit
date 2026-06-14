@@ -1,12 +1,7 @@
 import type { TapEntry } from './helpers.js';
+import type { SkillRepoSource } from '@skillkit/core';
 
 const GITHUB_REPO_PATTERN = /^([\w.-]+)\/([\w.-]+)$/;
-
-export interface SkillRepoSource {
-  owner: string;
-  repo: string;
-  description?: string;
-}
 
 export interface RecommendationSourcesResult {
   sources: SkillRepoSource[];

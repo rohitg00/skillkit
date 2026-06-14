@@ -806,13 +806,12 @@ export class ProjectDetector {
     }
 
     if (
-      this.hasDotNetFileWithExtension('.csproj') ||
-      this.hasDotNetSolution()
+      this.hasDotNetFileWithExtension('.csproj')
     ) {
       languages.push({
         name: 'csharp',
         confidence: 100,
-        source: this.firstDotNetFile('.csproj') || this.firstDotNetSolution(),
+        source: this.firstDotNetFile('.csproj'),
       });
     }
 
@@ -826,7 +825,7 @@ export class ProjectDetector {
       name: 'dotnet',
       version: this.getDotNetSdkVersion(),
       confidence: 100,
-      source: this.hasFile('global.json') ? 'global.json' : this.firstDotNetMarker(),
+      source: this.firstFileNamed('global.json') || this.firstDotNetMarker(),
     };
   }
 
@@ -953,15 +952,23 @@ export class ProjectDetector {
   }
 
   private getDotNetSdkVersion(): string | undefined {
-    if (!this.hasFile('global.json')) return undefined;
+    const globalJsonPath = this.firstFileNamed('global.json');
+    if (!globalJsonPath) return undefined;
 
     try {
-      const content = this.readProjectFile('global.json');
+      const content = this.readProjectFile(globalJsonPath);
       const data = JSON.parse(content) as { sdk?: { version?: unknown } };
       return typeof data.sdk?.version === 'string' ? data.sdk.version : undefined;
     } catch {
       return undefined;
     }
+  }
+
+  private firstFileNamed(name: string): string | undefined {
+    for (const file of this.files) {
+      if (basename(file) === name) return file;
+    }
+    return undefined;
   }
 
   private getDotNetText(): string {

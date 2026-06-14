@@ -37,6 +37,7 @@ describe('recommend source resolution', () => {
     const taps: TapEntry[] = [
       { source: `${builtIn.owner}/${builtIn.repo}`, addedAt: '2026-06-14T00:00:00.000Z' },
       { source: 'some-org/some-skills', addedAt: '2026-06-14T00:00:00.000Z' },
+      { source: 'Some-Org/Some-Skills', addedAt: '2026-06-14T00:00:00.000Z' },
       { source: 'some-org/some-skills', addedAt: '2026-06-14T00:00:00.000Z' },
     ];
 
@@ -44,7 +45,7 @@ describe('recommend source resolution', () => {
     const names = result.sources.map((source) => `${source.owner}/${source.repo}`);
 
     expect(names.filter((name) => name === `${builtIn.owner}/${builtIn.repo}`)).toHaveLength(1);
-    expect(names.filter((name) => name === 'some-org/some-skills')).toHaveLength(1);
+    expect(names.filter((name) => name.toLowerCase() === 'some-org/some-skills')).toHaveLength(1);
   });
 
   it('should warn and skip invalid tap sources', () => {

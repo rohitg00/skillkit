@@ -690,7 +690,9 @@ export class RecommendCommand extends Command {
     }
 
     const sourceResult = buildRecommendationSources(KNOWN_SKILL_REPOS, loadTaps().taps);
-    console.log(colors.muted(`Sources: ${sourceResult.sources.map(r => `${r.owner}/${r.repo}`).join(', ')}\n`));
+    if (!this.quiet && !this.json) {
+      console.log(colors.muted(`Sources: ${sourceResult.sources.map(r => `${r.owner}/${r.repo}`).join(', ')}\n`));
+    }
 
     const s = spinner();
     s.start('Fetching skills...');
