@@ -168,6 +168,187 @@ describe('ProjectDetector', () => {
         })
       );
     });
+
+    it('should detect .NET solution, project, SDK version, frameworks, testing, and tools', () => {
+      vi.mocked(existsSync).mockImplementation((path) => {
+        if (typeof path !== 'string') return false;
+        return [
+          'global.json',
+          'Directory.Build.props',
+          'Directory.Packages.props',
+          'MarketplaceDemo.slnx',
+          'Web.csproj',
+        ].some((file) => path.endsWith(file));
+      });
+
+      vi.mocked(readFileSync).mockImplementation((path) => {
+        if (typeof path !== 'string') return '';
+        if (path.endsWith('global.json')) {
+          return JSON.stringify({ sdk: { version: '9.0.100' } });
+        }
+        if (path.endsWith('src/Web/Web.csproj')) {
+          return `
+            <Project Sdk="Microsoft.NET.Sdk.Web">
+              <PropertyGroup>
+                <TargetFramework>net9.0</TargetFramework>
+                <UseMaui>true</UseMaui>
+              </PropertyGroup>
+              <ItemGroup>
+                <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0" />
+                <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.0" />
+                <PackageReference Include="xunit" Version="2.9.2" />
+                <PackageReference Include="NUnit" Version="4.2.2" />
+                <PackageReference Include="MSTest.TestFramework" Version="3.6.4" />
+              </ItemGroup>
+            </Project>
+          `;
+        }
+        return '<Project />';
+      });
+
+      vi.mocked(readdirSync).mockImplementation((path) => {
+        if (typeof path !== 'string') return [];
+        if (path === '/test/project') {
+          return [
+            { name: 'MarketplaceDemo.slnx', isDirectory: () => false },
+            { name: 'global.json', isDirectory: () => false },
+            { name: 'Directory.Build.props', isDirectory: () => false },
+            { name: 'Directory.Packages.props', isDirectory: () => false },
+            { name: 'src', isDirectory: () => true },
+          ] as any;
+        }
+        if (path.endsWith('/src')) {
+          return [
+            { name: 'Web', isDirectory: () => true },
+          ] as any;
+        }
+        if (path.endsWith('/src/Web')) {
+          return ['Web.csproj'] as any;
+        }
+        return [];
+      });
+
+      const detector = new ProjectDetector('/test/project');
+      const stack = detector.analyze();
+
+      expect(stack.languages).toContainEqual(expect.objectContaining({ name: 'csharp' }));
+      expect(stack.runtime).toContainEqual(
+        expect.objectContaining({ name: 'dotnet', version: '9.0.100' })
+      );
+      expect(stack.frameworks).toContainEqual(expect.objectContaining({ name: 'aspnetcore' }));
+      expect(stack.frameworks).toContainEqual(expect.objectContaining({ name: 'blazor' }));
+      expect(stack.frameworks).toContainEqual(expect.objectContaining({ name: 'maui' }));
+      expect(stack.testing).toContainEqual(expect.objectContaining({ name: 'xunit' }));
+      expect(stack.testing).toContainEqual(expect.objectContaining({ name: 'nunit' }));
+      expect(stack.testing).toContainEqual(expect.objectContaining({ name: 'mstest' }));
+      expect(stack.tools).toContainEqual(expect.objectContaining({ name: 'msbuild' }));
+      expect(stack.tools).toContainEqual(expect.objectContaining({ name: 'nuget' }));
+    });
+
+    it('should detect F# project files without inferring C# from generic .NET SDK', () => {
+      vi.mocked(existsSync).mockImplementation((path) => {
+        if (typeof path !== 'string') return false;
+        return path.endsWith('Library.fsproj');
+      });
+
+      vi.mocked(readFileSync).mockReturnValue('<Project Sdk="Microsoft.NET.Sdk" />');
+      vi.mocked(readdirSync).mockReturnValue([
+        { name: 'Library.fsproj', isDirectory: () => false },
+      ] as any);
+
+      const detector = new ProjectDetector('/test/project');
+      const stack = detector.analyze();
+
+      expect(stack.languages).toContainEqual(expect.objectContaining({ name: 'fsharp' }));
+      expect(stack.languages).not.toContainEqual(expect.objectContaining({ name: 'csharp' }));
+    });
+
+    it('should not infer C# from F# solution files', () => {
+      vi.mocked(existsSync).mockImplementation((path) => {
+        if (typeof path !== 'string') return false;
+        return path.endsWith('App.slnx') || path.endsWith('Library.fsproj');
+      });
+
+      vi.mocked(readFileSync).mockImplementation((path) => {
+        if (typeof path !== 'string') return '';
+        if (path.endsWith('App.slnx')) {
+          return '<Project Path="src/Library/Library.fsproj" />';
+        }
+        return '<Project Sdk="Microsoft.NET.Sdk" />';
+      });
+
+      vi.mocked(readdirSync).mockImplementation((path) => {
+        if (typeof path !== 'string') return [];
+        if (path === '/test/project') {
+          return [
+            { name: 'App.slnx', isDirectory: () => false },
+            { name: 'src', isDirectory: () => true },
+          ] as any;
+        }
+        if (path.endsWith('/src')) {
+          return [
+            { name: 'Library', isDirectory: () => true },
+          ] as any;
+        }
+        if (path.endsWith('/src/Library')) {
+          return ['Library.fsproj'] as any;
+        }
+        return [];
+      });
+
+      const detector = new ProjectDetector('/test/project');
+      const stack = detector.analyze();
+
+      expect(stack.languages).toContainEqual(expect.objectContaining({ name: 'fsharp' }));
+      expect(stack.languages).not.toContainEqual(expect.objectContaining({ name: 'csharp' }));
+    });
+
+    it('should read nested global.json files for .NET SDK version', () => {
+      vi.mocked(existsSync).mockImplementation((path) => {
+        if (typeof path !== 'string') return false;
+        return path.endsWith('global.json') || path.endsWith('App.csproj');
+      });
+
+      vi.mocked(readFileSync).mockImplementation((path) => {
+        if (typeof path !== 'string') return '';
+        if (path.endsWith('samples/dotnet/global.json')) {
+          return JSON.stringify({ sdk: { version: '8.0.204' } });
+        }
+        return '<Project Sdk="Microsoft.NET.Sdk" />';
+      });
+
+      vi.mocked(readdirSync).mockImplementation((path) => {
+        if (typeof path !== 'string') return [];
+        if (path === '/test/project') {
+          return [
+            { name: 'samples', isDirectory: () => true },
+          ] as any;
+        }
+        if (path.endsWith('/samples')) {
+          return [
+            { name: 'dotnet', isDirectory: () => true },
+          ] as any;
+        }
+        if (path.endsWith('/samples/dotnet')) {
+          return [
+            { name: 'global.json', isDirectory: () => false },
+            { name: 'App.csproj', isDirectory: () => false },
+          ] as any;
+        }
+        return [];
+      });
+
+      const detector = new ProjectDetector('/test/project');
+      const stack = detector.analyze();
+
+      expect(stack.runtime).toContainEqual(
+        expect.objectContaining({
+          name: 'dotnet',
+          version: '8.0.204',
+          source: 'samples/dotnet/global.json',
+        })
+      );
+    });
   });
 
   describe('framework detection', () => {

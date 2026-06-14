@@ -232,6 +232,67 @@ describe('RecommendationEngine', () => {
   });
 
   describe('recommend', () => {
+    it('should rank .NET matching skills above unrelated skills', () => {
+      const dotnetProfile: ProjectProfile = {
+        name: 'dotnet-web',
+        type: 'web-app',
+        stack: {
+          languages: [{ name: 'csharp', confidence: 100 }],
+          frameworks: [{ name: 'aspnetcore', confidence: 100 }],
+          libraries: [],
+          styling: [],
+          testing: [{ name: 'xunit', confidence: 100 }],
+          databases: [],
+          tools: [{ name: 'msbuild', confidence: 100 }, { name: 'nuget', confidence: 100 }],
+          runtime: [{ name: 'dotnet', version: '9.0.100', confidence: 100 }],
+        },
+        installedSkills: [],
+        excludedSkills: [],
+      };
+
+      const dotnetIndex: SkillIndex = {
+        version: 1,
+        lastUpdated: new Date().toISOString(),
+        sources: [],
+        skills: [
+          {
+            name: 'dotnet-aspnetcore',
+            tags: ['dotnet', 'csharp', 'aspnetcore'],
+            compatibility: {
+              languages: ['csharp'],
+              frameworks: ['aspnetcore'],
+              libraries: [],
+            },
+            quality: 90,
+            popularity: 250,
+            lastUpdated: new Date().toISOString(),
+          },
+          {
+            name: 'python-fastapi',
+            tags: ['python', 'fastapi'],
+            compatibility: {
+              languages: ['python'],
+              frameworks: ['fastapi'],
+              libraries: [],
+            },
+            quality: 90,
+            popularity: 250,
+            lastUpdated: new Date().toISOString(),
+          },
+        ],
+      };
+
+      engine.loadIndex(dotnetIndex);
+
+      const result = engine.recommend(dotnetProfile, {
+        limit: 2,
+        minScore: 0,
+      });
+
+      expect(result.recommendations[0].skill.name).toBe('dotnet-aspnetcore');
+      expect(result.recommendations[0].score).toBeGreaterThan(result.recommendations[1].score);
+    });
+
     it('should return recommendations sorted by score', () => {
       const result = engine.recommend(sampleProfile);
 

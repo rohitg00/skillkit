@@ -14,6 +14,7 @@ import {
   INDEX_PATH,
   KNOWN_SKILL_REPOS,
 } from '@skillkit/core';
+import { loadTaps } from '../helpers.js';
 import {
   header,
   colors,
@@ -25,6 +26,7 @@ import {
   formatQualityBadge,
   getQualityGradeFromScore,
 } from '../onboarding/index.js';
+import { buildRecommendationSources } from '../recommend-sources.js';
 
 export class RecommendCommand extends Command {
   static override paths = [['recommend'], ['rec']];
@@ -687,23 +689,27 @@ export class RecommendCommand extends Command {
       header('Update Skill Index');
     }
 
-    console.log(colors.muted(`Sources: ${KNOWN_SKILL_REPOS.map(r => `${r.owner}/${r.repo}`).join(', ')}\n`));
+    const sourceResult = buildRecommendationSources(KNOWN_SKILL_REPOS, loadTaps().taps);
+    if (!this.quiet && !this.json) {
+      console.log(colors.muted(`Sources: ${sourceResult.sources.map(r => `${r.owner}/${r.repo}`).join(', ')}\n`));
+    }
 
     const s = spinner();
     s.start('Fetching skills...');
 
     try {
-      const { index, errors } = await buildSkillIndex(KNOWN_SKILL_REPOS, (message) => {
+      const { index, errors } = await buildSkillIndex(sourceResult.sources, (message) => {
         s.message(message);
       });
+      const allWarnings = [...sourceResult.warnings, ...errors];
 
       s.stop(`Fetched ${index.skills.length} skills`);
 
       // Report any errors
-      if (errors.length > 0) {
+      if (allWarnings.length > 0) {
         console.log('');
         console.log(colors.warning('Warnings:'));
-        for (const error of errors) {
+        for (const error of allWarnings) {
           console.log(colors.muted(`  ${symbols.stepActive} ${error}`));
         }
       }

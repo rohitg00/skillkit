@@ -48,6 +48,7 @@ skillkit read <skills>        # Read skill content
 
 ```bash
 skillkit recommend                     # Project-based recommendations
+skillkit recommend --update            # Refresh index from built-ins and taps
 skillkit recommend --search "auth"     # Task-based search
 skillkit recommend --category security # Filter by category
 skillkit recommend --min-score 80      # Quality threshold
@@ -57,6 +58,24 @@ skillkit marketplace search "react"    # Search marketplace
 skillkit marketplace --tags typescript # Filter by tags
 skillkit marketplace refresh           # Refresh index
 ```
+
+`skillkit recommend --update` fetches skills from built-in recommendation sources
+and from custom GitHub taps added with `skillkit tap add <owner>/<repo>`. Sources
+are deduplicated by `owner/repo`; invalid tap entries are reported as warnings
+and skipped without failing the update.
+
+Recommendations use the project context detected for the current path. .NET
+projects are detected from standard markers including `*.sln`, `*.slnx`,
+`*.csproj`, `*.fsproj`, `*.vbproj`, `global.json`,
+`Directory.Build.props`, `Directory.Build.targets`,
+`Directory.Packages.props`, `NuGet.config`, and `packages.config`.
+The detector recognizes C#, F#, Visual Basic, the `dotnet` runtime, SDK versions
+from `global.json`, ASP.NET Core, Blazor, MAUI, xUnit, NUnit, MSTest, MSBuild,
+and NuGet markers.
+
+If an existing project already has a stale `.skillkit/context.yaml`, refresh the
+context with `skillkit context init` or reinitialize SkillKit so recommendations
+can use newly detected stack data.
 
 ### Translation
 

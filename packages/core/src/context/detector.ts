@@ -2,6 +2,28 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, basename } from 'node:path';
 import type { ProjectStack, Detection, ProjectPatterns } from './types.js';
 
+const DOTNET_MARKER_FILES = [
+  'global.json',
+  'Directory.Build.props',
+  'Directory.Build.targets',
+  'Directory.Packages.props',
+  'NuGet.config',
+  'packages.config',
+];
+
+const DOTNET_PROJECT_EXTENSIONS = ['.csproj', '.fsproj', '.vbproj'];
+const DOTNET_SOLUTION_EXTENSIONS = ['.sln', '.slnx'];
+const SKIPPED_SCAN_DIRS = new Set([
+  'node_modules',
+  '.git',
+  'dist',
+  'build',
+  'bin',
+  'obj',
+  '.next',
+  '.turbo',
+]);
+
 /**
  * Framework detection patterns
  */
@@ -419,12 +441,21 @@ export class ProjectDetector {
     // Detect everything
     const stack: ProjectStack = {
       languages: this.detectLanguages(),
-      frameworks: this.detectFromPatterns(FRAMEWORK_PATTERNS),
+      frameworks: this.mergeDetections(
+        this.detectFromPatterns(FRAMEWORK_PATTERNS),
+        this.detectDotNetFrameworks()
+      ),
       libraries: this.detectFromPatterns(LIBRARY_PATTERNS),
       styling: this.detectFromPatterns(STYLING_PATTERNS),
-      testing: this.detectFromPatterns(TESTING_PATTERNS),
+      testing: this.mergeDetections(
+        this.detectFromPatterns(TESTING_PATTERNS),
+        this.detectDotNetTesting()
+      ),
       databases: this.detectFromPatterns(DATABASE_PATTERNS),
-      tools: this.detectFromPatterns(TOOL_PATTERNS),
+      tools: this.mergeDetections(
+        this.detectFromPatterns(TOOL_PATTERNS),
+        this.detectDotNetTools()
+      ),
       runtime: this.detectRuntime(),
     };
 
@@ -538,24 +569,34 @@ export class ProjectDetector {
 
   private scanFiles(): void {
     try {
-      const entries = readdirSync(this.projectPath, { withFileTypes: true });
-      for (const entry of entries) {
-        this.files.add(entry.name);
-        if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'node_modules') {
-          // Scan one level deep for common config locations
-          try {
-            const subEntries = readdirSync(join(this.projectPath, entry.name));
-            for (const subEntry of subEntries) {
-              this.files.add(`${entry.name}/${subEntry}`);
-            }
-          } catch {
-            // Ignore permission errors
-          }
-        }
-      }
+      this.scanDirectory('', 0, 2);
     } catch {
       // Ignore errors
     }
+  }
+
+  private scanDirectory(relativeDir: string, depth: number, maxDepth: number): void {
+    const dirPath = relativeDir ? join(this.projectPath, relativeDir) : this.projectPath;
+    const entries = readdirSync(dirPath, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const name = typeof entry === 'string' ? entry : entry.name;
+      const relativePath = relativeDir ? `${relativeDir}/${name}` : name;
+      this.files.add(relativePath);
+
+      const isDirectory = typeof entry === 'string' ? false : entry.isDirectory();
+      if (isDirectory && depth < maxDepth && !this.shouldSkipDirectory(name)) {
+        try {
+          this.scanDirectory(relativePath, depth + 1, maxDepth);
+        } catch {
+          // Ignore permission errors
+        }
+      }
+    }
+  }
+
+  private shouldSkipDirectory(name: string): boolean {
+    return name.startsWith('.') || SKIPPED_SCAN_DIRS.has(name);
   }
 
   private getDependencies(): Set<string> {
@@ -655,6 +696,9 @@ export class ProjectDetector {
       });
     }
 
+    // DotNet
+    languages.push(...this.detectDotNetLanguages());
+
     return languages;
   }
 
@@ -689,6 +733,12 @@ export class ProjectDetector {
         confidence: 100,
         source: 'deno.json',
       });
+    }
+
+    // DotNet
+    const dotnetRuntime = this.detectDotNetRuntime();
+    if (dotnetRuntime) {
+      runtime.push(dotnetRuntime);
     }
 
     return runtime;
@@ -738,6 +788,226 @@ export class ProjectDetector {
     }
 
     return detected;
+  }
+
+  private detectDotNetLanguages(): Detection[] {
+    const languages: Detection[] = [];
+
+    if (this.hasDotNetFileWithExtension('.fsproj')) {
+      languages.push({ name: 'fsharp', confidence: 100, source: this.firstDotNetFile('.fsproj') });
+    }
+
+    if (this.hasDotNetFileWithExtension('.vbproj')) {
+      languages.push({
+        name: 'visual-basic',
+        confidence: 100,
+        source: this.firstDotNetFile('.vbproj'),
+      });
+    }
+
+    if (
+      this.hasDotNetFileWithExtension('.csproj')
+    ) {
+      languages.push({
+        name: 'csharp',
+        confidence: 100,
+        source: this.firstDotNetFile('.csproj'),
+      });
+    }
+
+    return languages;
+  }
+
+  private detectDotNetRuntime(): Detection | null {
+    if (!this.hasDotNetMarker()) return null;
+
+    return {
+      name: 'dotnet',
+      version: this.getDotNetSdkVersion(),
+      confidence: 100,
+      source: this.firstFileNamed('global.json') || this.firstDotNetMarker(),
+    };
+  }
+
+  private detectDotNetFrameworks(): Detection[] {
+    const content = this.getDotNetText().toLowerCase();
+    const frameworks: Detection[] = [];
+
+    if (
+      content.includes('microsoft.net.sdk.web') ||
+      content.includes('microsoft.aspnetcore.') ||
+      content.includes('microsoft.aspnetcore"')
+    ) {
+      frameworks.push({ name: 'aspnetcore', confidence: 100, source: this.firstDotNetProjectFile() });
+    }
+
+    if (content.includes('microsoft.aspnetcore.components')) {
+      frameworks.push({ name: 'blazor', confidence: 100, source: this.firstDotNetProjectFile() });
+    }
+
+    if (
+      content.includes('<usemaui>true</usemaui>') ||
+      content.includes('microsoft.maui.') ||
+      content.includes('microsoft.net.sdk.maui')
+    ) {
+      frameworks.push({ name: 'maui', confidence: 100, source: this.firstDotNetProjectFile() });
+    }
+
+    return frameworks;
+  }
+
+  private detectDotNetTesting(): Detection[] {
+    const content = this.getDotNetText();
+    const lowerContent = content.toLowerCase();
+    const testing: Detection[] = [];
+    const source = this.firstDotNetProjectFile();
+
+    if (lowerContent.includes('xunit')) {
+      testing.push({ name: 'xunit', confidence: 100, source });
+    }
+    if (content.includes('NUnit')) {
+      testing.push({ name: 'nunit', confidence: 100, source });
+    }
+    if (content.includes('MSTest')) {
+      testing.push({ name: 'mstest', confidence: 100, source });
+    }
+
+    return testing;
+  }
+
+  private detectDotNetTools(): Detection[] {
+    const tools: Detection[] = [];
+    const content = this.getDotNetText();
+
+    if (
+      this.hasDotNetSolution() ||
+      this.hasDotNetProjectFile() ||
+      this.hasFile('Directory.Build.props') ||
+      this.hasFile('Directory.Build.targets')
+    ) {
+      tools.push({ name: 'msbuild', confidence: 100, source: this.firstDotNetMarker() });
+    }
+
+    if (
+      this.hasFile('NuGet.config') ||
+      this.hasFile('packages.config') ||
+      this.hasFile('Directory.Packages.props') ||
+      content.includes('PackageReference')
+    ) {
+      tools.push({ name: 'nuget', confidence: 100, source: this.firstDotNetMarker() });
+    }
+
+    return tools;
+  }
+
+  private hasDotNetMarker(): boolean {
+    return (
+      DOTNET_MARKER_FILES.some((file) => this.hasFile(file)) ||
+      this.hasDotNetSolution() ||
+      this.hasDotNetProjectFile()
+    );
+  }
+
+  private firstDotNetMarker(): string | undefined {
+    return (
+      this.firstDotNetSolution() ||
+      this.firstDotNetProjectFile() ||
+      DOTNET_MARKER_FILES.find((file) => this.hasFile(file))
+    );
+  }
+
+  private hasDotNetSolution(): boolean {
+    return DOTNET_SOLUTION_EXTENSIONS.some((extension) => this.hasDotNetFileWithExtension(extension));
+  }
+
+  private firstDotNetSolution(): string | undefined {
+    for (const extension of DOTNET_SOLUTION_EXTENSIONS) {
+      const file = this.firstDotNetFile(extension);
+      if (file) return file;
+    }
+    return undefined;
+  }
+
+  private hasDotNetProjectFile(): boolean {
+    return DOTNET_PROJECT_EXTENSIONS.some((extension) => this.hasDotNetFileWithExtension(extension));
+  }
+
+  private firstDotNetProjectFile(): string | undefined {
+    for (const extension of DOTNET_PROJECT_EXTENSIONS) {
+      const file = this.firstDotNetFile(extension);
+      if (file) return file;
+    }
+    return undefined;
+  }
+
+  private hasDotNetFileWithExtension(extension: string): boolean {
+    return this.firstDotNetFile(extension) !== undefined;
+  }
+
+  private firstDotNetFile(extension: string): string | undefined {
+    for (const file of this.files) {
+      if (file.endsWith(extension)) return file;
+    }
+    return undefined;
+  }
+
+  private getDotNetSdkVersion(): string | undefined {
+    const globalJsonPath = this.firstFileNamed('global.json');
+    if (!globalJsonPath) return undefined;
+
+    try {
+      const content = this.readProjectFile(globalJsonPath);
+      const data = JSON.parse(content) as { sdk?: { version?: unknown } };
+      return typeof data.sdk?.version === 'string' ? data.sdk.version : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  private firstFileNamed(name: string): string | undefined {
+    for (const file of this.files) {
+      if (basename(file) === name) return file;
+    }
+    return undefined;
+  }
+
+  private getDotNetText(): string {
+    const parts: string[] = [];
+    const dotnetFiles = Array.from(this.files).filter((file) => (
+      DOTNET_PROJECT_EXTENSIONS.some((extension) => file.endsWith(extension)) ||
+      file.endsWith('.props') ||
+      file.endsWith('.targets') ||
+      file.endsWith('packages.config') ||
+      file.endsWith('NuGet.config')
+    ));
+
+    for (const file of dotnetFiles) {
+      try {
+        parts.push(this.readProjectFile(file));
+      } catch {
+        // Ignore unreadable project files
+      }
+    }
+
+    return parts.join('\n');
+  }
+
+  private readProjectFile(relativePath: string): string {
+    return readFileSync(join(this.projectPath, relativePath), 'utf-8');
+  }
+
+  private mergeDetections(primary: Detection[], extra: Detection[]): Detection[] {
+    const merged = [...primary];
+    const seen = new Set(primary.map((detection) => detection.name));
+
+    for (const detection of extra) {
+      if (!seen.has(detection.name)) {
+        merged.push(detection);
+        seen.add(detection.name);
+      }
+    }
+
+    return merged;
   }
 }
 
