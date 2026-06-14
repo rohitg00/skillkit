@@ -9,7 +9,7 @@ import {
 import { join, dirname } from "node:path";
 import { tmpdir, homedir } from "node:os";
 import { randomUUID } from "node:crypto";
-import type { SkillIndex, SkillSummary, IndexSource } from "./types.js";
+import type { SkillIndex, SkillSummary, IndexSource, SkillRepoSource } from "./types.js";
 import { discoverSkills, extractFrontmatter } from "../skills.js";
 
 /**
@@ -31,7 +31,7 @@ export const KNOWN_SKILL_REPOS = [
     repo: "awesome-claude-skills",
     description: "Curated Claude Code skills",
   },
-] as const;
+] as const satisfies readonly SkillRepoSource[];
 
 /**
  * Index file path
@@ -130,7 +130,7 @@ export async function fetchSkillsFromRepo(
  * Fetch skills from all known repositories and build index
  */
 export async function buildSkillIndex(
-  repos: typeof KNOWN_SKILL_REPOS = KNOWN_SKILL_REPOS,
+  repos: readonly SkillRepoSource[] = KNOWN_SKILL_REPOS,
   onProgress?: (message: string) => void,
 ): Promise<{ index: SkillIndex; errors: string[] }> {
   const allSkills: SkillSummary[] = [];

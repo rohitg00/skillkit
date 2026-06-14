@@ -109,6 +109,15 @@ export interface SkillIndex {
 }
 
 /**
+ * GitHub repository source used to build the recommendation index
+ */
+export interface SkillRepoSource {
+  owner: string;
+  repo: string;
+  description?: string;
+}
+
+/**
  * Source repository in the index
  */
 export interface IndexSource {
