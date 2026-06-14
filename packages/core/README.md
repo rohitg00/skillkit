@@ -83,6 +83,16 @@ await ctx.init();
 const context = ctx.getContext();
 ```
 
+Project detection includes .NET repositories using common markers such as
+`*.sln`, `*.slnx`, project files (`*.csproj`, `*.fsproj`, `*.vbproj`),
+`global.json`, MSBuild props/targets, and NuGet config/package files. Detected
+.NET stack data includes language, `dotnet` runtime and SDK version, ASP.NET
+Core, Blazor, MAUI, xUnit, NUnit, MSTest, MSBuild, and NuGet signals.
+
+Existing projects with a stale `.skillkit/context.yaml` may need a context
+refresh or reinitialization before recommendations pick up newly supported
+markers.
+
 ### Session Memory
 
 ```typescript
