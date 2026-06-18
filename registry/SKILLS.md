@@ -45,6 +45,10 @@ A curated list of community-contributed skills for AI coding agents.
 - [api-docs](https://github.com/anthropics/skills) - API documentation generation
 - [readme-guide](https://github.com/anthropics/skills) - README writing best practices
 
+## Social & Publishing
+
+- [hermes-tweet](https://github.com/Xquik-dev/hermes-tweet) - X/Twitter search, account reads, and guarded posting for Hermes Agent
+
 ## AI & ML
 
 - [prompt-engineering](https://github.com/anthropics/skills) - Prompt engineering patterns
