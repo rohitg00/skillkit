@@ -126275,6 +126275,7 @@
       "id": "Xquik-dev/hermes-tweet/hermes-tweet",
       "name": "Hermes Tweet",
       "description": "Hermes Agent X/Twitter plugin for read-first social monitoring and approval-gated account actions through Xquik.",
+      "path": "skills/hermes-tweet/SKILL.md",
       "source": "Xquik-dev/hermes-tweet",
       "tags": [
         "hermes-agent",
