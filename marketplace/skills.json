@@ -1,8 +1,8 @@
 {
   "$schema": "./schema.json",
   "version": 1,
-  "updatedAt": "2026-02-28",
-  "totalSkills": 15120,
+  "updatedAt": "2026-06-22",
+  "totalSkills": 15121,
   "curatedCollections": 33,
   "skills": [
     {
@@ -126269,6 +126269,19 @@
         "multi-agent",
         "startup",
         "autonomous"
+      ]
+    },
+    {
+      "id": "Xquik-dev/hermes-tweet/hermes-tweet",
+      "name": "Hermes Tweet",
+      "description": "Hermes Agent X/Twitter plugin for read-first social monitoring and approval-gated account actions through Xquik.",
+      "source": "Xquik-dev/hermes-tweet",
+      "tags": [
+        "hermes-agent",
+        "twitter",
+        "x",
+        "social-media",
+        "automation"
       ]
     }
   ]

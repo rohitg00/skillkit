@@ -37,6 +37,7 @@
     { "source": "intellectronica/agent-skills", "name": "Context7" },
     { "source": "muratcankoylan/Agent-Skills-for-Context-Engineering", "name": "Context Engineering" },
     { "source": "sickn33/antigravity-awesome-skills", "name": "Antigravity Awesome Skills" },
+    { "source": "Xquik-dev/hermes-tweet", "name": "Hermes Tweet" },
     { "source": "NousResearch/hermes-agent", "name": "Hermes Agent Skills" },
     { "source": "skills.sh", "name": "Skills.sh Leaderboard", "official": true, "registry": "skills-sh" }
   ]
