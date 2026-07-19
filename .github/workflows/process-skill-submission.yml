@@ -134,6 +134,7 @@ jobs:
             };
 
             skillsData.skills.push(newSkill);
+            skillsData.totalSkills = skillsData.skills.length;
             skillsData.updatedAt = new Date().toISOString().split('T')[0];
 
             // Write updated skills.json
