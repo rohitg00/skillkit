@@ -4,6 +4,7 @@ import { OpenAIProvider } from './openai.js';
 import { GoogleProvider } from './google.js';
 import { OllamaProvider } from './ollama.js';
 import { OpenRouterProvider } from './openrouter.js';
+import { MiniMaxProvider } from './minimax.js';
 import { MockAIProvider } from './mock.js';
 
 export interface ProviderDetectionResult {
@@ -52,6 +53,15 @@ export function detectProviders(): ProviderDetectionResult[] {
     });
   }
 
+  if (process.env.MINIMAX_API_KEY) {
+    results.push({
+      provider: 'minimax',
+      displayName: 'MiniMax',
+      configured: true,
+      envVar: 'MINIMAX_API_KEY',
+    });
+  }
+
   results.push({
     provider: 'ollama',
     displayName: 'Ollama (Local)',
@@ -67,6 +77,7 @@ export function getDefaultProvider(): ProviderName {
   if (process.env.OPENAI_API_KEY) return 'openai';
   if (process.env.GOOGLE_AI_KEY || process.env.GEMINI_API_KEY) return 'google';
   if (process.env.OPENROUTER_API_KEY) return 'openrouter';
+  if (process.env.MINIMAX_API_KEY) return 'minimax';
   if (process.env.OLLAMA_HOST) return 'ollama';
 
   return 'mock';
@@ -94,6 +105,9 @@ export function createProvider(
     case 'openrouter':
       return new OpenRouterProvider(config);
 
+    case 'minimax':
+      return new MiniMaxProvider(config);
+
     case 'mock':
     default:
       return new MockAIProvider();
@@ -110,6 +124,8 @@ export function isProviderConfigured(providerName: ProviderName): boolean {
       return Boolean(process.env.GOOGLE_AI_KEY || process.env.GEMINI_API_KEY);
     case 'openrouter':
       return Boolean(process.env.OPENROUTER_API_KEY);
+    case 'minimax':
+      return Boolean(process.env.MINIMAX_API_KEY);
     case 'ollama':
       return true;
     case 'mock':
@@ -126,6 +142,7 @@ export function getProviderEnvVars(): Record<ProviderName, string[]> {
     google: ['GOOGLE_AI_KEY', 'GEMINI_API_KEY'],
     ollama: ['OLLAMA_HOST'],
     openrouter: ['OPENROUTER_API_KEY'],
+    minimax: ['MINIMAX_API_KEY'],
     mock: [],
   };
 }
@@ -148,6 +165,7 @@ export function getProviderModels(providerName: ProviderName): string[] {
       'meta-llama/llama-3.1-70b-instruct',
       'mistralai/mistral-large',
     ],
+    minimax: ['MiniMax-M3', 'MiniMax-M2.7'],
     mock: ['mock'],
   };
 

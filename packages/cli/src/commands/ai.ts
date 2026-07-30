@@ -429,9 +429,11 @@ export class AICommand extends Command {
           ? ('google' as const)
           : process.env.OPENROUTER_API_KEY
             ? ('openrouter' as const)
-            : process.env.OLLAMA_HOST
-              ? ('ollama' as const)
-              : ('none' as const);
+            : process.env.MINIMAX_API_KEY
+              ? ('minimax' as const)
+              : process.env.OLLAMA_HOST
+                ? ('ollama' as const)
+                : ('none' as const);
 
     const apiKey =
       provider === 'anthropic'
@@ -442,7 +444,9 @@ export class AICommand extends Command {
             ? (process.env.GOOGLE_AI_KEY || process.env.GEMINI_API_KEY)
             : provider === 'openrouter'
               ? process.env.OPENROUTER_API_KEY
-              : undefined;
+              : provider === 'minimax'
+                ? process.env.MINIMAX_API_KEY
+                : undefined;
 
     return {
       provider,
