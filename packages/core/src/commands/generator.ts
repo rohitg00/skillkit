@@ -143,6 +143,13 @@ const AGENT_FORMATS: Record<AgentType, AgentCommandFormat> = {
     supportsSlashCommands: true,
     supportsCommandFiles: true,
   },
+  dsh: {
+    agent: 'dsh',
+    extension: '.md',
+    directory: '.dsh/commands',
+    supportsSlashCommands: true,
+    supportsCommandFiles: true,
+  },
   cline: {
     agent: 'cline',
     extension: '.md',

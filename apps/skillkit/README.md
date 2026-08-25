@@ -188,7 +188,7 @@ skillkit memory compress
 skillkit memory export auth-insight --output auth-skill.md
 ```
 
-## Supported Agents (46)
+## Supported Agents (47)
 
 **Primary (19):** Claude Code, Cursor, Codex, Gemini CLI, Windsurf, GitHub Copilot, OpenCode, Antigravity, Amp, Clawdbot, OpenClaw, Droid, Goose, Hermes Agent, Kilo, Kiro, Roo, Trae, Universal
 

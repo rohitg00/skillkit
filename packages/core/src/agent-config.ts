@@ -219,6 +219,16 @@ export const AGENT_CONFIG: Record<AgentType, AgentDirectoryConfig> = {
     supportsAutoDiscovery: true,
   },
 
+  // DeepSeek Harness
+  dsh: {
+    skillsDir: '.dsh/skills',
+    configFile: 'AGENTS.md',
+    globalSkillsDir: '~/.dsh/skills',
+    configFormat: 'xml',
+    usesFrontmatter: true,
+    supportsAutoDiscovery: true,
+  },
+
   // Universal - works with any agent
   universal: {
     skillsDir: 'skills',

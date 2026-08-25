@@ -68,6 +68,7 @@ const adapters: Record<AgentType, AgentAdapter> = {
   windsurf: new WindsurfAdapter(),
   universal: new UniversalAdapter(),
   factory: new FactoryAdapter(),
+  dsh: new GenericAgentAdapter('dsh'),
   cline: new GenericAgentAdapter('cline'),
   codebuddy: new GenericAgentAdapter('codebuddy'),
   commandcode: new GenericAgentAdapter('commandcode'),
@@ -163,6 +164,7 @@ export async function detectAgent(): Promise<AgentType> {
     'tabnine',
     'codegpt',
     'playcode-agent',
+    'dsh',
     'hermes',
     'universal',
   ];

@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@skillkit/agents.svg)](https://www.npmjs.com/package/@skillkit/agents)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-**Agent adapters for SkillKit** - configuration and detection for 46 AI coding agents.
+**Agent adapters for SkillKit** - configuration and detection for 47 AI coding agents.
 
 ## Installation
 
@@ -11,7 +11,7 @@
 npm install @skillkit/agents
 ```
 
-## Supported Agents (46)
+## Supported Agents (47)
 
 | Agent | Config Format | Project Skills | Global Skills |
 |-------|--------------|----------------|---------------|

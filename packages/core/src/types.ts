@@ -18,6 +18,7 @@ export const AgentType = z.enum([
   "roo",
   "trae",
   "windsurf",
+  "dsh",
   "universal",
   "cline",
   "codebuddy",

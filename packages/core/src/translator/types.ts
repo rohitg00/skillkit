@@ -29,6 +29,7 @@ export const AGENT_FORMAT_MAP: Record<AgentType, FormatCategory> = {
   'roo': 'skill-md',
   'trae': 'skill-md',
   'universal': 'skill-md',
+  'dsh': 'skill-md',
   'cursor': 'cursor-mdc',
   'windsurf': 'markdown-rules',
   'github-copilot': 'markdown-rules',
