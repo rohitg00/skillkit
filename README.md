@@ -20,7 +20,7 @@
 
 
 <a href="https://skillkit.sh"><img src="assets/tags/skills.svg" alt="400K+ skills"></a>
-<a href="#supported-agents"><img src="assets/tags/agents.svg" alt="46 agents"></a>
+<a href="#supported-agents"><img src="assets/tags/agents.svg" alt="47 agents"></a>
 <a href="#skill-sources"><img src="assets/tags/sources.svg" alt="31 sources"></a>
 <img src="assets/tags/tests.svg" alt="757 tests">
 <a href="LICENSE"><img src="assets/tags/license.svg" alt="Apache 2.0"></a>
@@ -60,7 +60,7 @@ Every AI coding agent wants skills. Every agent invented a different format.
 <tr><td>Cursor</td><td><code>.mdc</code></td><td><code>.cursor/skills/</code></td></tr>
 <tr><td>Copilot</td><td>Markdown</td><td><code>.github/skills/</code></td></tr>
 <tr><td>Windsurf</td><td>Markdown</td><td><code>.windsurf/skills/</code></td></tr>
-<tr><td colspan="3"><i>... 41 more</i></td></tr>
+<tr><td colspan="3"><i>... 42 more</i></td></tr>
 </table>
 
 You rewrite the same skill for each agent. Or you lock in to one.
@@ -419,7 +419,7 @@ skillkit cicd init               # CI/CD templates
 </details>
 
 <details>
-<summary><b>Plus 35 more</b></summary>
+<summary><b>Plus 36 more</b></summary>
 
 Amp, Antigravity, Augment Code, Bolt, Clawdbot, Cline, CodeBuddy, CodeGPT, CommandCode, Continue, Crush, Droid, Factory, Goose, Hermes Agent, Kilo Code, Kiro CLI, Lovable, MCPJam, Mux, Neovate, OpenClaw, OpenHands, Pi, PlayCode, Qoder, Qwen, Replit Agent, Roo Code, Tabby, Tabnine, Trae, Vercel, Zencoder, Universal.
 </details>

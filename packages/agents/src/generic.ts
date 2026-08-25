@@ -7,6 +7,7 @@ import type { Skill, AgentType } from '@skillkit/core';
 import { AGENT_CONFIG } from '@skillkit/core';
 
 const AGENT_DISPLAY_NAMES: Partial<Record<AgentType, string>> = {
+  'dsh': 'DeepSeek Harness',
   'cline': 'Cline',
   'codebuddy': 'CodeBuddy',
   'commandcode': 'CommandCode',

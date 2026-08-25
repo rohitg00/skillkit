@@ -3,6 +3,7 @@ import { getAllAdapters, getAdapter, detectAgent } from '../index.js';
 import { AGENT_CONFIG, AgentType } from '@skillkit/core';
 
 const GENERIC_AGENTS: AgentType[] = [
+  'dsh',
   'cline',
   'codebuddy',
   'commandcode',
@@ -35,10 +36,10 @@ const ALL_AGENTS = AgentType.options;
 
 describe('Agent Adapters', () => {
   describe('getAllAdapters', () => {
-    it('should return all 46 registered adapters', () => {
+    it('should return all 47 registered adapters', () => {
       const adapters = getAllAdapters();
       expect(adapters).toBeInstanceOf(Array);
-      expect(adapters.length).toBe(46);
+      expect(adapters.length).toBe(47);
     });
 
     it('should include common agents', () => {
@@ -47,6 +48,7 @@ describe('Agent Adapters', () => {
 
       expect(types).toContain('claude-code');
       expect(types).toContain('cursor');
+      expect(types).toContain('dsh');
     });
 
     it('should have an adapter for every AgentType', () => {
@@ -110,6 +112,33 @@ describe('Agent Adapters', () => {
     it('amazon-q adapter should have correct skillsDir', () => {
       const adapter = getAdapter('amazon-q');
       expect(adapter.skillsDir).toBe('.amazonq/skills');
+    });
+
+    it('dsh adapter should use the native DSH paths and display name', () => {
+      const adapter = getAdapter('dsh');
+      const config = AGENT_CONFIG.dsh;
+      expect(adapter.type).toBe('dsh');
+      expect(adapter.name).toBe('DeepSeek Harness');
+      expect(adapter.skillsDir).toBe('.dsh/skills');
+      expect(adapter.configFile).toBe('AGENTS.md');
+      expect(config.globalSkillsDir).toBe('~/.dsh/skills');
+      expect(config.configFormat).toBe('xml');
+      expect(config.usesFrontmatter).toBe(true);
+      expect(config.supportsAutoDiscovery).toBe(true);
+    });
+
+    it('dsh adapter should generate and parse the generic skill catalog', () => {
+      const adapter = getAdapter('dsh');
+      const skills = [
+        { name: 'pdf', description: 'PDF tools', enabled: true, path: '', location: 'project' },
+        { name: 'xlsx', description: 'Sheet tools', enabled: false, path: '', location: 'project' },
+      ];
+      const generated = adapter.generateConfig(skills as any);
+      expect(generated).toContain('SKILLKIT_SKILLS_START');
+      expect(generated).toContain('<name>pdf</name>');
+      expect(generated).not.toContain('<name>xlsx</name>');
+      expect(adapter.parseConfig(generated)).toEqual(['pdf']);
+      expect(adapter.getInvokeCommand('pdf')).toBe('skillkit read pdf');
     });
   });
 
