@@ -1,6 +1,6 @@
 import type { SearchableSkill, GeneratedSkill, SkillExample } from '../types.js';
 
-export type ProviderName = 'anthropic' | 'openai' | 'google' | 'ollama' | 'openrouter' | 'mock';
+export type ProviderName = 'anthropic' | 'openai' | 'google' | 'ollama' | 'openrouter' | 'minimax' | 'mock';
 
 export interface ProviderConfig {
   apiKey?: string;

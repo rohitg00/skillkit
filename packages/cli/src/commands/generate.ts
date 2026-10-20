@@ -27,7 +27,7 @@ export class GenerateCommand extends Command {
       - Marketplace skills (400K+)
       - Memory observations and learnings
 
-      Supports multiple LLM providers: Claude, GPT-4, Gemini, Ollama, OpenRouter
+      Supports multiple LLM providers: Claude, GPT-4, Gemini, Ollama, OpenRouter, MiniMax
     `,
     examples: [
       ['Interactive wizard', '$0 generate'],
@@ -39,7 +39,7 @@ export class GenerateCommand extends Command {
   });
 
   provider = Option.String('--provider,-p', {
-    description: 'LLM provider: anthropic, openai, google, ollama, openrouter',
+    description: 'LLM provider: anthropic, openai, google, ollama, openrouter, minimax',
   });
 
   model = Option.String('--model,-m', {
@@ -140,6 +140,7 @@ export class GenerateCommand extends Command {
   OPENAI_API_KEY - GPT-4 (OpenAI)
   GOOGLE_AI_KEY - Gemini (Google)
   OPENROUTER_API_KEY - OpenRouter (100+ models)
+  MINIMAX_API_KEY - MiniMax (global or CN endpoint)
 
 Or use Ollama for local models (no API key needed)`,
         'Provider Setup'

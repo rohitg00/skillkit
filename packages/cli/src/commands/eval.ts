@@ -48,7 +48,7 @@ export class EvalCommand extends Command {
   });
 
   provider = Option.String('--provider,-p', {
-    description: 'LLM provider: anthropic, openai, google, ollama, openrouter',
+    description: 'LLM provider: anthropic, openai, google, ollama, openrouter, minimax',
   });
 
   model = Option.String('--model,-m', {

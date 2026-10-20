@@ -5,6 +5,7 @@ export { OpenAIProvider } from './openai.js';
 export { GoogleProvider } from './google.js';
 export { OllamaProvider } from './ollama.js';
 export { OpenRouterProvider } from './openrouter.js';
+export { MiniMaxProvider } from './minimax.js';
 export {
   ProviderFactory,
   createProvider,
