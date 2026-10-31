@@ -6,7 +6,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { join } from 'node:path';
-import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, readlinkSync, renameSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { createServer, type Server } from 'node:http';
@@ -43,6 +43,12 @@ interface GitFixture {
   installedDirectory: string;
   name: string;
   revisionA: string;
+}
+
+interface StandaloneGitFixture extends GitFixture {
+  sourceFile: string;
+  installedFile: string;
+  metadataFile: string;
 }
 
 const sourcePathCases: SourcePathCase[] = [
@@ -180,6 +186,34 @@ function readMetadata(directory: string): Record<string, unknown> {
   return JSON.parse(readFileSync(join(directory, '.skillkit.json'), 'utf8'));
 }
 
+function createStandaloneGitFixture(
+  testDirectory: string,
+  provider: typeof gitProviders[number],
+  selectedSubtree = '',
+): StandaloneGitFixture {
+  const fixture = createGitFixture(testDirectory, provider, {
+    label: `standalone file ${selectedSubtree}`,
+    name: 'directory-skill',
+    directory: join(selectedSubtree, 'skills', 'directory-skill'),
+    selectedSubtree,
+    expectedSubpath: 'skills/directory-skill',
+    decoy: false,
+  });
+  const sourceFile = join(fixture.repository, selectedSubtree, 'skills', 'source-file.md');
+  writeFileSync(sourceFile, skillRevision('standalone-skill', 'A'));
+  return {
+    ...fixture,
+    revisionA: gitRevision(fixture.repository, 'Standalone fixture revision A'),
+    sourceFile,
+    installedFile: join(fixture.project, '.claude', 'skills', 'standalone-skill.md'),
+    metadataFile: join(fixture.project, '.claude', 'skills', '.standalone-skill.skillkit.json'),
+  };
+}
+
+function standaloneObservation(fixture: StandaloneGitFixture): Record<string, unknown> {
+  return { skill: observedFile(fixture.installedFile), metadata: observedFile(fixture.metadataFile) };
+}
+
 function observedFile(path: string): { content: string; sha256: string } | null {
   if (!existsSync(path)) return null;
   const content = readFileSync(path, 'utf8');
@@ -265,6 +299,113 @@ describe('E2E: Core CLI Commands', () => {
 
   describe('source path round trip', () => {
     describe.each(gitProviders)('$type', (provider) => {
+      it.each(['', 'catalog'])('updates a nested standalone file and directory from subtree "%s"', async (subtree) => {
+        const fixture = createStandaloneGitFixture(testDir, provider, subtree);
+        const install = await runCli([
+          'install', fixture.source, '--all', '--agent', 'claude-code', '--yes', '--no-scan', '--json',
+        ], { cwd: fixture.project, env: fixture.env });
+        expect(install.exitCode, install.stdout + install.stderr).toBe(0);
+        expect(JSON.parse(install.stdout)).toMatchObject({ success: true, total: 2 });
+        expect(readFileSync(fixture.installedFile, 'utf8')).toBe(skillRevision('standalone-skill', 'A'));
+        expectInitialRevision(fixture.installedDirectory, fixture.name);
+        const installedMetadata = JSON.parse(readFileSync(fixture.metadataFile, 'utf8'));
+        writeFileSync(fixture.sourceFile, skillRevision('standalone-skill', 'B'));
+        writeSkillRevision(fixture.skillDirectory, fixture.name, 'B');
+        const revisionB = gitRevision(fixture.repository, 'Standalone fixture revision B');
+        const update = await runCli(['update', 'standalone-skill', fixture.name, '--force', '--json'], {
+          cwd: fixture.project, env: fixture.env,
+        });
+        recordRoundTrip(fixture.id, {
+          source: fixture.source, revisionA: fixture.revisionA, revisionB, install, update,
+          installedMetadata, sourceFile: observedFile(fixture.sourceFile),
+          installed: standaloneObservation(fixture), directory: installedObservation(fixture.installedDirectory),
+        });
+        expect.soft(installedMetadata).toMatchObject({
+          name: 'standalone-skill', source: fixture.source, sourceType: provider.type,
+          subpath: 'skills/source-file.md',
+        });
+        expect(update.exitCode, update.stdout + update.stderr).toBe(0);
+        expect.soft(JSON.parse(update.stdout)).toEqual({ updated: 2, skipped: 0, failed: 0 });
+        expect.soft(readFileSync(fixture.installedFile, 'utf8')).toBe(skillRevision('standalone-skill', 'B'));
+        expect(readFileSync(join(fixture.installedDirectory, 'SKILL.md'), 'utf8')).toBe(skillRevision(fixture.name, 'B'));
+        expect(readFileSync(join(fixture.installedDirectory, 'asset.txt'), 'utf8')).toBe(`Asset ${fixture.name} revision B.\n`);
+        expect(JSON.parse(readFileSync(fixture.metadataFile, 'utf8'))).toMatchObject({
+          subpath: 'skills/source-file.md', updatedAt: expect.any(String),
+        });
+      });
+
+      it('updates a standalone file from an upstream symlink after clone cleanup', async () => {
+        const fixture = createStandaloneGitFixture(testDir, provider);
+        const cloneDirectory = join(testDir, 'clones');
+        mkdirSync(cloneDirectory);
+        fixture.env.TMPDIR = cloneDirectory;
+        const install = await runCli([
+          'install', fixture.source, '--skill', 'standalone-skill', '--agent', 'claude-code',
+          '--yes', '--no-scan', '--json',
+        ], { cwd: fixture.project, env: fixture.env });
+        expect(install.exitCode, install.stdout + install.stderr).toBe(0);
+        expect(readFileSync(fixture.installedFile, 'utf8')).toBe(skillRevision('standalone-skill', 'A'));
+        const installedBefore = standaloneObservation(fixture);
+        const content = skillRevision('standalone-skill', 'B');
+        writeFileSync(join(fixture.repository, 'skills', 'symlink-content.md'), content);
+        rmSync(fixture.sourceFile);
+        symlinkSync('symlink-content.md', fixture.sourceFile);
+        expect(lstatSync(fixture.sourceFile).isSymbolicLink()).toBe(true);
+        const revisionB = gitRevision(fixture.repository, 'Replace standalone source with symlink');
+        const update = await runCli(['update', 'standalone-skill', '--force'], {
+          cwd: fixture.project, env: fixture.env,
+        });
+        recordRoundTrip(`${fixture.id}-symlink-command`, { update });
+        expect(update.exitCode, update.stdout + update.stderr).toBe(0);
+        const installedIsSymlink = lstatSync(fixture.installedFile).isSymbolicLink();
+        const installedLinkTarget = installedIsSymlink ? readlinkSync(fixture.installedFile) : null;
+        const installedAfter = standaloneObservation(fixture);
+        const remainingClones = readdirSync(cloneDirectory);
+        recordRoundTrip(`${fixture.id}-symlink`, {
+          source: fixture.source, revisionA: fixture.revisionA, revisionB, install, update,
+          sourceLinkTarget: readlinkSync(fixture.sourceFile), sourceFile: observedFile(fixture.sourceFile),
+          installedBefore, installedAfter, installedIsSymlink, installedLinkTarget, remainingClones,
+        });
+        expect.soft(update.exitCode, update.stdout + update.stderr).toBe(0);
+        expect.soft(update.stdout).toContain('Updated: 1, Skipped: 0, Failed: 0');
+        expect.soft(installedIsSymlink).toBe(false);
+        expect.soft(observedFile(fixture.installedFile)).toEqual({
+          content, sha256: createHash('sha256').update(content).digest('hex'),
+        });
+        expect.soft(JSON.parse(readFileSync(fixture.metadataFile, 'utf8'))).toMatchObject({
+          subpath: 'skills/source-file.md', updatedAt: expect.any(String),
+          checksum: createHash('sha256').update(content).digest('hex').slice(0, 16),
+        });
+        expect(remainingClones).toEqual([]);
+      });
+
+      it.each(['removed', 'replaced by directory'])('skips a %s standalone source without replacing installed files', async (change) => {
+        const fixture = createStandaloneGitFixture(testDir, provider);
+        const install = await runCli([
+          'install', fixture.source, '--skill', 'standalone-skill', '--agent', 'claude-code',
+          '--yes', '--no-scan', '--json',
+        ], { cwd: fixture.project, env: fixture.env });
+        expect(install.exitCode, install.stdout + install.stderr).toBe(0);
+        expect(readFileSync(fixture.installedFile, 'utf8')).toBe(skillRevision('standalone-skill', 'A'));
+        const installedBefore = standaloneObservation(fixture);
+        rmSync(fixture.sourceFile);
+        if (change === 'replaced by directory') {
+          writeSkillRevision(fixture.sourceFile, 'standalone-skill', 'B');
+        }
+        const revisionB = gitRevision(fixture.repository, `Standalone source ${change}`);
+        const update = await runCli(['update', 'standalone-skill', '--force', '--json'], {
+          cwd: fixture.project, env: fixture.env,
+        });
+        const installedAfter = standaloneObservation(fixture);
+        recordRoundTrip(`${fixture.id}-${change}`, {
+          source: fixture.source, revisionA: fixture.revisionA, revisionB,
+          install, update, installedBefore, installedAfter,
+        });
+        expect(update.exitCode, update.stdout + update.stderr).toBe(0);
+        expect(JSON.parse(update.stdout)).toEqual({ updated: 0, skipped: 1, failed: 0 });
+        expect(installedAfter).toEqual(installedBefore);
+      });
+
       it.each(sourcePathCases)('updates $label from the discovered directory', async (sourceCase) => {
         const fixture = createGitFixture(testDir, provider, sourceCase);
         const install = await installGitFixture(fixture);
@@ -295,7 +436,7 @@ describe('E2E: Core CLI Commands', () => {
         });
       });
 
-      it.each(['removed', 'moved'])('skips a %s source without replacing installed files', async (change) => {
+      it.each(['removed', 'moved', 'missing SKILL.md', 'replaced by file'])('skips a %s source without replacing installed files', async (change) => {
         const sourceCase = sourcePathCases[2];
         const fixture = createGitFixture(testDir, provider, sourceCase);
         fixture.id = `${fixture.id}-${change}`;
@@ -303,19 +444,30 @@ describe('E2E: Core CLI Commands', () => {
         const installedBefore = installedObservation(fixture.installedDirectory);
         if (change === 'removed') {
           rmSync(fixture.skillDirectory, { recursive: true });
-        } else {
+        } else if (change === 'moved') {
           renameSync(fixture.skillDirectory, join(fixture.repository, 'skills', 'moved-folder'));
+        } else if (change === 'missing SKILL.md') {
+          rmSync(join(fixture.skillDirectory, 'SKILL.md'));
+        } else {
+          rmSync(fixture.skillDirectory, { recursive: true });
+          writeFileSync(fixture.skillDirectory, skillRevision(fixture.name, 'B'));
         }
         writeFileSync(join(fixture.repository, 'README.md'), `Source ${change}.\n`);
         const revisionB = gitRevision(fixture.repository, `Fixture source ${change}`);
-        const update = await updateGitFixture(fixture);
+        const update = change === 'replaced by file'
+          ? await runCli(['update', fixture.name, '--force'], { cwd: fixture.project, env: fixture.env })
+          : await updateGitFixture(fixture);
         const installedAfter = installedObservation(fixture.installedDirectory);
         recordRoundTrip(fixture.id, {
           source: fixture.source, revisionA: fixture.revisionA, revisionB,
           install, update, installedBefore, installedAfter,
         });
         expect(update.exitCode, update.stdout + update.stderr).toBe(0);
-        expect(JSON.parse(update.stdout)).toEqual({ updated: 0, skipped: 1, failed: 0 });
+        if (change === 'replaced by file') {
+          expect(update.stdout).toContain('Updated: 0, Skipped: 1, Failed: 0');
+        } else {
+          expect(JSON.parse(update.stdout)).toEqual({ updated: 0, skipped: 1, failed: 0 });
+        }
         expect(installedAfter).toEqual(installedBefore);
       });
 

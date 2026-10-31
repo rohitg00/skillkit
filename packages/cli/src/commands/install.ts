@@ -659,7 +659,7 @@ export class InstallCommand extends Command {
         description: "",
         source: this.source,
         sourceType: providerAdapter!.type,
-        subpath: this.getSkillSubpath(installation, target, context),
+        subpath: this.getSkillSubpath(installation, context),
         installedAt: new Date().toISOString(),
         enabled: true,
       };
@@ -676,11 +676,10 @@ export class InstallCommand extends Command {
 
   private getSkillSubpath(
     installation: SkillInstallation,
-    target: InstallTarget,
     context: InstallContext,
   ): string {
     const gitProviders = ["github", "gitlab", "bitbucket", "skills-sh"];
-    if (target.isStandaloneFile || !gitProviders.includes(context.providerAdapter!.type)) {
+    if (!gitProviders.includes(context.providerAdapter!.type)) {
       return installation.skill.name;
     }
     return relative(context.cloneResult.path!, installation.skill.path).split(sep).join("/");
