@@ -202,6 +202,16 @@ skillkit install ./local/path            # Local directory
 --agent=cursor,windsurf   # Install to specific agents
 ```
 
+### Updating Existing Git Installs
+
+New Git directory installs retain their source paths for updates. Existing installs with incorrect metadata ([#133](https://github.com/rohitg00/skillkit/issues/133)) need explicit reinstallation; updates do not repair them automatically. Preserve local edits first, then reinstall from the original source using the same skill and agent with `--force`:
+
+```bash
+skillkit install owner/repo --skill=skill-name --agent=claude-code --force
+```
+
+Keep any original source subdirectory and install scope. Renamed or moved source directories remain unsupported.
+
 ## Programmatic Usage
 
 ```typescript

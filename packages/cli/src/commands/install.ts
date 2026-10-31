@@ -8,7 +8,7 @@ import {
   readFileSync,
   writeFileSync,
 } from "node:fs";
-import { join } from "node:path";
+import { join, relative, sep } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -32,7 +32,7 @@ import {
   addSkillToLock,
 } from "@skillkit/core";
 import type { SkillsShStats } from "@skillkit/core";
-import type { SkillMetadata, GitProvider, AgentType } from "@skillkit/core";
+import type { SkillMetadata, GitProvider, AgentType, DiscoveredSkill, CloneResult } from "@skillkit/core";
 import { isPathInside } from "@skillkit/core";
 import { getAdapter, detectAgent, getAllAdapters } from "@skillkit/agents";
 import { getInstallDir, saveSkillMetadata, formatCount } from "../helpers.js";
@@ -64,6 +64,25 @@ import {
   formatTrustBadge,
   type InstallResult,
 } from "../onboarding/index.js";
+
+interface InstallTarget {
+  path: string;
+  isStandaloneFile: boolean;
+}
+
+interface SkillInstallation {
+  skill: Readonly<Pick<DiscoveredSkill, "name" | "path">>;
+  installedAgents: string[];
+  primaryPath: string | null;
+}
+
+interface InstallContext {
+  installMethod: InstallResult["method"];
+  targetAgents: AgentType[];
+  providerAdapter: ReturnType<typeof detectProvider>;
+  cloneResult: Pick<CloneResult, "path" | "tempRoot">;
+  s: ReturnType<typeof spinner>;
+}
 
 export class InstallCommand extends Command {
   static override paths = [["install"], ["i"], ["add"]];
@@ -518,112 +537,29 @@ export class InstallCommand extends Command {
   }
 
   private async performInstall(
-    skillsToInstall: Array<{ name: string; dirName: string; path: string }>,
+    skillsToInstall: DiscoveredSkill[],
     targetAgents: AgentType[],
-    installMethod: "symlink" | "copy",
+    installMethod: InstallResult["method"],
     providerAdapter: ReturnType<typeof detectProvider>,
-    cloneResult: { tempRoot?: string; path?: string },
+    cloneResult: Pick<CloneResult, "path" | "tempRoot">,
     s: ReturnType<typeof spinner>,
   ): Promise<InstallResult[]> {
     const installResults: InstallResult[] = [];
+    const context: InstallContext = { installMethod, targetAgents, providerAdapter, cloneResult, s };
 
     for (const skill of skillsToInstall) {
       const skillName = skill.name;
       const sourcePath = skill.path;
+      const sourceSkill = { name: skillName, path: sourcePath };
       const installedAgents: string[] = [];
-      let primaryPath: string | null = null;
+      const installation: SkillInstallation = {
+        skill: sourceSkill,
+        installedAgents,
+        primaryPath: null,
+      };
 
       for (const agentType of targetAgents) {
-        const adapter = getAdapter(agentType);
-        const installDir = getInstallDir(this.global, agentType);
-
-        if (!existsSync(installDir)) {
-          mkdirSync(installDir, { recursive: true });
-        }
-
-        let isStandaloneFile: boolean;
-        try {
-          isStandaloneFile = statSync(sourcePath).isFile();
-        } catch {
-          if (!this.quiet) {
-            warn(`Skipping ${skillName} for ${adapter.name} (source not accessible)`);
-          }
-          continue;
-        }
-        const targetPath = isStandaloneFile
-          ? join(installDir, skillName.endsWith(".md") ? skillName : `${skillName}.md`)
-          : join(installDir, skillName);
-
-        if (existsSync(targetPath) && !this.force) {
-          if (!this.quiet) {
-            warn(`Skipping ${skillName} for ${adapter.name} (already exists, use --force)`);
-          }
-          continue;
-        }
-
-        const securityRoot = cloneResult.tempRoot || cloneResult.path || "";
-        if (!securityRoot || !isPathInside(sourcePath, securityRoot)) {
-          error(`Skipping ${skillName} (path traversal detected)`);
-          continue;
-        }
-
-        const isSymlinkMode = installMethod === "symlink" && targetAgents.length > 1;
-        const useSymlink = isSymlinkMode && primaryPath !== null;
-
-        s.start(`Installing ${skillName} to ${adapter.name}${useSymlink ? " (symlink)" : ""}...`);
-
-        try {
-          if (existsSync(targetPath)) {
-            rmSync(targetPath, { recursive: true, force: true });
-          }
-
-          if (useSymlink && primaryPath) {
-            symlinkSync(primaryPath, targetPath, isStandaloneFile ? "file" : "dir");
-          } else {
-            if (isStandaloneFile) {
-              cpSync(sourcePath, targetPath);
-            } else {
-              cpSync(sourcePath, targetPath, { recursive: true, dereference: true });
-            }
-            if (isSymlinkMode && primaryPath === null) {
-              primaryPath = targetPath;
-            }
-
-            if (!isStandaloneFile) {
-              const packageJsonPath = join(targetPath, "package.json");
-              if (existsSync(packageJsonPath)) {
-                s.stop(`Installed ${skillName} to ${adapter.name}`);
-                s.start(`Installing npm dependencies for ${skillName}...`);
-                try {
-                  await execFileAsync("npm", ["install", "--omit=dev"], { cwd: targetPath });
-                  s.stop(`Installed dependencies for ${skillName}`);
-                } catch {
-                  s.stop(colors.warning(`Dependencies failed for ${skillName}`));
-                  console.log(colors.muted("Run manually: npm install in " + targetPath));
-                }
-                s.start(`Finishing ${skillName} installation...`);
-              }
-            }
-          }
-
-          const metadata: SkillMetadata = {
-            name: skillName,
-            description: "",
-            source: this.source,
-            sourceType: providerAdapter!.type,
-            subpath: skillName,
-            installedAt: new Date().toISOString(),
-            enabled: true,
-          };
-          metadata.checksum = computeSkillChecksum(targetPath);
-          saveSkillMetadata(targetPath, metadata);
-
-          installedAgents.push(agentType);
-          s.stop(`Installed ${skillName} to ${adapter.name}${useSymlink ? " (symlink)" : ""}`);
-        } catch (err) {
-          s.stop(colors.error(`Failed to install ${skillName} to ${adapter.name}`));
-          console.log(colors.muted(err instanceof Error ? err.message : String(err)));
-        }
+        await this.installForAgent(installation, agentType, context);
       }
 
       if (installedAgents.length > 0) {
@@ -650,6 +586,154 @@ export class InstallCommand extends Command {
     }
 
     return installResults;
+  }
+
+  private prepareInstallTarget(
+    skill: Readonly<Pick<DiscoveredSkill, "name" | "path">>,
+    agentType: AgentType,
+    agentName: string,
+  ): InstallTarget | null {
+    const installDir = getInstallDir(this.global, agentType);
+    if (!existsSync(installDir)) {
+      mkdirSync(installDir, { recursive: true });
+    }
+
+    let isStandaloneFile: boolean;
+    try {
+      isStandaloneFile = statSync(skill.path).isFile();
+    } catch {
+      if (!this.quiet) {
+        warn(`Skipping ${skill.name} for ${agentName} (source not accessible)`);
+      }
+      return null;
+    }
+
+    const targetPath = isStandaloneFile
+      ? join(installDir, skill.name.endsWith(".md") ? skill.name : `${skill.name}.md`)
+      : join(installDir, skill.name);
+    if (existsSync(targetPath) && !this.force) {
+      if (!this.quiet) {
+        warn(`Skipping ${skill.name} for ${agentName} (already exists, use --force)`);
+      }
+      return null;
+    }
+
+    return { path: targetPath, isStandaloneFile };
+  }
+
+  private isInstallSourceContained(
+    skill: Readonly<Pick<DiscoveredSkill, "name" | "path">>,
+    cloneResult: Pick<CloneResult, "path" | "tempRoot">,
+  ): boolean {
+    const securityRoot = cloneResult.tempRoot || cloneResult.path || "";
+    if (!securityRoot || !isPathInside(skill.path, securityRoot)) {
+      error(`Skipping ${skill.name} (path traversal detected)`);
+      return false;
+    }
+    return true;
+  }
+
+  private async installForAgent(
+    installation: SkillInstallation,
+    agentType: AgentType,
+    context: InstallContext,
+  ): Promise<void> {
+    const { skill } = installation;
+    const { installMethod, targetAgents, providerAdapter, cloneResult, s } = context;
+    const adapter = getAdapter(agentType);
+    const target = this.prepareInstallTarget(skill, agentType, adapter.name);
+    if (!target) return;
+    if (!this.isInstallSourceContained(skill, cloneResult)) return;
+
+    const skillName = skill.name;
+    const isSymlinkMode = installMethod === "symlink" && targetAgents.length > 1;
+    const useSymlink = isSymlinkMode && installation.primaryPath !== null;
+    s.start(`Installing ${skillName} to ${adapter.name}${useSymlink ? " (symlink)" : ""}...`);
+
+    try {
+      await this.installSkillContent(
+        installation, target, isSymlinkMode, useSymlink, adapter.name, s,
+      );
+      const metadata: SkillMetadata = {
+        name: skillName,
+        description: "",
+        source: this.source,
+        sourceType: providerAdapter!.type,
+        subpath: this.getSkillSubpath(installation, context),
+        installedAt: new Date().toISOString(),
+        enabled: true,
+      };
+      metadata.checksum = computeSkillChecksum(target.path);
+      saveSkillMetadata(target.path, metadata);
+
+      installation.installedAgents.push(agentType);
+      s.stop(`Installed ${skillName} to ${adapter.name}${useSymlink ? " (symlink)" : ""}`);
+    } catch (err) {
+      s.stop(colors.error(`Failed to install ${skillName} to ${adapter.name}`));
+      console.log(colors.muted(err instanceof Error ? err.message : String(err)));
+    }
+  }
+
+  private getSkillSubpath(
+    installation: SkillInstallation,
+    context: InstallContext,
+  ): string {
+    const gitProviders = ["github", "gitlab", "bitbucket", "skills-sh"];
+    if (!gitProviders.includes(context.providerAdapter!.type)) {
+      return installation.skill.name;
+    }
+    return relative(context.cloneResult.path!, installation.skill.path).split(sep).join("/");
+  }
+
+  private async installSkillContent(
+    installation: SkillInstallation,
+    target: InstallTarget,
+    isSymlinkMode: boolean,
+    useSymlink: boolean,
+    agentName: string,
+    s: ReturnType<typeof spinner>,
+  ): Promise<void> {
+    const { skill } = installation;
+    if (existsSync(target.path)) {
+      rmSync(target.path, { recursive: true, force: true });
+    }
+
+    if (useSymlink && installation.primaryPath) {
+      symlinkSync(installation.primaryPath, target.path, target.isStandaloneFile ? "file" : "dir");
+    } else {
+      if (target.isStandaloneFile) {
+        cpSync(skill.path, target.path);
+      } else {
+        cpSync(skill.path, target.path, { recursive: true, dereference: true });
+      }
+      if (isSymlinkMode && installation.primaryPath === null) {
+        installation.primaryPath = target.path;
+      }
+      if (!target.isStandaloneFile) {
+        await this.installDependencies(skill.name, target.path, agentName, s);
+      }
+    }
+  }
+
+  private async installDependencies(
+    skillName: string,
+    targetPath: string,
+    agentName: string,
+    s: ReturnType<typeof spinner>,
+  ): Promise<void> {
+    const packageJsonPath = join(targetPath, "package.json");
+    if (!existsSync(packageJsonPath)) return;
+
+    s.stop(`Installed ${skillName} to ${agentName}`);
+    s.start(`Installing npm dependencies for ${skillName}...`);
+    try {
+      await execFileAsync("npm", ["install", "--omit=dev"], { cwd: targetPath });
+      s.stop(`Installed dependencies for ${skillName}`);
+    } catch {
+      s.stop(colors.warning(`Dependencies failed for ${skillName}`));
+      console.log(colors.muted("Run manually: npm install in " + targetPath));
+    }
+    s.start(`Finishing ${skillName} installation...`);
   }
 
   private cleanupTemp(cloneResult: { tempRoot?: string; path?: string }): void {
